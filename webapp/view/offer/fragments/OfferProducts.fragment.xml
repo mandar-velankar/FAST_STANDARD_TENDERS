@@ -1,0 +1,4 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:up="sap.uxap" xmlns:form="sap.ui.layout.form" xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" xmlns:l="sap.ui.layout">
+	<Text text="Offer contents comes here"></Text>
+</core:FragmentDefinition>

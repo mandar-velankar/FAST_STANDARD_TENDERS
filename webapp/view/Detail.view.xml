@@ -1,100 +1,83 @@
 <mvc:View
 	controllerName="com.bayer.tender.statenderapp.controller.Detail"
 	xmlns="sap.m"
-	xmlns:semantic="sap.f.semantic"
-	xmlns:mvc="sap.ui.core.mvc">
-
-	<semantic:SemanticPage
-		id="detailPage"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+	<f:DynamicPage id="detailPage" showFooter="{comp>/detailEditMode}"
 		busy="{detailView>/busy}"
-		busyIndicatorDelay="{detailView>/delay}">
-		<semantic:titleHeading>
-			<Title
-				text="{TenderName}"
-				level="H2"/>
-		</semantic:titleHeading>
-		<semantic:headerContent>
-			<ObjectAttribute title="{i18n>priceTitle}"/>
-			<ObjectNumber
-				id="objectHeaderNumber"
-				number="{
-					path: 'TenderNo',
-					formatter: '.formatter.currencyValue'
-				}"
-				unit="{BidDueDate}"
-			/>
-		</semantic:headerContent>
-		<semantic:content>
-			<Table
-				id="lineItemsList"
-				width="auto"
-				items="{Offer}"
-				updateFinished=".onListUpdateFinished"
-				noDataText="{i18n>detailLineItemTableNoDataText}"
-				busyIndicatorDelay="{detailView>/lineItemTableDelay}">
-				<headerToolbar>
-					<Toolbar>
-						<Title
-							id="lineItemsTitle"
-							text="{detailView>/lineItemListTitle}"
-							titleStyle="H3"
-							level="H3"/>
-					</Toolbar>
-				</headerToolbar>
-				<columns>
-					<Column>
-						<Text text="{i18n>detailLineItemTableIDColumn}"/>
-					</Column>
-					<Column
-						minScreenWidth="Tablet"
-						demandPopin="true"
-						hAlign="End">
-						<Text text="{i18n>detailLineItemTableUnitNumberColumn}"/>
-					</Column>
-				</columns>
+		busyIndicatorDelay="{detailView>/delay}"
+			stickySubheaderProvider="detailTabBar"
+			class="sapUiNoContentPadding" >
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text="{TenderName}" level="H2"/>
+				</f:heading>
+				<f:navigationActions>
+					<Button
+							icon="sap-icon://{= ${appView>/editmode}?'display':'edit'}"
+							type="{= ${appView>/editmode}?'Transparent':'Emphasized'}"
+							press=".onEdit" />
+					<Button
+							icon="sap-icon://full-screen"
+							type="Transparent"
+							visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+							press=".toggleFullScreen" />
+					<Button
+							icon="sap-icon://exit-full-screen"
+							type="Transparent"
+							visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+							press=".toggleFullScreen" />
+					<Button
+							icon="sap-icon://decline"
+							type="Transparent" 
+							press=".onCloseDetailPress"/>
+				</f:navigationActions>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:header>
+			<f:DynamicPageHeader >
+					<ObjectAttribute title="{i18n>priceTitle}"/>
+					<ObjectNumber
+						id="objectHeaderNumber"
+						number="{
+							path: 'TenderNo',
+							formatter: '.formatter.currencyValue'
+						}"
+						unit="{BidDueDate}"
+					/>
+			</f:DynamicPageHeader>
+		</f:header>
+		<f:content>	
+			<IconTabBar
+				id="detailTabBar"
+				expanded="{device>/isNoPhone}"
+				class="sapUiResponsiveContentPadding">
 				<items>
-					<ColumnListItem>
-						<cells>
-							<ObjectIdentifier
-								title="{OfferID}"
-								text="{OfferID}"/>
-							<ObjectNumber
-								number="{
-									path: 'ContinuationOfferNo',
-									formatter: '.formatter.currencyValue'
-								}"
-								unit="{DistributorID}"/>
-						</cells>
-					</ColumnListItem>
+					<IconTabFilter text="{i18n>tender}" key="tender">
+						<Panel visible="{= !${appView>/editmode}}">
+							<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.tender.fragments.BasicInformation" type="XML" />
+						</Panel>
+						<Panel visible="{appView>/editmode}">
+							<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.tender.fragments.BasicInformationEdit" type="XML" />
+						</Panel>
+					</IconTabFilter>
+					<IconTabFilter text="{i18n>offer}" key="offer">
+						<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.OfferProducts" type="XML" />
+					</IconTabFilter>
+					<IconTabFilter text="{i18n>overview}" key="overview">
+						<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.Information" type="XML" />
+					</IconTabFilter>
+					<IconTabFilter text="{i18n>awards}" key="awards">
+						<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.awards.fragments.Information" type="XML" />
+					</IconTabFilter>
 				</items>
-			</Table>
-		</semantic:content>
-		<!--Semantic ShareMenu Buttons-->
-		<semantic:sendEmailAction>
-			<semantic:SendEmailAction
-				id="shareEmail"
-				press=".onSendEmailPress"/>
-		</semantic:sendEmailAction>
-
-		<semantic:closeAction>
-			<semantic:CloseAction
-					id="closeColumn"
-					press=".onCloseDetailPress"/>
-		</semantic:closeAction>
-
-		<semantic:fullScreenAction>
-			<semantic:FullScreenAction
-					id="enterFullScreen"
-					visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
-					press=".toggleFullScreen"/>
-		</semantic:fullScreenAction>
-		<semantic:exitFullScreenAction>
-			<semantic:ExitFullScreenAction
-					id="exitFullScreen"
-					visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
-					press=".toggleFullScreen"/>
-		</semantic:exitFullScreenAction>
-
-	</semantic:SemanticPage>
-
+			</IconTabBar>
+		</f:content>
+	</f:DynamicPage>
 </mvc:View>
