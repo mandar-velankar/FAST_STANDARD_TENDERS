@@ -19,10 +19,11 @@
 					<Title text="{TenderName}" level="H2"/>
 				</f:heading>
 				<f:navigationActions>
-					<Button
+					<!--<Button
+							text="Edit"
 							icon="sap-icon://{= ${appView>/editmode}?'display':'edit'}"
 							type="{= ${appView>/editmode}?'Transparent':'Emphasized'}"
-							press=".onEdit" />
+							press=".onEdit" />-->
 					<Button
 							icon="sap-icon://full-screen"
 							type="Transparent"
@@ -38,19 +39,48 @@
 							type="Transparent" 
 							press=".onCloseDetailPress"/>
 				</f:navigationActions>
+
+				<!-- ACTIONS -->
+				<f:actions>
+					<Button id="deleteTenderButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteTenderPress" enabled="true" />
+					<Button id="cloneButtonId" icon="sap-icon://copy" text="Clone" enabled="true" type="Accept" press="onCloneButtonPress"/>
+					<Button id="folderButtonId" icon="sap-icon://browse-folder" text="Documents" type="Emphasized" press="._onFolderButtonPress" visible="{= ${fastData>FoldersCreated} === 1}"/>
+					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
+					<!--<m:Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>-->
+					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true}"/>
+				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
 		<f:header>
 			<f:DynamicPageHeader >
-					<ObjectAttribute title="{i18n>priceTitle}"/>
-					<ObjectNumber
-						id="objectHeaderNumber"
-						number="{
-							path: 'TenderNo',
-							formatter: '.formatter.currencyValue'
-						}"
-						unit="{BidDueDate}"
-					/>
+				<FlexBox wrap="Wrap" fitContainer="true" alignItems="Stretch">
+
+					<!-- INSTITUTE INFO -->
+					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+						<Label text="{i18n>Institute}"/>
+						<Text id="idhdrInstNme" text="Dubai Health Authority (DHA)"/>
+						<Text id="idhdrInstID" text="{InstituteID}" visible="false"/>
+					</VBox>
+					
+					<!-- SELECTED TENDER INFO -->
+					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+						<Label text="{i18n>TenderName}"/>
+						<Text id="idHdrTndrNme" text="{TenderName}"/>
+					</VBox>
+					
+					<!-- SELECTED OFFER INFO -->
+					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+						<Label text="{i18n>OfferID}"/>
+						<Text  text="{OfferID}"/>
+					</VBox>
+
+					<!-- SELECTED PRODUCT INFO -->
+					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
+						<Label text="{i18n>productnme}"/>
+						<Text text="No product selected"/>
+					</VBox>	
+				
+				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
 		<f:content>	

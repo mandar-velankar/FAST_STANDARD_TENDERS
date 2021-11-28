@@ -28,9 +28,11 @@
 			<VBox fitContainer="true">
 				<OverflowToolbar class="sapFDynamicPageAlignContent">
 					<!-- Filter for Country -->
-					<Select id="idSlctCountry" forceSelection="true" selectedKey="TH" items="{ path: 'ctr>/countries', sorter: { path: 'countryName' } }"
+					<Select id="idSlctCountry" forceSelection="true" selectedKey="TH" items="{ path: '/UserCountries', sorter: { path: 'COUNTRY_CODE', filters: [
+					{path: 'USER_ID', operator: 'EQ', value1: 'ELLTZ' }
+					] } }"
 							change=".setFilter">
-							<core:Item key="{ctr>countryCode}" text="{ctr>countryName}"/>
+							<core:Item key="{COUNTRY_CODE}" text="{COUNTRY_NAME}"/>
 					</Select>
 
 					<!-- Filter for Brand -->
@@ -63,7 +65,10 @@
 					id="list"
 					inset="false"
 					items="{
-						path: '/PT_TMTEND'
+						path: '/PT_TMTEND',
+						parameters: {
+							expand: 'Offer'
+						}
 					}"
 					class="sapFDynamicPageAlignContent"
 					width="auto"
@@ -102,7 +107,7 @@
 						</Column>
 						<Column width="12%" minScreenWidth="920px" demandPopin="true" popinDisplay="Inline">
 							<header>
-								<ObjectIdentifier title="{i18n>value}" />
+								<ObjectIdentifier title="{i18n>Value}" />
 							</header>
 						</Column>
 						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' }">
@@ -127,7 +132,7 @@
 								<ObjectIdentifier text="{TenderID}"/>
 								<Text text="{TenderName}"/>
 								<Text text="{InstituteID}"/>
-								<Text text="{/Offer/OfferID}"/>
+								<Text text="{Offer/OfferID}"/>
 								<Text text="{/CountryCode}"/>
 								<Text text="{/CountryCode}"/>
 								<Text text="{
