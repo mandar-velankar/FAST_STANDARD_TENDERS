@@ -27,39 +27,11 @@
 		<f:content>
 			<VBox fitContainer="true">
 				<OverflowToolbar class="sapFDynamicPageAlignContent">
-					<!-- Filter for Country -->
-					<Select id="idSlctCountry" forceSelection="true" selectedKey="TH" items="{ path: '/UserCountries', sorter: { path: 'COUNTRY_CODE', filters: [
-					{path: 'USER_ID', operator: 'EQ', value1: 'ELLTZ' }
-					] } }"
-							change=".setFilter">
-							<core:Item key="{COUNTRY_CODE}" text="{COUNTRY_NAME}"/>
-					</Select>
-
-					<!-- Filter for Brand -->
-					<Select 
-						id="idSlctBrand" 
-						forceSelection="true" 
-						items="{ 
-							path: 'ctr>/countryContractBrands', 
-							sorter: { path: 'BrandName' }
-						}"
-						change="._filterContractsTable"
-					>
-							<core:Item key="{ctr>BrandID}" text="{ctr>BrandName}"/>
-					</Select>
-
-					<!-- Filter for Status -->
-					<!--<Select id="idSlctChannel" forceSelection="true" change=".setFilter" visible="true">
-						<items>
-							<core:Item key="All" text="All"/>
-							<core:Item key="Tender" text="Tenders"/>
-							<core:Item key="Other" text="Other"/>
-						</items>		
-					</Select>-->
 					<ToolbarSpacer/>
 					
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
-						<Button icon="sap-icon://add" text="Create New" press=".onAdd"/>
+					<Button icon="sap-icon://filter" text="" press=".onOpenViewSettings"/>
+					<Button icon="sap-icon://add" text="Create New" press=".onAdd"/>
 				</OverflowToolbar>
 				<Table
 					id="list"
@@ -80,7 +52,7 @@
 					growingThreshold="15"
 					growingScrollToLoad="false">
 					<columns>
-						<Column width="6%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' }">
+						<Column width="6%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
 							<header>
 								<ObjectIdentifier title="{i18n>Country}" />
 							</header>
@@ -100,12 +72,12 @@
 								<ObjectIdentifier title="{i18n>Institute}" />
 							</header>
 						</Column>
-						<Column width="10%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' }">
+						<Column visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
 							<header>
 								<ObjectIdentifier title="{i18n>OfferID}" />
 							</header>
 						</Column>
-						<Column width="12%" minScreenWidth="920px" demandPopin="true" popinDisplay="Inline">
+						<Column width="8%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
 							<header>
 								<ObjectIdentifier title="{i18n>Value}" />
 							</header>
@@ -118,11 +90,14 @@
 						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' }">
 							<ObjectIdentifier title="{i18n>pubcndte}" />
 						</Column>
-						<Column width="12%" minScreenWidth="920px" demandPopin="true" popinDisplay="Inline">
+						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
 							<ObjectIdentifier title="{i18n>BidDueDate}" />
 						</Column>
-						<Column width="12%" minScreenWidth="920px" demandPopin="true" popinDisplay="Inline">
+						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
 							<ObjectIdentifier title="{i18n>ClosingDate}" />
+						</Column>
+						<Column width="4%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<ObjectIdentifier title="" />
 						</Column>
 					</columns>
 					<items>
@@ -150,7 +125,7 @@
 									}
 								}"/>
 								<Text text="{/CountryCode}"/>
-								<Text text="{/CountryCode}"/>
+								<Button text="{i18n>Deliveries}"/>
 							</cells>
 						</ColumnListItem>
 					</items>

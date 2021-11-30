@@ -31,17 +31,17 @@
 			</OverflowToolbar>
 		</headerToolbar>
 		<content>
-			<form:SimpleForm id="idGeneralInfo" editable="false" maxContainerCols="2" layout="ResponsiveGridLayout" labelSpanL="1" labelSpanM="1"
+			<form:SimpleForm id="idGeneralInfo" editable="false" maxContainerCols="2" layout="ResponsiveGridLayout" labelSpanL="2" labelSpanM="2"
 								emptySpanL="0" emptySpanM="0" columnsL="2" columnsM="2" class="editableForm" visible="true">
 				<form:content>
 						<Label text="Offer Date"/>
 						<Text text="01-08-2015"/>
 
 						<Label text="Offer Validity"/>
-						<Text text="1 Months"/>
+						<Text text="03-03-2016"/>
 
 						<Label text="Shipping Terms"/>
-						<Text text="100 Days"/>
+						<Text text="First shipment 10 days after receiving a PO "/>
 
 						<Label text="Payment Terms"/>
 						<Text text="30 Days"/>

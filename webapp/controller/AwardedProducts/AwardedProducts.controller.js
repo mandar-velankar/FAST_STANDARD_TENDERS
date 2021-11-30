@@ -62,8 +62,6 @@ sap.ui.define([
 					productId: "1"
 				});
 			}.bind(this));
-			
-	
-}
+		}
     });
 });

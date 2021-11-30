@@ -1,27 +1,25 @@
-<mvc:View controllerName="com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail" xmlns="sap.uxap" xmlns:m="sap.m" xmlns:f="sap.f"
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail" xmlns="sap.uxap" xmlns:m="sap.m" xmlns:f="sap.f"
 	xmlns:form="sap.ui.layout.form" xmlns:mvc="sap.ui.core.mvc" xmlns:t="sap.ui.table" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"
 	xmlns:viz.data="sap.viz.ui5.data" xmlns:viz="sap.viz.ui5.controls" xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
 
-	<DynamicPage
+	<f:DynamicPage
 		id="idDynamicPage"
-		toggleHeaderOnTitleClick="false"
-	>
-		<title>
-			<DynamicPageTitle>
-				<heading>
+		toggleHeaderOnTitleClick="false">
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
 					<m:FlexBox
 						wrap="Wrap"
 						fitContainer="true"
-						alignItems="Center"
-					>
+						alignItems="Center">
 						<m:Title
-							text="Delivery Details"
+							text="Product Detail"
 							wrapping="true"
 							class="sapUiTinyMarginEnd"
 						/>
 					</m:FlexBox>
-				</heading>
-				<navigationActions>
+				</f:heading>
+				<f:navigationActions>
 					<m:OverflowToolbarButton
 						type="Transparent"
 						icon="sap-icon://full-screen"
@@ -43,33 +41,56 @@
 						tooltip="Close column"
 						visible="{= ${detailDetailView>/actionButtonsInfo/endColumn/closeColumn} !== null }"
 					/>
-				</navigationActions>
-			</DynamicPageTitle>
-		</title>
-		<content>
-			<form:SimpleForm
-				editable="true"
-				maxContainerCols="1"
-				layout="ColumnLayout"
-				columnsL="1" >
-				<form:content>
-					<m:Label text="Contract No"/>
-					<m:Input value="5634534534234"/>
-					<m:Label text="Product"/>
-					<m:Input value="10003223"/>
-					<m:Label text="Currency"/>
-					<m:Input value="EUR"/>
-					<m:Label text="FOC"/>
-					<m:Input value=""/>
-					<m:Label text="UoM"/>
-					<m:Input value="Units"/>
-					<m:Label text="Outcome"/>
-					<m:Input value="Won"/>
-					<m:Label text="Reason"/>
-					<m:Input value=""/>
-				</form:content>
-			</form:SimpleForm>
-		</content>
-	</DynamicPage>
+				</f:navigationActions>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:content>
+			<m:Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true" backgroundDesign="Solid">
+				<m:headerToolbar>
+					<m:OverflowToolbar style="Standard" design="Solid">
+							<m:Title text="Request Details" />
+							<m:ToolbarSpacer />
+							<m:Link text="Tender History" press="handleLinkPress" />
+					</m:OverflowToolbar>
+				</m:headerToolbar>
+				<m:content>
+					<form:SimpleForm
+						editable="true"
+						maxContainerCols="2"
+						layout="ColumnLayout"
+						columnsL="2" >
+						<form:content>
+							<m:Label text="Reference"/>
+							<m:Input value="" enabled="false"/>
+							<m:Label text="Alternate Offer"/>
+							<m:Input value="No" enabled="false"/>
+							<m:Label text="Requested Volume"/>
+							<m:Input value="100" enabled="false"/>
+							<m:Label text="UoM"/>
+							<m:Input value="Units" enabled="false"/>
+							<m:Label text="Samples"/>
+							<m:Input value="No" enabled="false"/>
+							<m:Label text="Incoterms"/>
+							<m:Input value="CIF Jeddah bv Sea" enabled="false"/>
+							<m:Label text="Decline"/>
+							<m:Input value="Products Included" enabled="false"/>
+						</form:content>
+					</form:SimpleForm>
 
+					<m:Title text="Request Details" />
+					<form:SimpleForm
+						editable="true"
+						maxContainerCols="2"
+						layout="ColumnLayout"
+						columnsL="2" >
+						<form:content>
+							
+							<m:Text text="Pricing chart will be shown here"/>
+						</form:content>
+					</form:SimpleForm>
+
+				</m:content>
+			</m:Panel>
+		</f:content>
+	</f:DynamicPage>
 </mvc:View>

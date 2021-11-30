@@ -18,11 +18,27 @@
 					<Column >
 						<Label text="Product" wrapping="true"/>
 					</Column>
+					<Column >
+						<Label text="Outcome" wrapping="true"/>
+					</Column>
 				</columns>
 				<items>
 					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
 						<cells>
-							<Text text="ADEMPAS 0,5MG 42TAB"/>							
+							<Text text="ADEMPAS 0,5MG 42TAB"/>	
+							<Text text="Won"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,0MG 42TAB"/>		
+							<Text text="Lost"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,5MG 42TAB"/>	
+							<Text text="Lost"/>					
 						</cells>
 					</ColumnListItem>
 				</items>

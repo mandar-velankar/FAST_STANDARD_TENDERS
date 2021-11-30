@@ -111,6 +111,15 @@
 						"object",
 						"objectDetail"
 					]
+				},
+				{
+					"pattern": "PT_TMTEND/{objectId}/OfferProductDetail/{productId}/{layout}",
+					"name": "offerProductDetail",
+					"target": [
+						"master",
+						"object",
+						"offerProductDetail"
+					]
 				}
 			],
 
@@ -127,7 +136,11 @@
 					"controlAggregation": "midColumnPages"
 				},
 				"objectDetail": {
-					"viewName": "DetailDetail",
+					"viewName": "awards/views/AwardedProductsDetail",
+					"controlAggregation": "endColumnPages"
+				},
+				"offerProductDetail": {
+					"viewName": "offer/views/OfferProductsDetail",
 					"controlAggregation": "endColumnPages"
 				},
 				"detailObjectNotFound": {

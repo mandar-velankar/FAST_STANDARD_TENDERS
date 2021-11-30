@@ -43,7 +43,6 @@
 				<!-- ACTIONS -->
 				<f:actions>
 					<Button id="deleteTenderButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteTenderPress" enabled="true" />
-					<Button id="cloneButtonId" icon="sap-icon://copy" text="Clone" enabled="true" type="Accept" press="onCloneButtonPress"/>
 					<Button id="folderButtonId" icon="sap-icon://browse-folder" text="Documents" type="Emphasized" press="._onFolderButtonPress" visible="{= ${fastData>FoldersCreated} === 1}"/>
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
 					<!--<m:Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>-->
