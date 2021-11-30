@@ -102,6 +102,15 @@
 						"master",
 						"object"
 					]
+				},
+				{
+					"pattern": "PT_TMTEND/{objectId}/AwardedDetail/{productId}/{layout}",
+					"name": "objectDetail",
+					"target": [
+						"master",
+						"object",
+						"objectDetail"
+					]
 				}
 			],
 
@@ -116,6 +125,10 @@
 					"viewId": "detail",
 					"viewLevel": 1,
 					"controlAggregation": "midColumnPages"
+				},
+				"objectDetail": {
+					"viewName": "DetailDetail",
+					"controlAggregation": "endColumnPages"
 				},
 				"detailObjectNotFound": {
 					"viewName": "DetailObjectNotFound",

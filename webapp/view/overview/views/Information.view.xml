@@ -1,0 +1,185 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.Information.Information" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt"
+	xmlns:u="sap.uxap">
+
+	<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" backgroundDesign="Solid" expanded="true">
+		<headerToolbar>
+			<OverflowToolbar style="Standard" design="Solid">
+				<Title text="Tender and Offer Details" />
+				<ToolbarSpacer />
+				<Button id="ApprovalButtonId" text="Approvals" icon="sap-icon://validate" press="onApprovalsPress" enabled="true"/>
+				<MenuButton text="Download Word" id="btnDownloadWordQuotation" visible="{= ${fastAppData>/WordTemplates}.length > 0 }">
+					<menu>
+						<Menu itemSelected="onMenuAction" items="{fastAppData>/WordTemplates}">
+							<MenuItem text="{fastAppData>WordTemplates/name}" icon="sap-icon://download" press=".onDownloadWord"/>
+						</Menu>
+					</menu>
+				</MenuButton>
+				<Button
+					id="btnSubmitQuotation"
+					text="{i18n>SubmitQuotation}"
+					icon="sap-icon://sys-enter"
+					press=".onSubmitQuotation"
+					enabled="false"/>
+			</OverflowToolbar>
+		</headerToolbar>
+		<content>
+			<form:SimpleForm id="idGeneralInfo" editable="false" maxContainerCols="2" layout="ResponsiveGridLayout" labelSpanL="1" labelSpanM="1"
+								emptySpanL="0" emptySpanM="0" columnsL="2" columnsM="2" class="editableForm" visible="true">
+				<form:content>
+						<Label text="Offer Date"/>
+						<Text text="01-08-2015"/>
+
+						<Label text="Offer Validity"/>
+						<Text text="1 Months"/>
+
+						<Label text="Shipping Terms"/>
+						<Text text="100 Days"/>
+
+						<Label text="Payment Terms"/>
+						<Text text="30 Days"/>
+
+						<Label text="Delivery Terms"/>
+						<Text text="30 Days"/>
+				</form:content>
+			</form:SimpleForm>
+		</content>
+	</Panel>
+
+	<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true" backgroundDesign="Solid">
+		<headerToolbar>
+			<OverflowToolbar style="Standard" design="Solid">
+					<Title text="Product Information" />
+			</OverflowToolbar>
+		</headerToolbar>
+		<content>
+			<Table id="productInformationTableId" 
+				mode="SingleSelectMaster">
+				<columns>
+					<Column>
+						<Label text="Product" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Qty" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Unit Price" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Pack Price" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Total Amount" wrapping="true"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="ADEMPAS 0,5MG 42TAB"/>	
+							<Text text="100"/>
+							<Text text="20.43 EUR"/>	
+							<Text text="200.43 EUR"/>
+							<Text text="2000.43 EUR"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem>
+						<cells>
+							<Text text="ADEMPAS 2,0MG 42TAB"/>	
+							<Text text="10"/>
+							<Text text="20.43 EUR"/>	
+							<Text text="200.43 EUR"/>
+							<Text text="200.43 EUR"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem>
+						<cells>
+							<Text text="ADEMPAS 2,5MG 42TAB"/>	
+							<Text text="100"/>
+							<Text text="20.43 EUR"/>	
+							<Text text="200.43 EUR"/>
+							<Text text="2000.43 EUR"/>					
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+	</Panel>
+
+	<Panel expandable="false" width="auto" class="sapUiResponsiveMargin" backgroundDesign="Solid">
+	<form:SimpleForm id="idRemarksIfno" editable="false" maxContainerCols="3" layout="ResponsiveGridLayout" labelSpanL="12" labelSpanM="12"
+                        emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" class="editableForm" visible="true">
+		<form:content>
+			
+			<VBox fitContainer="true" alignItems="Stretch">
+				<items>					
+					<HBox visible="true">
+						<items>
+								
+							<!-- Remarks -->
+							<VBox class="sapUiSmallMarginEnd" width="50%" >
+								<items>
+									<Label text="{i18n>qStandardRemark}" design="Bold"/>
+									<FormattedText htmlText="{fastAppData>/OfferValidation/REMARKS}" class="sapMText" />
+								</items>
+							</VBox>
+									
+							<!-- Additional remarks -->
+							<VBox class="sapUiSmallMarginEnd" width="50%" alignItems="Start">
+								<items>
+									<Label text="{i18n>qCustomRemark}" design="Bold"/>
+									<TextArea id="idCustomRemark" value="{path: 'fastAppData>/OfferValidation/CUSTOM_REMARKS'}" maxLength="500" enabled="false" height="10rem" width="30rem"/>
+								</items>
+							</VBox>									
+								
+						</items>
+					</HBox>
+					<Toolbar width="100%" height="1px" visible="true"/>	
+					<HBox visible="true">
+						<items>
+							<!-- Issued by -->
+							<VBox class="sapUiSmallMarginEnd" width="48%">
+								<items>
+									<Label text="{i18n>qIssuedBy}" design="Bold"/>
+									<Select id="idSelectIssuedBy" 
+										showSecondaryValues="true"
+										selectedKey="{fastAppData>/OfferValidation/SELLING_COMPANY_AS1}" 
+										enabled="false" 
+											items="{ path: 'fastAppData>/EditOffer/Signatories/results'}">
+										<core:ListItem text="{fastAppData>NAME}" additionalText="{fastAppData>TITLE}" key="{fastAppData>AUTHORIZED_SIGNATORY}"/>
+									</Select>
+								</items>
+							</VBox>																
+							<VBox width="1%">
+							</VBox>	
+							<!-- Company stamp -->
+							<VBox class="sapUiSmallMarginEnd" width="48%" alignItems="Start">
+								<items>
+									<Label text="{i18n>qCompanyStamp}" design="Bold"/>
+									<Select id="idSelectCompanyStamp" 
+										showSecondaryValues="true"
+										selectedKey="{fastAppData>/OfferValidation/SELLING_COMPANY_AS2}" 
+										enabled="false" 
+										items="{ path: 'fastAppData>/EditOffer/Signatories/results'}">
+											<core:ListItem text="{fastAppData>NAME}" additionalText="{fastAppData>TITLE}" key="{fastAppData>AUTHORIZED_SIGNATORY}"/>
+									</Select>
+								</items>
+							</VBox>
+									
+						</items>
+					</HBox>
+				</items>
+			</VBox>
+			
+		</form:content>
+	</form:SimpleForm>
+	
+	</Panel>
+
+</mvc:View>

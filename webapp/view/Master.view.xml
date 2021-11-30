@@ -67,7 +67,7 @@
 					items="{
 						path: '/PT_TMTEND',
 						parameters: {
-							expand: 'Offer'
+							expand: 'Offer,Offer/OfferStatus,Institute'
 						}
 					}"
 					class="sapFDynamicPageAlignContent"

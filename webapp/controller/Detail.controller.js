@@ -76,7 +76,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getModel().metadataLoaded().then( function() {
 				var sObjectPath = this.getModel().createKey("PT_TMTEND", {
-					TenderID :  sObjectId
+					TenderID :  sObjectId,
 				});
 				this._bindView("/" + sObjectPath);
 			}.bind(this));
@@ -141,14 +141,14 @@ sap.ui.define([
 
 		_onMetadataLoaded : function () {
 			// Store original busy indicator delay for the detail view
-			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay(),
-				oViewModel = this.getModel("detailView"),
-				oLineItemTable = this.byId("lineItemsList"),
-				iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
+			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
+			var	oViewModel = this.getModel("detailView");
+			var	oLineItemTable = this.byId("lineItemsList");
+				//iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
 
 			// Make sure busy indicator is displayed immediately when
 			// detail view is displayed for the first time
-			oViewModel.setProperty("/delay", 0);
+			/*oViewModel.setProperty("/delay", 0);
 			oViewModel.setProperty("/lineItemTableDelay", 0);
 
 			oLineItemTable.attachEventOnce("updateFinished", function() {
@@ -159,7 +159,7 @@ sap.ui.define([
 			// Binding the view will set it to not busy - so the view is always busy if it is not bound
 			oViewModel.setProperty("/busy", true);
 			// Restore original busy indicator delay for the detail view
-			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);
+			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);*/
 		},
 
 		onEdit:function(){

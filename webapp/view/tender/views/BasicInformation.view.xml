@@ -1,7 +1,14 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:up="sap.uxap" xmlns:form="sap.ui.layout.form" xmlns:u="sap.uxap"
-	xmlns:t="sap.ui.table" xmlns:l="sap.ui.layout">
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
 
-	<VBox>
+<VBox>
 		<form:SimpleForm editable="true" title="" layout="ResponsiveGridLayout" labelSpanXL="5" labelSpanL="5" labelSpanM="12" labelSpanS="12"
 			adjustLabelSpan="false" emptySpanXL="1" emptySpanL="1" emptySpanM="1" emptySpanS="1" columnsXL="2" columnsL="2" columnsM="2"
 			singleContainerFullSize="false" backgroundDesign="Solid">
@@ -10,9 +17,9 @@
 				<!-- Block Institute & Type -->
 				<core:Title text="Institute &amp; Type"/>
 				<Label text="{i18n>tenderref}" design="Bold"  required="true"/>
-				<Input value="{fastData>TenderName}" enabled="false"/>
+				<Input value="{TenderName}" enabled="false"/>
 				<Label text="{i18n>clasficn}" design="Bold" required="true"/>
-				<Input id="idClassificationDisplay" value="{fastData>Classification}" enabled="false" />
+				<Input id="idClassificationDisplay" value="{Classification}" enabled="false" />
 
 				<!-- Argentina only -->
 				<!-- <Label text="{i18n>BiddingTypeLevel1}" design="Bold" required="true" 
@@ -64,7 +71,11 @@
 				</MultiComboBox>-->
 				<!-- /Argentina only -->
 				<Label text="{i18n>insttyp}" design="Bold" required="true"/>
-				<Input value="{fastData>Institute/InstituteType}" enabled="false"/>
+				<Select id="idInstituteType" selectedKey="{fastData>Institute/InstituteType}" change="resetInstituteName" enabled="false" items="{ path: 'fastAppData>/CountryChannels'}">
+					<items>
+						<core:Item text="{fastAppData>ChannelName}" key="{fastAppData>ChannelName}"/>
+					</items>
+				</Select>
 				<Label text="{i18n>institnme}" design="Bold"  required="true"/>
 				<Input value="{fastData>Institute/InstituteName}" enabled="false"/>
 				<!-- Italy onlye -->
@@ -82,7 +93,7 @@
 				</MultiComboBox>-->
 				<!-- /Italy onlye -->
 				<Label text="{i18n>typechnl}" design="Bold" required="true"/>
-				<Input value="{fastData>TenderChannel}" enabled="false" visible="{= ${fastAppData>/Tender/CountryCode} !== 'IT'}"/>
+				<Input value="{TenderChannel}" enabled="false" visible="true"/>
 				<Label text="{i18n>grpurchsng}" design="Bold" required="true"/>
 				<!-- <Select id="idGroupPurchasing" selectedKey="{fastData>GroupPurchasing}" enabled="false">
 					<items>
@@ -189,13 +200,13 @@
 				<!-- Block Timeline -->
 				<core:Title text="Timeline"/>
 				<Label text="{i18n>pubcndte}" design="Bold" required="true"/>
-				<Input id="input6" value="{path :'fastAppData>/EditTender/PublicationDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
+				<Input id="input6" value="{path :'PublicationDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
 				<Label text="{i18n>offrdudte}" design="Bold" required="true"/>
-				<Input id="input7" value="{path :'fastAppData>/EditTender/BidDueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
+				<Input id="input7" value="{path :'BidDueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
 				<Label text="{i18n>expctawdte}" design="Bold"/>
-				<Input id="input8" value="{path :'fastAppData>/EditTender/AwardDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
+				<Input id="input8" value="{path :'AwardDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
 				<Label text="{i18n>nwpubdate}" design="Bold"/>
-				<Input id="input9" value="{path :'fastAppData>/EditTender/NextPublicationDye', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
+				<Input id="input9" value="{path :'NextPublicationDye', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
 
 				<!-- Brazil only -->
 				<!--<Label text="{i18n>OfferStartDate}" design="Bold"/>
@@ -209,22 +220,9 @@
 				<!-- End Brazil only -->
 
 				<Label text="{i18n>contleng}" design="Bold"/>
-				<Input id="input10" value="{fastData>ContractLength}" enabled="false"/>
+				<Input id="input10" value="{ContractLength}" enabled="false"/>
 				<Label text="{i18n>contextnprd}" design="Bold"/>
-				<Input id="input11" value="{fastData>ContractExtenseion}" enabled="false"/>
-				
-				<!-- Status  tender -->
-				<Label text="{i18n>tenderstatus}" design="Bold" visible="false"/>
-				
-				<Select id="input12" selectedKey="{fastData>TenderStatus}" enabled="false" visible="false">
-					<items>
-							<core:Item text="Open" key="Open"/>
-							<core:Item text="Closed" key="Closed"/>
-							<core:Item text="Submitted" key="Submitted"/>
-							<core:Item text="Declined" key="Declined"/>
-							<core:Item text="Cancelled" key="Cancelled"/>
-					</items>
-				</Select>
+				<Input id="input11" value="{ContractExtenseion}" enabled="false"/>
 				
 				<!-- TABLE with the award critiria -->
 				<core:Title text="{i18n>tilawrcrit}"/>
@@ -249,24 +247,6 @@
 				</Table>
 			</form:content>
 		</form:SimpleForm>
-
-		<!-- Tender Information Only for Chile-->
-		<!--<form:SimpleForm id="idTenderInformationSimpleForm" editable="true" title="" layout="ResponsiveGridLayout" labelSpanXL="5" labelSpanL="5" labelSpanM="12" labelSpanS="12"
-			adjustLabelSpan="false" emptySpanXL="1" emptySpanL="1" emptySpanM="1" emptySpanS="1" columnsXL="2" columnsL="2" columnsM="2"
-			singleContainerFullSize="false" backgroundDesign="Solid" visible="{= ${fastAppData>/Tender/CountryCode} === 'CL' ? true : false }">
-			<form:content>
-				<core:Title text="{i18n>tenderInformation}" />
-				<Label />
-				<Button xmlns="sap.m" icon="sap-icon://document" text="{i18n>btnDocuments}" type="Emphasized" width="9em" press="onDocumentsPress"/>
-				<Label text="{i18n>Institute}" design="Bold"/>
-				<Input value="{fastData>CountrySpecificInformation/Institute}" enabled="false"/>
-				<Label text="{i18n>tenderref}" design="Bold"/>
-				<Input value="{fastData>CountrySpecificInformation/TenderReference}" enabled="false"/>
-				<Label text="{i18n>pubcndte}" design="Bold" required="true"/>
-				<DatePicker enabled="false" value="{path :'fastData>CountrySpecificInformation/PublicationDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}"/>
-				<Label text="{i18n>ClosingDate}" design="Bold" required="true"/>
-				<DatePicker  enabled="false" value="{path :'fastData>CountrySpecificInformation/ClosingDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" />
-			</form:content>
-		</form:SimpleForm>-->
 	</VBox>
-</core:FragmentDefinition>
+
+</mvc:View>

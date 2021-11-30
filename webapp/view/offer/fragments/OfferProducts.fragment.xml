@@ -8,14 +8,20 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:mvc="sap.ui.core.mvc">
 	
-
+					<HBox>
+							<Button text="New Offer" icon="sap-icon://add" press="onCreateProductOffer"/>
+							<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" enabled="true" />
+							<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" enabled="true"/>
+						</HBox>	
 		<l:BlockLayout background="Light">
-			<l:BlockLayoutRow>
-				<l:BlockLayoutCell>						
+			<l:BlockLayoutRow>	
+				<l:BlockLayoutCell>
+										
 						<!-- FORM WITH OFFER DATA -->
 						<form:SimpleForm editable="true" id="editForm" maxContainerCols="3" layout="ResponsiveGridLayout" labelSpanL="12" labelSpanM="12"
-							emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" class="editableForm">
+							emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" class="editableForm" backgroundDesign="Solid">
 							<form:content>
+								
 								
 								<core:Title/>
 								
@@ -73,15 +79,9 @@
 		</l:BlockLayout>
 
 		<List id="ShortProductList"
-			  headerText="Products"
-			  items="{
-				path: '/OfferProducts',
-				sorter: {
-					path: 'Name'
-				}
-		}">
+			  headerText="Products">
 		<items>
-			<StandardListItem
+			<!--<StandardListItem
 				type="Active"
 				title="{Name}"
 				navigated="{
@@ -91,6 +91,18 @@
 					],
 					formatter: '.isNavigated'
 				}"
+				press="onPress" />-->
+			<StandardListItem
+				type="Active"
+				title="ADEMPAS 0,5MG 42TAB"
+				press="onPress" />
+			<StandardListItem
+				type="Active"
+				title="ADEMPAS 2,0MG 42TAB"
+				press="onPress" />
+			<StandardListItem
+				type="Active"
+				title="ADEMPAS 2,5MG 42TAB"
 				press="onPress" />
 		</items>
 	</List>
