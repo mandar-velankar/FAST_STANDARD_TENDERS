@@ -1,4 +1,110 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:up="sap.uxap" xmlns:form="sap.ui.layout.form" xmlns:u="sap.uxap"
-	xmlns:t="sap.ui.table" xmlns:l="sap.ui.layout">
-	<Text text="Offer contents comes here"></Text>
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+	
+					<HBox>
+							<Button text="New Offer" icon="sap-icon://add" press="onCreateProductOffer"/>
+							<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" enabled="true" />
+							<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" enabled="true"/>
+						</HBox>	
+		<l:BlockLayout background="Light">
+			<l:BlockLayoutRow>	
+				<l:BlockLayoutCell>
+										
+						<!-- FORM WITH OFFER DATA -->
+						<form:SimpleForm editable="true" id="editForm" maxContainerCols="3" layout="ResponsiveGridLayout" labelSpanL="12" labelSpanM="12"
+							emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" class="editableForm" backgroundDesign="Solid">
+							<form:content>
+								
+								
+								<core:Title/>
+								
+								<Label text="{i18n>didtrbtrnme}" design="Bold" required="true"/>
+								
+								<Select id="idDistributorName" 
+									enabled="false"
+									selectedKey="Pharmaworld"
+									change="onChangeDistributor"
+									visible="true">
+									<core:Item text="Pharmaworld" key="Pharmaworld"/>
+								</Select>
+
+								<Label text="{i18n>selncmpny}" design="Bold" required="true"/>
+								<Select id="idSellingCompany" 
+										selectedKey="BPH" 
+										change="onChangeSellingCompany"
+										enabled="false">
+									<core:Item text="BPH" key="BPH"/>
+								</Select>
+								<core:Title/>
+								
+								<Label text="{i18n>intrnlduedte}" required="true"/>
+								<!--<DatePicker id="idintrDueDte" value="{path :'fastAppData>/EditOffer/InternalBidDueDate',formatter:'FAST_NS0FAST0.utils.Formatter.bdate'}" valueFormat="dd-MM-yyyy" displayFormat="dd.MM.yyyy" />-->
+								<DatePicker id="idintrDueDte" minDate="{dateModel>/minDate}" value="{path :'InternalBidDueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
+								
+								<Label text="{i18n>ofrduedte}"/>
+								<!--<Text text="{path :'fastData>BidDueDate',formatter:'FAST_NS0FAST0.utils.Formatter.bdate'}"/>-->
+								<DatePicker id="idOrfDueDate" value="{path :'fastData>BidDueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
+								
+								<core:Title/>
+								
+								<Label text="{i18n>whlseofr}" required="true"/>
+								<Select id="idWhleSle" enabled="false" selectedKey="{fastAppData>/EditOffer/WholesaleOffer}" visible="{= ${fastAppData>/Tender/CountryCode} === 'TH' || ${fastAppData>/Tender/CountryCode} === 'AR' || ${fastAppData>/Tender/CountryCode} === 'CL'  || ${fastAppData>/Tender/CountryCode} === 'IT' ? false : true}">
+									<items>
+										<core:Item text="No" key="No"/>
+										<core:Item text="Yes" key="Yes"/>
+									</items>
+								</Select>
+
+								<Label text="{i18n>Division}" required="true"/>
+								<Select id="idProductOfferDivision" selectedKey="{fastAppData>/EditOffer/Division}" enabled="false" visible="true" change="onChangeDivision">
+										<items>
+											<core:Item text="" key=""/>
+											<core:Item text="Pharma" key="Pharma"/>
+											<core:Item text="Radiology" key="Radiology"/>
+										</items>
+								</Select>			
+								<!-- <Text id="idDistID" text="{fastAppData>/EditOffer/Distributor/DistributorID}" visible="false"/> -->
+								
+							</form:content>
+						</form:SimpleForm>					
+				</l:BlockLayoutCell>
+			</l:BlockLayoutRow>
+		</l:BlockLayout>
+
+		<List id="ShortProductList"
+			  headerText="Products">
+		<items>
+			<!--<StandardListItem
+				type="Active"
+				title="{Name}"
+				navigated="{
+					parts: [
+						'settings>/navigatedItem',
+						'ProductId'
+					],
+					formatter: '.isNavigated'
+				}"
+				press="onPress" />-->
+			<StandardListItem
+				type="Active"
+				title="ADEMPAS 0,5MG 42TAB"
+				press="onPress" />
+			<StandardListItem
+				type="Active"
+				title="ADEMPAS 2,0MG 42TAB"
+				press="onPress" />
+			<StandardListItem
+				type="Active"
+				title="ADEMPAS 2,5MG 42TAB"
+				press="onPress" />
+		</items>
+	</List>
+
 </core:FragmentDefinition>

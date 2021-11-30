@@ -1,0 +1,49 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProducts" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	<!--<f:DynamicPage id="idAwardedProducts" toggleHeaderOnTitleClick="false">
+		<f:content>-->
+			<Table id="AwardedProducts" 
+				mode="SingleSelectMaster"
+				delete="onDeleteAwardedProduct"
+				selectionChange=".onAwardedProductPress">
+				<columns>
+					<Column >
+						<Label text="Product" wrapping="true"/>
+					</Column>
+					<Column >
+						<Label text="Outcome" wrapping="true"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 0,5MG 42TAB"/>	
+							<Text text="Won"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,0MG 42TAB"/>		
+							<Text text="Lost"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,5MG 42TAB"/>	
+							<Text text="Lost"/>					
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+			
+		<!--</f:content>
+	</f:DynamicPage>-->
+</mvc:View>

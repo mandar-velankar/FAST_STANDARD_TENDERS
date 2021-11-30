@@ -102,6 +102,24 @@
 						"master",
 						"object"
 					]
+				},
+				{
+					"pattern": "PT_TMTEND/{objectId}/AwardedDetail/{productId}/{layout}",
+					"name": "objectDetail",
+					"target": [
+						"master",
+						"object",
+						"objectDetail"
+					]
+				},
+				{
+					"pattern": "PT_TMTEND/{objectId}/OfferProductDetail/{productId}/{layout}",
+					"name": "offerProductDetail",
+					"target": [
+						"master",
+						"object",
+						"offerProductDetail"
+					]
 				}
 			],
 
@@ -116,6 +134,14 @@
 					"viewId": "detail",
 					"viewLevel": 1,
 					"controlAggregation": "midColumnPages"
+				},
+				"objectDetail": {
+					"viewName": "awards/views/AwardedProductsDetail",
+					"controlAggregation": "endColumnPages"
+				},
+				"offerProductDetail": {
+					"viewName": "offer/views/OfferProductsDetail",
+					"controlAggregation": "endColumnPages"
 				},
 				"detailObjectNotFound": {
 					"viewName": "DetailObjectNotFound",
