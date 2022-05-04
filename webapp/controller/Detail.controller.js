@@ -38,20 +38,6 @@ sap.ui.define([
 		/* event handlers                                              */
 		/* =========================================================== */
 
-		/**
-		 * Event handler when the share by E-Mail button has been clicked
-		 * @public
-		 */
-		onSendEmailPress : function () {
-			var oViewModel = this.getModel("detailView");
-
-			URLHelper.triggerEmail(
-				null,
-				oViewModel.getProperty("/shareSendEmailSubject"),
-				oViewModel.getProperty("/shareSendEmailMessage")
-			);
-		},
-
 
 		/**
 		 * Updates the item count within the line item table's header
@@ -90,7 +76,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getModel().metadataLoaded().then( function() {
 				var sObjectPath = this.getModel().createKey("PT_TMTEND", {
-					TenderID :  sObjectId
+					TenderID :  sObjectId,
 				});
 				this._bindView("/" + sObjectPath);
 			}.bind(this));
@@ -109,6 +95,7 @@ sap.ui.define([
 
 			// If the view was not bound yet its not busy, only if the binding requests data it is set to busy again
 			oViewModel.setProperty("/busy", false);
+			this.getModel("appView").setProperty("/editmode", false);
 
 			this.getView().bindElement({
 				path : sObjectPath,
@@ -154,14 +141,14 @@ sap.ui.define([
 
 		_onMetadataLoaded : function () {
 			// Store original busy indicator delay for the detail view
-			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay(),
-				oViewModel = this.getModel("detailView"),
-				oLineItemTable = this.byId("lineItemsList"),
-				iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
+			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
+			var	oViewModel = this.getModel("detailView");
+			var	oLineItemTable = this.byId("lineItemsList");
+				//iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
 
 			// Make sure busy indicator is displayed immediately when
 			// detail view is displayed for the first time
-			oViewModel.setProperty("/delay", 0);
+			/*oViewModel.setProperty("/delay", 0);
 			oViewModel.setProperty("/lineItemTableDelay", 0);
 
 			oLineItemTable.attachEventOnce("updateFinished", function() {
@@ -172,9 +159,13 @@ sap.ui.define([
 			// Binding the view will set it to not busy - so the view is always busy if it is not bound
 			oViewModel.setProperty("/busy", true);
 			// Restore original busy indicator delay for the detail view
-			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);
+			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);*/
 		},
 
+		onEdit:function(){
+			const editmode = this.getModel("appView").getProperty("/editmode");
+			this.getModel("appView").setProperty("/editmode", !editmode);
+		},
 		/**
 		 * Set the full screen mode to false and navigate to master page
 		 */

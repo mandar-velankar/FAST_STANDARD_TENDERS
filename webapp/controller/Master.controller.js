@@ -26,11 +26,11 @@ sap.ui.define([
 		onInit : function () {
 			// Control state model
 			var oList = this.byId("list"),
-				oViewModel = this._createViewModel(),
+				oViewModel = this._createViewModel();
 				// Put down master list's original value for busy indicator delay,
 				// so it can be restored later on. Busy handling on the master list is
 				// taken care of by the master list itself.
-				iOriginalBusyDelay = oList.getBusyIndicatorDelay();
+				//iOriginalBusyDelay = oList.getBusyIndicatorDelay();
 
 			this._oGroupFunctions = {
 				TenderNo : function(oContext) {
@@ -61,10 +61,10 @@ sap.ui.define([
 			// Make sure, busy indication is showing immediately so there is no
 			// break after the busy indication for loading the view's meta data is
 			// ended (see promise 'oWhenMetadataIsLoaded' in AppController)
-			oList.attachEventOnce("updateFinished", function(){
+			/*oList.attachEventOnce("updateFinished", function(){
 				// Restore original busy indicator delay for the list
 				oViewModel.setProperty("/delay", iOriginalBusyDelay);
-			});
+			});*/
 
 			this.getView().addEventDelegate({
 				onBeforeFirstShow: function () {
@@ -126,7 +126,7 @@ sap.ui.define([
 		 * @public
 		 */
 		onRefresh : function () {
-			this._oList.getBinding("items").refresh();
+			//this._oList.getBinding("items").refresh();
 		},
 
 		/**

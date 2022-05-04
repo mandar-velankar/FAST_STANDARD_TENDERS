@@ -3,8 +3,10 @@ sap.ui.define([
 	"sap/ui/Device",
 	"./model/models",
 	"./controller/ListSelector",
-	"./controller/ErrorHandler"
-], function (UIComponent, Device, models, ListSelector, ErrorHandler) {
+	"./controller/ErrorHandler",
+	'sap/f/FlexibleColumnLayoutSemanticHelper',
+	'sap/f/library'
+], function (UIComponent, Device, models, ListSelector, ErrorHandler, FlexibleColumnLayoutSemanticHelper, fioriLibrary) {
 	"use strict";
 
 	return UIComponent.extend("com.bayer.tender.statenderapp.Component", {
@@ -66,6 +68,31 @@ sap.ui.define([
 				}
 			}
 			return this._sContentDensityClass;
+		},
+
+		getHelper: function () {
+			return this._getFcl().then(function(oFCL) {
+				var oSettings = {
+					defaultTwoColumnLayoutType: fioriLibrary.LayoutType.TwoColumnsMidExpanded,
+					defaultThreeColumnLayoutType: fioriLibrary.LayoutType.ThreeColumnsMidExpanded,
+					initialColumnsCount: 2
+				};
+				return (FlexibleColumnLayoutSemanticHelper.getInstanceFor(oFCL, oSettings));
+			});
+		},
+
+		_getFcl: function () {
+			return new Promise(function(resolve, reject) {
+				var oFCL = this.getRootControl().byId('layout');
+				if (!oFCL) {
+					this.getRootControl().attachAfterInit(function(oEvent) {
+						resolve(oEvent.getSource().byId('layout'));
+					}, this);
+					return;
+				}
+				resolve(oFCL);
+
+			}.bind(this));
 		}
 
 	});
