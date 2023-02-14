@@ -1,0 +1,72 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail" xmlns="sap.uxap" xmlns:m="sap.m" xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form" xmlns:mvc="sap.ui.core.mvc" xmlns:t="sap.ui.table" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"
+	xmlns:viz.data="sap.viz.ui5.data" xmlns:viz="sap.viz.ui5.controls" xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+
+	<f:DynamicPage
+		id="idDynamicPage"
+		toggleHeaderOnTitleClick="false">
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<m:FlexBox
+						wrap="Wrap"
+						fitContainer="true"
+						alignItems="Center">
+						<m:Title
+							text="Awarded Product Detail"
+							wrapping="true"
+							class="sapUiTinyMarginEnd"
+						/>
+					</m:FlexBox>
+				</f:heading>
+				<f:navigationActions>
+					<m:OverflowToolbarButton
+						type="Transparent"
+						icon="sap-icon://full-screen"
+						press=".handleFullScreen"
+						tooltip="Enter Full Screen Mode"
+						visible="{= !${detailDetailView>/actionButtonsInfo/fullScreen}}"
+					/>
+					<m:OverflowToolbarButton
+						type="Transparent"
+						icon="sap-icon://exit-full-screen"
+						press=".handleExitFullScreen"
+						tooltip="Exit Full Screen Mode"
+						visible="{= ${detailDetailView>/actionButtonsInfo/fullScreen}}"
+					/>
+					<m:OverflowToolbarButton
+						type="Transparent"
+						icon="sap-icon://decline"
+						press=".handleClose"
+						tooltip="Close column"
+						visible="{= ${detailDetailView>/actionButtonsInfo/endColumn/closeColumn} !== null }"
+					/>
+				</f:navigationActions>
+			</f:DynamicPageTitle>
+		</f:title>
+		<f:content>
+			<form:SimpleForm
+				editable="true"
+				maxContainerCols="1"
+				layout="ColumnLayout"
+				columnsL="1" >
+				<form:content>
+					<m:Label text="Contract No"/>
+					<m:Input value="5634534534234" enabled="false"/>
+					<m:Label text="Product"/>
+					<m:Input value="10003223" enabled="false"/>
+					<m:Label text="Currency"/>
+					<m:Input value="EUR" enabled="false"/>
+					<m:Label text="FOC"/>
+					<m:Input value="" enabled="false"/>
+					<m:Label text="UoM"/>
+					<m:Input value="Units" enabled="false"/>
+					<m:Label text="Outcome"/>
+					<m:Input value="Won" enabled="false"/>
+					<m:Label text="Reason"/>
+					<m:Input value="" enabled="false"/>
+				</form:content>
+			</form:SimpleForm>
+		</f:content>
+	</f:DynamicPage>
+</mvc:View>
