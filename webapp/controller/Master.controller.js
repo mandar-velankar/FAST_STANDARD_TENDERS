@@ -1,5 +1,7 @@
 sap.ui.define([
 	"./BaseController",
+	"sap/ui/core/Component",
+	"sap/ui/core/ComponentContainer",
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
 	"sap/ui/model/Sorter",
@@ -8,7 +10,7 @@ sap.ui.define([
 	"sap/ui/Device",
 	"sap/ui/core/Fragment",
 	"../model/formatter"
-], function (BaseController, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter) {
+], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -227,13 +229,14 @@ sap.ui.define([
 		 * @public
 		 */
 		onSelectionChange : function (oEvent) {
-			var oList = oEvent.getSource(),
+			var oList = oEvent.getParameter("source"),//oEvent.getSource(),
+				data = oEvent.getParameter("data"),
 				bSelected = oEvent.getParameter("selected");
 
 			// skip navigation when deselecting an item in multi selection mode
 			if (!(oList.getMode() === "MultiSelect" && !bSelected)) {
 				// get the list item, either from the listItem parameter or from the event's source itself (will depend on the device-dependent mode).
-				this._showDetail(oEvent.getParameter("listItem") || oEvent.getSource());
+				this._showDetail(data||oList);
 			}
 		},
 
@@ -288,9 +291,26 @@ sap.ui.define([
 			});
 		},
 
-		_onMasterMatched :  function() {
+		_onMasterMatched : async function() {
 			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
+			const genericTableComp = await this.getOwnerComponent().createComponent({
+				usage: "GenericTableComponent",
+				settings: {},
+				componentData: {
+					countryCode:"BR",
+					appID:"StandardTenders",
+					page:"MASTER"
+				},
+				async: true
+			  });
+			  genericTableComp.attachItemPress(this.onSelectionChange.bind(this));
+			  const compContainer = new ComponentContainer({
+				component: genericTableComp,
+				height: "100%",
+				width: "100%"
+			});
+			this.byId("GenericTableComponentPlaceHolder").addItem(compContainer);
 		},
 
 		/**
@@ -304,7 +324,7 @@ sap.ui.define([
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getRouter().navTo("object", {
-				objectId : oItem.getBindingContext().getProperty("TenderID")
+				objectId : oItem.TenderID //getBindingContext().getProperty("TenderID")
 			}, bReplace);
 		},
 

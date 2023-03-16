@@ -25,7 +25,10 @@
 
 
 		<f:content>
-			<VBox fitContainer="true">
+		<VBox id="GenericTableComponentPlaceHolder" fitContainer="true">
+			<!-- <core:ComponentContainer usage="GenericTableComponent" async="true" /> -->
+			</VBox>
+			<!-- <VBox fitContainer="true">
 				<OverflowToolbar class="sapFDynamicPageAlignContent">
 					<ToolbarSpacer/>
 					
@@ -130,7 +133,7 @@
 						</ColumnListItem>
 					</items>
 				</Table>
-			</VBox>
+			</VBox> -->
 		</f:content>
 	</f:DynamicPage>
 </mvc:View>

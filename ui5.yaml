@@ -10,6 +10,8 @@ server:
     configuration:
       ignoreCertError: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
       backend:
+      - path: /UITemplates
+        url: http://localhost:4005/
       - path: /v2
         url: http://localhost:4004
       ui5:
@@ -18,6 +20,12 @@ server:
         - /test-resources
         url: https://ui5.sap.com
         version:  # The UI5 version, for instance, 1.78.1. Empty means latest version
+  - name: fiori-tools-servestatic
+    afterMiddleware: compression
+    configuration:
+      paths:
+        - path: /GenericTableComponent
+          src: ..\F_TNDR_CAG_FAST_UI_TEMPLATES\app\GenericTableComponent\dist
   - name: fiori-tools-appreload
     afterMiddleware: compression
     configuration:
