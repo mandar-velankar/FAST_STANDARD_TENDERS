@@ -68,10 +68,17 @@
 				"settings": {},
 				"componentData": {},
 				"lazy": true
+			},
+			"GenericFormComponent": {
+				"name": "com.bayer.SXTENDER.templates.GenericFormComponent",
+				"settings": {},
+				"componentData": {},
+				"lazy": true
 			}
 		},
 		"resourceRoots":{
-			"com.bayer.SXTENDER.templates.GenericTableComponent": "./GenericTableComponent"
+			"com.bayer.SXTENDER.templates.GenericTableComponent": "./GenericTableComponent",
+			"com.bayer.SXTENDER.templates.GenericFormComponent": "./GenericFormComponent"
 		},
 		"models": {
 			"i18n": {
@@ -106,7 +113,7 @@
 					"target": "master"
 				},
 				{
-					"pattern": "PT_TMTEND/{objectId}",
+					"pattern": "detail/{objectId}",
 					"name": "object",
 					"target": [
 						"master",

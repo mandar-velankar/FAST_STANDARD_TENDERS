@@ -310,7 +310,9 @@ sap.ui.define([
 				height: "100%",
 				width: "100%"
 			});
-			this.byId("GenericTableComponentPlaceHolder").addItem(compContainer);
+			// this.byId("GenericTableComponentPlaceHolder").addItem(compContainer);
+			// this.getView().insertContent(compContainer)
+			this.byId("masterPage").setContent(compContainer);
 		},
 
 		/**

@@ -83,7 +83,10 @@
 			</f:DynamicPageHeader>
 		</f:header>
 		<f:content>	
-			<IconTabBar
+		<!-- <VBox id="GenericFormComponentPlaceHolder" fitContainer="true">
+			</VBox> -->
+		
+			<!-- <IconTabBar
 				id="detailTabBar"
 				expanded="{device>/isNoPhone}"
 				class="sapUiResponsiveContentPadding">
@@ -104,7 +107,7 @@
 						<mvc:XMLView id="awardedProductsViewId" viewName="com.bayer.tender.statenderapp.view.awards.views.AwardedProducts"/>
 					</IconTabFilter>
 				</items>
-			</IconTabBar>
+			</IconTabBar> -->
 		</f:content>
 	</f:DynamicPage>
 </mvc:View>

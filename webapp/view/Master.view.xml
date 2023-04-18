@@ -25,9 +25,8 @@
 
 
 		<f:content>
-		<VBox id="GenericTableComponentPlaceHolder" fitContainer="true">
-			<!-- <core:ComponentContainer usage="GenericTableComponent" async="true" /> -->
-			</VBox>
+		<!-- <VBox id="GenericTableComponentPlaceHolder" fitContainer="true"> -->
+			<!-- </VBox> -->
 			<!-- <VBox fitContainer="true">
 				<OverflowToolbar class="sapFDynamicPageAlignContent">
 					<ToolbarSpacer/>
