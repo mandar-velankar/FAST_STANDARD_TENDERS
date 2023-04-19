@@ -75,7 +75,7 @@ sap.ui.define([
 		_onObjectMatched: async function (oEvent) {
 			var sObjectId = oEvent.getParameter("arguments").objectId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-
+			// this.getModel("appView").setProperty("/editable", false);
 			const genericFormComp = await this.getOwnerComponent().createComponent({
 				usage: "GenericFormComponent",
 				settings: {},
@@ -94,7 +94,28 @@ sap.ui.define([
 				height: "100%",
 				width: "100%"
 			});
-			this.byId("detailPage").setContent(compContainer);
+			this.byId("tabs").insertContent(compContainer);
+
+			const genericSingleFormComp = await this.getOwnerComponent().createComponent({
+				usage: "GenericSingleFormComponent",
+				settings: {},
+				componentData: {
+					countryCode: "BR",
+					appID: "StandardTenders",
+					page: "DETAIL-TAB1",
+					keys: {
+						TenderID: sObjectId,
+					}
+				},
+				async: true
+			});
+			const compSingleContainer = new ComponentContainer({
+				component: genericSingleFormComp,
+				height: "100%",
+				width: "100%",
+				propagateModel:true
+			});
+			this.byId("form").insertContent(compSingleContainer);
 			// this.byId("GenericFormComponentPlaceHolder").addItem(compContainer);
 			// this.getModel().metadataLoaded().then( function() {
 			// 	var sObjectPath = this.getModel().createKey("PT_TMTEND", {

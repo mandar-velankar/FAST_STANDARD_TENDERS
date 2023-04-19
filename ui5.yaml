@@ -28,6 +28,8 @@ server:
           src: ..\F_TNDR_CAG_FAST_UI_TEMPLATES\app\GenericTableComponent\dist
         - path: /GenericFormComponent
           src: ..\F_TNDR_CAG_FAST_UI_TEMPLATES\app\GenericFormComponent\dist
+        - path: /GenericSingleFormComponent
+          src: ..\F_TNDR_CAG_FAST_UI_TEMPLATES\app\GenericSingleFormComponent\dist
   - name: fiori-tools-appreload
     afterMiddleware: compression
     configuration:
