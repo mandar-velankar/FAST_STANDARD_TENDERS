@@ -94,28 +94,39 @@ sap.ui.define([
 				height: "100%",
 				width: "100%"
 			});
+			this.byId("tabs").removeAllContent();
 			this.byId("tabs").insertContent(compContainer);
-
-			const genericSingleFormComp = await this.getOwnerComponent().createComponent({
-				usage: "GenericSingleFormComponent",
-				settings: {},
-				componentData: {
+			if (!this.genericSingleFormComp) {
+				this.genericSingleFormComp = await this.getOwnerComponent().createComponent({
+					usage: "GenericSingleFormComponent",
+					settings: {},
+					componentData: {
+						countryCode: "BR",
+						appID: "StandardTenders",
+						page: "DETAIL-TAB1",
+						keys: {
+							TenderID: sObjectId,
+						}
+					},
+					async: true
+				});
+				const compSingleContainer = new ComponentContainer({
+					component: this.genericSingleFormComp,
+					height: "100%",
+					width: "100%",
+					propagateModel: true
+				});
+				this.byId("form").insertContent(compSingleContainer);
+			} else {
+				this.genericSingleFormComp.setInput({
 					countryCode: "BR",
 					appID: "StandardTenders",
 					page: "DETAIL-TAB1",
 					keys: {
 						TenderID: sObjectId,
 					}
-				},
-				async: true
-			});
-			const compSingleContainer = new ComponentContainer({
-				component: genericSingleFormComp,
-				height: "100%",
-				width: "100%",
-				propagateModel:true
-			});
-			this.byId("form").insertContent(compSingleContainer);
+				});
+			}
 			// this.byId("GenericFormComponentPlaceHolder").addItem(compContainer);
 			// this.getModel().metadataLoaded().then( function() {
 			// 	var sObjectPath = this.getModel().createKey("PT_TMTEND", {
