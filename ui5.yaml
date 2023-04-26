@@ -4,6 +4,8 @@ metadata:
 type: application
 ui5Theme: sap_fiori_3
 server:
+  settings:
+    httpPort: 8089
   customMiddleware:
   - name: fiori-tools-proxy
     afterMiddleware: compression
