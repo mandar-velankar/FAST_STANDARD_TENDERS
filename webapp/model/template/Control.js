@@ -1,3 +1,4 @@
+//todo: dependencies are required for dynamic loading of controls, need to find a better solution
 sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input"], function (Text, BaseObject, ControlProperty, Input) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
@@ -21,8 +22,8 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input"]
       return `sap/m/${this.type}`;
     },
     generateControl: function () {
-      const m = new Input();
-      const t = new Text();
+      // const m = new Input();
+      // const t = new Text();
       const controlPath = this.getControlPath();
       const ui5Control = sap.ui.require(controlPath);
       const props = this.getPropertiesAsObject();
