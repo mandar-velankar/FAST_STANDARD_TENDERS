@@ -20,6 +20,14 @@
 					"odataVersion": "2.0",
 					"localUri": "localService/metadata.xml"
 				}
+			},
+			"tempService": {
+				"uri": "/UITemplates/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0",
+					"localUri": "localService/metadata.xml"
+				}
 			}
 		}
 	},
@@ -63,29 +71,8 @@
 			"cozy": true
 		},
 		"componentUsages": {
-			"GenericTableComponent": {
-				"name": "com.bayer.SXTENDER.templates.GenericTableComponent",
-				"settings": {},
-				"componentData": {},
-				"lazy": true
-			},
-			"GenericFormComponent": {
-				"name": "com.bayer.SXTENDER.templates.GenericFormComponent",
-				"settings": {},
-				"componentData": {},
-				"lazy": true
-			},
-			"GenericSingleFormComponent": {
-				"name": "com.bayer.SXTENDER.templates.GenericSingleFormComponent",
-				"settings": {},
-				"componentData": {},
-				"lazy": true
-			}
 		},
 		"resourceRoots":{
-			"com.bayer.SXTENDER.templates.GenericTableComponent": "./GenericTableComponent",
-			"com.bayer.SXTENDER.templates.GenericFormComponent": "./GenericFormComponent",
-			"com.bayer.SXTENDER.templates.GenericSingleFormComponent": "./GenericSingleFormComponent"
 		},
 		"models": {
 			"i18n": {
@@ -97,6 +84,10 @@
 			"": {
 				"dataSource": "mainService",
 				"preload": true
+			},
+			"template": {
+				"dataSource": "tempService",
+				"type": "com.bayer.tender.statenderapp.state.TemplateState"
 			}
 		},
 

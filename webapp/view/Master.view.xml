@@ -25,6 +25,16 @@
 
 
 		<f:content>
+            <Table id="genericMasterTable" 
+                columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
+                itemPress=".onSelectionChange"
+            >
+                <columns>
+                    <Column>
+                        <Text text="{template>title}" />
+                    </Column>
+                </columns>
+            </Table>
 		<!-- <VBox id="GenericTableComponentPlaceHolder" fitContainer="true"> -->
 			<!-- </VBox> -->
 			<!-- <VBox fitContainer="true">

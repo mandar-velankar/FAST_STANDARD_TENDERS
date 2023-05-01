@@ -9,8 +9,9 @@ sap.ui.define([
 	"sap/m/GroupHeaderListItem",
 	"sap/ui/Device",
 	"sap/ui/core/Fragment",
-	"../model/formatter"
-], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter) {
+	"../model/formatter",
+	"sap/m/ColumnListItem"
+], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -75,6 +76,7 @@ sap.ui.define([
 			});
 
 			this.getRouter().getRoute("master").attachPatternMatched(this._onMasterMatched, this);
+			this.getRouter().getRoute("object").attachPatternMatched(this._onMasterMatched, this);
 			this.getRouter().attachBypassed(this.onBypassed, this);
 		},
 
@@ -229,8 +231,8 @@ sap.ui.define([
 		 * @public
 		 */
 		onSelectionChange : function (oEvent) {
-			var oList = oEvent.getParameter("source"),//oEvent.getSource(),
-				data = oEvent.getParameter("data"),
+			var oList = oEvent.getSource(),
+				data = oEvent.getParameter("listItem").getBindingContext().getObject(),//oEvent.getParameter("data"),
 				bSelected = oEvent.getParameter("selected");
 
 			// skip navigation when deselecting an item in multi selection mode
@@ -294,25 +296,27 @@ sap.ui.define([
 		_onMasterMatched : async function() {
 			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
-			const genericTableComp = await this.getOwnerComponent().createComponent({
-				usage: "GenericTableComponent",
-				settings: {},
-				componentData: {
-					countryCode:"BR",
-					appID:"StandardTenders",
-					page:"MASTER"
-				},
-				async: true
-			  });
-			  genericTableComp.attachItemPress(this.onSelectionChange.bind(this));
-			  const compContainer = new ComponentContainer({
-				component: genericTableComp,
-				height: "100%",
-				width: "100%"
+			
+			
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			await this.templateState.read("MASTER",{
+				countryCode:"BR",
+				appID:"StandardTenders",
+				page:"MASTER"
 			});
-			// this.byId("GenericTableComponentPlaceHolder").addItem(compContainer);
-			// this.getView().insertContent(compContainer)
-			this.byId("masterPage").setContent(compContainer);
+			// this.setModel(this.templateStateData.masterConfig.countryTemplate.getTemplate().getODataModel(), "data");
+			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
+			const table = this.byId("genericMasterTable");
+			table && table.bindItems({
+			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getEntity()}`,
+			//   model: '',
+			  template: new ColumnListItem({
+				type: "Active",
+				cells: cols.map(col => col.getControl().generateControl())
+			  }),
+			  templateShareable: true
+			});
 		},
 
 		/**

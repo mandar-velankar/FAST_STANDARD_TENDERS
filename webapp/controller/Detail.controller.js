@@ -61,7 +61,10 @@ sap.ui.define([
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
 		},
-
+		fieldsFactory: function (id, context) {
+			const control = context.getObject();
+			return control.generateControl();
+		},
 		/* =========================================================== */
 		/* begin: internal methods                                     */
 		/* =========================================================== */
@@ -76,58 +79,35 @@ sap.ui.define([
 			var sObjectId = oEvent.getParameter("arguments").objectId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
-			const genericFormComp = await this.getOwnerComponent().createComponent({
-				usage: "GenericFormComponent",
-				settings: {},
-				componentData: {
-					countryCode: "BR",
-					appID: "StandardTenders",
-					page: "DETAIL",
-					keys: {
-						TenderID: sObjectId,
-					}
-				},
-				async: true
+
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			
+			await this.templateState.read("DETAIL",{
+				countryCode: "BR",
+				appID: "StandardTenders",
+				page: "DETAIL",
+				keys: {
+					TenderID: sObjectId,
+				}
 			});
-			const compContainer = new ComponentContainer({
-				component: genericFormComp,
-				height: "100%",
-				width: "100%"
-			});
-			this.byId("tabs").removeAllContent();
-			this.byId("tabs").insertContent(compContainer);
-			if (!this.genericSingleFormComp) {
-				this.genericSingleFormComp = await this.getOwnerComponent().createComponent({
-					usage: "GenericSingleFormComponent",
-					settings: {},
-					componentData: {
-						countryCode: "BR",
-						appID: "StandardTenders",
-						page: "DETAIL-TAB1",
-						keys: {
-							TenderID: sObjectId,
-						}
-					},
-					async: true
+
+			await this.getModel().metadataLoaded();
+			let path = "";
+			if (sObjectId) {
+				path = this.getModel().createKey(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {
+					TenderID: sObjectId,
 				});
-				const compSingleContainer = new ComponentContainer({
-					component: this.genericSingleFormComp,
-					height: "100%",
-					width: "100%",
-					propagateModel: true
-				});
-				this.byId("form").insertContent(compSingleContainer);
 			} else {
-				this.genericSingleFormComp.setInput({
-					countryCode: "BR",
-					appID: "StandardTenders",
-					page: "DETAIL-TAB1",
-					keys: {
-						TenderID: sObjectId,
-					}
-				});
+				const newEntryContext = this.getModel().createEntry(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {});
+				path = newEntryContext.getPath();
 			}
-			// this.byId("GenericFormComponentPlaceHolder").addItem(compContainer);
+			this.getView().bindElement({
+				path: path,
+				//`/${this.GenericFormStateData.countryTemplate.getTemplate().getEntity()}`,
+				// model: 'data'
+			});
+
 			// this.getModel().metadataLoaded().then( function() {
 			// 	var sObjectPath = this.getModel().createKey("PT_TMTEND", {
 			// 		TenderID :  sObjectId,

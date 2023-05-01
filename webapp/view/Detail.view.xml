@@ -83,10 +83,47 @@
 			</f:DynamicPageHeader>
 		</f:header>
 		<f:content>	
-		<!-- <VBox id="GenericFormComponentPlaceHolder" fitContainer="true">
-			</VBox> -->
-		
-			<IconTabBar
+			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{template>/detailConfig/countryTemplate/template/tabs}">
+				<items>
+					<IconTabFilter text="{template>title}" icon="sap-icon://{template>icon}" content="{path:'template>forms'}" >
+						<form:Form
+							editable="true"
+							formContainers="{path:'template>formContainers'}">
+							<form:title>
+								<core:Title text="{template>title}" />
+							</form:title>
+							<form:layout>
+								<form:ResponsiveGridLayout
+									labelSpanXL="{template>layout/labelSpanXL}"
+									labelSpanL="{template>layout/labelSpanL}"
+									labelSpanM="{template>layout/labelSpanM}"
+									labelSpanS="{template>layout/labelSpanS}"
+									adjustLabelSpan="{template>layout/adjustLabelSpan}"
+									emptySpanXL="{template>layout/emptySpanXL}"
+									emptySpanL="{template>layout/emptySpanL}"
+									emptySpanM="{template>layout/emptySpanM}"
+									emptySpanS="{template>layout/emptySpanS}"
+									columnsXL="{template>layout/columnsXL}"
+									columnsL="{template>layout/columnsL}"
+									columnsM="{template>layout/columnsM}"
+									singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+							</form:layout>
+							<form:formContainers>
+								<form:FormContainer title="{template>title}" formElements="{path:'template>formElements'}">
+									<form:formElements>
+										<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory'}">
+											<!-- <form:fields>
+												<Input value="{template>control/type}"/>
+											</form:fields> -->
+										</form:FormElement>
+									</form:formElements>
+								</form:FormContainer>
+							</form:formContainers>
+						</form:Form>
+					</IconTabFilter>
+				</items>
+			</IconTabBar>
+			<!-- <IconTabBar
 				id="detailTabBar"
 				expanded="{device>/isNoPhone}"
 				class="sapUiResponsiveContentPadding">
@@ -106,12 +143,8 @@
 					<IconTabFilter text="{i18n>awards}" key="awards">
 						<mvc:XMLView id="awardedProductsViewId" viewName="com.bayer.tender.statenderapp.view.awards.views.AwardedProducts"/>
 					</IconTabFilter>
-					<IconTabFilter text="{i18n>tabs}" key="tabs" id="tabs">
-					</IconTabFilter>
-					<IconTabFilter text="{i18n>form}" key="form" id="form">
-					</IconTabFilter>
 				</items>
-			</IconTabBar>
+			</IconTabBar> -->
 		</f:content>
 	</f:DynamicPage>
 </mvc:View>
