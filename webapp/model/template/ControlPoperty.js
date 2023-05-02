@@ -5,7 +5,7 @@ sap.ui.define(["../BaseObject"], function (BaseObject) {
       if (data) {
         this.id = data.ID;
         this.name = data.Name;
-        this.value = data.Value;
+        this.value = this.stringToBoolean(data.Value);
         this.isBinding = data.IsBinding;
       }
     },
@@ -25,6 +25,16 @@ sap.ui.define(["../BaseObject"], function (BaseObject) {
         Value: this.value,
         IsBinding: this.isBinding
       };
+    },
+    stringToBoolean: function(stringValue) {
+        switch(stringValue?.toLowerCase()?.trim()){
+            case "true": 
+              return true;
+            case "false": 
+              return false;
+            default:
+              return stringValue;
+        }
     }
   });
   return ControlProperty;
