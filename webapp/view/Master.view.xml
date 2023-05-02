@@ -28,6 +28,15 @@
             <Table id="genericMasterTable" 
                 columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
                 itemPress=".onSelectionChange"
+				class="sapFDynamicPageAlignContent"
+				width="auto"
+				updateFinished=".onUpdateFinished"
+				alternateRowColors="true"
+				contextualWidth="Auto" 
+				popinLayout="Block"
+				growing="true"
+				growingThreshold="15"
+				growingScrollToLoad="false"
             >
                 <columns>
                     <Column>

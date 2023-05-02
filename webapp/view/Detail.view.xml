@@ -85,7 +85,7 @@
 		<f:content>	
 			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{template>/detailConfig/countryTemplate/template/tabs}">
 				<items>
-					<IconTabFilter text="{template>title}" icon="sap-icon://{template>icon}" content="{path:'template>forms'}" >
+					<IconTabFilter text="{template>title}"  content="{path:'template>forms'}" >
 						<form:Form
 							editable="true"
 							formContainers="{path:'template>formContainers'}">
