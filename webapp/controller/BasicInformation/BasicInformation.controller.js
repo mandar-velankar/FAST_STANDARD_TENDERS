@@ -11,5 +11,15 @@ sap.ui.define([
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
 
-    });
+		onInit: function () {
+		},
+		onBeforeShow:function(){
+			// get state data
+			// this.templateState = this.getOwnerComponent().getModel("template");
+			// this.templateStateData = this.templateState.getData();
+			
+			//this.getView().getBindingContext("template"); // get current tab data
+
+		}
+	});
 });

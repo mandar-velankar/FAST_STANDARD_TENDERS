@@ -5,8 +5,8 @@ sap.ui.define([
 	"sap/ui/core/ComponentContainer",
 	"sap/m/library",
 	"sap/m/IconTabFilter",
-	"sap/ui/core/mvc/View"
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, View) {
+	"sap/ui/core/mvc/XMLView"
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, XMLView) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -63,25 +63,26 @@ sap.ui.define([
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
 		},
-		fieldsFactory: function (id, context) {
-			const control = context.getObject();
-			return control.generateControl();
-		},
 		tabsFactory: function (id, context) {
 			const tab = context.getObject();
-			const xmlView = tab.getXMLView();;
+			const xmlView = tab.getXMLView();
+			
 
-			const oView = View.create({
+			const iconTabfilter = new IconTabFilter({
+				text: "{template>title}",
+				key: "{template>title}"
+			}); 
+
+			xmlView && XMLView.create({
 				viewName: `com.bayer.tender.statenderapp.view.tender.views.${xmlView.getName()}`,
 				viewId: `id${xmlView.getName()}`,
 				type: sap.ui.core.mvc.ViewType.XML
-			}).then(function(oView) {
-				return new IconTabFilter({
-							text: "{template>title}",
-							key: "{template>title}",
-							content: [oView]
-						}); 
-			}.bind(this));
+			}).then(view => {
+				view.setBindingContext(context,"template");
+				view.getController().onBeforeShow && view.getController().onBeforeShow();
+				iconTabfilter.insertContent(view);
+			});
+			return iconTabfilter;
 
 		},
 		/* =========================================================== */

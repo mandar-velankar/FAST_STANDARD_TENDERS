@@ -3,16 +3,22 @@ sap.ui.define(["../BaseObject", "./Form", "./Table"], function (BaseObject, Form
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
       this.forms = [];
+      this.formByName = {};
       this.tables = [];
+      this.tableByName = {};
       if (data) {
         this.id = data.ID;
         this.viewName = data.ViewName;
         this.description = data.Description;
-        for (const form of data.Forms) {
-          this.forms.push(new Form(form));
+        for (const formData of data.Forms) {
+          const form = new Form(formData);
+          this.forms.push(form);
+          this.formByName[form.description.replace(/\s/g,'')] = form;
         }
-        for(const table of data.Tables){
-          this.tables.push(new Table(table));
+        for(const tableData of data.Tables){
+          const table = new Table(tableData);
+          this.tables.push(table);
+          this.tableByName[table.title.replace(/\s/g,'')] = table;
         }
       }
     },
