@@ -29,7 +29,7 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
                 this.updateConfig("master",await this.templateService.getTableConfig(keys || {}));
             },
             readDetailConfig: async function (keys) {
-                this.updateConfig("detail",await this.templateService.getFormConfig(keys || {}));
+                this.updateConfig("detail",await this.templateService.getViewConfig(keys || {}));
             },
             updateConfig:function(type,templateResponse){
                 this.oData[`${type}Config`] = {

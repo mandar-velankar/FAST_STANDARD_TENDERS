@@ -83,8 +83,8 @@
 			</f:DynamicPageHeader>
 		</f:header>
 		<f:content>	
-			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{template>/detailConfig/countryTemplate/template/tabs}">
-				<items>
+			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{path: 'template>/detailConfig/countryTemplate/template/tabs', factory: '.tabsFactory'}">
+				<!-- <items>
 					<IconTabFilter text="{template>title}"  content="{path:'template>forms'}" >
 						<form:Form
 							editable="true"
@@ -112,16 +112,16 @@
 								<form:FormContainer title="{template>title}" formElements="{path:'template>formElements'}">
 									<form:formElements>
 										<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory'}">
-											<!-- <form:fields>
+											<form:fields>
 												<Input value="{template>control/type}"/>
-											</form:fields> -->
+											</form:fields>
 										</form:FormElement>
 									</form:formElements>
 								</form:FormContainer>
 							</form:formContainers>
 						</form:Form>
 					</IconTabFilter>
-				</items>
+				</items> -->
 			</IconTabBar>
 			<!-- <IconTabBar
 				id="detailTabBar"

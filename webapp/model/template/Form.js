@@ -19,7 +19,7 @@ sap.ui.define(["../BaseObject", "./FormContainer", "./Layout"], function (BaseOb
         Title: this.title,
         Description: this.description,
         FormContainers: this.formContainers.map(formContainer => formContainer.getJSON()),
-        Layout: this.layout.getJson()
+        Layout: this.layout.getJSON()
       };
     }
   });

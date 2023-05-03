@@ -3,8 +3,10 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"../model/formatter",
 	"sap/ui/core/ComponentContainer",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary) {
+	"sap/m/library",
+	"sap/m/IconTabFilter",
+	"sap/ui/core/mvc/View"
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, View) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -64,6 +66,23 @@ sap.ui.define([
 		fieldsFactory: function (id, context) {
 			const control = context.getObject();
 			return control.generateControl();
+		},
+		tabsFactory: function (id, context) {
+			const tab = context.getObject();
+			const xmlView = tab.getXMLView();;
+
+			const oView = View.create({
+				viewName: `com.bayer.tender.statenderapp.view.tender.views.${xmlView.getName()}`,
+				viewId: `id${xmlView.getName()}`,
+				type: sap.ui.core.mvc.ViewType.XML
+			}).then(function(oView) {
+				return new IconTabFilter({
+							text: "{template>title}",
+							key: "{template>title}",
+							content: [oView]
+						}); 
+			}.bind(this));
+
 		},
 		/* =========================================================== */
 		/* begin: internal methods                                     */
