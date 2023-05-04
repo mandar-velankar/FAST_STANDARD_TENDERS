@@ -2,8 +2,11 @@ sap.ui.define([
 	"./BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/ui/core/ComponentContainer",
+	"sap/m/library",
+	"sap/m/IconTabFilter",
+	"sap/ui/core/mvc/XMLView"
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, XMLView) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -17,14 +20,14 @@ sap.ui.define([
 		/* lifecycle methods                                           */
 		/* =========================================================== */
 
-		onInit : function () {
+		onInit: function () {
 			// Model used to manipulate control states. The chosen values make sure,
 			// detail page is busy indication immediately so there is no break in
 			// between the busy indication for loading the view's meta data
 			var oViewModel = new JSONModel({
-				busy : false,
-				delay : 0,
-				lineItemListTitle : this.getResourceBundle().getText("detailLineItemTableHeading")
+				busy: false,
+				delay: 0,
+				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
 
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
@@ -44,7 +47,7 @@ sap.ui.define([
 		 * @param {object} oEvent an event containing the total number of items in the list
 		 * @private
 		 */
-		onListUpdateFinished : function (oEvent) {
+		onListUpdateFinished: function (oEvent) {
 			var sTitle,
 				iTotalItems = oEvent.getParameter("total"),
 				oViewModel = this.getModel("detailView");
@@ -60,7 +63,28 @@ sap.ui.define([
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
 		},
+		tabsFactory: function (id, context) {
+			const tab = context.getObject();
+			const xmlView = tab.getXMLView();
+			
 
+			const iconTabfilter = new IconTabFilter({
+				text: "{template>title}",
+				key: "{template>title}"
+			}); 
+
+			xmlView && XMLView.create({
+				viewName: `com.bayer.tender.statenderapp.view.tender.views.${xmlView.getName()}`,
+				viewId: `id${xmlView.getName()}`,
+				type: sap.ui.core.mvc.ViewType.XML
+			}).then(view => {
+				view.setBindingContext(context,"template");
+				view.getController().onBeforeShow && view.getController().onBeforeShow();
+				iconTabfilter.insertContent(view);
+			});
+			return iconTabfilter;
+
+		},
 		/* =========================================================== */
 		/* begin: internal methods                                     */
 		/* =========================================================== */
@@ -71,15 +95,45 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent pattern match event in route 'object'
 		 * @private
 		 */
-		_onObjectMatched : function (oEvent) {
-			var sObjectId =  oEvent.getParameter("arguments").objectId;
+		_onObjectMatched: async function (oEvent) {
+			var sObjectId = oEvent.getParameter("arguments").objectId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-			this.getModel().metadataLoaded().then( function() {
-				var sObjectPath = this.getModel().createKey("PT_TMTEND", {
-					TenderID :  sObjectId,
+			// this.getModel("appView").setProperty("/editable", false);
+
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			
+			await this.templateState.read("DETAIL",{
+				countryCode: "BR",
+				appID: "StandardTenders",
+				page: "DETAIL",
+				keys: {
+					TenderID: sObjectId,
+				}
+			});
+
+			await this.getModel().metadataLoaded();
+			let path = "";
+			if (sObjectId) {
+				path = this.getModel().createKey(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {
+					TenderID: sObjectId,
 				});
-				this._bindView("/" + sObjectPath);
-			}.bind(this));
+			} else {
+				const newEntryContext = this.getModel().createEntry(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {});
+				path = newEntryContext.getPath();
+			}
+			this.getView().bindElement({
+				path: path,
+				//`/${this.GenericFormStateData.countryTemplate.getTemplate().getEntity()}`,
+				// model: 'data'
+			});
+
+			// this.getModel().metadataLoaded().then( function() {
+			// 	var sObjectPath = this.getModel().createKey("PT_TMTEND", {
+			// 		TenderID :  sObjectId,
+			// 	});
+			// 	this._bindView("/" + sObjectPath);
+			// }.bind(this));
 		},
 
 		/**
@@ -89,7 +143,7 @@ sap.ui.define([
 		 * @param {string} sObjectPath path to the object to be bound to the view.
 		 * @private
 		 */
-		_bindView : function (sObjectPath) {
+		_bindView: function (sObjectPath) {
 			// Set busy indicator during view binding
 			var oViewModel = this.getModel("detailView");
 
@@ -98,10 +152,10 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/editmode", false);
 
 			this.getView().bindElement({
-				path : sObjectPath,
+				path: sObjectPath,
 				events: {
-					change : this._onBindingChange.bind(this),
-					dataRequested : function () {
+					change: this._onBindingChange.bind(this),
+					dataRequested: function () {
 						oViewModel.setProperty("/busy", true);
 					},
 					dataReceived: function () {
@@ -111,7 +165,7 @@ sap.ui.define([
 			});
 		},
 
-		_onBindingChange : function () {
+		_onBindingChange: function () {
 			var oView = this.getView(),
 				oElementBinding = oView.getElementBinding();
 
@@ -139,12 +193,12 @@ sap.ui.define([
 				oResourceBundle.getText("shareSendEmailObjectMessage", [sObjectName, sObjectId, location.href]));
 		},
 
-		_onMetadataLoaded : function () {
+		_onMetadataLoaded: function () {
 			// Store original busy indicator delay for the detail view
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
-			var	oViewModel = this.getModel("detailView");
-			var	oLineItemTable = this.byId("lineItemsList");
-				//iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
+			var oViewModel = this.getModel("detailView");
+			var oLineItemTable = this.byId("lineItemsList");
+			//iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
 
 			// Make sure busy indicator is displayed immediately when
 			// detail view is displayed for the first time
@@ -162,7 +216,7 @@ sap.ui.define([
 			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);*/
 		},
 
-		onEdit:function(){
+		onEdit: function () {
 			const editmode = this.getModel("appView").getProperty("/editmode");
 			this.getModel("appView").setProperty("/editmode", !editmode);
 		},
@@ -188,7 +242,7 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", "MidColumnFullScreen");
 			} else {
 				// reset to previous layout
-				this.getModel("appView").setProperty("/layout",  this.getModel("appView").getProperty("/previousLayout"));
+				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
 		}
 	});

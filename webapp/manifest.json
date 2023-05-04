@@ -20,6 +20,14 @@
 					"odataVersion": "2.0",
 					"localUri": "localService/metadata.xml"
 				}
+			},
+			"tempService": {
+				"uri": "/UITemplates/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0",
+					"localUri": "localService/metadata.xml"
+				}
 			}
 		}
 	},
@@ -62,7 +70,10 @@
 			"compact": true,
 			"cozy": true
 		},
-
+		"componentUsages": {
+		},
+		"resourceRoots":{
+		},
 		"models": {
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
@@ -73,6 +84,10 @@
 			"": {
 				"dataSource": "mainService",
 				"preload": true
+			},
+			"template": {
+				"dataSource": "tempService",
+				"type": "com.bayer.tender.statenderapp.state.TemplateState"
 			}
 		},
 
@@ -96,7 +111,7 @@
 					"target": "master"
 				},
 				{
-					"pattern": "PT_TMTEND/{objectId}",
+					"pattern": "detail/{objectId}",
 					"name": "object",
 					"target": [
 						"master",

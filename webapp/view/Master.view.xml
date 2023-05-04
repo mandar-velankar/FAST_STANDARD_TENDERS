@@ -25,7 +25,28 @@
 
 
 		<f:content>
-			<VBox fitContainer="true">
+            <Table id="genericMasterTable" 
+                columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
+                itemPress=".onSelectionChange"
+				class="sapFDynamicPageAlignContent"
+				width="auto"
+				updateFinished=".onUpdateFinished"
+				alternateRowColors="true"
+				contextualWidth="Auto" 
+				popinLayout="Block"
+				growing="true"
+				growingThreshold="15"
+				growingScrollToLoad="false"
+            >
+                <columns>
+                    <Column>
+                        <Text text="{template>title}" />
+                    </Column>
+                </columns>
+            </Table>
+		<!-- <VBox id="GenericTableComponentPlaceHolder" fitContainer="true"> -->
+			<!-- </VBox> -->
+			<!-- <VBox fitContainer="true">
 				<OverflowToolbar class="sapFDynamicPageAlignContent">
 					<ToolbarSpacer/>
 					
@@ -130,7 +151,7 @@
 						</ColumnListItem>
 					</items>
 				</Table>
-			</VBox>
+			</VBox> -->
 		</f:content>
 	</f:DynamicPage>
 </mvc:View>

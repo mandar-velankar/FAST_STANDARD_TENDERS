@@ -14,6 +14,10 @@ sap.ui.define([
 			return this.getOwnerComponent().getRouter();
 		},
 
+		fieldsFactory: function (id, context) {
+			const control = context.getObject();
+			return control.generateControl();
+		},
 		/**
 		 * Convenience method for getting the view model by name in every controller of the application.
 		 * @public
