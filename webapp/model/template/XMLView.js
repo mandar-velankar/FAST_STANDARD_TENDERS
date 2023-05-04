@@ -13,12 +13,12 @@ sap.ui.define(["../BaseObject", "./Form", "./Table"], function (BaseObject, Form
         for (const formData of data.Forms) {
           const form = new Form(formData);
           this.forms.push(form);
-          this.formByName[form.description.replace(/\s/g,'')] = form;
+          this.formByName[form.formId] = form;
         }
         for(const tableData of data.Tables){
           const table = new Table(tableData);
           this.tables.push(table);
-          this.tableByName[table.title.replace(/\s/g,'')] = table;
+          this.tableByName[table.tableId] = table;
         }
       }
     },

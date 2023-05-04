@@ -14,7 +14,13 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input"]
     getPropertiesAsObject: function () {
       const props = {};
       for (const prop of this.properties) {
-        props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : prop.getValue();
+        if(prop.getName() === "enabled"){
+          props[prop.getName()] = prop.getIsBinding() ? '{= ${'+prop.getValue()+'} &amp,&amp; ${ui>/editable}}' : prop.getValue();
+        }else{
+          props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : prop.getValue();
+        }
+        
+
       }
       return props;
     },

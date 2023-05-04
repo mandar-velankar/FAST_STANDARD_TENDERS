@@ -7,6 +7,7 @@ sap.ui.define(["../BaseObject", "./FormContainer", "./Layout"], function (BaseOb
         this.id = data.ID;
         this.title = data.Title;
         this.description = data.Description;
+        this.formId = data.FormID;
         this.layout = new Layout(data.Layout);
         for (const formContainer of data.FormContainers) {
           this.formContainers.push(new FormContainer(formContainer));

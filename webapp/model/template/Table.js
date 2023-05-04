@@ -6,6 +6,7 @@ sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
+        this.tableId = data.TableID;
         for (const col of data.Columns) {
           this.columns.push(new Column(col));
         }
