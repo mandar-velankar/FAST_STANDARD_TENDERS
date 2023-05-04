@@ -74,7 +74,7 @@ sap.ui.define([
 			}); 
 
 			xmlView && XMLView.create({
-				viewName: `com.bayer.tender.statenderapp.view.tender.views.${xmlView.getName()}`,
+				viewName: `com.bayer.tender.statenderapp.view.${tab.title.toLowerCase()}.views.${xmlView.getName()}`,
 				viewId: `id${xmlView.getName()}`,
 				type: sap.ui.core.mvc.ViewType.XML
 			}).then(view => {

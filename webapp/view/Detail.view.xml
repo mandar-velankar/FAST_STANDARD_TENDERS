@@ -84,44 +84,7 @@
 		</f:header>
 		<f:content>	
 			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{path: 'template>/detailConfig/countryTemplate/template/tabs', factory: '.tabsFactory'}">
-				<!-- <items>
-					<IconTabFilter text="{template>title}"  content="{path:'template>forms'}" >
-						<form:Form
-							editable="true"
-							formContainers="{path:'template>formContainers'}">
-							<form:title>
-								<core:Title text="{template>title}" />
-							</form:title>
-							<form:layout>
-								<form:ResponsiveGridLayout
-									labelSpanXL="{template>layout/labelSpanXL}"
-									labelSpanL="{template>layout/labelSpanL}"
-									labelSpanM="{template>layout/labelSpanM}"
-									labelSpanS="{template>layout/labelSpanS}"
-									adjustLabelSpan="{template>layout/adjustLabelSpan}"
-									emptySpanXL="{template>layout/emptySpanXL}"
-									emptySpanL="{template>layout/emptySpanL}"
-									emptySpanM="{template>layout/emptySpanM}"
-									emptySpanS="{template>layout/emptySpanS}"
-									columnsXL="{template>layout/columnsXL}"
-									columnsL="{template>layout/columnsL}"
-									columnsM="{template>layout/columnsM}"
-									singleContainerFullSize="{template>layout/singleContainerFullSize}" />
-							</form:layout>
-							<form:formContainers>
-								<form:FormContainer title="{template>title}" formElements="{path:'template>formElements'}">
-									<form:formElements>
-										<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory'}">
-											<form:fields>
-												<Input value="{template>control/type}"/>
-											</form:fields>
-										</form:FormElement>
-									</form:formElements>
-								</form:FormContainer>
-							</form:formContainers>
-						</form:Form>
-					</IconTabFilter>
-				</items> -->
+					<!-- iconTabfilters are generated in tabsFactory implementation in the controller -->
 			</IconTabBar>
 			<!-- <IconTabBar
 				id="detailTabBar"
