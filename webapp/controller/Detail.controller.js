@@ -79,12 +79,14 @@ sap.ui.define([
 				type: sap.ui.core.mvc.ViewType.XML
 			}).then(view => {
 				view.setBindingContext(context,"template");
-				view.getController().onBeforeShow && view.getController().onBeforeShow();
+				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId);
 				iconTabfilter.insertContent(view);
 			});
 			return iconTabfilter;
 
 		},
+
+		
 		/* =========================================================== */
 		/* begin: internal methods                                     */
 		/* =========================================================== */
@@ -96,7 +98,7 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: async function (oEvent) {
-			var sObjectId = oEvent.getParameter("arguments").objectId;
+			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 
@@ -108,25 +110,26 @@ sap.ui.define([
 				appID: "StandardTenders",
 				page: "DETAIL",
 				keys: {
-					TenderID: sObjectId,
+					TenderID: this.sObjectId,
 				}
 			});
 
-			await this.getModel().metadataLoaded();
-			let path = "";
-			if (sObjectId) {
-				path = this.getModel().createKey(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {
-					TenderID: sObjectId,
-				});
-			} else {
-				const newEntryContext = this.getModel().createEntry(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {});
-				path = newEntryContext.getPath();
-			}
-			this.getView().bindElement({
-				path: path,
-				//`/${this.GenericFormStateData.countryTemplate.getTemplate().getEntity()}`,
-				// model: 'data'
-			});
+			// await this.getModel().metadataLoaded();
+			// let path = "";
+			// if (sObjectId) {
+			// 	path = this.getModel().createKey(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(selectedTab)}`, {
+			// 		TenderID: sObjectId,
+			// 	});
+			// } else {
+			// 	const newEntryContext = this.getModel().createEntry(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {});
+			// 	path = newEntryContext.getPath();
+			// }
+			
+			// this.getView().bindElement({
+			// 	path: path,
+			// 	//`/${this.GenericFormStateData.countryTemplate.getTemplate().getEntity()}`,
+			// 	// model: 'data'
+			// });
 
 			// this.getModel().metadataLoaded().then( function() {
 			// 	var sObjectPath = this.getModel().createKey("PT_TMTEND", {

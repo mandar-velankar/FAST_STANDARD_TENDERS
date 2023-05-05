@@ -11,6 +11,7 @@
 	
 	<VBox>
 		<form:Form
+			id="idTenderForm"
 			editable="true"
 			formContainers="{path:'template>xmlView/formByName/TenderForm/formContainers',templateShareable:true}">
 			<form:title>
