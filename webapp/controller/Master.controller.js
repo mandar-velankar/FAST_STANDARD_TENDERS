@@ -309,7 +309,7 @@ sap.ui.define([
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const table = this.byId("genericMasterTable");
 			table && table.bindItems({
-			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getEntity()}`,
+			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
 			//   model: '',
 			  template: new ColumnListItem({
 				type: "Active",

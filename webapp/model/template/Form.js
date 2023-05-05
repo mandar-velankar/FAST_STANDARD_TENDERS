@@ -8,17 +8,23 @@ sap.ui.define(["../BaseObject", "./FormContainer", "./Layout"], function (BaseOb
         this.title = data.Title;
         this.description = data.Description;
         this.formId = data.FormID;
+        this.entity = data.Entity;
         this.layout = new Layout(data.Layout);
         for (const formContainer of data.FormContainers) {
           this.formContainers.push(new FormContainer(formContainer));
         }
       }
     },
+
+    getEntity: function () {
+      return this.entity;
+    },
     getJSON: function () {
       return {
         ID: this.id,
         Title: this.title,
         Description: this.description,
+        Entity: this.entity,
         FormContainers: this.formContainers.map(formContainer => formContainer.getJSON()),
         Layout: this.layout.getJSON()
       };

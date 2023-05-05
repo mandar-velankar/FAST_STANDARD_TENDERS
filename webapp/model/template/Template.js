@@ -7,7 +7,6 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "
         this.id = data.ID;
         this.title = data.Title;
         this.service = data.Service;
-        this.entity = data.Entity;
         this.type = data.Type;
         data.Table && (this.table = new Table(data.Table));
         if (data.Tabs) {
@@ -26,15 +25,12 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "
     getTable: function () {
       return this.table;
     },
-    getEntity: function () {
-      return this.entity;
-    },
+   
     getJSON: function () {
       return {
         ID: this.id,
         Title: this.title,
         Service: this.service,
-        Entity: this.entity,
         Type: this.type,
         Table: this.table.getJSON(),
         Tabs: this.tabs.map(tab => tab.getJSON())

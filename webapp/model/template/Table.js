@@ -7,6 +7,7 @@ sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
         this.id = data.ID;
         this.title = data.Title;
         this.tableId = data.TableID;
+        this.entity = data.Entity;
         for (const col of data.Columns) {
           this.columns.push(new Column(col));
         }
@@ -15,10 +16,14 @@ sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
     getColumns: function () {
       return this.columns;
     },
+    getEntity: function () {
+      return this.entity;
+    },
     getJSON: function () {
       return {
         ID: this.id,
         Title: this.title,
+        Entity: this.entity,
         Columns: this.columns.map(col => col.getJSON())
       };
     }
