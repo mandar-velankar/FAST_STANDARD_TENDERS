@@ -51,6 +51,14 @@
 			class="sapFDynamicPageAlignContent"
 			width="auto"
 		>
+			<headerToolbar>
+				<OverflowToolbar>
+					<content>
+						<Title text="{path:'template>xmlView/tableByName/AwardCriteriaTable/title'}" level="H2"/>
+						<ToolbarSpacer />
+					</content>
+				</OverflowToolbar>
+			</headerToolbar>
 			<columns>
 				<Column>
 					<Text text="{template>title}" />
