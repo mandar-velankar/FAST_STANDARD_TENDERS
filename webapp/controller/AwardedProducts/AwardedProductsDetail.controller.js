@@ -106,6 +106,18 @@ sap.ui.define([
 					objectId: this.sObjectId
 				});
 			}.bind(this));
+		},
+		handleFullScreen: function () {
+			let bFullScreen = this.getModel("appView").getProperty("/actionButtonsInfo/midColumn/fullScreen");
+			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", !bFullScreen);
+			if (!bFullScreen) {
+				// store current layout and go full screen
+				this.getModel("appView").setProperty("/previousLayout", this.getModel("appView").getProperty("/layout"));
+				this.getModel("appView").setProperty("/layout", "EndColumnFullScreen");
+			} else {
+				// reset to previous layout
+				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
+			}
 		}
     });
 });
