@@ -26,6 +26,11 @@ sap.ui.define(["../BaseObject", "./Form", "./Table"], function (BaseObject, Form
     getName: function(){
       return this.viewName;
     },
+
+    getFormByName(formName){
+      return this.formByName[formName];
+    },
+
     getJSON: function () {
       return {
         ID: this.id,
