@@ -47,15 +47,15 @@
 		</form:Form>
 	</VBox>
 	<VBox class='sapUiMediumMargin'>
-		<Table id="awardCriteriaId" 
-			columns="{path:'template>xmlView/tableByName/AwardCriteriaTable/columns'}"
+		<Table id="idAwardCriteria" 
+			columns="{path:'template>xmlView/tableByName/AwardCriteria/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
 		>
 			<headerToolbar>
 				<OverflowToolbar>
 					<content>
-						<Title text="{path:'template>xmlView/tableByName/AwardCriteriaTable/title'}" level="H2"/>
+						<Title text="{path:'template>xmlView/tableByName/AwardCriteria/title'}" level="H2"/>
 						<ToolbarSpacer />
 					</content>
 				</OverflowToolbar>
@@ -66,6 +66,13 @@
 				</Column>
 			</columns>
 		</Table>
+	</VBox>	
+	<VBox class='sapUiMediumMargin'>
+		<Text text="{
+			path: 'Weight',
+			type: 'sap.ui.model.type.Float',
+			formatter:'.formatter.formatPercentage'
+		}"/>
 	</VBox>	
 	
 

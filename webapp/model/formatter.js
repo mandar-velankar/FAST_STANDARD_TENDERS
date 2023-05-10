@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+	'sap/ui/core/format/NumberFormat'
+], function (NumberFormat) {
 	"use strict";
 
 	return {
@@ -15,6 +17,12 @@ sap.ui.define([], function () {
 			}
 
 			return parseFloat(sValue).toFixed(2);
+		},
+
+		formatPercentage: function(value){
+			if(!value) return;
+			var oPercentFormat = NumberFormat.getPercentInstance();
+			return oPercentFormat.format(value);
 		}
 	};
 });
