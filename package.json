@@ -17,18 +17,26 @@
 		"deploy-config": "fiori add deploy-config",
 		"unit-tests": "fiori run --open test/unit/unitTests.qunit.html",
 		"int-tests": "fiori run --open test/integration/opaTests.qunit.html",
-		"start-mock": "fiori run --open 'test/flpSandboxMockServer.html'"
+		"start-mock": "fiori run --open 'test/flpSandboxMockServer.html'",
+		"build:cf": "ui5 build preload --clean-dest --config ui5-deploy.yaml --include-task=generateCachebusterInfo",
+        "build:mta": "rimraf resources mta_archives && mbt build"
 	},
 	"devDependencies": {
 		"@ui5/cli": "^2.10.1",
 		"@ui5/fs": "^2.0.6",
 		"@ui5/logger": "^2.0.1",
 		"@sap/ux-ui5-tooling": "1",
-		"rimraf": "3.0.2"
+		"rimraf": "3.0.2",
+        "mbt": "^1.2.18",
+        "ui5-task-zipper": "^0.5.0",
+        "ui5-tooling-transpile": "^0.3.6"
 	},
 	"ui5": {
 		"dependencies": [
-			"@sap/ux-ui5-tooling"
+            "@sap/ux-ui5-tooling",
+            "ui5-task-zipper",
+            "ui5-tooling-transpile",
+            "mbt"
 		]
 	}
 }
