@@ -45,8 +45,7 @@
 					<Button id="deleteTenderButtonId" icon="sap-icon://delete" text="Delete" type="Reject" press="onDeleteTenderPress" enabled="true" />
 					<Button id="folderButtonId" icon="sap-icon://browse-folder" text="Documents" type="Emphasized" press="._onFolderButtonPress" visible="{= ${fastData>FoldersCreated} === 1}"/>
 					<Button id="refreshButtonId" icon="sap-icon://refresh" type="Emphasized" press="onRefresh" enabled="true"/>
-					<!--<m:Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>-->
-					<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>
+					<!--<Button id="editButtonId" text="Edit" type="Emphasized" press=".onEditButtonPress" enabled="true"/>-->
 				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
@@ -57,7 +56,7 @@
 					<!-- INSTITUTE INFO -->
 					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
 						<Label text="{i18n>Institute}"/>
-						<Text id="idhdrInstNme" text="Dubai Health Authority (DHA)"/>
+						<Text id="idhdrInstNme" text="{InstituteName}"/>
 						<Text id="idhdrInstID" text="{InstituteID}" visible="false"/>
 					</VBox>
 					
@@ -71,14 +70,7 @@
 					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
 						<Label text="{i18n>OfferID}"/>
 						<Text  text="{OfferID}"/>
-					</VBox>
-
-					<!-- SELECTED PRODUCT INFO -->
-					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-						<Label text="{i18n>productnme}"/>
-						<Text text="No product selected"/>
-					</VBox>	
-				
+					</VBox>				
 				</FlexBox>
 			</f:DynamicPageHeader>
 		</f:header>
