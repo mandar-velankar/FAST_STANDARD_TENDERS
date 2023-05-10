@@ -25,14 +25,14 @@
 						icon="sap-icon://full-screen"
 						press=".handleFullScreen"
 						tooltip="Enter Full Screen Mode"
-						visible="{= !${detailDetailView>/actionButtonsInfo/fullScreen}}"
+						visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
 					/>
 					<m:OverflowToolbarButton
 						type="Transparent"
 						icon="sap-icon://exit-full-screen"
-						press=".handleExitFullScreen"
+						press=".handleFullScreen"
 						tooltip="Exit Full Screen Mode"
-						visible="{= ${detailDetailView>/actionButtonsInfo/fullScreen}}"
+						visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
 					/>
 					<m:OverflowToolbarButton
 						type="Transparent"

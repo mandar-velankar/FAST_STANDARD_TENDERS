@@ -8,245 +8,65 @@
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:tnt="sap.tnt">
 
-<VBox>
-		<form:SimpleForm editable="true" title="" layout="ResponsiveGridLayout" labelSpanXL="5" labelSpanL="5" labelSpanM="12" labelSpanS="12"
-			adjustLabelSpan="false" emptySpanXL="1" emptySpanL="1" emptySpanM="1" emptySpanS="1" columnsXL="2" columnsL="2" columnsM="2"
-			singleContainerFullSize="false" backgroundDesign="Solid">
-			<form:content>
-				
-				<!-- Block Institute & Type -->
-				<core:Title text="Institute &amp; Type"/>
-				<Label text="{i18n>tenderref}" design="Bold"  required="true"/>
-				<Input value="{TenderName}" enabled="false"/>
-				<Label text="{i18n>clasficn}" design="Bold" required="true"/>
-				<Input id="idClassificationDisplay" value="{Classification}" enabled="false" />
-
-				<!-- Argentina only -->
-				<!-- <Label text="{i18n>BiddingTypeLevel1}" design="Bold" required="true" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR'  &amp;&amp; 
-						(${fastData>BiddingTypeLevel1} ? true : false)
-					}"
-				/>-->
-				<!-- <Input id="idBiddingTypeLevel1Display" value="{fastData>BiddingTypeLevel1}" enabled="false" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR'  &amp;&amp; 
-						${fastData>BiddingTypeLevel1}.length > 0
-					}"
-				/>
-				<Label text="{i18n>BiddingTypeLevel2}" design="Bold" required="true" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR'  &amp;&amp; 
-						(${fastData>BiddingTypeLevel2} ? true : false)
-					}"
-				/>
-				<Input id="idBiddingTypeLevel2Display" value="{fastData>BiddingTypeLevel2}" enabled="false" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR'  &amp;&amp;
-						(${fastData>BiddingTypeLevel2} ? true : false)
-					}"
-				/>
-				<Label text="{i18n>BiddingTypeLevel3}" design="Bold" required="true" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR'  &amp;&amp;
-						(${fastData>BiddingTypeLevel3} ? true : false)
-					}"
-				/>
-				<Input id="idBiddingTypeLevel3Display" value="{fastData>BiddingTypeLevel3}" enabled="false" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR'  &amp;&amp;
-						(${fastData>BiddingTypeLevel3} ? true : false)
-					}"
-				/>
-				<Label text="{i18n>Specifications}" design="Bold" required="true" visible="{= ${fastAppData>/Tender/CountryCode} === 'AR'}"/>
-				<MultiComboBox
-					id="idSpecificationsDisplay"
-					visible="{= ${fastAppData>/Tender/CountryCode} === 'AR'}"
-					enabled="false"
-					items="{
-						path: 'fastData>/Specifications',
-						sorter: { path: 'Name' }
-					}">
-					<core:Item text="{fastData>Name}" key="{fastData>Name}"/>
-				</MultiComboBox>-->
-				<!-- /Argentina only -->
-				<Label text="{i18n>insttyp}" design="Bold" required="true"/>
-				<Select id="idInstituteType" selectedKey="{fastData>Institute/InstituteType}" change="resetInstituteName" enabled="false" items="{ path: 'fastAppData>/CountryChannels'}">
-					<items>
-						<core:Item text="{fastAppData>ChannelName}" key="{fastAppData>ChannelName}"/>
-					</items>
-				</Select>
-				<Label text="{i18n>institnme}" design="Bold"  required="true"/>
-				<Input value="{fastData>Institute/InstituteName}" enabled="false"/>
-				<!-- Italy onlye -->
-				<!-- <Label text="{i18n>region}" design="Bold" required="true"/>
-				<MultiComboBox id="idRegionView" 
-					selectionChange="handleRegionSelectionChange"
-					selectionFinish="handleRegionSelectionFinish"
-					enabled="false"
-					items="{ 
-						path: 'fastData>/CountryRegions',
-						sorter: { path: 'Name' }
-					}" 
-					visible="{= (${fastData>Institute/InstituteType} === 'Region(s)' || ${fastData>/newTender/instituteType}  === 'Region(s)') &amp;&amp; ${fastAppData>/Tender/CountryCode} === 'IT' }">
-					<core:Item text="{fastData>Name}" key="{fastData>ID}"/>
-				</MultiComboBox>-->
-				<!-- /Italy onlye -->
-				<Label text="{i18n>typechnl}" design="Bold" required="true"/>
-				<Input value="{TenderChannel}" enabled="false" visible="true"/>
-				<Label text="{i18n>grpurchsng}" design="Bold" required="true"/>
-				<!-- <Select id="idGroupPurchasing" selectedKey="{fastData>GroupPurchasing}" enabled="false">
-					<items>
-						<core:Item text="No" key="0" />
-						<core:Item text="Yes, Delivery Tracking Only" key="1"/>
-						<core:Item text="Yes, Requested Quantity - Delivery Tracking" key="2"/>
-					</items>
-				</Select>
-				<Label id="idLabelTenderType" text="{i18n>tendertype}" design="Bold" required="true" visible="true"/>
-				<Select id="idSelectTenderType" 
-				selectedKey="{fastData>TENDER_TYPE_ID}" 
-				enabled="false" 
-				items="{ path: 'fastData>/TenderType', sorter: { path: 'ID' } }">
-					<core:Item text="{fastData>NAME}" key="{fastData>ID}"/>
-				</Select>-->
-				<!-- Italy only -->
-				<!--<Label text="{i18n>CWID}" design="Bold" />
-				<Input value="{fastData>createdBy}" enabled="false" visible="{= ${fastAppData>/Tender/CountryCode} === 'IT'}"/>-->
-				<!-- Argentina only -->
-				<!-- <Label text="{i18n>HighValue}" design="Bold" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR' &amp;&amp; ${fastData>TenderChannel} === 'Direct' &amp;&amp; ${fastData>BiddingTypeLevel3} === 'Nacional'
-					}"
-				/>
-				<CheckBox 
-					enabled="false"
-					selected="{fastData>HighValue}" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'AR' &amp;&amp; ${fastData>TenderChannel} === 'Direct' &amp;&amp; ${fastData>BiddingTypeLevel3} === 'Nacional'
-					}"
-				/> -->
-				<!-- / Argentina only -->
-				
-				<!-- Mexico changes-->
-				<!--<Label id="idLabelSalesType" text="{i18n>salestype}" design="Bold" required="true" visible="true"/>
-				<Select id="idSelectSalesType" 
-					selectedKey="{fastData>SALES_TYPE_ID}" 
-					enabled="false" 
-					items="{ path: 'fastData>/SalesType', sorter: { path: 'ID' } }">
-						<core:Item text="{fastData>NAME}" key="{fastData>ID}"/>
-				</Select>-->
-				
-				<!-- Mexico: Tender Origin-->
-				<!--<Label id="idLabelTenderOrigin" text="{i18n>tenderOrigin}" design="Bold" required="true" visible="true"/>
-				<Select id="idSelectTenderOrigin" 
-					selectedKey="{fastData>TENDER_ORIGIN_ID}" 
-					enabled="false" 
-					items="{ path: 'fastData>/TenderOrigin', sorter: { path: 'ID' } }">
-						<core:Item text="{fastData>NAME}" key="{fastData>ID}"/>
-				</Select>-->
-				
-				<!-- Mexico: Contract Type-->
-				<!-- <Label id="idLabelContracType" text="{i18n>contracttype}" design="Bold" required="true" visible="true"/>
-				<Select id="idSelectContractType" 
-					selectedKey="{fastData>CONTRACT_TYPE_ID}" 
-					enabled="false" 
-					items="{ path: 'fastData>/ContractType', sorter: { path: 'ID' } }">
-						<core:Item text="{fastData>NAME}" key="{fastData>ID}"/>
-				</Select>-->
-				<!-- End of Mexico Changes-->
-
-				<!-- Thailand: Procurement Method-->
-				<!-- <Label id="idLabelProcurementMethod" text="{i18n>procurementmethod}" design="Bold" required="true" visible="true"/>
-				<Select id="idSelectProcurementMethod" 
-					selectedKey="{fastData>PROCUREMENT_METHOD_ID}" 
-					enabled="false" 
-					items="{ path: 'fastData>/CountryProcurementMethod', sorter: { path: 'PROCUREMENT_METHOD_ID' } }">
-						<core:Item text="{fastData>PROCUREMENT_METHOD_ID}" key="{fastData>PROCUREMENT_METHOD_ID}"/>
-				</Select>
-
-				<Label id="idLabelProcurementReason" text="{i18n>procurementmethodreason}" design="Bold" required="true" visible="true"/>
-				<Input id="idProcurementReason" value="{fastData>PROCUREMENT_REASON}" enabled="false" visible="{= ${fastData>PROCUREMENT_METHOD_ID} === 'Other' ? true : false}"/>-->
-				<!-- End of Thailand Changes-->
-
-				<!-- Brazil only -->
-				<!-- <Label text="{i18n>IBIZId}" design="Bold" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'BR'
-					}"
-				/>
-				<Input id="idIbizID"
-					value="{fastData>IbizID}" 
-					enabled="false"
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'BR'
-					}"
-				/>
-				<Label text="{i18n>PublicNotice}" design="Bold" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'BR'
-					}"
-				/>
-				<TextArea id="idPublicNotice" rows="8" 
-					enabled="false"
-					value="{fastData>PublicNotice}"
-					showExceededText="true" 
-					maxLength="500"
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'BR'
-					}"
-				/>-->
-				<!-- End Brazil only -->
-				
-				<!-- Block Timeline -->
-				<core:Title text="Timeline"/>
-				<Label text="{i18n>pubcndte}" design="Bold" required="true"/>
-				<Input id="input6" value="{path :'PublicationDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
-				<Label text="{i18n>offrdudte}" design="Bold" required="true"/>
-				<Input id="input7" value="{path :'BidDueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
-				<Label text="{i18n>expctawdte}" design="Bold"/>
-				<Input id="input8" value="{path :'AwardDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
-				<Label text="{i18n>nwpubdate}" design="Bold"/>
-				<Input id="input9" value="{path :'NextPublicationDye', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" enabled="false"/>
-
-				<!-- Brazil only -->
-				<!--<Label text="{i18n>OfferStartDate}" design="Bold"/>
-				<DatePicker id="idOfferStartDate" 
-					enabled="false"
-					value="{path :'fastData>OfferStartDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd.MM.yyyy' , UTC:true}}" 
-					visible="{= 
-						${fastAppData>/Tender/CountryCode} === 'BR'
-					}"
-				/>-->
-				<!-- End Brazil only -->
-
-				<Label text="{i18n>contleng}" design="Bold"/>
-				<Input id="input10" value="{ContractLength}" enabled="false"/>
-				<Label text="{i18n>contextnprd}" design="Bold"/>
-				<Input id="input11" value="{ContractExtenseion}" enabled="false"/>
-				
-				<!-- TABLE with the award critiria -->
-				<core:Title text="{i18n>tilawrcrit}"/>
-				<Table id="awardCriteriaId" items="{tabModel>/Data}" inset="false"
-                    class="sapFDynamicPageAlignContent" width="auto">
-                    <columns>
-                        <Column>
-                            <Label text="{i18n>critr}" wrapping="true"/>
-                        </Column>
-                        <Column>
-                            <Label text="{i18n>weigh}" wrapping="true"/>
-                        </Column>
-                    </columns>
-                    <items>
-                        <ColumnListItem type="Active">
-                            <cells>
-                            <Text text="{tabModel>AwardCriteria}" />
-                            <Text text="{path :'tabModel>Weight',formatter:'FAST_NS0FAST0.utils.Formatter.percentage'}"/>
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-				</Table>
-			</form:content>
-		</form:SimpleForm>
+	
+	<VBox>
+		<form:Form
+			id="idTenderForm"
+			editable="true"
+			formContainers="{path:'template>xmlView/formByName/TenderForm/formContainers',templateShareable:true}">
+			<form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="{template>layout/labelSpanXL}"
+					labelSpanL="{template>layout/labelSpanL}"
+					labelSpanM="{template>layout/labelSpanM}"
+					labelSpanS="{template>layout/labelSpanS}"
+					adjustLabelSpan="{template>layout/adjustLabelSpan}"
+					emptySpanXL="{template>layout/emptySpanXL}"
+					emptySpanL="{template>layout/emptySpanL}"
+					emptySpanM="{template>layout/emptySpanM}"
+					emptySpanS="{template>layout/emptySpanS}"
+					columnsXL="{template>layout/columnsXL}"
+					columnsL="{template>layout/columnsL}"
+					columnsM="{template>layout/columnsM}"
+					singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
 	</VBox>
+	<VBox class='sapUiMediumMargin'>
+		<Table id="awardCriteriaId" 
+			columns="{path:'template>xmlView/tableByName/AwardCriteriaTable/columns'}"
+			class="sapFDynamicPageAlignContent"
+			width="auto"
+		>
+			<headerToolbar>
+				<OverflowToolbar>
+					<content>
+						<Title text="{path:'template>xmlView/tableByName/AwardCriteriaTable/title'}" level="H2"/>
+						<ToolbarSpacer />
+					</content>
+				</OverflowToolbar>
+			</headerToolbar>
+			<columns>
+				<Column>
+					<Text text="{template>title}" />
+				</Column>
+			</columns>
+		</Table>
+	</VBox>	
+	
 
 </mvc:View>

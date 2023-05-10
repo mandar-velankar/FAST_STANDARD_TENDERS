@@ -1,0 +1,46 @@
+sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "./Tab"], function (ODataModel, BaseObject, Table, Tab) {
+  const Template = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Template", {
+    constructor: function (data) {
+      BaseObject.prototype.constructor.call(this);
+      this.tabs = [];
+      if (data) {
+        this.id = data.ID;
+        this.title = data.Title;
+        this.service = data.Service;
+        this.type = data.Type;
+        data.Table && (this.table = new Table(data.Table));
+        if (data.Tabs) {
+          for (const tab of data.Tabs) {
+            this.tabs.push(new Tab(tab));
+          }
+        }
+      }
+    },
+    getId: function () {
+      return this.id;
+    },
+    getODataModel: function () {
+      return new ODataModel(`/v2/${this.service}`);
+    },
+    getTable: function () {
+      return this.table;
+    },
+    
+    getTab: function (tabName) {
+      if(!tabName) tabName = this.tabs[0].title;
+      return this.tabs.find(t=>t.title === tabName);
+    },
+   
+    getJSON: function () {
+      return {
+        ID: this.id,
+        Title: this.title,
+        Service: this.service,
+        Type: this.type,
+        Table: this.table.getJSON(),
+        Tabs: this.tabs.map(tab => tab.getJSON())
+      };
+    }
+  });
+  return Template;
+});

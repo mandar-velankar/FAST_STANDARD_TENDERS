@@ -1,0 +1,26 @@
+sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElement) {
+  const FormContainer = BaseObject.extend("com.bayer.tender.statenderapp.model.template.FormContainer", {
+    constructor: function (data) {
+      BaseObject.prototype.constructor.call(this);
+      this.formElements = [];
+      if (data) {
+        this.id = data.ID;
+        this.title = data.Title;
+        for (const formElement of data.FormElements) {
+          this.formElements.push(new FormElement(formElement));
+        }
+        // for(const control of data.Controls){
+        //     this.controls.push(new Control(control));
+        // }
+      }
+    },
+    getJSON: function () {
+      return {
+        ID: this.id,
+        Title: this.title,
+        FormElements: this.formElements.map(formElement => formElement.getJSON())
+      };
+    }
+  });
+  return FormContainer;
+});
