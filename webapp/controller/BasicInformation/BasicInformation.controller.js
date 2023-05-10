@@ -2,8 +2,9 @@ sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/m/library",
+	"sap/m/ColumnListItem"
+], function (BaseController, JSONModel, formatter, mobileLibrary, ColumnListItem) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -24,10 +25,11 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 
 			this._bindForm("TenderForm");
+			this._bindTable("AwardCriteria");
 		},
 
 		/**
-		 * This method bind a given form to its entity from the ui configuration template.
+		 * This method binds a given form to its entity from the ui configuration template.
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
@@ -44,8 +46,33 @@ sap.ui.define([
 				path = newEntryContext.getPath();
 			}
 			
-			form.bindElement({
+			form?.bindElement({
 				path: path,
+			});
+		},
+
+		/**
+		 * This method binds a given table to its entity from the ui configuration template.
+		 * FYI: the table ID in the View is a concatination of "id" + tableName
+		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
+		 */
+		_bindTable(tableName){
+			const tableConfig =  this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getTableByName(tableName);
+			const entity = tableConfig.getEntity();
+			const table = this.byId(`id${tableName}`);
+			const cols = tableConfig.getColumns();
+			
+			table?.bindItems({
+				path: `/${entity}`,
+			  	filters: [
+					new sap.ui.model.Filter("TenderID", "EQ", this.objectId)
+				],
+				//   model: '',
+			  	template: new ColumnListItem({
+					type: "Inactive",
+					cells: cols.map(col => col.getControl().generateControl())
+			  	}),
+			  	templateShareable: true
 			});
 		}
 	});
