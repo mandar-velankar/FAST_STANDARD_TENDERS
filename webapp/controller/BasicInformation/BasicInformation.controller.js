@@ -3,14 +3,17 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"../../model/formatter",
 	"sap/m/library",
-	"sap/m/ColumnListItem"
-], function (BaseController, JSONModel, formatter, mobileLibrary, ColumnListItem) {
+	"sap/m/ColumnListItem",
+	"sap/ui/model/Filter"
+], function (BaseController, JSONModel, formatter, mobileLibrary, ColumnListItem, Filter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
+
+		formatter: formatter,
 
 		onInit: function () {
 		},
@@ -26,6 +29,8 @@ sap.ui.define([
 
 			this._bindForm("TenderForm");
 			this._bindTable("AwardCriteria");
+
+			// this.getView().setModel(new JSONModel({data: 0.0}), "test");
 		},
 
 		/**
@@ -65,7 +70,7 @@ sap.ui.define([
 			table?.bindItems({
 				path: `/${entity}`,
 			  	filters: [
-					new sap.ui.model.Filter("TenderID", "EQ", this.objectId)
+					new Filter("TenderID", "EQ", this.objectId)
 				],
 				//   model: '',
 			  	template: new ColumnListItem({
