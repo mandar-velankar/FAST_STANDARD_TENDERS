@@ -1,0 +1,67 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	<!--<f:DynamicPage id="idAwardedProducts" toggleHeaderOnTitleClick="false">
+		<f:content>-->
+			<Table id="OfferProductsTable" 
+				mode="SingleSelectMaster"
+				delete="onDeleteOfferProduct"
+				selectionChange=".onOfferProductPress">
+				<columns>
+					<Column >
+						<Label text="Product" wrapping="true"/>
+					</Column>
+					<Column >
+						<Label text="Requested Volume" wrapping="true"/>
+					</Column>
+                    <Column >
+						<Label text="UoM" wrapping="true"/>
+					</Column>
+                    <Column >
+						<Label text="Net Price" wrapping="true"/>
+					</Column>
+                    <Column >
+						<Label text="Total Amount" wrapping="true"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem press="onOfferProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,0MG 42TAB"/>
+                            <Text text="100"/>	
+                            <Text text="Units"/>	
+                            <Text text="10"/>			
+							<Text text="1000 EUR"/>				
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem press="onOfferProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,0MG 42TAB"/>
+                            <Text text="100"/>	
+                            <Text text="Units"/>	
+                            <Text text="10"/>			
+							<Text text="1000 EUR"/>					
+						</cells>
+					</ColumnListItem>
+					<ColumnListItem press="onOfferProductPress" detailPress="onAwardedProductPress">
+						<cells>
+							<Text text="ADEMPAS 2,0MG 42TAB"/>
+                            <Text text="100"/>	
+                            <Text text="Units"/>	
+                            <Text text="10"/>			
+							<Text text="1000 EUR"/>				
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+			
+		<!--</f:content>
+	</f:DynamicPage>-->
+</mvc:View>
