@@ -17,6 +17,33 @@
 			<form:title>
 				<core:Title text="{template>title}" />
 			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="{template>title}"/>
+					<ToolbarSpacer/>
+					<Button
+						id="idTenderFormEditBtn"
+						icon="sap-icon://edit"
+						text="Edit"
+						press=".onTenderFormEditBtnPress"
+						visible="{= !${ui>/editMode} }"
+					/>
+					<Button
+						id="idTenderFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onTenderFormSaveBtnPress"
+						visible="{= ${ui>/editMode} }"
+					/>
+					<Button
+						id="idTenderFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onTenderFormCancelBtnPress"
+						visible="{= ${ui>/editMode} }"
+					/>
+				</Toolbar>
+			</form:toolbar>
 			<form:layout>
 				<form:ResponsiveGridLayout
 					labelSpanXL="{template>layout/labelSpanXL}"
@@ -47,15 +74,15 @@
 		</form:Form>
 	</VBox>
 	<VBox class='sapUiMediumMargin'>
-		<Table id="awardCriteriaId" 
-			columns="{path:'template>xmlView/tableByName/AwardCriteriaTable/columns'}"
+		<Table id="idAwardCriteria" 
+			columns="{path:'template>xmlView/tableByName/AwardCriteria/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
 		>
 			<headerToolbar>
 				<OverflowToolbar>
 					<content>
-						<Title text="{path:'template>xmlView/tableByName/AwardCriteriaTable/title'}" level="H2"/>
+						<Title text="{path:'template>xmlView/tableByName/AwardCriteria/title'}" level="H2"/>
 						<ToolbarSpacer />
 					</content>
 				</OverflowToolbar>
@@ -66,6 +93,12 @@
 				</Column>
 			</columns>
 		</Table>
+	</VBox>	
+	<VBox class='sapUiMediumMargin'>
+		<Input value="{
+			path: 'test>/data',
+			type: '.customTypes.percentage'
+		}"/>
 	</VBox>	
 	
 

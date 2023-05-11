@@ -1,9 +1,10 @@
 sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
-	"../../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/m/library",
+	"sap/m/ColumnListItem",
+	"sap/ui/model/Filter",
+], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -23,11 +24,24 @@ sap.ui.define([
 			this.objectId = sObjectId;
 			this.selectedTab = iconTabfilter.getKey();
 
+			if(this.selectedTab !== "Tender") return;
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+			});
+	
+			this.setModel(oModel, "ui");
+
 			this._bindForm("TenderForm");
+			this._bindTable("AwardCriteria");
+
+			this.getView().setModel(new JSONModel({data: "0.34"}), "test");
 		},
 
 		/**
-		 * This method bind a given form to its entity from the ui configuration template.
+		 * This method binds a given form to its entity from the ui configuration template.
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
@@ -44,9 +58,45 @@ sap.ui.define([
 				path = newEntryContext.getPath();
 			}
 			
-			form.bindElement({
+			form?.bindElement({
 				path: path,
 			});
+		},
+
+		/**
+		 * This method binds a given table to its entity from the ui configuration template.
+		 * FYI: the table ID in the View is a concatination of "id" + tableName
+		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
+		 */
+		_bindTable(tableName){
+			const tableConfig =  this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getTableByName(tableName);
+			const entity = tableConfig.getEntity();
+			const table = this.byId(`id${tableName}`);
+			const cols = tableConfig.getColumns();
+			
+			table?.bindItems({
+				path: `/${entity}`,
+			  	filters: [
+					new Filter("TenderID", "EQ", this.objectId)
+				],
+				//   model: '',
+			  	template: new ColumnListItem({
+					type: "Inactive",
+					cells: cols.map(col => col.getControl().generateControl())
+			  	}),
+			  	templateShareable: true
+			});
+		},
+
+		onTenderFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', true);
+		},
+		onTenderFormSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+		},
+		onTenderFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
 		}
+
 	});
 });

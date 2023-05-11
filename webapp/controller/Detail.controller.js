@@ -99,6 +99,7 @@ sap.ui.define([
 		 */
 		_onObjectMatched: async function (oEvent) {
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
+			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 
@@ -131,12 +132,13 @@ sap.ui.define([
 			// 	// model: 'data'
 			// });
 
-			// this.getModel().metadataLoaded().then( function() {
-			// 	var sObjectPath = this.getModel().createKey("PT_TMTEND", {
-			// 		TenderID :  sObjectId,
-			// 	});
-			// 	this._bindView("/" + sObjectPath);
-			// }.bind(this));
+			this.getModel().metadataLoaded().then( function() {
+			 	var sObjectPath = this.getModel().createKey("TenderMasterView", {
+			 		TenderID :  this.sObjectId,
+					OfferID : this.sOfferId
+			 	});
+			 	this._bindView("/" + sObjectPath);
+			}.bind(this));
 		},
 
 		/**
@@ -156,6 +158,9 @@ sap.ui.define([
 
 			this.getView().bindElement({
 				path: sObjectPath,
+				/*parameters: {
+					expand: "Institute,Offer"
+				},*/
 				events: {
 					change: this._onBindingChange.bind(this),
 					dataRequested: function () {

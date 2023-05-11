@@ -1,10 +1,19 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
-	"sap/ui/core/routing/History"
-], function (Controller, History) {
+	"sap/ui/core/routing/History",
+	"../model/formatter",
+	"../model/datatypes/CustomPercentageType"
+], function (Controller, History, formatter, CustomPercentageType) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
+
+		formatter: formatter,
+
+		customTypes: {
+			percentage: CustomPercentageType
+		},
+
 		/**
 		 * Convenience method for accessing the router in every controller of the application.
 		 * @public
