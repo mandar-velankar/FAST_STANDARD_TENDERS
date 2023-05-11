@@ -24,6 +24,16 @@ sap.ui.define([
 			this.objectId = sObjectId;
 			this.selectedTab = iconTabfilter.getKey();
 
+			if(this.selectedTab !== "Tender") return;
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+			});
+	
+			this.setModel(oModel, "ui");
+
 			this._bindForm("TenderForm");
 			this._bindTable("AwardCriteria");
 
@@ -76,6 +86,17 @@ sap.ui.define([
 			  	}),
 			  	templateShareable: true
 			});
+		},
+
+		onTenderFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', true);
+		},
+		onTenderFormSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+		},
+		onTenderFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
 		}
+
 	});
 });
