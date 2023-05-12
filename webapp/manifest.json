@@ -83,7 +83,16 @@
 			},
 			"": {
 				"dataSource": "mainService",
-				"preload": true
+				"preload": true,
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "TwoWay"
+				}
+			},
+			"st": {
+				"dataSource": "mainService",
+				"preload": true,
+				"type": "com.bayer.tender.statenderapp.state.StandardTenderState"
 			},
 			"template": {
 				"dataSource": "tempService",

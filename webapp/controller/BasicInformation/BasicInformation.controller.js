@@ -37,7 +37,7 @@ sap.ui.define([
 			this._bindForm("TenderForm");
 			this._bindTable("AwardCriteria");
 
-			this.getView().setModel(new JSONModel({data: "0.34"}), "test");
+			// this.getView().setModel(new JSONModel({data: "0.34"}), "test");
 		},
 
 		/**
