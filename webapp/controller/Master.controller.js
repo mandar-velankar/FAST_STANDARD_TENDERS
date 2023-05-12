@@ -330,7 +330,8 @@ sap.ui.define([
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getRouter().navTo("object", {
-				objectId : oItem.TenderID //getBindingContext().getProperty("TenderID")
+				objectId : oItem.TenderID, //getBindingContext().getProperty("TenderID")
+				offerId : oItem.OfferID
 			}, bReplace);
 		},
 
@@ -374,8 +375,28 @@ sap.ui.define([
 			var oViewModel = this.getModel("masterView");
 			oViewModel.setProperty("/isFilterBarVisible", (this._oListFilterState.aFilter.length > 0));
 			oViewModel.setProperty("/filterBarLabel", this.getResourceBundle().getText("masterFilterBarText", [sFilterBarText]));
+		},
+		onOpenCreateTenderDialog : function () {
+			const that = this;
+			// create dialog lazily
+			if (!this.byId("idCreateTenderDialog")) {
+				this.tenderCreationDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTender",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getModel("appView").setProperty("/bCreateTenderMode", true);
+					that.getView().addDependent(oDialog);
+                    return oDialog
+                })
+			}
+			that.getModel("appView").setProperty("/bCreateTenderMode", true);
+			this.tenderCreationDialog.then(oDialog => oDialog.open());
+		},
+		onCloseTenderCreationDialog: function () {
+			this.byId("idCreateTenderDialog").close();
+			this.getModel("appView").setProperty("/bCreateTenderMode", false);
 		}
-
 	});
 
 });

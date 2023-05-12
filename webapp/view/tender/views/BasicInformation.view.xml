@@ -17,6 +17,33 @@
 			<form:title>
 				<core:Title text="{template>title}" />
 			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="{template>title}"/>
+					<ToolbarSpacer/>
+					<Button
+						id="idTenderFormEditBtn"
+						icon="sap-icon://edit"
+						text="Edit"
+						press=".onTenderFormEditBtnPress"
+						visible="{= !${ui>/editMode} }"
+					/>
+					<Button
+						id="idTenderFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onTenderFormSaveBtnPress"
+						visible="{= ${ui>/editMode} }"
+					/>
+					<Button
+						id="idTenderFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onTenderFormCancelBtnPress"
+						visible="{= ${ui>/editMode} }"
+					/>
+				</Toolbar>
+			</form:toolbar>
 			<form:layout>
 				<form:ResponsiveGridLayout
 					labelSpanXL="{template>layout/labelSpanXL}"
@@ -36,7 +63,7 @@
 			<form:formContainers>
 				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						<form:FormElement visible="{= ${template>label} !== 'ID'}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
@@ -68,10 +95,9 @@
 		</Table>
 	</VBox>	
 	<VBox class='sapUiMediumMargin'>
-		<Text text="{
-			path: 'Weight',
-			type: 'sap.ui.model.type.Float',
-			formatter:'.formatter.formatPercentage'
+		<Input value="{
+			path: 'test>/data',
+			type: '.customTypes.percentage'
 		}"/>
 	</VBox>	
 	

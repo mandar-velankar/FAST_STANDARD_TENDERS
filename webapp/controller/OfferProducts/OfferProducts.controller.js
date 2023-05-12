@@ -10,58 +10,43 @@ sap.ui.define([
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts", {
-		/* =========================================================== */
-		/* lifecycle methods                                           */
-		/* =========================================================== */
 
 		onInit: function () {
-
-			this.oOwnerComponent = this.getOwnerComponent();
-			this.oRouter = this.oOwnerComponent.getRouter();
-
-			// Model used to manipulate control states. The chosen values make sure,
-			// detail page is busy indication immediately so there is no break in
-			// between the busy indication for loading the view's meta data
-			var oViewModel = new JSONModel({
-				busy: false,
-				delay: 0,
-				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
-			});
-			/*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
-			this.setModel(this.paState.getModel(), "pa");
-
-			this.oObjectPageLayout = this.byId("DetailPage");
-			this.paState.setDetailPage(this.oObjectPageLayout);
-
-			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
-			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
-
-			this.setModel(oViewModel, "detailView");
-
-			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
-		
-		/* =========================================================== */
-		/* event handlers                                              */
-		/* =========================================================== */
+		onBeforeShow:async function(iconTabfilter,sObjectId){
+			// get state data
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			
+			//this.getView().getBindingContext("template"); // get current tab data
+			// await this.getOwnerComponent().getModel().metadataLoaded();
+			this.objectId = sObjectId;
+			this.selectedTab = iconTabfilter.getKey();
 
-		onOfferProductPress: function(oEvent){
-			/*const objContext = oEvent.getParameter("listItem").getBindingContext("pa");
-			const selectedObj = objContext?.getObject();
+			this._bindForm("OfferForm");
+		},
 
-			var deliveryPath = objContext.getPath(),
-			delivery = deliveryPath.split("/").slice(-1).pop();*/
-
-			let oNextUIState = "";
-
-			this.oOwnerComponent.getHelper().then(function (oHelper) {
-				oNextUIState = oHelper.getNextUIState(2);
-				this.oRouter.navTo("offerProductDetail", {
-					layout: oNextUIState.layout,
-					objectId: "AE-15-100-1001",
-					productId: "1"
+		/**
+		 * This method bind a given form to its entity from the ui configuration template.
+		 * FYI: the form ID in the View is a concatination of "id" + formName
+		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
+		 */
+		_bindForm(formName){
+			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getFormByName(formName).getEntity();
+			const form = this.byId(`id${formName}`);
+			let path = "";
+			if (this.objectId) {
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					TenderID: this.objectId,
 				});
-			}.bind(this));
+			} else {
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				path = newEntryContext.getPath();
+			}
+			
+			form.bindElement({
+				path: path,
+			});
 		}
-    });
+	});
 });

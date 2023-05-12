@@ -1,4 +1,4 @@
-sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "./Tab"], function (ODataModel, BaseObject, Table, Tab) {
+sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "./Tab", "./Form"], function (ODataModel, BaseObject, Table, Tab, Form) {
   const Template = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Template", {
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
@@ -10,6 +10,7 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "
         this.type = data.Type;
         this.tabByName = {};
         data.Table && (this.table = new Table(data.Table));
+        data.Form && (this.form = new Form(data.Form));
         if (data.Tabs) {
           for (const tab of data.Tabs) {
             const tabObj = new Tab(tab);
