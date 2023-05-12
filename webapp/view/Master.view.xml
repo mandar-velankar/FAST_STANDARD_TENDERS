@@ -20,6 +20,9 @@
 				<f:heading>
 					<Title text="Tenders"/>
 				</f:heading>
+				<f:actions>
+					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
 

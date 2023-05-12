@@ -26,6 +26,24 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                                         }
                                     }
                                 }
+                            },
+                            "Form": {
+                                $expand: {
+                                    "Layout": {
+                                        $expand: "Properties"
+                                    },
+                                    "FormContainers": {
+                                        $expand: {
+                                            "FormElements": {
+                                                $expand: {
+                                                    "Controls": {
+                                                        $expand: "Properties"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

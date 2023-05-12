@@ -111,7 +111,7 @@
 					"target": "master"
 				},
 				{
-					"pattern": "detail/{objectId}",
+					"pattern": "detail/{objectId}/{offerId}",
 					"name": "object",
 					"target": [
 						"master",

@@ -1,19 +1,16 @@
 sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
-	"../../model/formatter",
 	"sap/m/library",
 	"sap/m/ColumnListItem",
-	"sap/ui/model/Filter"
-], function (BaseController, JSONModel, formatter, mobileLibrary, ColumnListItem, Filter) {
+	"sap/ui/model/Filter",
+], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
-
-		formatter: formatter,
 
 		onInit: function () {
 		},
@@ -27,10 +24,20 @@ sap.ui.define([
 			this.objectId = sObjectId;
 			this.selectedTab = iconTabfilter.getKey();
 
+			if(this.selectedTab !== "Tender") return;
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+			});
+	
+			this.setModel(oModel, "ui");
+
 			this._bindForm("TenderForm");
 			this._bindTable("AwardCriteria");
 
-			// this.getView().setModel(new JSONModel({data: 0.0}), "test");
+			this.getView().setModel(new JSONModel({data: "0.34"}), "test");
 		},
 
 		/**
@@ -79,6 +86,17 @@ sap.ui.define([
 			  	}),
 			  	templateShareable: true
 			});
+		},
+
+		onTenderFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', true);
+		},
+		onTenderFormSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+		},
+		onTenderFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
 		}
+
 	});
 });
