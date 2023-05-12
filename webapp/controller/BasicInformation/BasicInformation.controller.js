@@ -16,6 +16,8 @@ sap.ui.define([
 		},
 		onBeforeShow:async function(iconTabfilter,sObjectId){
 			// get state data
+
+			this.stState = this.getOwnerComponent().getModel("st");
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			
@@ -93,9 +95,11 @@ sap.ui.define([
 		},
 		onTenderFormSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
+			this.getOwnerComponent().getModel().submitChanges();
 		},
 		onTenderFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
+			this.getOwnerComponent().getModel().resetChanges();
 		}
 
 	});
