@@ -86,7 +86,8 @@
 				"preload": true,
 				"settings": {
 					"defaultOperationMode": "Server",
-					"defaultBindingMode": "TwoWay"
+					"defaultBindingMode": "TwoWay",
+					"defaultUpdateMethod": "Put"
 				}
 			},
 			"st": {

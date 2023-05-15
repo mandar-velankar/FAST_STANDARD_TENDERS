@@ -4,7 +4,8 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Filter",
-], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter) {
+	"sap/m/MessageBox"
+], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -95,12 +96,99 @@ sap.ui.define([
 		},
 		onTenderFormSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
-			this.getOwnerComponent().getModel().submitChanges();
+
+			// Award Criteria	
+			const isAwardCriteriaValid = this.validateAwardCriteria();
+			if(!isAwardCriteriaValid) return;
+
+			this.getOwnerComponent().getModel().submitChanges(
+				{
+					success: function(oData) {
+						debugger;
+					},
+					error: function(oError){
+						debugger;
+					}
+				}
+			);
 		},
 		onTenderFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
 			this.getOwnerComponent().getModel().resetChanges();
-		}
+		},
+
+
+		validateAwardCriteria: function () {
+
+			let bValid = true;
+			const aAwardCriteria = this.getView().byId("idAwardCriteria").getItems();
+
+			//sum of all award criterias
+			let sumWeight = 0;
+			// let awardCriteriaName = [];
+
+			//checks on mandatory fields & calulation of sumWeight
+			aAwardCriteria.forEach(function (oAwardCriteria) {
+
+				//get values
+				// let sCriteria = oAwardCriteria.getCells()[0].getProperty("value");
+				// let iWeight = parseInt(oAwardCriteria.getCells()[1].getProperty("value"));
+
+				let weight = oAwardCriteria.getCells()[1].getBinding("value").getValue();
+				sumWeight = sumWeight + weight;
+
+				//Check that award criteria is complete, everything is filled
+				// if (oAwardCriteria.getVisible()) {
+
+				// 	//check if everything is filled
+				// 	if (sCriteria === "" || iWeight === "") {
+				// 		MessageBox.error("Award Criteria information incomplete.");
+				// 		bValid = false;
+				// 	}
+
+				// 	//make sum of weights, so we can check afterwards they are not above 100%
+				// 	sumWeight = sumWeight + iWeight;
+
+				// 	//keep the awardcritiria names so we can check lateron for duplicates
+				// 	awardCriteriaName.push(sCriteria);
+
+				// }
+
+			});
+
+			//check that sum of all award criteria = 100
+			// if (sumWeight !== 100 && awardCriteriaName.length !== 0) {
+			// 	MessageBox.error("Sum of Award Criteria weight must be 100%");
+			// 	return false;
+			// }
+
+			if (sumWeight > 0 && sumWeight < 1) {
+				MessageBox.error("Sum of Award Criteria weight must be 100%");
+				return false;
+			}
+
+			//check only unique award criteria names are there
+			// var uniq = awardCriteriaName
+			// 	.map((name) => {
+			// 		return {
+			// 			count: 1,
+			// 			name: name
+			// 		}
+			// 	})
+			// 	.reduce((a, b) => {
+			// 		a[b.name] = (a[b.name] || 0) + b.count
+			// 		return a
+			// 	}, {});
+
+			//if duplicates are found
+			// var duplicates = Object.keys(uniq).filter((a) => uniq[a] > 1);
+			// if (duplicates.length !== 0) {
+			// 	MessageBox.error("Two award criteria cannot have the same name.");
+			// 	bValid = false;
+			// }
+
+			return bValid;
+		},
 
 	});
 });
