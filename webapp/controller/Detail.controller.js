@@ -115,6 +115,12 @@ sap.ui.define([
 				}
 			});
 
+			// get awarded criteria of the selected tender 
+			// this is needed at a later stage to check on existing Award Criteria
+			this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
+				filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
+			});
+
 			// await this.getModel().metadataLoaded();
 			// let path = "";
 			// if (sObjectId) {

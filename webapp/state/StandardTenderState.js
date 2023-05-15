@@ -24,7 +24,12 @@ sap.ui.define(
 
             getOdataModel: function(){
                 return this.odataModel;
-            }
+            },
+            
+            saveAwardCriteria: async function(aContext){
+                return this.standardTenderService.saveAwardCriteria(aContext);        
+            },
+
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':

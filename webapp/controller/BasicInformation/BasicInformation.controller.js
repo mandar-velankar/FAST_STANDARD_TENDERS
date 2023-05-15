@@ -16,18 +16,22 @@ sap.ui.define([
 		onInit: function () {
 		},
 		onBeforeShow:async function(iconTabfilter,sObjectId){
-			// get state data
+			
+			this.objectId = sObjectId;
+			this.selectedTab = iconTabfilter.getKey();
 
+			if(this.selectedTab !== "Tender") return; // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
+
+			this.defaultModel = this.getOwnerComponent().getModel();
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
-			this.objectId = sObjectId;
-			this.selectedTab = iconTabfilter.getKey();
 
-			if(this.selectedTab !== "Tender") return;
+			this.oAwardCriteriaTable = this.getView().byId("idAwardCriteria");
+			
 
 			const oModel = new JSONModel({
 				busy: false,
@@ -100,92 +104,70 @@ sap.ui.define([
 			// Award Criteria	
 			const isAwardCriteriaValid = this.validateAwardCriteria();
 			if(!isAwardCriteriaValid) return;
+			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
-			this.getOwnerComponent().getModel().submitChanges(
-				{
-					success: function(oData) {
-						debugger;
-					},
-					error: function(oError){
-						debugger;
-					}
-				}
-			);
+			this.defaultModel.submitChanges(); 
 		},
 		onTenderFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
-			this.getOwnerComponent().getModel().resetChanges();
+			this.defaultModel.resetChanges();
 		},
 
+
+		/**
+		 * This method changes/updates the odata model PendingChanges list which is used when triggering "submitChanges" method
+		 * see https://ui5.sap.com/#/api/sap.ui.model.odata.v2.ODataModel%23methods/getObject
+		 * 
+		 * Context: in the View we have the AwardCriteria table binded to AwardCriteriaTableView which is a CDS view with joins.
+		 * Since, at the moment, there are some limitations with custom event handler on view with joins, we are manipulation
+		 * the pending changes on the odata model to send out different backend calls. 
+		 */
+		setAwardCriteriaPrendingChanges: function(oModel, oTable){
+				
+			const aItemContexts = oTable.getBinding("items").getContexts();
+			aItemContexts?.forEach(ctx => {
+				const awardCriteriObj = {
+					TENDERID: ctx.getObject().TenderID,
+					Active: 1,
+					AwardCriteria: ctx.getObject().Criteria,
+					COUNTRYCODE: ctx.getObject().CountryCode,
+                	Weight: ctx.getObject().Weight
+				}
+				const sPath = oModel.createKey("/PT_TMAWRDCR", awardCriteriObj);
+				const existingObj = oModel.getProperty(sPath);
+				
+				if(existingObj){
+					oModel.setProperty(sPath+"/Weight", ctx.getObject().Weight)
+				}else {
+					oModel.createEntry("/PT_TMAWRDCR", {
+						properties: awardCriteriObj
+					});
+				}
+                
+            });
+
+			// remove unwanted changes from the oModel pending changes list
+			oModel.resetChanges(aItemContexts.map(ctx => ctx.getPath()));
+		},
 
 		validateAwardCriteria: function () {
 
 			let bValid = true;
-			const aAwardCriteria = this.getView().byId("idAwardCriteria").getItems();
+			const aAwardCriteriaItems = this.getView().byId("idAwardCriteria").getItems();
 
 			//sum of all award criterias
 			let sumWeight = 0;
-			// let awardCriteriaName = [];
-
+			
 			//checks on mandatory fields & calulation of sumWeight
-			aAwardCriteria.forEach(function (oAwardCriteria) {
-
-				//get values
-				// let sCriteria = oAwardCriteria.getCells()[0].getProperty("value");
-				// let iWeight = parseInt(oAwardCriteria.getCells()[1].getProperty("value"));
-
+			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
 				let weight = oAwardCriteria.getCells()[1].getBinding("value").getValue();
-				sumWeight = sumWeight + weight;
-
-				//Check that award criteria is complete, everything is filled
-				// if (oAwardCriteria.getVisible()) {
-
-				// 	//check if everything is filled
-				// 	if (sCriteria === "" || iWeight === "") {
-				// 		MessageBox.error("Award Criteria information incomplete.");
-				// 		bValid = false;
-				// 	}
-
-				// 	//make sum of weights, so we can check afterwards they are not above 100%
-				// 	sumWeight = sumWeight + iWeight;
-
-				// 	//keep the awardcritiria names so we can check lateron for duplicates
-				// 	awardCriteriaName.push(sCriteria);
-
-				// }
-
+				sumWeight = sumWeight + parseFloat(weight);
 			});
 
-			//check that sum of all award criteria = 100
-			// if (sumWeight !== 100 && awardCriteriaName.length !== 0) {
-			// 	MessageBox.error("Sum of Award Criteria weight must be 100%");
-			// 	return false;
-			// }
-
-			if (sumWeight > 0 && sumWeight < 1) {
+			if (sumWeight > 0 && sumWeight !== 1) {
 				MessageBox.error("Sum of Award Criteria weight must be 100%");
 				return false;
 			}
-
-			//check only unique award criteria names are there
-			// var uniq = awardCriteriaName
-			// 	.map((name) => {
-			// 		return {
-			// 			count: 1,
-			// 			name: name
-			// 		}
-			// 	})
-			// 	.reduce((a, b) => {
-			// 		a[b.name] = (a[b.name] || 0) + b.count
-			// 		return a
-			// 	}, {});
-
-			//if duplicates are found
-			// var duplicates = Object.keys(uniq).filter((a) => uniq[a] > 1);
-			// if (duplicates.length !== 0) {
-			// 	MessageBox.error("Two award criteria cannot have the same name.");
-			// 	bValid = false;
-			// }
 
 			return bValid;
 		},
