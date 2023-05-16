@@ -79,7 +79,7 @@ sap.ui.define([
 				type: sap.ui.core.mvc.ViewType.XML
 			}).then(view => {
 				view.setBindingContext(context,"template");
-				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId);
+				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId,this.sOfferId);
 				iconTabfilter.insertContent(view);
 			});
 			return iconTabfilter;
@@ -112,7 +112,14 @@ sap.ui.define([
 				page: "DETAIL",
 				keys: {
 					TenderID: this.sObjectId,
+					OfferID: this.sOfferId
 				}
+			});
+
+			// get awarded criteria of the selected tender 
+			// this is needed at a later stage to check on existing Award Criteria
+			this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
+				filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
 			});
 
 			// await this.getModel().metadataLoaded();
