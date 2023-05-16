@@ -166,6 +166,7 @@ sap.ui.define([
 
 			if (sumWeight > 0 && sumWeight !== 1) {
 				MessageBox.error("Sum of Award Criteria weight must be 100%");
+				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
 
