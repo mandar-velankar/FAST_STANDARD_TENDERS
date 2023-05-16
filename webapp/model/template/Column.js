@@ -5,6 +5,7 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
+        this.importance = data.Importance;
         this.control = new Control(data.Control);
       }
     },

@@ -36,13 +36,14 @@
 				updateFinished=".onUpdateFinished"
 				alternateRowColors="true"
 				contextualWidth="Auto" 
-				popinLayout="Block"
+				autoPopinMode="true"
+				hiddenInPopin="None"
 				growing="true"
 				growingThreshold="15"
 				growingScrollToLoad="false"
             >
                 <columns>
-                    <Column>
+                    <Column importance="{template>importance}" >
                         <Text text="{template>title}" />
                     </Column>
                 </columns>
