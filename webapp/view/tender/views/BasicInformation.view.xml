@@ -78,6 +78,8 @@
 			columns="{path:'template>xmlView/tableByName/AwardCriteria/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
+			mode="SingleSelectMaster"
+			selectionChange=".onOfferProductPress"
 		>
 			<headerToolbar>
 				<OverflowToolbar>

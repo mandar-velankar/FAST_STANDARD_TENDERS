@@ -79,7 +79,7 @@ sap.ui.define([
 				type: sap.ui.core.mvc.ViewType.XML
 			}).then(view => {
 				view.setBindingContext(context,"template");
-				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId);
+				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId,this.sOfferId);
 				iconTabfilter.insertContent(view);
 			});
 			return iconTabfilter;
@@ -112,6 +112,7 @@ sap.ui.define([
 				page: "DETAIL",
 				keys: {
 					TenderID: this.sObjectId,
+					OfferID: this.sOfferId
 				}
 			});
 
