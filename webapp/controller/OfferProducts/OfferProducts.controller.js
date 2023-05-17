@@ -99,7 +99,7 @@ sap.ui.define([
 				oNextUIState = oHelper.getNextUIState(2);
 				this.oRouter.navTo("offerProductDetail", {
 					layout: oNextUIState.layout,
-					objectId: this.offerID,
+					objectId: "AE-15-100-1001",
 					productId: "1"
 				});
 			}.bind(this));
