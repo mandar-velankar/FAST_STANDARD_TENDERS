@@ -4,6 +4,7 @@ sap.ui.define([
 	"sap/ui/core/ComponentContainer",
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
+	"sap/ui/model/FilterType",
 	"sap/ui/model/Sorter",
 	"sap/ui/model/FilterOperator",
 	"sap/m/GroupHeaderListItem",
@@ -11,7 +12,7 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"../model/formatter",
 	"sap/m/ColumnListItem"
-], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem) {
+], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -28,7 +29,7 @@ sap.ui.define([
 		 */
 		onInit : function () {
 			// Control state model
-			var oList = this.byId("list"),
+			var oList = this.byId("genericMasterTable"),
 				oViewModel = this._createViewModel();
 				// Put down master list's original value for busy indicator delay,
 				// so it can be restored later on. Busy handling on the master list is
@@ -396,7 +397,128 @@ sap.ui.define([
 		onCloseTenderCreationDialog: function () {
 			this.byId("idCreateTenderDialog").close();
 			this.getModel("appView").setProperty("/bCreateTenderMode", false);
-		}
+		},
+
+		setFilter: function (oEvent) {
+
+			const orFilters = [];
+			const andFilters = [];
+
+			let sSearch = oEvent.getParameter("query");
+
+			if (sSearch.length > 0) {
+
+				orFilters.push(new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "TenderID",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "Classification",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "TenderName",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "createdBy",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "DistributorName",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "InstituteName",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				orFilters.push(new Filter({
+					path: "OfferID",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				// regex checks for numbers (decimals included)
+				if(/^[0-9]*[.]?[0-9]+$/.test(sSearch)){
+					orFilters.push(new Filter({
+						path: "VALUE",
+						operator: FilterOperator.BT,
+						value1: Math.floor(sSearch),
+						value2: Math.ceil(sSearch)
+					}));
+				}
+
+				orFilters.push(new Filter({
+					path: "STATUS",
+					operator: FilterOperator.Contains,
+					value1: sSearch,
+					caseSensitive: false
+				}));
+
+				const publicationDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
+				if(publicationDate){
+					orFilters.push(new Filter({
+						path: "PublicationDate",
+						operator: FilterOperator.EQ,
+						value1: publicationDate,
+						caseSensitive: false
+					}));
+				}
+
+				const bidDueDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
+				if(bidDueDate){
+					orFilters.push(new Filter({
+						path: "BidDueDate",
+						operator: FilterOperator.EQ,
+						value1: bidDueDate,
+						caseSensitive: false
+					}));
+				}
+				
+				andFilters.push(new Filter(orFilters, false));
+			}
+
+			if(andFilters.length > 0){
+				const oFilters = new Filter(andFilters, true);
+
+				//Binding to table with the filters and the sorters
+				this._oList.getBinding("items").filter(oFilters, FilterType.Application);
+			}else{
+				this._oList.getBinding('items').aApplicationFilters = [];
+				this._oList.getBinding("items").filter();
+			}
+			
+			if (this._oList.getBinding("items").isSuspended()) {
+				this._oList.getBinding("items").resume();
+			}
+			
+		},
 	});
 
 });

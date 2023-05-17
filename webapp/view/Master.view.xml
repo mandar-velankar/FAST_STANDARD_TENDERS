@@ -20,34 +20,40 @@
 				<f:heading>
 					<Title text="Tenders"/>
 				</f:heading>
-				<f:actions>
-					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
-				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
 
 
 		<f:content>
-            <Table id="genericMasterTable" 
-                columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
-                itemPress=".onSelectionChange"
-				class="sapFDynamicPageAlignContent"
-				width="auto"
-				updateFinished=".onUpdateFinished"
-				alternateRowColors="true"
-				contextualWidth="Auto" 
-				autoPopinMode="true"
-				hiddenInPopin="None"
-				growing="true"
-				growingThreshold="15"
-				growingScrollToLoad="false"
-            >
-                <columns>
-                    <Column importance="{template>importance}" >
-                        <Text text="{template>title}" />
-                    </Column>
-                </columns>
-            </Table>
+			<VBox>
+				<OverflowToolbar class="sapFDynamicPageAlignContent">
+					<ToolbarSpacer/>
+					
+					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
+					<Button icon="sap-icon://filter" text="" press=".onOpenViewSettings"/>
+					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+				</OverflowToolbar>
+				<Table id="genericMasterTable" 
+					columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
+					itemPress=".onSelectionChange"
+					class="sapFDynamicPageAlignContent"
+					width="auto"
+					updateFinished=".onUpdateFinished"
+					alternateRowColors="true"
+					contextualWidth="Auto" 
+					autoPopinMode="true"
+					hiddenInPopin="None"
+					growing="true"
+					growingThreshold="15"
+					growingScrollToLoad="false"
+				>
+					<columns>
+						<Column importance="{template>importance}" >
+							<Text text="{template>title}" />
+						</Column>
+					</columns>
+				</Table>
+			</VBox>
 		<!-- <VBox id="GenericTableComponentPlaceHolder" fitContainer="true"> -->
 			<!-- </VBox> -->
 			<!-- <VBox fitContainer="true">
