@@ -19,6 +19,8 @@ sap.ui.define([
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.oOwnerComponent = this.getOwnerComponent();
+			this.oRouter = this.oOwnerComponent.getRouter();
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
@@ -79,5 +81,28 @@ sap.ui.define([
 			  	templateShareable: true
 			});
 		},
+
+		/* =========================================================== */
+		/* event handlers                                              */
+		/* =========================================================== */
+
+		onOfferProductPress: function(oEvent){
+			/*const objContext = oEvent.getParameter("listItem").getBindingContext("pa");
+			const selectedObj = objContext?.getObject();
+
+			var deliveryPath = objContext.getPath(),
+			delivery = deliveryPath.split("/").slice(-1).pop();*/
+
+			let oNextUIState = "";
+
+			this.oOwnerComponent.getHelper().then(function (oHelper) {
+				oNextUIState = oHelper.getNextUIState(2);
+				this.oRouter.navTo("offerProductDetail", {
+					layout: oNextUIState.layout,
+					objectId: "AE-15-100-1001",
+					productId: "1"
+				});
+			}.bind(this));
+		}
 	});
 });
