@@ -18,6 +18,7 @@ sap.ui.define([
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
 
 		formatter: formatter,
+		oCountryCodeFilter: new Filter("COUNTRYCODE", FilterOperator.EQ, "AR"),
 
 		/* =========================================================== */
 		/* lifecycle methods                                           */
@@ -81,6 +82,12 @@ sap.ui.define([
 			this.getRouter().attachBypassed(this.onBypassed, this);
 		},
 
+		onCountriesRequested: function(event){
+			debugger;
+		},
+		onCountriesReceived: function(event){
+			debugger;
+		},
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
@@ -310,7 +317,7 @@ sap.ui.define([
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const table = this.byId("genericMasterTable");
 			table && table.bindItems({
-			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
+			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
 			//   model: '',
 			  template: new ColumnListItem({
 				type: "Active",
@@ -404,9 +411,9 @@ sap.ui.define([
 			const orFilters = [];
 			const andFilters = [];
 
-			let sSearch = oEvent.getParameter("query");
+			let sSearch = this.byId('idSearch').getValue();
 
-			if (sSearch.length > 0) {
+			if (sSearch) {
 
 				orFilters.push(new Filter({
 					path: "CountryCode",
@@ -503,6 +510,36 @@ sap.ui.define([
 				
 				andFilters.push(new Filter(orFilters, false));
 			}
+
+			// Dropdown filters
+			// Country
+			const oCountrySelectedItem =  this.byId("idSlctCountry").getSelectedItem();
+			const sCountryCode = oCountrySelectedItem?.getKey();
+			if(sCountryCode){
+				andFilters.push(new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.Contains,
+					value1: sCountryCode,
+					caseSensitive: false
+				}));
+			}
+
+			// Brands
+			const oFilterBrands = new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode);
+			const oSelectBrands = this.byId("idSlctBrand");	
+			oSelectBrands.getBinding("items").filter([oFilterBrands]);
+			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
+			if(sBrandId && !sBrandId.toLowerCase().includes('all_brands')){
+				andFilters.push(new Filter({
+					path: "BrandID",
+					operator: FilterOperator.Contains,
+					value1: sBrandId,
+					caseSensitive: false
+				}));
+			}
+
+
+
 
 			if(andFilters.length > 0){
 				const oFilters = new Filter(andFilters, true);
