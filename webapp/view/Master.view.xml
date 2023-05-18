@@ -66,8 +66,17 @@
 						text="Status"
 						labelFor="idSlctStatus"
 					/>
-					<Select id="idSlctStatus" change=".setFilter" >
-						<core:Item key="{fastAppData>COUNTRY_CODE}" text="{fastAppData>COUNTRY_NAME}"/>
+					<Select 
+						id="idSlctStatus" 
+						items="{ 
+							path: '/CountryStatusses', 
+							sorter: { 
+								path: 'Status' 
+							} 
+						}"
+						change=".setFilter" 
+					>
+						<core:Item key="{Status}" text="{Status}"/>
 					</Select>
 					<ToolbarSpacer/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>

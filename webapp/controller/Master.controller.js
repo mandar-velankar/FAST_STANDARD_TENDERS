@@ -538,7 +538,19 @@ sap.ui.define([
 				}));
 			}
 
-
+			// Status 
+			const oFilterStatus = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const oSelectStatus = this.byId("idSlctStatus");	
+			oSelectStatus.getBinding("items").filter([oFilterStatus]);
+			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
+			if(sStatus && !sStatus.toLowerCase().includes('all')){
+				andFilters.push(new Filter({
+					path: "STATUS",
+					operator: FilterOperator.Contains,
+					value1: sStatus,
+					caseSensitive: false
+				}));
+			}
 
 
 			if(andFilters.length > 0){
