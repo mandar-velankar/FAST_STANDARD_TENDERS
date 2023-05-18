@@ -27,11 +27,41 @@
 		<f:content>
 			<VBox>
 				<OverflowToolbar class="sapFDynamicPageAlignContent">
-					<ToolbarSpacer/>
+					<Label
+						text="Country"
+						labelFor="idSlctCountry"
+					/>
+					<Select 
+						id="idSlctCountry" 
+						items="{ 
+							path: 'fastAppData>/UserCountries/results/', 
+							sorter: { 
+								path: 'COUNTRY_NAME' 
+							} 
+						}"
+						change=".setFilter"
+					>
+						<core:Item key="{fastAppData>COUNTRY_CODE}" text="{fastAppData>COUNTRY_NAME}"/>
+					</Select>
 					
+					<Label
+						text="Brand"
+						labelFor="idSlctCountry"
+					/>
+					<Select id="idSlctBrand" change=".setFilter">
+						<core:Item key="{fastAppData>COUNTRY_CODE}" text="{fastAppData>COUNTRY_NAME}"/>
+					</Select>
+					<Label
+						text="Status"
+						labelFor="idSlctCountry"
+					/>
+					<Select id="idSlctStatus" change=".setFilter" >
+						<core:Item key="{fastAppData>COUNTRY_CODE}" text="{fastAppData>COUNTRY_NAME}"/>
+					</Select>
+					<ToolbarSpacer/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
-					<Button icon="sap-icon://filter" text="" press=".onOpenViewSettings"/>
 					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
 				</OverflowToolbar>
 				<Table id="genericMasterTable" 
 					columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"

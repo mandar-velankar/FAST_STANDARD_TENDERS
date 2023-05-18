@@ -140,15 +140,15 @@ sap.ui.define([
 		 * @public
 		 */
 		onOpenViewSettings : function (oEvent) {
-			var sDialogTab = "filter";
-			if (oEvent.getSource() instanceof sap.m.Button) {
-				var sButtonId = oEvent.getSource().getId();
-				if (sButtonId.match("sort")) {
-					sDialogTab = "sort";
-				} else if (sButtonId.match("group")) {
-					sDialogTab = "group";
-				}
-			}
+			var sDialogTab = "sort";
+			// if (oEvent.getSource() instanceof sap.m.Button) {
+			// 	var sButtonId = oEvent.getSource().getId();
+			// 	if (sButtonId.match("sort")) {
+			// 		sDialogTab = "sort";
+			// 	} else if (sButtonId.match("group")) {
+			// 		sDialogTab = "group";
+			// 	}
+			// }
 			// load asynchronous XML fragment
 			if (!this.byId("viewSettingsDialog")) {
 				Fragment.load({
