@@ -12,7 +12,7 @@
 
 		<content>
             <form:Form
-			id="idTenderForm"
+			id="idNewTenderForm"
 			editable="true"
 			formContainers="{path:'template>/masterConfig/countryTemplate/template/form/formContainers',templateShareable:true}"> 
 			<!-- <form:title>

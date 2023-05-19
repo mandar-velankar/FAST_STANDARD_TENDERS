@@ -17,6 +17,9 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
     getControls: function () {
       return this.controls;
     },
+    getControlById: function (controlId) {
+      return this.controls.find(el => el.controlID === controlId);
+    },
     getJSON: function () {
       return {
         ID: this.id,

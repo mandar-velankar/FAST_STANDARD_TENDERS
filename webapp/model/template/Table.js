@@ -19,6 +19,9 @@ sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
     getEntity: function () {
       return this.entity;
     },
+    getTitle: function () {
+      return this.title;
+    },
     getJSON: function () {
       return {
         ID: this.id,

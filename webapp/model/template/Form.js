@@ -19,6 +19,9 @@ sap.ui.define(["../BaseObject", "./FormContainer", "./Layout"], function (BaseOb
     getEntity: function () {
       return this.entity;
     },
+    getFormContainerByName: function (containerTitle) {
+      return this.formContainers.find(el => el.title === containerTitle);
+    },
     getJSON: function () {
       return {
         ID: this.id,

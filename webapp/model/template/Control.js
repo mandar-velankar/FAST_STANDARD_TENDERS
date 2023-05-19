@@ -1,5 +1,5 @@
 //todo: dependencies are required for dynamic loading of controls, need to find a better solution
-sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input"], function (Text, BaseObject, ControlProperty, Input) {
+sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input", "sap/m/DatePicker", "./ValueHelp"], function (Text, BaseObject, ControlProperty, Input, DatePicker, ValueHelp) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (data) {
@@ -9,6 +9,8 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input"]
         this.id = data.ID;
         this.type = data.Type;
         this.properties = data.Properties.map(property => new ControlProperty(property));
+        this.controlID = this.properties.find(property => property.name === "id")?.value;
+        data.ValueHelp && (this.valueHelp = new com.bayer.tender.statenderapp.model.template.ValueHelp(data.ValueHelp));
       }
     },
     getPropertiesAsObject: function () {
@@ -35,16 +37,23 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input"]
       const props = this.getPropertiesAsObject();
       // new Text();
       const control = new ui5Control(props);
+      if (this.valueHelp && this.type === "Input") {
+        control.attachValueHelpRequest(this.valueHelp.onHandleValueHelpRequest);
+      }
       // const r2 = new (<any>window)["TestClass"]()
       // const control = new (sap.ui.require(this.getControlPath()))(this.getPropertiesAsObject());
 
       return control;
     },
+    getValueHelp: function () {
+      return this.valueHelp;
+    },
     getJSON: function () {
       return {
         ID: this.id,
         Type: this.type,
-        Properties: this.properties.map(property => property.getJSON())
+        Properties: this.properties.map(property => property.getJSON()),
+        ValueHelp: this.valueHelp
       };
     }
   });

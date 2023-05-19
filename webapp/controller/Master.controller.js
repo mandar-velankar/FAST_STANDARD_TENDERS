@@ -376,6 +376,7 @@ sap.ui.define([
 			oViewModel.setProperty("/isFilterBarVisible", (this._oListFilterState.aFilter.length > 0));
 			oViewModel.setProperty("/filterBarLabel", this.getResourceBundle().getText("masterFilterBarText", [sFilterBarText]));
 		},
+
 		onOpenCreateTenderDialog : function () {
 			const that = this;
 			// create dialog lazily
@@ -385,17 +386,37 @@ sap.ui.define([
 					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTender",
                     controller: that,
 				}).then(function (oDialog) {
-					that.getModel("appView").setProperty("/bCreateTenderMode", true);
 					that.getView().addDependent(oDialog);
-                    return oDialog
+                    oDialog.open();
+					that._bindFormElements();
                 })
+			}else {
+				this.byId("idCreateTenderDialog").open();
 			}
-			that.getModel("appView").setProperty("/bCreateTenderMode", true);
-			this.tenderCreationDialog.then(oDialog => oDialog.open());
 		},
+
 		onCloseTenderCreationDialog: function () {
 			this.byId("idCreateTenderDialog").close();
-			this.getModel("appView").setProperty("/bCreateTenderMode", false);
+			this.byId("idCreateTenderDialog").destroy();
+		},
+
+		_bindFormElements: async function () {
+			const tenderId = sap.ui.getCore().byId("idNewTenderId");
+			const oInstituteName = sap.ui.getCore().byId("idInstituteName");
+			const oClassification = sap.ui.getCore().byId("idClassification");
+			const oInstituteType = sap.ui.getCore().byId("idInstituteType");
+			
+			const controlInstName = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type").getFormElementByName("Institute Name").getControlById("idInstituteName");
+			const controlClassification = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type").getFormElementByName("Classification").getControlById("idClassification");
+			const controlInstituteType = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type").getFormElementByName("Institute Type").getControlById("idInstituteType");
+			
+			oInstituteName.attachValueHelpRequest(this.onHandleValueHelpRequest, {templateStateControl: controlInstName, showValue: "InstituteName", oView: this.getView()});
+			oClassification.attachValueHelpRequest(this.onHandleValueHelpRequest, {templateStateControl: controlClassification, showValue: "CLASSIFICATION", oView: this.getView()});
+			oInstituteType.attachValueHelpRequest(this.onHandleValueHelpRequest, {templateStateControl: controlInstituteType, showValue: "ChannelName", oView: this.getView()});
+
+		},
+		_generateNewTenderId: async function () {
+
 		}
 	});
 

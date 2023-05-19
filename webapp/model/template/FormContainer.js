@@ -14,6 +14,9 @@ sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElem
         // }
       }
     },
+    getFormElementByName: function (formElemLabel) {
+      return this.formElements.find(el => el.label === formElemLabel);
+    },
     getJSON: function () {
       return {
         ID: this.id,
