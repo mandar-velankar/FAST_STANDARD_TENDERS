@@ -19,7 +19,7 @@ sap.ui.define([
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
 
 		formatter: formatter,
-		oCountryCodeFilter: new Filter("COUNTRYCODE", FilterOperator.EQ, "AR"),
+		// oCountryCodeFilter: new Filter("COUNTRYCODE", FilterOperator.EQ, "AR"),
 
 		/* =========================================================== */
 		/* lifecycle methods                                           */
@@ -38,23 +38,23 @@ sap.ui.define([
 				// taken care of by the master list itself.
 				//iOriginalBusyDelay = oList.getBusyIndicatorDelay();
 
-			this._oGroupFunctions = {
-				TenderNo : function(oContext) {
-					var iNumber = oContext.getProperty('TenderNo'),
-						key, text;
-					if (iNumber <= 20) {
-						key = "LE20";
-						text = this.getResourceBundle().getText("masterGroup1Header1");
-					} else {
-						key = "GT20";
-						text = this.getResourceBundle().getText("masterGroup1Header2");
-					}
-					return {
-						key: key,
-						text: text
-					};
-				}.bind(this)
-			};
+			// this._oGroupFunctions = {
+			// 	TenderNo : function(oContext) {
+			// 		var iNumber = oContext.getProperty('TenderNo'),
+			// 			key, text;
+			// 		if (iNumber <= 20) {
+			// 			key = "LE20";
+			// 			text = this.getResourceBundle().getText("masterGroup1Header1");
+			// 		} else {
+			// 			key = "GT20";
+			// 			text = this.getResourceBundle().getText("masterGroup1Header2");
+			// 		}
+			// 		return {
+			// 			key: key,
+			// 			text: text
+			// 		};
+			// 	}.bind(this)
+			// };
 
 		
 			this._oList = oList;
@@ -88,7 +88,8 @@ sap.ui.define([
 		},
 
 		onCountriesReceived: async function(oEvent){
-			const sCountryCode = oEvent.getParameter("data").results[0].CountryCode;
+			const sCountryCode = oEvent.getParameter("data").results[0].CountryCode; // we default to first country in the list
+			// set filter which is needed later on
 			if(sCountryCode){
 				this.andFilters.push(new Filter({
 					path: "CountryCode",
@@ -97,19 +98,28 @@ sap.ui.define([
 					caseSensitive: false
 				}));
 			}
-			const table = this.byId("genericMasterTable");
-			this.getView().getModel('masterView').setProperty("/SelectedCountry", sCountryCode);
-			this.templateState.read("MASTER",{ 
-				countryCode:"BR", // TODO: this is hardcoded country. We need to change this once we have more country config
-				appID:"StandardTenders",
-				page:"MASTER"
-			}).then(()=>{
-				this._bindTable(table);	
-			});
 			
+			this._getTemplateConfig(sCountryCode);	
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			
+		},
+
+		_getTemplateConfig: function(sCountryCode){
+			this.getView().getModel('masterView').setProperty("/SelectedCountry", sCountryCode);
+			this.templateState.read("MASTER",{ 
+				countryCode: "BR" || sCountryCode, // TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				appID:"StandardTenders",
+				page:"MASTER"
+			}).then(this._onTemplateConfigReceived.bind(this));
+		},
+
+		/**
+		 * This method is called once the template configuration is loaded
+		 */
+		_onTemplateConfigReceived: function(){
+			const table = this.byId("genericMasterTable");
+			this._bindTable(table);
 		},
 
 		_bindBrandItems: function(sCountryCode){
@@ -182,34 +192,34 @@ sap.ui.define([
 			this._updateListItemCount(oEvent.getParameter("total"));
 		},
 
-		/**
-		 * Event handler for the master search field. Applies current
-		 * filter value and triggers a new search. If the search field's
-		 * 'refresh' button has been pressed, no new search is triggered
-		 * and the list binding is refresh instead.
-		 * @param {sap.ui.base.Event} oEvent the search event
-		 * @public
-		 */
-		onSearch : function (oEvent) {
-			if (oEvent.getParameters().refreshButtonPressed) {
-				// Search field's 'refresh' button has been pressed.
-				// This is visible if you select any master list item.
-				// In this case no new search is triggered, we only
-				// refresh the list binding.
-				this.onRefresh();
-				return;
-			}
+		// /**
+		//  * Event handler for the master search field. Applies current
+		//  * filter value and triggers a new search. If the search field's
+		//  * 'refresh' button has been pressed, no new search is triggered
+		//  * and the list binding is refresh instead.
+		//  * @param {sap.ui.base.Event} oEvent the search event
+		//  * @public
+		//  */
+		// onSearch : function (oEvent) {
+		// 	if (oEvent.getParameters().refreshButtonPressed) {
+		// 		// Search field's 'refresh' button has been pressed.
+		// 		// This is visible if you select any master list item.
+		// 		// In this case no new search is triggered, we only
+		// 		// refresh the list binding.
+		// 		this.onRefresh();
+		// 		return;
+		// 	}
 
-			var sQuery = oEvent.getParameter("query");
+		// 	var sQuery = oEvent.getParameter("query");
 
-			if (sQuery) {
-				this._oListFilterState.aSearch = [new Filter("TenderName", FilterOperator.Contains, sQuery)];
-			} else {
-				this._oListFilterState.aSearch = [];
-			}
-			this._applyFilterSearch();
+		// 	if (sQuery) {
+		// 		this._oListFilterState.aSearch = [new Filter("TenderName", FilterOperator.Contains, sQuery)];
+		// 	} else {
+		// 		this._oListFilterState.aSearch = [];
+		// 	}
+		// 	this._applyFilterSearch();
 
-		},
+		// },
 
 		/**
 		 * Event handler for refresh event. Keeps filter, sort
@@ -262,28 +272,28 @@ sap.ui.define([
 		 * @public
 		 */
 		onConfirmViewSettingsDialog : function (oEvent) {
-			var aFilterItems = oEvent.getParameters().filterItems,
-				aFilters = this.andFilters,
-				aCaptions = [];
+			// var aFilterItems = oEvent.getParameters().filterItems,
+			// 	aFilters = this.andFilters,
+			// 	aCaptions = [];
 
-			// update filter state:
-			// combine the filter array and the filter string
-			aFilterItems.forEach(function (oItem) {
-				switch (oItem.getKey()) {
-					case "Filter1" :
-						aFilters.push(new Filter("TenderNo", FilterOperator.LE, 100));
-						break;
-					case "Filter2" :
-						aFilters.push(new Filter("TenderNo", FilterOperator.GT, 100));
-						break;
-					default :
-						break;
-				}
-				aCaptions.push(oItem.getText());
-			});
+			// // update filter state:
+			// // combine the filter array and the filter string
+			// aFilterItems.forEach(function (oItem) {
+			// 	switch (oItem.getKey()) {
+			// 		case "Filter1" :
+			// 			aFilters.push(new Filter("TenderNo", FilterOperator.LE, 100));
+			// 			break;
+			// 		case "Filter2" :
+			// 			aFilters.push(new Filter("TenderNo", FilterOperator.GT, 100));
+			// 			break;
+			// 		default :
+			// 			break;
+			// 	}
+			// 	aCaptions.push(oItem.getText());
+			// });
 
-			this._oListFilterState.aFilter = aFilters;
-			this._updateFilterBar(aCaptions.join(", "));
+			this._oListFilterState.aFilter = this.andFilters;
+			// this._updateFilterBar(aCaptions.join(", "));
 			this._applyFilterSearch();
 			this._applySortGroup(oEvent);
 		},
