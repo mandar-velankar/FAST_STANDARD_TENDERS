@@ -38,7 +38,7 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input",
       // new Text();
       const control = new ui5Control(props);
       if (this.valueHelp && this.type === "Input") {
-        control.attachValueHelpRequest(this.valueHelp.onHandleValueHelpRequest);
+        control.attachValueHelpRequest(this.valueHelp.onHandleValueHelpRequest, this.valueHelp);
       }
       // const r2 = new (<any>window)["TestClass"]()
       // const control = new (sap.ui.require(this.getControlPath()))(this.getPropertiesAsObject());

@@ -1,4 +1,4 @@
-sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem","sap/m/Column","sap/m/Text"], function (BaseObject, Table, TableSelectDialog, ColumnListItem,Column,Text) {
+sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem","sap/m/Column","sap/m/Text", "sap/ui/model/Filter"], function (BaseObject, Table, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -21,17 +21,17 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
           Table: this.table
         };
       },
+      handleCloseValueHelp: function (oEvent) {
+        const oParam = oEvent.getParameter("selectedItem")
+        const selectedItem = oParam.getBindingContext().getObject();
+        oEvent.getSource().setValue(selectedItem[this.selectedFieldName]);
+      },
       onHandleValueHelpRequest: async function (oEvent) {
         const oSource = oEvent.getSource();
         const columns = this.getTable().getColumns();
         const sEntityPath = `/${this.getTable().getEntity()}`;
         const sTitle = this.getTable().getTitle();
   
-        let handleCloseValueHelp = function (oEvent) {
-          const oParam = oEvent.getParameter("selectedItem")
-          const selectedItem = oParam.getBindingContext().getObject();
-          oSource.setValue(selectedItem[this.selectedFieldName]);
-        }
         // create value help dialog
         this.valueHelpTableSelectDialog = new TableSelectDialog({
           title: sTitle,
@@ -84,7 +84,7 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
               this.getBinding("items").filter();
             }
           },
-          confirm: handleCloseValueHelp
+          confirm: (oEvent)=>this.handleCloseValueHelp(oEvent)
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
