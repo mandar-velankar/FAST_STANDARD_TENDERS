@@ -27,11 +27,11 @@ sap.ui.define([
 		},
 
 		formatDate: function(date, pattern){
-			return DateFormat.getDateInstance({pattern: pattern}).format(date);
+			return DateFormat.getDateInstance({pattern: pattern, UTC: true}).format(date);
 		},
 
 		parseDate: function(date, pattern){
-			return DateFormat.getDateInstance({pattern: pattern}).parse(date);
+			return DateFormat.getDateInstance({pattern: pattern, UTC: true}).parse(date);
 		}
 	};
 });

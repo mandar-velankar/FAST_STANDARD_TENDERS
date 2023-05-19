@@ -64,6 +64,9 @@ sap.ui.define([
 				aSearch : []
 			};
 
+			this.orFilters = [];
+			this.andFilters = [];
+			
 			this.setModel(oViewModel, "masterView");
 			// Make sure, busy indication is showing immediately so there is no
 			// break after the busy indication for loading the view's meta data is
@@ -86,6 +89,14 @@ sap.ui.define([
 
 		onCountriesReceived: async function(oEvent){
 			const sCountryCode = oEvent.getParameter("data").results[0].CountryCode;
+			if(sCountryCode){
+				this.andFilters.push(new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.Contains,
+					value1: sCountryCode,
+					caseSensitive: false
+				}));
+			}
 			const table = this.byId("genericMasterTable");
 			this.getView().getModel('masterView').setProperty("/SelectedCountry", sCountryCode);
 			this.templateState.read("MASTER",{ 
@@ -252,7 +263,7 @@ sap.ui.define([
 		 */
 		onConfirmViewSettingsDialog : function (oEvent) {
 			var aFilterItems = oEvent.getParameters().filterItems,
-				aFilters = [],
+				aFilters = this.andFilters,
 				aCaptions = [];
 
 			// update filter state:
@@ -476,63 +487,63 @@ sap.ui.define([
 
 		setFilter: function (oEvent) {
 
-			const orFilters = [];
-			const andFilters = [];
+			this.orFilters = [];
+			this.andFilters = [];
 
 			let sSearch = this.byId('idSearch').getValue();
 
 			if (sSearch) {
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "CountryCode",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "TenderID",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "Classification",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "TenderName",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "createdBy",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "DistributorName",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "InstituteName",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
 					caseSensitive: false
 				}));
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "OfferID",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
@@ -541,7 +552,7 @@ sap.ui.define([
 
 				// regex checks for numbers (decimals included)
 				if(/^[0-9]*[.]?[0-9]+$/.test(sSearch)){
-					orFilters.push(new Filter({
+					this.orFilters.push(new Filter({
 						path: "VALUE",
 						operator: FilterOperator.BT,
 						value1: Math.floor(sSearch),
@@ -549,7 +560,7 @@ sap.ui.define([
 					}));
 				}
 
-				orFilters.push(new Filter({
+				this.orFilters.push(new Filter({
 					path: "STATUS",
 					operator: FilterOperator.Contains,
 					value1: sSearch,
@@ -558,7 +569,7 @@ sap.ui.define([
 
 				const publicationDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
 				if(publicationDate){
-					orFilters.push(new Filter({
+					this.orFilters.push(new Filter({
 						path: "PublicationDate",
 						operator: FilterOperator.EQ,
 						value1: publicationDate,
@@ -568,7 +579,7 @@ sap.ui.define([
 
 				const bidDueDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
 				if(bidDueDate){
-					orFilters.push(new Filter({
+					this.orFilters.push(new Filter({
 						path: "BidDueDate",
 						operator: FilterOperator.EQ,
 						value1: bidDueDate,
@@ -576,7 +587,7 @@ sap.ui.define([
 					}));
 				}
 				
-				andFilters.push(new Filter(orFilters, false));
+				this.andFilters.push(new Filter(this.orFilters, false));
 			}
 
 			// Dropdown filters
@@ -584,7 +595,7 @@ sap.ui.define([
 			const oCountrySelectedItem =  this.byId("idSlctCountry").getSelectedItem();
 			const sCountryCode = oCountrySelectedItem?.getKey();
 			if(sCountryCode){
-				andFilters.push(new Filter({
+				this.andFilters.push(new Filter({
 					path: "CountryCode",
 					operator: FilterOperator.Contains,
 					value1: sCountryCode,
@@ -604,7 +615,7 @@ sap.ui.define([
 			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if(sBrandId && !sBrandId.toLowerCase().includes('all_brands')){
-				andFilters.push(new Filter({
+				this.andFilters.push(new Filter({
 					path: "BrandID",
 					operator: FilterOperator.Contains,
 					value1: sBrandId,
@@ -618,7 +629,7 @@ sap.ui.define([
 			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
 			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
 			if(sStatus && !sStatus.toLowerCase().includes('all')){
-				andFilters.push(new Filter({
+				this.andFilters.push(new Filter({
 					path: "STATUS",
 					operator: FilterOperator.Contains,
 					value1: sStatus,
@@ -627,8 +638,8 @@ sap.ui.define([
 			}
 
 
-			if(andFilters.length > 0){
-				const oFilters = new Filter(andFilters, true);
+			if(this.andFilters.length > 0){
+				const oFilters = new Filter(this.andFilters, true);
 
 				//Binding to table with the filters and the sorters
 				this._oList.getBinding("items")?.filter(oFilters, FilterType.Application);
