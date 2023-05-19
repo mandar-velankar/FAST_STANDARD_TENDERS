@@ -388,7 +388,6 @@ sap.ui.define([
 				}).then(function (oDialog) {
 					that.getView().addDependent(oDialog);
                     oDialog.open();
-					that._bindFormElements();
                 })
 			}else {
 				this.byId("idCreateTenderDialog").open();
@@ -400,21 +399,6 @@ sap.ui.define([
 			this.byId("idCreateTenderDialog").destroy();
 		},
 
-		_bindFormElements: async function () {
-			const tenderId = sap.ui.getCore().byId("idNewTenderId");
-			const oInstituteName = sap.ui.getCore().byId("idInstituteName");
-			const oClassification = sap.ui.getCore().byId("idClassification");
-			const oInstituteType = sap.ui.getCore().byId("idInstituteType");
-			
-			const controlInstName = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type").getFormElementByName("Institute Name").getControlById("idInstituteName");
-			const controlClassification = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type").getFormElementByName("Classification").getControlById("idClassification");
-			const controlInstituteType = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type").getFormElementByName("Institute Type").getControlById("idInstituteType");
-			
-			oInstituteName.attachValueHelpRequest(this.onHandleValueHelpRequest, {templateStateControl: controlInstName, showValue: "InstituteName", oView: this.getView()});
-			oClassification.attachValueHelpRequest(this.onHandleValueHelpRequest, {templateStateControl: controlClassification, showValue: "CLASSIFICATION", oView: this.getView()});
-			oInstituteType.attachValueHelpRequest(this.onHandleValueHelpRequest, {templateStateControl: controlInstituteType, showValue: "ChannelName", oView: this.getView()});
-
-		},
 		_generateNewTenderId: async function () {
 
 		}
