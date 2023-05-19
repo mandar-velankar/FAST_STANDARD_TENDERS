@@ -1,4 +1,4 @@
-sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem"], function (BaseObject, Table, TableSelectDialog, ColumnListItem) {
+sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem","sap/m/Column","sap/m/Text"], function (BaseObject, Table, TableSelectDialog, ColumnListItem,Column,Text) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -47,45 +47,39 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
           },
           liveChange: function (oEvent) {
             let orFilters = [];
-            let andFilters = [];
+            // let andFilters = [];
             let sValue = oEvent.getParameter("value");
   
 
             if (sValue) {
-              getPropertiesAsObject()
-              if (showValue === "InstituteName") {
-                orFilters.push(new Filter({
-                  path: "InstituteName",
+              orFilters = columns.map(col => {
+                const control = col.getControl()
+                const properties = control.getPropertiesAsObject();
+                let path;
+                switch (control.type) {
+                  case 'Text':
+                    path = 'text';
+                    break;
+                  case 'Input':
+                    path = 'value';
+                    break;
+                  default:
+                    path = '';
+                    break;
+                }
+                return new Filter({
+                  path: path,
                   operator: FilterOperator.Contains,
                   value1: sValue,
                   caseSensitive: false	
-                }))
-                orFilters.push(new Filter({
-                  path: "InstituteID",
-                  operator: FilterOperator.EQ,
-                  value1: sValue,
-                }))
-              }
-              if (showValue === "CLASSIFICATION") {
-                orFilters.push(new Filter({
-                  path: "CLASSIFICATION",
-                  operator: FilterOperator.Contains,
-                  value1: sValue,
-                  caseSensitive: false	
-                }))
-              }
-              if (showValue === "ChannelName") {
-                orFilters.push(new Filter({
-                  path: "ChannelName",
-                  operator: FilterOperator.Contains,
-                  value1: sValue,
-                  caseSensitive: false	
-                }))
-              }
-              andFilters.push(new Filter(orFilters, false));
+                })
+              });
+              
+              // andFilters.push(new Filter(orFilters, false));
             }
-            if (andFilters.length > 0) {
-              this.getBinding("items").filter(andFilters);
+            // if (andFilters.length > 0) {
+            if (orFilters.length > 0) {
+              this.getBinding("items").filter(orFilters);
             }else {
               this.getBinding("items").filter();
             }
@@ -94,8 +88,8 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
-          let newColumn = new sap.m.Column({
-            header: new sap.m.Text({
+          let newColumn = new Column({
+            header: new Text({
               text: col.title
             })
           })
