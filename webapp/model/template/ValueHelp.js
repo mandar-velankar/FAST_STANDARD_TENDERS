@@ -21,10 +21,10 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
           Table: this.table
         };
       },
-      handleCloseValueHelp: function (oEvent) {
+      handleCloseValueHelp: function (oEvent,originalInputField) {
         const oParam = oEvent.getParameter("selectedItem")
         const selectedItem = oParam.getBindingContext().getObject();
-        oEvent.getSource().setValue(selectedItem[this.selectedFieldName]);
+        originalInputField?.setValue(selectedItem[this.selectedFieldName]);
       },
       onHandleValueHelpRequest: async function (oEvent) {
         const oSource = oEvent.getSource();
@@ -84,7 +84,7 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
               this.getBinding("items").filter();
             }
           },
-          confirm: (oEvent)=>this.handleCloseValueHelp(oEvent)
+          confirm: (oEvent)=>this.handleCloseValueHelp(oEvent,oSource)
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
