@@ -11,8 +11,9 @@ sap.ui.define([
 	"sap/ui/Device",
 	"sap/ui/core/Fragment",
 	"../model/formatter",
-	"sap/m/ColumnListItem"
-], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem) {
+	"sap/m/ColumnListItem",
+	"sap/ui/core/Item"
+], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem, Item) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -55,6 +56,7 @@ sap.ui.define([
 				}.bind(this)
 			};
 
+		
 			this._oList = oList;
 			// keeps the filter and search state
 			this._oListFilterState = {
@@ -82,11 +84,77 @@ sap.ui.define([
 			this.getRouter().attachBypassed(this.onBypassed, this);
 		},
 
-		onCountriesRequested: function(event){
-			debugger;
+		onCountriesReceived: async function(oEvent){
+			const sCountryCode = oEvent.getParameter("data").results[0].CountryCode;
+			const table = this.byId("genericMasterTable");
+			this.getView().getModel('masterView').setProperty("/SelectedCountry", sCountryCode);
+			this.templateState.read("MASTER",{ 
+				countryCode:"BR", // TODO: this is hardcoded country. We need to change this once we have more country config
+				appID:"StandardTenders",
+				page:"MASTER"
+			}).then(()=>{
+				this._bindTable(table);	
+			});
+			
+			this._bindBrandItems(sCountryCode);
+			this._bindStatusses(sCountryCode);
+			
 		},
-		onCountriesReceived: function(event){
-			debugger;
+
+		_bindBrandItems: function(sCountryCode){
+			const oSelectBrands = this.byId("idSlctBrand");	
+			oSelectBrands?.bindItems({
+				path: "/CountryTenderBrands", 
+				filters: [
+					new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode)
+				],
+				sorter: new Sorter ({
+					path: 'BRANDNAME', 
+					descending: false
+				}),
+				template: new sap.ui.core.Item({
+					key: "{BRANDID}",
+					text: "{BRANDNAME}"
+				}),
+				templateShareable: true
+			});	
+		},
+
+		_bindStatusses: function(sCountryCode){
+			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const oSelectStatus = this.byId("idSlctStatus");	
+			oSelectStatus?.bindItems({
+				path: "/CountryStatusses", 
+				filters: [
+					new Filter("CountryCode",FilterOperator.EQ, sCountryCode)
+				],
+				sorter: new Sorter ({
+					path: 'Status', 
+					descending: false
+				}),
+				template: new Item({
+					key: "{Status}",
+					text: "{Status}"
+				}),
+				templateShareable: true
+			});
+		},
+
+		_bindTable: function(table){
+			const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
+			const sCountryCode = oCountrySelectedItem?.getKey();
+			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
+			table && table.bindItems({
+			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
+			  filters: [oFilterCountry],
+			//   model: '',
+			  template: new ColumnListItem({
+				type: "Active",
+				cells: cols.map(col => col.getControl().generateControl())
+			  }),
+			  templateShareable: true
+			});
 		},
 		/* =========================================================== */
 		/* event handlers                                              */
@@ -297,7 +365,8 @@ sap.ui.define([
 				title: this.getResourceBundle().getText("masterTitleCount", [0]),
 				noDataText: this.getResourceBundle().getText("masterListNoDataText"),
 				sortBy: "TenderName",
-				groupBy: "None"
+				groupBy: "None",
+				SelectedCountry: ""
 			});
 		},
 
@@ -305,26 +374,25 @@ sap.ui.define([
 			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
 			
-			
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			await this.templateState.read("MASTER",{
-				countryCode:"BR",
-				appID:"StandardTenders",
-				page:"MASTER"
-			});
+			// await this.templateState.read("MASTER",{
+			// 	countryCode:"BR",
+			// 	appID:"StandardTenders",
+			// 	page:"MASTER"
+			// });
 			// this.setModel(this.templateStateData.masterConfig.countryTemplate.getTemplate().getODataModel(), "data");
-			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
-			const table = this.byId("genericMasterTable");
-			table && table.bindItems({
-			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
-			//   model: '',
-			  template: new ColumnListItem({
-				type: "Active",
-				cells: cols.map(col => col.getControl().generateControl())
-			  }),
-			  templateShareable: true
-			});
+			// const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
+			// const table = this.byId("genericMasterTable");
+			// table && table.bindItems({
+			//   path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
+			// //   model: '',
+			//   template: new ColumnListItem({
+			// 	type: "Active",
+			// 	cells: cols.map(col => col.getControl().generateControl())
+			//   }),
+			//   templateShareable: true
+			// });
 		},
 
 		/**
@@ -523,11 +591,17 @@ sap.ui.define([
 					caseSensitive: false
 				}));
 			}
+			
+			const isCountrySelectChanged = oEvent.getParameter("id").toLowerCase().includes("idslctcountry");
+			if(isCountrySelectChanged){
+				this._bindBrandItems(sCountryCode);
+				this._bindStatusses(sCountryCode);
+			}
 
 			// Brands
-			const oFilterBrands = new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode);
+			// const oFilterBrands = new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode);
 			const oSelectBrands = this.byId("idSlctBrand");	
-			oSelectBrands.getBinding("items").filter([oFilterBrands]);
+			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if(sBrandId && !sBrandId.toLowerCase().includes('all_brands')){
 				andFilters.push(new Filter({
@@ -539,9 +613,9 @@ sap.ui.define([
 			}
 
 			// Status 
-			const oFilterStatus = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			// const oFilterStatus = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
 			const oSelectStatus = this.byId("idSlctStatus");	
-			oSelectStatus.getBinding("items").filter([oFilterStatus]);
+			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
 			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
 			if(sStatus && !sStatus.toLowerCase().includes('all')){
 				andFilters.push(new Filter({
@@ -557,14 +631,14 @@ sap.ui.define([
 				const oFilters = new Filter(andFilters, true);
 
 				//Binding to table with the filters and the sorters
-				this._oList.getBinding("items").filter(oFilters, FilterType.Application);
+				this._oList.getBinding("items")?.filter(oFilters, FilterType.Application);
 			}else{
 				this._oList.getBinding('items').aApplicationFilters = [];
-				this._oList.getBinding("items").filter();
+				this._oList.getBinding("items")?.filter();
 			}
 			
-			if (this._oList.getBinding("items").isSuspended()) {
-				this._oList.getBinding("items").resume();
+			if (this._oList.getBinding("items")?.isSuspended()) {
+				this._oList.getBinding("items")?.resume();
 			}
 			
 		},

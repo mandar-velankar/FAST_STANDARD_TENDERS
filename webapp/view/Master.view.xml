@@ -33,6 +33,7 @@
 					/>
 					<Select 
 						id="idSlctCountry" 
+						selectedKey="{masterView>/SelectedCountry}"
 						items="{ 
 							path: '/UserCountries', 
 							parameters: {
@@ -40,6 +41,9 @@
 							},
 							sorter: { 
 								path: 'Country/CountryName' 
+							},
+							 events: {
+								dataReceived: '.onCountriesReceived'
 							}
 						}"
 						change=".setFilter"
@@ -52,14 +56,9 @@
 					/>
 					<Select 
 						id="idSlctBrand" 
-						items="{ 
-							path: '/CountryTenderBrands', 
-							sorter: { 
-								path: 'BRANDNAME' 
-							} 
-						}"
 						change=".setFilter"
 					>
+						<!-- items binding see controller -->
 						<core:Item key="{BRANDID}" text="{BRANDNAME}"/>
 					</Select>
 					<Label
@@ -68,14 +67,9 @@
 					/>
 					<Select 
 						id="idSlctStatus" 
-						items="{ 
-							path: '/CountryStatusses', 
-							sorter: { 
-								path: 'Status' 
-							} 
-						}"
 						change=".setFilter" 
 					>
+						<!-- items binding see controller -->
 						<core:Item key="{Status}" text="{Status}"/>
 					</Select>
 					<ToolbarSpacer/>
