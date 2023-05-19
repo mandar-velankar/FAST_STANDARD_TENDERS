@@ -1,4 +1,4 @@
-<mvc:View controllerName="com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation" 
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts" 
 	xmlns="sap.m"
 	xmlns:t="sap.ui.table"
 	xmlns:f="sap.f"
@@ -53,11 +53,12 @@
 	</VBox>
 
 	<VBox class='sapUiMediumMargin'>
-		<Table id="idOfferProducts" 
+		<Table id="idOfferProductsTable" 
 			columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
-		>
+			mode="SingleSelectMaster"
+			selectionChange=".onOfferProductPress">
 			<headerToolbar>
 				<OverflowToolbar>
 					<content>

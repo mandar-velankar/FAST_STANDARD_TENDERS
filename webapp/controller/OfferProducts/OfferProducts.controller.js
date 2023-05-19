@@ -2,8 +2,10 @@ sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/m/library",
+	"sap/ui/model/Filter",
+	"sap/m/ColumnListItem",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -13,17 +15,21 @@ sap.ui.define([
 
 		onInit: function () {
 		},
-		onBeforeShow:async function(iconTabfilter,sObjectId){
+		onBeforeShow:async function(iconTabfilter,sObjectId, sOfferId){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.oOwnerComponent = this.getOwnerComponent();
+			this.oRouter = this.oOwnerComponent.getRouter();
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.objectId = sObjectId;
+			this.offerID = sOfferId;
 			this.selectedTab = iconTabfilter.getKey();
 
 			this._bindForm("OfferForm");
+			this._bindTable("OfferProductsTable");
 		},
 
 		/**
@@ -38,6 +44,7 @@ sap.ui.define([
 			if (this.objectId) {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 					TenderID: this.objectId,
+					OfferID: this.offerID
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
@@ -47,6 +54,55 @@ sap.ui.define([
 			form.bindElement({
 				path: path,
 			});
+		},
+
+		/**
+		 * This method binds a given table to its entity from the ui configuration template.
+		 * FYI: the table ID in the View is a concatination of "id" + tableName
+		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
+		 */
+		_bindTable(tableName){
+			const tableConfig =  this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getTableByName(tableName);
+			const entity = tableConfig.getEntity();
+			const table = this.byId(`id${tableName}`);
+			const cols = tableConfig.getColumns();
+			
+			table?.bindItems({
+				path: `/${entity}`,
+			  	filters: [
+					new Filter("TenderID", "EQ", this.objectId),
+					new Filter("OfferID", "EQ", this.offerID)
+				],
+				//   model: '',
+			  	template: new ColumnListItem({
+					type: "Inactive",
+					cells: cols.map(col => col.getControl().generateControl())
+			  	}),
+			  	templateShareable: true
+			});
+		},
+
+		/* =========================================================== */
+		/* event handlers                                              */
+		/* =========================================================== */
+
+		onOfferProductPress: function(oEvent){
+			/*const objContext = oEvent.getParameter("listItem").getBindingContext("pa");
+			const selectedObj = objContext?.getObject();
+
+			var deliveryPath = objContext.getPath(),
+			delivery = deliveryPath.split("/").slice(-1).pop();*/
+
+			let oNextUIState = "";
+
+			this.oOwnerComponent.getHelper().then(function (oHelper) {
+				oNextUIState = oHelper.getNextUIState(2);
+				this.oRouter.navTo("offerProductDetail", {
+					layout: oNextUIState.layout,
+					objectId: "AE-15-100-1001",
+					productId: "1"
+				});
+			}.bind(this));
 		}
 	});
 });
