@@ -21,20 +21,27 @@
 				<Toolbar>
 					<Title text="{template>title}"/>
 					<ToolbarSpacer />
-					<Button text="New Offer" icon="sap-icon://add" press="onCreateProductOffer"/>
-					<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" enabled="true" />
-					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" enabled="true"/>
-					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onEditOfferButtonPress" enabled="true"/>
+					<Button text="New Offer" icon="sap-icon://add" press="onCreateProductOffer" visible="{= !${ui>/editMode} }"/>
+					<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" visible="{= !${ui>/editMode} }" />
+					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" visible="{= !${ui>/editMode} }"/>
+					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferFormEditBtnPress" visible="{= !${ui>/editMode} }"/>
+					<Button
+						id="idOfferFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onOfferFormSaveBtnPress"
+						visible="{= ${ui>/editMode} }"
+					/>
+					<Button
+						id="idOfferFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onOfferFormCancelBtnPress"
+						visible="{= ${ui>/editMode} }"
+					/>
 				</Toolbar>
 			</form:toolbar>
 			<form:layout>
-				<!--<form:ResponsiveGridLayout labelSpanL="{template>layout/labelSpanL}" 
-										   labelSpanM="{template>layout/labelSpanM}"
-										   emptySpanL="{template>layout/emptySpanL}" 
-										   emptySpanM="{template>layout/emptySpanL}"
-										   columnsL="{template>layout/columnsL}" 
-										   columnsM="{template>layout/columnsM}" 
-										   columnsXL="{template>layout/columnsXL}" />-->
 				<form:ResponsiveGridLayout labelSpanL="12" labelSpanM="12"
 				emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" columnsXL="3" class="editableForm" backgroundDesign="Solid" />
 			</form:layout>
