@@ -39,12 +39,33 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input",
       const control = new ui5Control(props);
       if (this.valueHelp && this.type === "Input") {
         control.attachValueHelpRequest(this.valueHelp.onHandleValueHelpRequest, this.valueHelp);
+      } 
+      
+      if (this.valueHelp && this.type === "Select"){
+        if(this.valueHelp.table && this.valueHelp.table.entity){
+          let oItemTemplate = this.generateItemTemplate(this.valueHelp.table);
+          control.bindItems({ 
+              path: `/${this.valueHelp.table.entity}`,
+              template: oItemTemplate 
+          });
+        } else {
+          this.valueHelp.staticValues.forEach(item => {
+            control.addItem(item.generateItem());
+          })
+        }
       }
       // const r2 = new (<any>window)["TestClass"]()
       // const control = new (sap.ui.require(this.getControlPath()))(this.getPropertiesAsObject());
 
       return control;
     },
+    
+    generateItemTemplate: function (table) {
+      let key = table?.columns?.find(column => column.isValueHelpKey)?.control?.properties?.find(prop => prop.name === 'text')?.value;
+      let text = table?.columns?.find(column => column.isValueHelpText)?.control?.properties?.find(prop => prop.name === 'text')?.value;
+      return new sap.ui.core.Item({'key': `{${key}}`, 'text': `{${text}}`});
+    },
+
     getValueHelp: function () {
       return this.valueHelp;
     },
