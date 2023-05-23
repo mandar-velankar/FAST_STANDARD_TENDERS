@@ -33,7 +33,7 @@
 					/>
 					<Select 
 						id="idSlctCountry" 
-						selectedKey="{masterView>/SelectedCountry}"
+						selectedKey="{st>/SelectedCountry}"
 						items="{ 
 							path: '/UserCountries', 
 							parameters: {

@@ -1,4 +1,13 @@
-sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem","sap/m/Column","sap/m/Text", "sap/ui/model/Filter"], function (BaseObject, Table, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
+sap.ui.define([
+  "../BaseObject", 
+  "./Table", 
+  "./Filter",
+  "sap/m/TableSelectDialog", 
+  "sap/m/ColumnListItem",
+  "sap/m/Column",
+  "sap/m/Text", 
+  "sap/ui/model/Filter"
+], function (BaseObject, Table, TemplateFilter, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -9,6 +18,7 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
           this.searchable = data.Searchable
           this.selectedFieldName = data.SelectedFieldName
           this.table = new com.bayer.tender.statenderapp.model.template.Table(data.Table);
+          this.filters = data.Filters.map(filter => new TemplateFilter(filter));
         }
       },
       getTable: function () {
@@ -24,7 +34,8 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
       handleCloseValueHelp: function (oEvent,originalInputField) {
         const oParam = oEvent.getParameter("selectedItem")
         const selectedItem = oParam.getBindingContext().getObject();
-        originalInputField?.setValue(selectedItem[this.selectedFieldName]);
+        const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
+        originalInputField.getModel().setProperty(path, selectedItem[this.selectedFieldName]);
       },
       onHandleValueHelpRequest: async function (oEvent) {
         const oSource = oEvent.getSource();
@@ -39,7 +50,13 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
           contentWidth: '250px',
           items: {
             path: sEntityPath,
-            filters: this._setValueHelpFilters(),
+            filters: this._setFilters(
+              {
+                defaultModel: oSource.getModel(),
+                defaultEntityPath:sEntityPath,
+                stateModel:oSource.getModel("st")
+              }
+            ),
             template: new ColumnListItem({
                 type: "Active",
                 cells: columns.map(col => col.getControl().generateControl())
@@ -97,14 +114,12 @@ sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/Col
         })
         
         this.valueHelpTableSelectDialog.setModel(oSource.getModel());
+        this.valueHelpTableSelectDialog.setModel(oSource.getModel("st"), "st");
         this.valueHelpTableSelectDialog.open();
       },
 
-      _setValueHelpFilters: function (showValue) {
-        let filters = [
-          new Filter("CountryCode", "EQ", "BR")
-        ];
-        return filters;
+      _setFilters: function (modelInfo) {
+        return this.filters.map(filter => filter.generateFilter(modelInfo));
       }
     });
     return ValueHelp;
