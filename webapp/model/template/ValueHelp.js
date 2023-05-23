@@ -1,4 +1,4 @@
-sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem","sap/m/Column","sap/m/Text", "sap/ui/model/Filter"], function (BaseObject, Table, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
+sap.ui.define(["../BaseObject", "./Table", "sap/m/TableSelectDialog", "sap/m/ColumnListItem","sap/m/Column","sap/m/Text", "sap/ui/model/Filter", "sap/ui/model/FilterOperator"], function (BaseObject, Table, TableSelectDialog, ColumnListItem,Column,Text, Filter, FilterOperator) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
