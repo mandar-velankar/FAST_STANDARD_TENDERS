@@ -16,7 +16,8 @@ sap.ui.define([
           this.title = data.Title;
           this.tableId = data.TableID;
           this.searchable = data.Searchable
-          this.selectedFieldName = data.SelectedFieldName
+          this.selectedFieldID = data.SelectedFieldID;
+          this.selectedFieldName = data.SelectedFieldName;
           this.table = new com.bayer.tender.statenderapp.model.template.Table(data.Table);
           this.filters = data.Filters.map(filter => new TemplateFilter(filter));
         }
@@ -36,6 +37,11 @@ sap.ui.define([
         const selectedItem = oParam.getBindingContext().getObject();
         const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
         originalInputField.getModel().setProperty(path, selectedItem[this.selectedFieldName]);
+
+        if(this.selectedFieldID){
+          const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + this.selectedFieldID;
+          originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[this.selectedFieldID]);
+        }
       },
       onHandleValueHelpRequest: async function (oEvent) {
         const oSource = oEvent.getSource();
