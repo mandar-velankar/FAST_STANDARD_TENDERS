@@ -52,7 +52,8 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                                                                             }
                                                                         }
                                                                     },
-                                                                    "Filters": {}
+                                                                    "Filters": {},
+                                                                    "StaticValues": {},
                                                                 }
                                                             }
                                                         }
@@ -144,7 +145,8 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                                                                                             }
                                                                                         }
                                                                                     },
-                                                                                    "Filters": {}
+                                                                                    "Filters": {},
+                                                                                    "StaticValues": {},
                                                                                 }
                                                                             }
                                                                         }
