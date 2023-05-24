@@ -62,42 +62,27 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                 $expand: {
                     "Template": {
                         $expand: {
-                            "Tabs": {
-                                $expand: {
-                                    "Forms": {
-                                        $expand: {
-                                            "Layout": {
-                                                $expand: "Properties"
-                                            },
-                                            "FormContainers": {
-                                                $expand: {
-                                                    "FormElements": {
-                                                        $expand: {
-                                                            "Controls": {
-                                                                $expand: "Properties"
-                                                            }
+                                "Form": {
+                                    $expand: {
+                                        "Layout": {
+                                            $expand: "Properties"
+                                        },
+                                        "FormContainers": {
+                                            $expand: {
+                                                "FormElements": {
+                                                    $expand: {
+                                                        "Controls": {
+                                                            $expand: "Properties"
                                                         }
                                                     }
                                                 }
                                             }
                                         }
-                                    },
-                                    "Tables": {
-                                        $expand: {
-                                            "Columns": {
-                                                $expand: {
-                                                    "Control": {
-                                                        $expand: "Properties"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }   
-                                }
+                                    }
+                                }  
                             }
                         }
                     }
-                }
             });
             return await templateBinding.requestObject();
         },
