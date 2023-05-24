@@ -118,6 +118,7 @@ sap.ui.define([
 			}).then(data => {
 				let year = new Date().getFullYear();
 				year = year.toString().substring(4, 2);
+				this.getModel("st").setProperty("/NextTenderNo", data);
 				return `${sCountryCode}-${year}-${data}`;
 			})
 		},
@@ -533,20 +534,22 @@ sap.ui.define([
 			const oNewTenderForm = this.byId("idNewTenderForm");
 			this.setNewTenderPendingChanges(oNewTenderForm);
 			this.getModel().submitChanges();
+			this.onCloseTenderCreationDialog();
 		},
 
 		setNewTenderPendingChanges: function (oForm) {
 			const oDefaultModel = oForm.getModel();
-			const oMasterViewModel = oForm.getModel("masterView");
+			const oStandModel = oForm.getModel("st");
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
-
+			const sSelectedCountry = oStandModel.getProperty("/SelectedCountry");
 
 			const newTenderObj = {
 				TenderID: oBoundContext.getObject().TenderID,
 				Active: 1,
 				TenderName: oBoundContext.getObject().TenderName,
-				CountryCode: oMasterViewModel.getProperty("/SelectedCountry"),
-				InstituteID: oInstitute.InstituteID,
+				CountryCode: sSelectedCountry,
+				InstituteID: 105441,
+				TenderNo: oStandModel.getProperty("/NextTenderNo"),
 				Classification: oBoundContext.getObject().Classification,
 				ContractExtenseion: oBoundContext.getObject().ContractExtenseion,
 				ContractLength: oBoundContext.getObject().ContractLength,
@@ -555,6 +558,10 @@ sap.ui.define([
 				AwardDate: oBoundContext.getObject().AwardDate,
 				NextPublicationDye: oBoundContext.getObject().NextPublicationDye
 			}
+			oDefaultModel.createEntry("/TenderFormView", {
+				properties: newTenderObj
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},
 		setFilter: function (oEvent) {
 
