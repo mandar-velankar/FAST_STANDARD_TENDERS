@@ -22,6 +22,13 @@
 					<Title text="{template>title}"/>
 					<ToolbarSpacer/>
 					<Button
+						icon="sap-icon://alert"
+						text="{= ${message>/}.length }"
+						visible="{= ${message>/}.length > 0 }"
+						type="Emphasized"
+						press="onMessagePopoverPress" 
+					/>
+					<Button
 						id="idTenderFormEditBtn"
 						icon="sap-icon://edit"
 						text="Edit"

@@ -4,8 +4,9 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Filter",
-	"sap/m/MessageBox"
-], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox) {
+	"sap/m/MessageBox",
+	"sap/ui/core/Fragment"
+], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Fragment) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -14,6 +15,13 @@ sap.ui.define([
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
 
 		onInit: function () {
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
+
 		},
 		onBeforeShow:async function(iconTabfilter,sObjectId){
 			
@@ -36,7 +44,7 @@ sap.ui.define([
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
-				editMode: false,
+				editMode: false
 			});
 	
 			this.setModel(oModel, "ui");
@@ -99,15 +107,30 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', false);
 
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
 			// Award Criteria	
 			const isAwardCriteriaValid = this.validateAwardCriteria();
 			if(!isAwardCriteriaValid) return;
 			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
-			this.defaultModel.submitChanges(); 
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSuccess.bind(this)
+			}); 
 		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesSuccess: function(res){
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/editMode', false);
+		},
+
 		onTenderFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
 			this.defaultModel.resetChanges();
@@ -172,6 +195,30 @@ sap.ui.define([
 
 			return bValid;
 		},
+
+
+		onMessagePopoverPress : function (oEvent) {
+			const oSourceControl = oEvent.getSource();
+			this._getMessagePopover().then(function(oMessagePopover){
+				oMessagePopover.openBy(oSourceControl);
+			});
+		},
+
+		_getMessagePopover: function () {
+			const oView = this.getView();
+
+			// create popover lazily (singleton)
+			if (!this._pMessagePopover) {
+				this._pMessagePopover = Fragment.load({
+					id: oView.getId(),
+					name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
+				}).then(function (oMessagePopover) {
+					oView.addDependent(oMessagePopover);
+					return oMessagePopover;
+				});
+			}
+			return this._pMessagePopover;
+		}
 
 	});
 });
