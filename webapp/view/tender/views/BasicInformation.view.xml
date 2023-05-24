@@ -103,6 +103,47 @@
 			</columns>
 		</Table>
 	</VBox>	
+	<VBox>
+		<form:Form
+			id="idTenderFormTest"
+			editable="true">
+			<form:title>
+				<core:Title text="Test only fields custom" />
+			</form:title>
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="3"
+					labelSpanL="3"
+					labelSpanM="3"
+					labelSpanS="12"
+					adjustLabelSpan="false"
+					emptySpanXL="4"
+					emptySpanL="4"
+					emptySpanM="4"
+					emptySpanS="0"
+					columnsXL="1"
+					columnsL="1"
+					columnsM="1"
+					singleContainerFullSize="false" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="Custom form container title" >
+					<form:formElements>
+						<form:FormElement visible="{template>xmlView/formByName/TenderForm/formContainers/0/elementByName/ID/visible}" label="Custom Label ID" >
+							<form:fields>
+								<Input value="{TenderID}"/>
+							</form:fields>
+						</form:FormElement>
+						<form:FormElement visible="{template>xmlView/formByName/TenderForm/formContainers/0/elementByName/TenderReference/visible}" label="Custom Label Tender Reference" >
+							<form:fields>
+								<Input value="{TenderName}"/>
+							</form:fields>
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+	</VBox>
 	
 
 </mvc:View>
