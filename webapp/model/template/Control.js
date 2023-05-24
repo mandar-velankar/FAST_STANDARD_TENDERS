@@ -53,6 +53,10 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input",
             control.addItem(item.generateItem());
           })
         }
+
+        if(this.properties.find(prop => prop.name === 'selectedKey')){
+          control.setSelectedKey(`{${this.properties.find(prop => prop.name === 'selectedKey').value}}`)
+        }
       }
       // const r2 = new (<any>window)["TestClass"]()
       // const control = new (sap.ui.require(this.getControlPath()))(this.getPropertiesAsObject());
