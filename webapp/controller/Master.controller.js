@@ -548,7 +548,7 @@ sap.ui.define([
 				Active: 1,
 				TenderName: oBoundContext.getObject().TenderName,
 				CountryCode: sSelectedCountry,
-				InstituteID: 105441,
+				// InstituteID: 105441,
 				TenderNo: oStandModel.getProperty("/NextTenderNo"),
 				Classification: oBoundContext.getObject().Classification,
 				ContractExtenseion: oBoundContext.getObject().ContractExtenseion,
