@@ -55,14 +55,14 @@ sap.ui.define([
             filters: this._setFilters(
               {
                 defaultModel: oSource.getModel(),
-                defaultEntityPath:sEntityPath,
-                stateModel:oSource.getModel("st")
+                defaultEntityPath:oSource?.getBindingContext().getPath(),
+                stateModel:oSource.getModel("st"),
               }
             ),
             template: new ColumnListItem({
                 type: "Active",
                 cells: columns.map(col => col.getControl().generateControl())
-              })	
+            })	
           },
           liveChange: function (oEvent) {
             let orFilters = [];
@@ -107,11 +107,7 @@ sap.ui.define([
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
-          let newColumn = new Column({
-            header: new Text({
-              text: col.title
-            })
-          })
+          let newColumn = new Column();
           this.valueHelpTableSelectDialog.addColumn(newColumn);
         })
         
@@ -120,7 +116,7 @@ sap.ui.define([
         this.valueHelpTableSelectDialog.open();
       },
 
-      _setFilters: function (modelInfo) {
+      _setFilters: function (modelInfo, oControl) {
         return this.filters.map(filter => filter.generateFilter(modelInfo));
       }
     });

@@ -98,13 +98,30 @@ sap.ui.define([
 					caseSensitive: false
 				}));
 			}
-			
+
 			this._getTemplateConfig(sCountryCode);	
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
-			
-		},
 
+		},
+		_getNextTenderID: async function (sCountryCode) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CountryTenderNo", {
+					filters: [
+						new Filter("COUNTRY_CODE", "EQ", sCountryCode)
+					],
+					success: function (res) {
+						let nextTenderNo = res.results[0].NEXT_TENDER_NO;
+						resolve(nextTenderNo);
+					}
+				});
+			}).then(data => {
+				let year = new Date().getFullYear();
+				year = year.toString().substring(4, 2);
+				this.getModel("st").setProperty("/NextTenderNo", data);
+				return `${sCountryCode}-${year}-${data}`;
+			})
+		},
 		_getTemplateConfig: function(sCountryCode){
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.templateState.read("MASTER",{ 
@@ -480,22 +497,72 @@ sap.ui.define([
 			if (!this.byId("idCreateTenderDialog")) {
 				this.tenderCreationDialog = Fragment.load({
 					id: that.getView().getId(),
-					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTender",
+					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTenderDialog",
                     controller: that,
 				}).then(function (oDialog) {
 					that.getView().addDependent(oDialog);
                     oDialog.open();
+					that._bindCreateTenderForm();
                 })
 			}else {
 				this.byId("idCreateTenderDialog").open();
 			}
 		},
+		_bindCreateTenderForm: async function () {
+			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
+			const form = this.byId("idNewTenderForm")
+			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+			const path = newEntryContext.getPath();
+			form?.bindElement({
+				path: path
+			});
+			const sElemBindingPath = form.getElementBinding().getPath();
+			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
+			const nextTenderID = await this._getNextTenderID(sCountryCode);
 
+			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
+			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
+			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
+		},
 		onCloseTenderCreationDialog: function () {
 			this.byId("idCreateTenderDialog").close();
 			this.byId("idCreateTenderDialog").destroy();
+			this.getModel().resetChanges();
 		},
 
+		onCreateNewTender: function () {
+			const oNewTenderForm = this.byId("idNewTenderForm");
+			this.setNewTenderPendingChanges(oNewTenderForm);
+			this.getModel().submitChanges();
+			this.onCloseTenderCreationDialog();
+		},
+
+		setNewTenderPendingChanges: function (oForm) {
+			const oDefaultModel = oForm.getModel();
+			const oStandModel = oForm.getModel("st");
+			const oBoundContext = oForm.getElementBinding().getBoundContext();
+			const sSelectedCountry = oStandModel.getProperty("/SelectedCountry");
+
+			const newTenderObj = {
+				TenderID: oBoundContext.getObject().TenderID,
+				Active: 1,
+				TenderName: oBoundContext.getObject().TenderName,
+				CountryCode: sSelectedCountry,
+				// InstituteID: 105441,
+				TenderNo: oStandModel.getProperty("/NextTenderNo"),
+				Classification: oBoundContext.getObject().Classification,
+				ContractExtenseion: oBoundContext.getObject().ContractExtenseion,
+				ContractLength: oBoundContext.getObject().ContractLength,
+				PublicationDate: oBoundContext.getObject().PublicationDate,
+				BidDueDate: oBoundContext.getObject().BidDueDate,
+				AwardDate: oBoundContext.getObject().AwardDate,
+				NextPublicationDye: oBoundContext.getObject().NextPublicationDye
+			}
+			oDefaultModel.createEntry("/TenderFormView", {
+				properties: newTenderObj
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
 		setFilter: function (oEvent) {
 
 			this.orFilters = [];
