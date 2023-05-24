@@ -21,12 +21,22 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
 			this.oRouter = this.oOwnerComponent.getRouter();
+
+			this.defaultModel = this.getOwnerComponent().getModel();
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.objectId = sObjectId;
 			this.offerID = sOfferId;
 			this.selectedTab = iconTabfilter.getKey();
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+			});
+	
+			this.setModel(oModel, "ui");
 
 			this._bindForm("OfferForm");
 			this._bindTable("OfferProductsTable");
@@ -103,6 +113,24 @@ sap.ui.define([
 					productId: "1"
 				});
 			}.bind(this));
-		}
+		},
+
+		onOfferFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', true);
+		},
+		onOfferFormSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+
+			// Award Criteria	
+			/*const isAwardCriteriaValid = this.validateAwardCriteria();
+			if(!isAwardCriteriaValid) return;
+			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);*/
+
+			this.defaultModel.submitChanges(); 
+		},
+		onOfferFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+			this.defaultModel.resetChanges();
+		},
 	});
 });

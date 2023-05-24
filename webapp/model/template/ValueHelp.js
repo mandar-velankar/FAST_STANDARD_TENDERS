@@ -2,12 +2,13 @@ sap.ui.define([
   "../BaseObject", 
   "./Table", 
   "./Filter",
+  "./StaticValue",
   "sap/m/TableSelectDialog", 
   "sap/m/ColumnListItem",
   "sap/m/Column",
   "sap/m/Text", 
   "sap/ui/model/Filter"
-], function (BaseObject, Table, TemplateFilter, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
+], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -19,6 +20,7 @@ sap.ui.define([
           this.selectedFieldName = data.SelectedFieldName
           this.table = new com.bayer.tender.statenderapp.model.template.Table(data.Table);
           this.filters = data.Filters.map(filter => new TemplateFilter(filter));
+          this.staticValues = data.StaticValues.map(value => new TemplateStaticValue(value));
         }
       },
       getTable: function () {
