@@ -4,16 +4,27 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Filter",
-	"sap/m/MessageBox"
-], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox) {
+	"sap/m/MessageBox",
+	"sap/ui/core/message/Message",
+	"sap/ui/core/Fragment",
+	"sap/ui/core/library"
+], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Message,Fragment,library) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
 	var URLHelper = mobileLibrary.URLHelper;
+	var MessageType = library.MessageType;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
 
 		onInit: function () {
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
+
 		},
 		onBeforeShow:async function(iconTabfilter,sObjectId){
 			
@@ -36,7 +47,7 @@ sap.ui.define([
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
-				editMode: false,
+				editMode: false
 			});
 	
 			this.setModel(oModel, "ui");
@@ -99,16 +110,34 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', false);
 
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
 			// Award Criteria	
-			const isAwardCriteriaValid = this.validateAwardCriteria();
+			const isAwardCriteriaValid = this.validateAwardCriteria(event);
 			if(!isAwardCriteriaValid) return;
 			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
-			this.defaultModel.submitChanges(); 
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSuccess.bind(this)
+			}); 
 		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesSuccess: function(res){
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/editMode', false);
+		},
+
 		onTenderFormCancelBtnPress: function(event){
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
 			this.getModel("ui").setProperty('/editMode', false);
 			this.defaultModel.resetChanges();
 		},
@@ -150,7 +179,7 @@ sap.ui.define([
 			oModel.resetChanges(aItemContexts.map(ctx => ctx.getPath()));
 		},
 
-		validateAwardCriteria: function () {
+		validateAwardCriteria: function (event) {
 
 			let bValid = true;
 			const aAwardCriteriaItems = this.getView().byId("idAwardCriteria").getItems();
@@ -166,12 +195,43 @@ sap.ui.define([
 
 			if (sumWeight > 0 && sumWeight !== 1) {
 				MessageBox.error("Sum of Award Criteria weight must be 100%");
+				// const oMessage = new Message({
+				// 	message: "Sum of Award Criteria weight must be 100%",
+				// 	type: MessageType.Error,
+				// 	target: "/AwardCriteriaTableView(CountryCode='AR',TenderID='AR-21-1007',Criteria='NotDefined')",
+				// 	processor: this.getView().getModel()
+				// });
+				// sap.ui.getCore().getMessageManager().addMessages(oMessage);
 				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
 
 			return bValid;
 		},
+
+
+		onMessagePopoverPress : function (oEvent) {
+			const oSourceControl = oEvent.getSource();
+			this._getMessagePopover().then(function(oMessagePopover){
+				oMessagePopover.openBy(oSourceControl);
+			});
+		},
+
+		_getMessagePopover: function () {
+			const oView = this.getView();
+
+			// create popover lazily (singleton)
+			if (!this._pMessagePopover) {
+				this._pMessagePopover = Fragment.load({
+					id: oView.getId(),
+					name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
+				}).then(function (oMessagePopover) {
+					oView.addDependent(oMessagePopover);
+					return oMessagePopover;
+				});
+			}
+			return this._pMessagePopover;
+		}
 
 	});
 });

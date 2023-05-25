@@ -5,6 +5,7 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input",
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
       this.properties = [];
+      this.propertyByName = {};
       if (data) {
         this.id = data.ID;
         this.type = data.Type;
