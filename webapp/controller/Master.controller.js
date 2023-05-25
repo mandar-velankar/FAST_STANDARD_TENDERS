@@ -568,101 +568,127 @@ sap.ui.define([
 			this.orFilters = [];
 			this.andFilters = [];
 
+			const tableConfig = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable();
+
 			let sSearch = this.byId('idSearch').getValue();
 
 			if (sSearch) {
 
-				this.orFilters.push(new Filter({
-					path: "CountryCode",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "TenderID",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "Classification",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "TenderName",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "createdBy",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "DistributorName",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "InstituteName",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				this.orFilters.push(new Filter({
-					path: "OfferID",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				// regex checks for numbers (decimals included)
-				if(/^[0-9]*[.]?[0-9]+$/.test(sSearch)){
+				if(tableConfig.hasColumn("CountryCode")){
 					this.orFilters.push(new Filter({
-						path: "VALUE",
-						operator: FilterOperator.BT,
-						value1: Math.floor(sSearch),
-						value2: Math.ceil(sSearch)
+						path: "CountryCode",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
 					}));
 				}
-
-				this.orFilters.push(new Filter({
-					path: "STATUS",
-					operator: FilterOperator.Contains,
-					value1: sSearch,
-					caseSensitive: false
-				}));
-
-				const publicationDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
-				if(publicationDate){
+				
+				if(tableConfig.hasColumn("TenderID")){
 					this.orFilters.push(new Filter({
-						path: "PublicationDate",
-						operator: FilterOperator.EQ,
-						value1: publicationDate,
+						path: "TenderID",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
 						caseSensitive: false
 					}));
 				}
 
-				const bidDueDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
-				if(bidDueDate){
+				if(tableConfig.hasColumn("Classification")){
 					this.orFilters.push(new Filter({
-						path: "BidDueDate",
-						operator: FilterOperator.EQ,
-						value1: bidDueDate,
+						path: "Classification",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
 						caseSensitive: false
 					}));
+				}
+
+				if(tableConfig.hasColumn("TenderName")){
+					this.orFilters.push(new Filter({
+						path: "TenderName",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("createdBy")){
+					this.orFilters.push(new Filter({
+						path: "createdBy",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("DistributorName")){
+					this.orFilters.push(new Filter({
+						path: "DistributorName",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("InstituteName")){
+					this.orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("OfferID")){
+					this.orFilters.push(new Filter({
+						path: "OfferID",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("VALUE")){
+					// regex checks for numbers (decimals included)
+					if(/^[0-9]*[.]?[0-9]+$/.test(sSearch)){
+						this.orFilters.push(new Filter({
+							path: "VALUE",
+							operator: FilterOperator.BT,
+							value1: Math.floor(sSearch),
+							value2: Math.ceil(sSearch)
+						}));
+					}
+				}
+
+				if(tableConfig.hasColumn("STATUS")){
+					this.orFilters.push(new Filter({
+						path: "STATUS",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("PublicationDate")){
+					const publicationDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
+					if(publicationDate){
+						this.orFilters.push(new Filter({
+							path: "PublicationDate",
+							operator: FilterOperator.EQ,
+							value1: publicationDate,
+							caseSensitive: false
+						}));
+					}
+				}
+
+				if(tableConfig.hasColumn("BidDueDate")){
+					const bidDueDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
+					if(bidDueDate){
+						this.orFilters.push(new Filter({
+							path: "BidDueDate",
+							operator: FilterOperator.EQ,
+							value1: bidDueDate,
+							caseSensitive: false
+						}));
+					}
 				}
 				
 				this.andFilters.push(new Filter(this.orFilters, false));
@@ -730,7 +756,7 @@ sap.ui.define([
 				this._oList.getBinding("items")?.resume();
 			}
 			
-		},
+		}
 	});
 
 });
