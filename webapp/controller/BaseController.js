@@ -27,6 +27,14 @@ sap.ui.define([
 			const control = context.getObject();
 			return control.generateControl();
 		},
+
+		sorterFactory: function (id, context) {
+			const i18nModel = this.getModel("i18n");
+			const index = parseInt(context.getPath().split('/').pop());
+			const control = context.getObject();
+			return control.generateViewSettingsItem(index, i18nModel);
+		},
+
 		/**
 		 * Convenience method for getting the view model by name in every controller of the application.
 		 * @public

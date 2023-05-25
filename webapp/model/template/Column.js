@@ -1,4 +1,8 @@
-sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
+sap.ui.define([
+  "../BaseObject", 
+  "./Control",
+  "sap/m/ViewSettingsItem" 
+], function (BaseObject, Control, ViewSettingsItem) {
   const Column = BaseObject.extend("com.bayer.SXTENDER.templates.GenericTableComponent.models.Column", {
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
@@ -17,6 +21,20 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
     getTitle: function () {
       return this.title;
     },
+
+    generateViewSettingsItem: function (index, i18nModel) {
+      let key = this.getControl().getPropertiesAsObject().text.replace(/{|}/g, '');
+      if(key.includes("path")){
+        key = key.split(',').find(e=>e.includes('path')).split("'")[1];
+      }
+      let text = `{i18n>${this.convertToUpperCamelCase(key)}}`;
+      return new ViewSettingsItem({
+        'key': key, 
+        'text': text,
+        'selected': index === 0 && true
+      });
+    },
+
     getJSON: function () {
       return {
         ID: this.id,
