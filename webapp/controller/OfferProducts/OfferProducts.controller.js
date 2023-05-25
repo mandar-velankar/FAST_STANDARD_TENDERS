@@ -5,7 +5,8 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/m/ColumnListItem",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem) {
+	"sap/m/MessageBox"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, MessageBox) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -34,6 +35,7 @@ sap.ui.define([
 				busy: false,
 				delay: 0,
 				editMode: false,
+				minDate: new Date()
 			});
 	
 			this.setModel(oModel, "ui");
@@ -121,16 +123,24 @@ sap.ui.define([
 		onOfferFormSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
 
-			// Award Criteria	
-			/*const isAwardCriteriaValid = this.validateAwardCriteria();
-			if(!isAwardCriteriaValid) return;
-			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);*/
-
-			this.defaultModel.submitChanges(); 
+			if(!this.validateOffer()) return; //error
+			this.defaultModel.submitChanges(); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/editMode', false);
 			this.defaultModel.resetChanges();
+		},
+
+		validateOffer: function () {
+			const offer = this.defaultModel.getProperty(this.byId('idOfferForm').getObjectBinding().getPath());
+
+			if (offer.InternalBidDueDate <= offer.NewOfferDueDate) {
+				MessageBox.error("Internal due date can not be before offer due date");
+				this.getModel("ui").setProperty('/editMode', true);
+				return false;
+			}
+
+			return true;
 		},
 	});
 });
