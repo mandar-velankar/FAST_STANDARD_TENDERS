@@ -4,19 +4,22 @@ sap.ui.define([
 	"sap/ui/core/ComponentContainer",
 	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
+	"sap/ui/model/FilterType",
 	"sap/ui/model/Sorter",
 	"sap/ui/model/FilterOperator",
 	"sap/m/GroupHeaderListItem",
 	"sap/ui/Device",
 	"sap/ui/core/Fragment",
 	"../model/formatter",
-	"sap/m/ColumnListItem"
-], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem) {
+	"sap/m/ColumnListItem",
+	"sap/ui/core/Item"
+], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem, Item) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
 
 		formatter: formatter,
+		// oCountryCodeFilter: new Filter("COUNTRYCODE", FilterOperator.EQ, "AR"),
 
 		/* =========================================================== */
 		/* lifecycle methods                                           */
@@ -28,31 +31,32 @@ sap.ui.define([
 		 */
 		onInit : function () {
 			// Control state model
-			var oList = this.byId("list"),
+			var oList = this.byId("genericMasterTable"),
 				oViewModel = this._createViewModel();
 				// Put down master list's original value for busy indicator delay,
 				// so it can be restored later on. Busy handling on the master list is
 				// taken care of by the master list itself.
 				//iOriginalBusyDelay = oList.getBusyIndicatorDelay();
 
-			this._oGroupFunctions = {
-				TenderNo : function(oContext) {
-					var iNumber = oContext.getProperty('TenderNo'),
-						key, text;
-					if (iNumber <= 20) {
-						key = "LE20";
-						text = this.getResourceBundle().getText("masterGroup1Header1");
-					} else {
-						key = "GT20";
-						text = this.getResourceBundle().getText("masterGroup1Header2");
-					}
-					return {
-						key: key,
-						text: text
-					};
-				}.bind(this)
-			};
+			// this._oGroupFunctions = {
+			// 	TenderNo : function(oContext) {
+			// 		var iNumber = oContext.getProperty('TenderNo'),
+			// 			key, text;
+			// 		if (iNumber <= 20) {
+			// 			key = "LE20";
+			// 			text = this.getResourceBundle().getText("masterGroup1Header1");
+			// 		} else {
+			// 			key = "GT20";
+			// 			text = this.getResourceBundle().getText("masterGroup1Header2");
+			// 		}
+			// 		return {
+			// 			key: key,
+			// 			text: text
+			// 		};
+			// 	}.bind(this)
+			// };
 
+		
 			this._oList = oList;
 			// keeps the filter and search state
 			this._oListFilterState = {
@@ -60,6 +64,9 @@ sap.ui.define([
 				aSearch : []
 			};
 
+			this.orFilters = [];
+			this.andFilters = [];
+			
 			this.setModel(oViewModel, "masterView");
 			// Make sure, busy indication is showing immediately so there is no
 			// break after the busy indication for loading the view's meta data is
@@ -80,6 +87,113 @@ sap.ui.define([
 			this.getRouter().attachBypassed(this.onBypassed, this);
 		},
 
+		onCountriesReceived: async function(oEvent){
+			const sCountryCode = oEvent.getParameter("data").results[0].CountryCode; // we default to first country in the list
+			// set filter which is needed later on
+			if(sCountryCode){
+				this.andFilters.push(new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.Contains,
+					value1: sCountryCode,
+					caseSensitive: false
+				}));
+			}
+
+			this._getTemplateConfig(sCountryCode);	
+			this._bindBrandItems(sCountryCode);
+			this._bindStatusses(sCountryCode);
+
+		},
+		_getNextTenderID: async function (sCountryCode) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CountryTenderNo", {
+					filters: [
+						new Filter("COUNTRY_CODE", "EQ", sCountryCode)
+					],
+					success: function (res) {
+						let nextTenderNo = res.results[0].NEXT_TENDER_NO;
+						resolve(nextTenderNo);
+					}
+				});
+			}).then(data => {
+				let year = new Date().getFullYear();
+				year = year.toString().substring(4, 2);
+				this.getModel("st").setProperty("/NextTenderNo", data);
+				return `${sCountryCode}-${year}-${data}`;
+			})
+		},
+		_getTemplateConfig: function(sCountryCode){
+			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
+			this.templateState.read("MASTER",{ 
+				countryCode: "BR" || sCountryCode, // TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				appID:"StandardTenders",
+				page:"MASTER"
+			}).then(this._onTemplateConfigReceived.bind(this));
+		},
+
+		/**
+		 * This method is called once the template configuration is loaded
+		 */
+		_onTemplateConfigReceived: function(){
+			const table = this.byId("genericMasterTable");
+			this._bindTable(table);
+		},
+
+		_bindBrandItems: function(sCountryCode){
+			const oSelectBrands = this.byId("idSlctBrand");	
+			oSelectBrands?.bindItems({
+				path: "/CountryTenderBrands", 
+				filters: [
+					new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode)
+				],
+				sorter: new Sorter ({
+					path: 'BRANDNAME', 
+					descending: false
+				}),
+				template: new sap.ui.core.Item({
+					key: "{BRANDID}",
+					text: "{BRANDNAME}"
+				}),
+				templateShareable: true
+			});	
+		},
+
+		_bindStatusses: function(sCountryCode){
+			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const oSelectStatus = this.byId("idSlctStatus");	
+			oSelectStatus?.bindItems({
+				path: "/CountryStatusses", 
+				filters: [
+					new Filter("CountryCode",FilterOperator.EQ, sCountryCode)
+				],
+				sorter: new Sorter ({
+					path: 'Status', 
+					descending: false
+				}),
+				template: new Item({
+					key: "{Status}",
+					text: "{Status}"
+				}),
+				templateShareable: true
+			});
+		},
+
+		_bindTable: function(table){
+			const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
+			const sCountryCode = oCountrySelectedItem?.getKey();
+			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
+			table && table.bindItems({
+			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
+			  filters: [oFilterCountry],
+			//   model: '',
+			  template: new ColumnListItem({
+				type: "Active",
+				cells: cols.map(col => col.getControl().generateControl())
+			  }),
+			  templateShareable: true
+			});
+		},
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
@@ -95,34 +209,34 @@ sap.ui.define([
 			this._updateListItemCount(oEvent.getParameter("total"));
 		},
 
-		/**
-		 * Event handler for the master search field. Applies current
-		 * filter value and triggers a new search. If the search field's
-		 * 'refresh' button has been pressed, no new search is triggered
-		 * and the list binding is refresh instead.
-		 * @param {sap.ui.base.Event} oEvent the search event
-		 * @public
-		 */
-		onSearch : function (oEvent) {
-			if (oEvent.getParameters().refreshButtonPressed) {
-				// Search field's 'refresh' button has been pressed.
-				// This is visible if you select any master list item.
-				// In this case no new search is triggered, we only
-				// refresh the list binding.
-				this.onRefresh();
-				return;
-			}
+		// /**
+		//  * Event handler for the master search field. Applies current
+		//  * filter value and triggers a new search. If the search field's
+		//  * 'refresh' button has been pressed, no new search is triggered
+		//  * and the list binding is refresh instead.
+		//  * @param {sap.ui.base.Event} oEvent the search event
+		//  * @public
+		//  */
+		// onSearch : function (oEvent) {
+		// 	if (oEvent.getParameters().refreshButtonPressed) {
+		// 		// Search field's 'refresh' button has been pressed.
+		// 		// This is visible if you select any master list item.
+		// 		// In this case no new search is triggered, we only
+		// 		// refresh the list binding.
+		// 		this.onRefresh();
+		// 		return;
+		// 	}
 
-			var sQuery = oEvent.getParameter("query");
+		// 	var sQuery = oEvent.getParameter("query");
 
-			if (sQuery) {
-				this._oListFilterState.aSearch = [new Filter("TenderName", FilterOperator.Contains, sQuery)];
-			} else {
-				this._oListFilterState.aSearch = [];
-			}
-			this._applyFilterSearch();
+		// 	if (sQuery) {
+		// 		this._oListFilterState.aSearch = [new Filter("TenderName", FilterOperator.Contains, sQuery)];
+		// 	} else {
+		// 		this._oListFilterState.aSearch = [];
+		// 	}
+		// 	this._applyFilterSearch();
 
-		},
+		// },
 
 		/**
 		 * Event handler for refresh event. Keeps filter, sort
@@ -139,15 +253,15 @@ sap.ui.define([
 		 * @public
 		 */
 		onOpenViewSettings : function (oEvent) {
-			var sDialogTab = "filter";
-			if (oEvent.getSource() instanceof sap.m.Button) {
-				var sButtonId = oEvent.getSource().getId();
-				if (sButtonId.match("sort")) {
-					sDialogTab = "sort";
-				} else if (sButtonId.match("group")) {
-					sDialogTab = "group";
-				}
-			}
+			var sDialogTab = "sort";
+			// if (oEvent.getSource() instanceof sap.m.Button) {
+			// 	var sButtonId = oEvent.getSource().getId();
+			// 	if (sButtonId.match("sort")) {
+			// 		sDialogTab = "sort";
+			// 	} else if (sButtonId.match("group")) {
+			// 		sDialogTab = "group";
+			// 	}
+			// }
 			// load asynchronous XML fragment
 			if (!this.byId("viewSettingsDialog")) {
 				Fragment.load({
@@ -175,28 +289,28 @@ sap.ui.define([
 		 * @public
 		 */
 		onConfirmViewSettingsDialog : function (oEvent) {
-			var aFilterItems = oEvent.getParameters().filterItems,
-				aFilters = [],
-				aCaptions = [];
+			// var aFilterItems = oEvent.getParameters().filterItems,
+			// 	aFilters = this.andFilters,
+			// 	aCaptions = [];
 
-			// update filter state:
-			// combine the filter array and the filter string
-			aFilterItems.forEach(function (oItem) {
-				switch (oItem.getKey()) {
-					case "Filter1" :
-						aFilters.push(new Filter("TenderNo", FilterOperator.LE, 100));
-						break;
-					case "Filter2" :
-						aFilters.push(new Filter("TenderNo", FilterOperator.GT, 100));
-						break;
-					default :
-						break;
-				}
-				aCaptions.push(oItem.getText());
-			});
+			// // update filter state:
+			// // combine the filter array and the filter string
+			// aFilterItems.forEach(function (oItem) {
+			// 	switch (oItem.getKey()) {
+			// 		case "Filter1" :
+			// 			aFilters.push(new Filter("TenderNo", FilterOperator.LE, 100));
+			// 			break;
+			// 		case "Filter2" :
+			// 			aFilters.push(new Filter("TenderNo", FilterOperator.GT, 100));
+			// 			break;
+			// 		default :
+			// 			break;
+			// 	}
+			// 	aCaptions.push(oItem.getText());
+			// });
 
-			this._oListFilterState.aFilter = aFilters;
-			this._updateFilterBar(aCaptions.join(", "));
+			this._oListFilterState.aFilter = this.andFilters;
+			// this._updateFilterBar(aCaptions.join(", "));
 			this._applyFilterSearch();
 			this._applySortGroup(oEvent);
 		},
@@ -289,7 +403,8 @@ sap.ui.define([
 				title: this.getResourceBundle().getText("masterTitleCount", [0]),
 				noDataText: this.getResourceBundle().getText("masterListNoDataText"),
 				sortBy: "TenderName",
-				groupBy: "None"
+				groupBy: "None",
+				SelectedCountry: ""
 			});
 		},
 
@@ -297,26 +412,25 @@ sap.ui.define([
 			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
 			
-			
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			await this.templateState.read("MASTER",{
-				countryCode:"BR",
-				appID:"StandardTenders",
-				page:"MASTER"
-			});
+			// await this.templateState.read("MASTER",{
+			// 	countryCode:"BR",
+			// 	appID:"StandardTenders",
+			// 	page:"MASTER"
+			// });
 			// this.setModel(this.templateStateData.masterConfig.countryTemplate.getTemplate().getODataModel(), "data");
-			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
-			const table = this.byId("genericMasterTable");
-			table && table.bindItems({
-			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
-			//   model: '',
-			  template: new ColumnListItem({
-				type: "Active",
-				cells: cols.map(col => col.getControl().generateControl())
-			  }),
-			  templateShareable: true
-			});
+			// const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
+			// const table = this.byId("genericMasterTable");
+			// table && table.bindItems({
+			//   path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
+			// //   model: '',
+			//   template: new ColumnListItem({
+			// 	type: "Active",
+			// 	cells: cols.map(col => col.getControl().generateControl())
+			//   }),
+			//   templateShareable: true
+			// });
 		},
 
 		/**
@@ -376,26 +490,272 @@ sap.ui.define([
 			oViewModel.setProperty("/isFilterBarVisible", (this._oListFilterState.aFilter.length > 0));
 			oViewModel.setProperty("/filterBarLabel", this.getResourceBundle().getText("masterFilterBarText", [sFilterBarText]));
 		},
+
 		onOpenCreateTenderDialog : function () {
 			const that = this;
 			// create dialog lazily
 			if (!this.byId("idCreateTenderDialog")) {
 				this.tenderCreationDialog = Fragment.load({
 					id: that.getView().getId(),
-					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTender",
+					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTenderDialog",
                     controller: that,
 				}).then(function (oDialog) {
-					that.getModel("appView").setProperty("/bCreateTenderMode", true);
 					that.getView().addDependent(oDialog);
-                    return oDialog
+                    oDialog.open();
+					that._bindCreateTenderForm();
                 })
+			}else {
+				this.byId("idCreateTenderDialog").open();
 			}
-			that.getModel("appView").setProperty("/bCreateTenderMode", true);
-			this.tenderCreationDialog.then(oDialog => oDialog.open());
+		},
+		_bindCreateTenderForm: async function () {
+			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
+			const form = this.byId("idNewTenderForm")
+			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+			const path = newEntryContext.getPath();
+			form?.bindElement({
+				path: path
+			});
+			const sElemBindingPath = form.getElementBinding().getPath();
+			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
+			const nextTenderID = await this._getNextTenderID(sCountryCode);
+
+			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
+			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
+			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 		},
 		onCloseTenderCreationDialog: function () {
 			this.byId("idCreateTenderDialog").close();
-			this.getModel("appView").setProperty("/bCreateTenderMode", false);
+			this.byId("idCreateTenderDialog").destroy();
+			this.getModel().resetChanges();
+		},
+
+		onCreateNewTender: function () {
+			const oNewTenderForm = this.byId("idNewTenderForm");
+			this.setNewTenderPendingChanges(oNewTenderForm);
+			this.getModel().submitChanges();
+			this.onCloseTenderCreationDialog();
+		},
+
+		setNewTenderPendingChanges: function (oForm) {
+			const oDefaultModel = oForm.getModel();
+			const oStandModel = oForm.getModel("st");
+			const oBoundContext = oForm.getElementBinding().getBoundContext();
+			const sSelectedCountry = oStandModel.getProperty("/SelectedCountry");
+
+			const newTenderObj = {
+				TenderID: oBoundContext.getObject().TenderID,
+				Active: 1,
+				TenderName: oBoundContext.getObject().TenderName,
+				CountryCode: sSelectedCountry,
+				// InstituteID: 105441,
+				TenderNo: oStandModel.getProperty("/NextTenderNo"),
+				Classification: oBoundContext.getObject().Classification,
+				ContractExtenseion: oBoundContext.getObject().ContractExtenseion,
+				ContractLength: oBoundContext.getObject().ContractLength,
+				PublicationDate: oBoundContext.getObject().PublicationDate,
+				BidDueDate: oBoundContext.getObject().BidDueDate,
+				AwardDate: oBoundContext.getObject().AwardDate,
+				NextPublicationDye: oBoundContext.getObject().NextPublicationDye
+			}
+			oDefaultModel.createEntry("/TenderFormView", {
+				properties: newTenderObj
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+		setFilter: function (oEvent) {
+
+			this.orFilters = [];
+			this.andFilters = [];
+
+			const tableConfig = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable();
+
+			let sSearch = this.byId('idSearch').getValue();
+
+			if (sSearch) {
+
+				if(tableConfig.hasColumn("CountryCode")){
+					this.orFilters.push(new Filter({
+						path: "CountryCode",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+				
+				if(tableConfig.hasColumn("TenderID")){
+					this.orFilters.push(new Filter({
+						path: "TenderID",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("Classification")){
+					this.orFilters.push(new Filter({
+						path: "Classification",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("TenderName")){
+					this.orFilters.push(new Filter({
+						path: "TenderName",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("createdBy")){
+					this.orFilters.push(new Filter({
+						path: "createdBy",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("DistributorName")){
+					this.orFilters.push(new Filter({
+						path: "DistributorName",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("InstituteName")){
+					this.orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("OfferID")){
+					this.orFilters.push(new Filter({
+						path: "OfferID",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("VALUE")){
+					// regex checks for numbers (decimals included)
+					if(/^[0-9]*[.]?[0-9]+$/.test(sSearch)){
+						this.orFilters.push(new Filter({
+							path: "VALUE",
+							operator: FilterOperator.BT,
+							value1: Math.floor(sSearch),
+							value2: Math.ceil(sSearch)
+						}));
+					}
+				}
+
+				if(tableConfig.hasColumn("STATUS")){
+					this.orFilters.push(new Filter({
+						path: "STATUS",
+						operator: FilterOperator.Contains,
+						value1: sSearch,
+						caseSensitive: false
+					}));
+				}
+
+				if(tableConfig.hasColumn("PublicationDate")){
+					const publicationDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
+					if(publicationDate){
+						this.orFilters.push(new Filter({
+							path: "PublicationDate",
+							operator: FilterOperator.EQ,
+							value1: publicationDate,
+							caseSensitive: false
+						}));
+					}
+				}
+
+				if(tableConfig.hasColumn("BidDueDate")){
+					const bidDueDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
+					if(bidDueDate){
+						this.orFilters.push(new Filter({
+							path: "BidDueDate",
+							operator: FilterOperator.EQ,
+							value1: bidDueDate,
+							caseSensitive: false
+						}));
+					}
+				}
+				
+				this.andFilters.push(new Filter(this.orFilters, false));
+			}
+
+			// Dropdown filters
+			// Country
+			const oCountrySelectedItem =  this.byId("idSlctCountry").getSelectedItem();
+			const sCountryCode = oCountrySelectedItem?.getKey();
+			if(sCountryCode){
+				this.andFilters.push(new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.Contains,
+					value1: sCountryCode,
+					caseSensitive: false
+				}));
+			}
+			
+			const isCountrySelectChanged = oEvent.getParameter("id").toLowerCase().includes("idslctcountry");
+			if(isCountrySelectChanged){
+				this._bindBrandItems(sCountryCode);
+				this._bindStatusses(sCountryCode);
+			}
+
+			// Brands
+			// const oFilterBrands = new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode);
+			const oSelectBrands = this.byId("idSlctBrand");	
+			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
+			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
+			if(sBrandId && !sBrandId.toLowerCase().includes('all_brands')){
+				this.andFilters.push(new Filter({
+					path: "BrandID",
+					operator: FilterOperator.Contains,
+					value1: sBrandId,
+					caseSensitive: false
+				}));
+			}
+
+			// Status 
+			// const oFilterStatus = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const oSelectStatus = this.byId("idSlctStatus");	
+			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
+			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
+			if(sStatus && !sStatus.toLowerCase().includes('all')){
+				this.andFilters.push(new Filter({
+					path: "STATUS",
+					operator: FilterOperator.Contains,
+					value1: sStatus,
+					caseSensitive: false
+				}));
+			}
+
+
+			if(this.andFilters.length > 0){
+				const oFilters = new Filter(this.andFilters, true);
+
+				//Binding to table with the filters and the sorters
+				this._oList.getBinding("items")?.filter(oFilters, FilterType.Application);
+			}else{
+				this._oList.getBinding('items').aApplicationFilters = [];
+				this._oList.getBinding("items")?.filter();
+			}
+			
+			if (this._oList.getBinding("items")?.isSuspended()) {
+				this._oList.getBinding("items")?.resume();
+			}
+			
 		}
 	});
 

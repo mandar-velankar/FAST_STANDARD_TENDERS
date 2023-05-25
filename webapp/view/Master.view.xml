@@ -20,34 +20,84 @@
 				<f:heading>
 					<Title text="Tenders"/>
 				</f:heading>
-				<f:actions>
-					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
-				</f:actions>
 			</f:DynamicPageTitle>
 		</f:title>
 
 
 		<f:content>
-            <Table id="genericMasterTable" 
-                columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
-                itemPress=".onSelectionChange"
-				class="sapFDynamicPageAlignContent"
-				width="auto"
-				updateFinished=".onUpdateFinished"
-				alternateRowColors="true"
-				contextualWidth="Auto" 
-				autoPopinMode="true"
-				hiddenInPopin="None"
-				growing="true"
-				growingThreshold="15"
-				growingScrollToLoad="false"
-            >
-                <columns>
-                    <Column importance="{template>importance}" >
-                        <Text text="{template>title}" />
-                    </Column>
-                </columns>
-            </Table>
+			<VBox>
+				<OverflowToolbar class="sapFDynamicPageAlignContent">
+					<Label
+						text="Country"
+						labelFor="idSlctCountry"
+					/>
+					<Select 
+						id="idSlctCountry" 
+						selectedKey="{st>/SelectedCountry}"
+						items="{ 
+							path: '/UserCountries', 
+							parameters: {
+								expand: 'Country'
+							},
+							sorter: { 
+								path: 'Country/CountryName' 
+							},
+							 events: {
+								dataReceived: '.onCountriesReceived'
+							}
+						}"
+						change=".setFilter"
+					>
+						<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
+					</Select>
+					<Label
+						text="Brand"
+						labelFor="idSlctBrand"
+					/>
+					<Select 
+						id="idSlctBrand" 
+						change=".setFilter"
+					>
+						<!-- items binding see controller -->
+						<core:Item key="{BRANDID}" text="{BRANDNAME}"/>
+					</Select>
+					<Label
+						text="Status"
+						labelFor="idSlctStatus"
+					/>
+					<Select 
+						id="idSlctStatus" 
+						change=".setFilter" 
+					>
+						<!-- items binding see controller -->
+						<core:Item key="{Status}" text="{Status}"/>
+					</Select>
+					<ToolbarSpacer/>
+					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
+					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
+				</OverflowToolbar>
+				<Table id="genericMasterTable" 
+					columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
+					itemPress=".onSelectionChange"
+					class="sapFDynamicPageAlignContent"
+					width="auto"
+					updateFinished=".onUpdateFinished"
+					alternateRowColors="true"
+					contextualWidth="Auto" 
+					autoPopinMode="true"
+					hiddenInPopin="None"
+					growing="true"
+					growingThreshold="15"
+					growingScrollToLoad="false"
+				>
+					<columns>
+						<Column importance="{template>importance}" >
+							<Text text="{template>title}" />
+						</Column>
+					</columns>
+				</Table>
+			</VBox>
 		<!-- <VBox id="GenericTableComponentPlaceHolder" fitContainer="true"> -->
 			<!-- </VBox> -->
 			<!-- <VBox fitContainer="true">

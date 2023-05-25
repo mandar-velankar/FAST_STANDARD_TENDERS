@@ -6,6 +6,7 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
       if (data) {
         this.id = data.ID;
         this.label = data.Label;
+        this.visible = data.Visible;
         for (const control of data.Controls) {
           this.controls.push(new Control(control));
         }
@@ -17,10 +18,14 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
     getControls: function () {
       return this.controls;
     },
+    getControlById: function (controlId) {
+      return this.controls.find(el => el.controlID === controlId);
+    },
     getJSON: function () {
       return {
         ID: this.id,
         Label: this.label,
+        Visible: this.visible,
         Controls: this.controls.map(control => control.getJSON())
       };
     }

@@ -11,30 +11,30 @@ sap.ui.define([
 
 			this.oOwnerComponent = this.getOwnerComponent();
 			this.oRouter = this.oOwnerComponent.getRouter();
-			this.oDynamicPage = this.byId("idDynamicPage");
+			this.oDynamicPage = this.byId("idProductForm");
 
-			// Model used to manipulate control states. The chosen values make sure,
-			// detail page is busy indication immediately so there is no break in
-			// between the busy indication for loading the view's meta data
-			var oViewModel = new JSONModel({
-				busy: false,
-				delay: 0,
-				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
-			});
+			// // Model used to manipulate control states. The chosen values make sure,
+			// // detail page is busy indication immediately so there is no break in
+			// // between the busy indication for loading the view's meta data
+			// var oViewModel = new JSONModel({
+			// 	busy: false,
+			// 	delay: 0,
+			// 	lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
+			// });
 
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
-			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
+			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 
-			/*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
-			this.setModel(this.paState.getModel(), "pa");
+			// /*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
+			// this.setModel(this.paState.getModel(), "pa");
 
-			this.oObjectPageLayout = this.byId("DetailPage");
-			this.paState.setDetailPage(this.oObjectPageLayout);
+			// this.oObjectPageLayout = this.byId("DetailPage");
+			// this.paState.setDetailPage(this.oObjectPageLayout);
 
-			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
-			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
+			// this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
+			// this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
 
-			this.setModel(oViewModel, "detailView");
+			// this.setModel(oViewModel, "detailView");
 
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
@@ -49,19 +49,31 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent pattern match event in route 'object'
 		 * @private
 		 */
-		 _onObjectMatched: function (oEvent) {
+		 _onObjectMatched: async function (oEvent) {
 
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;
 
 			this.getModel("appView").setProperty("/layout", this.layout);
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+
+			const detaildetailConfig = await this.templateState.read("DETAIL-OFFERPRODUCTDETAIL", {
+				countryCode: "BR",
+				appID: "StandardTenders",
+				page: "DETAIL-OFFERPRODUCTDETAIL",
+				keys: {
+					TenderID: this.sObjectId,
+				}
+			});
 
 			this.getModel().metadataLoaded().then(function () {
-				var sObjectPath = this.getModel().createKey("PublicSalesOpportunities", {
-					ID: this.sObjectId
-				});
-				this._bindView("/" + sObjectPath);
+				// var sObjectPath = this.getModel().createKey("PublicSalesOpportunities", {
+				// 	ID: this.sObjectId
+				// });
+				// this._bindView("/" + sObjectPath);
+				//this._bindForm("ProductForm");
 			}.bind(this));
 
 		},
@@ -81,6 +93,41 @@ sap.ui.define([
 			oViewModel.setProperty("/busy", false);
 		},
 
+		onBeforeShow:async function(iconTabfilter,sObjectId){
+			// get state data
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			
+			//this.getView().getBindingContext("template"); // get current tab data
+			// await this.getOwnerComponent().getModel().metadataLoaded();
+			this.objectId = sObjectId;
+			this.selectedTab = iconTabfilter.getKey();
+
+			this._bindForm("ProductForm");
+		},
+
+		/**
+		 * This method bind a given form to its entity from the ui configuration template.
+		 * FYI: the form ID in the View is a concatination of "id" + formName
+		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
+		 */
+		_bindForm(formName){
+			const entity = this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getForm().getEntity();
+			const form = this.byId(`id${formName}`);
+			let path = "";
+			if (this.objectId) {
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					TenderID: this.objectId,
+				});
+			} else {
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				path = newEntryContext.getPath();
+			}
+			
+			form.bindElement({
+				path: path,
+			});
+		},
 
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
@@ -101,8 +148,13 @@ sap.ui.define([
 			MessageBox.alert("Tender history will be shown in a pop-up");
 		},
 
+		
+
 		handleClose: function() {
 			let oNextUIState = "";
+			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
+                // No item should be selected on list after detail page is closed
+            this.getOwnerComponent().oListSelector.clearMasterListSelection();
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(1);
 				this.oRouter.navTo("object", {

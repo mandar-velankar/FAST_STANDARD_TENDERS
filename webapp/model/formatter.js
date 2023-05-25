@@ -1,6 +1,7 @@
 sap.ui.define([
-	'sap/ui/core/format/NumberFormat'
-], function (NumberFormat) {
+	'sap/ui/core/format/NumberFormat',
+	'sap/ui/core/format/DateFormat'
+], function (NumberFormat,DateFormat) {
 	"use strict";
 
 	return {
@@ -23,6 +24,14 @@ sap.ui.define([
 			if(!value) return;
 			var oPercentFormat = NumberFormat.getPercentInstance();
 			return oPercentFormat.format(value);
+		},
+
+		formatDate: function(date, pattern){
+			return DateFormat.getDateInstance({pattern: pattern, UTC: true}).format(date);
+		},
+
+		parseDate: function(date, pattern){
+			return DateFormat.getDateInstance({pattern: pattern, UTC: true}).parse(date);
 		}
 	};
 });

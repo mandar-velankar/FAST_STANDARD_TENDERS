@@ -1,40 +1,34 @@
-<mvc:View controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail" xmlns="sap.uxap" xmlns:m="sap.m" xmlns:f="sap.f"
-	xmlns:form="sap.ui.layout.form" xmlns:mvc="sap.ui.core.mvc" xmlns:t="sap.ui.table" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"
-	xmlns:viz.data="sap.viz.ui5.data" xmlns:viz="sap.viz.ui5.controls" xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail" xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
 
-	<f:DynamicPage
-		id="idDynamicPage"
-		toggleHeaderOnTitleClick="false">
+<f:DynamicPage id="idProductPage">
 		<f:title>
 			<f:DynamicPageTitle>
 				<f:heading>
-					<m:FlexBox
-						wrap="Wrap"
-						fitContainer="true"
-						alignItems="Center">
-						<m:Title
-							text="Product Detail"
-							wrapping="true"
-							class="sapUiTinyMarginEnd"
-						/>
-					</m:FlexBox>
+					<Title text="Product Detail" level="H2"/>
 				</f:heading>
 				<f:navigationActions>
-					<m:OverflowToolbarButton
+					<OverflowToolbarButton
 						type="Transparent"
 						icon="sap-icon://full-screen"
 						press=".handleFullScreen"
 						tooltip="Enter Full Screen Mode"
 						visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
 					/>
-					<m:OverflowToolbarButton
+					<OverflowToolbarButton
 						type="Transparent"
 						icon="sap-icon://exit-full-screen"
 						press=".handleFullScreen"
 						tooltip="Exit Full Screen Mode"
 						visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
 					/>
-					<m:OverflowToolbarButton
+					<OverflowToolbarButton
 						type="Transparent"
 						icon="sap-icon://decline"
 						press=".handleClose"
@@ -42,55 +36,54 @@
 						visible="{= ${detailDetailView>/actionButtonsInfo/endColumn/closeColumn} !== null }"
 					/>
 				</f:navigationActions>
+
+				
 			</f:DynamicPageTitle>
 		</f:title>
-		<f:content>
-			<m:Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true" backgroundDesign="Solid">
-				<m:headerToolbar>
-					<m:OverflowToolbar style="Standard" design="Solid">
-							<m:Title text="Request Details" />
-							<m:ToolbarSpacer />
-							<m:Link text="Tender History" press="handleLinkPress" />
-					</m:OverflowToolbar>
-				</m:headerToolbar>
-				<m:content>
-					<form:SimpleForm
-						editable="true"
-						maxContainerCols="2"
-						layout="ColumnLayout"
-						columnsL="2" >
-						<form:content>
-							<m:Label text="Reference"/>
-							<m:Input value="" enabled="false"/>
-							<m:Label text="Alternate Offer"/>
-							<m:Input value="No" enabled="false"/>
-							<m:Label text="Requested Volume"/>
-							<m:Input value="100" enabled="false"/>
-							<m:Label text="UoM"/>
-							<m:Input value="Units" enabled="false"/>
-							<m:Label text="Samples"/>
-							<m:Input value="No" enabled="false"/>
-							<m:Label text="Incoterms"/>
-							<m:Input value="CIF Jeddah bv Sea" enabled="false"/>
-							<m:Label text="Decline"/>
-							<m:Input value="Products Included" enabled="false"/>
-						</form:content>
-					</form:SimpleForm>
-
-					<m:Title text="Request Details" />
-					<form:SimpleForm
-						editable="true"
-						maxContainerCols="2"
-						layout="ColumnLayout"
-						columnsL="2" >
-						<form:content>
-							
-							<m:Text text="Pricing chart will be shown here"/>
-						</form:content>
-					</form:SimpleForm>
-
-				</m:content>
-			</m:Panel>
+		
+		<f:content>	
+			<Panel expandable="true" headerText="Product Info">
+<VBox>
+		<form:Form
+			id="idProductForm"
+			editable="true"
+			formContainers="{path:'template>/detailDetailOfferProductConfig/countryTemplate/template/form/formContainers',templateShareable:true}">
+			<form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:layout>
+				<form:ResponsiveGridLayout labelSpanXL="{template>layout/labelSpanXL}"
+											labelSpanL="{template>layout/labelSpanL}" 
+										   labelSpanM="{template>layout/labelSpanM}"
+										   labelSpanS="{template>layout/labelSpanS}"
+										   adjustLabelSpan="{template>layout/adjustLabelSpan}"
+										   emptySpanXL="{template>layout/emptySpanXL}"
+										   emptySpanL="{template>layout/emptySpanL}" 
+										   emptySpanM="{template>layout/emptySpanM}"
+										   emptySpanS="{template>layout/emptySpanS}"
+										   columnsXL="{template>layout/columnsXL}" 
+										   columnsL="{template>layout/columnsL}" 
+										   columnsM="{template>layout/columnsM}"										   
+										   singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+				<!-- <form:ResponsiveGridLayout labelSpanL="12" labelSpanM="12"
+				emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" columnsXL="3" class="editableForm" backgroundDesign="Solid" /> -->
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+	</VBox>	
+</Panel>
 		</f:content>
 	</f:DynamicPage>
+
+
 </mvc:View>
