@@ -16,8 +16,17 @@ sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
     getColumns: function () {
       return this.columns;
     },
+
+    hasColumn: function(path){
+      const lowerCasePath = path.toLowerCase();
+      return !!this.getColumns().find(cl => cl.control.properties.find(p => p.value.toLowerCase().includes(lowerCasePath)));
+    },
+
     getEntity: function () {
       return this.entity;
+    },
+    getTitle: function () {
+      return this.title;
     },
     getJSON: function () {
       return {

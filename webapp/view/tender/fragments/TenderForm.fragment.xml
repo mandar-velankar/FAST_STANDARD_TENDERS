@@ -8,11 +8,8 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:mvc="sap.ui.core.mvc">
 
-<Dialog id = "idCreateTenderDialog" title="New Tender" contentWidth="1400px" contentHeight="400px">
-
-		<content>
             <form:Form
-			id="idTenderForm"
+			id="idNewTenderForm"
 			editable="true"
 			formContainers="{path:'template>/masterConfig/countryTemplate/template/form/formContainers',templateShareable:true}"> 
 			<!-- <form:title>
@@ -37,7 +34,7 @@
 			<form:formContainers>
 				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						    <form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
@@ -46,12 +43,5 @@
 				</form:FormContainer>
 			</form:formContainers>
 		</form:Form>
-        </content>
-
-        <buttons>
-            <Button id="addSelectedSOProducts" text="Create" press=".onCreateTender"/>
-            <Button id="cancelDialog" text="Cancel" press=".onCloseTenderCreationDialog" />
-        </buttons>
-</Dialog>
 
 </core:FragmentDefinition>

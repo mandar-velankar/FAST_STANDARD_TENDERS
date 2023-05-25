@@ -20,22 +20,28 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
                         return this.readMasterConfig(keys);
                     case 'DETAIL':
                         return this.readDetailConfig(keys);
+                    case 'DETAIL-OFFERPRODUCTDETAIL':
+                        return this.readDetailDetailOfferProductConfig(keys);
 
                     default:
                         break;
                 }
             }, 
             readMasterConfig: async function (keys) {
-                this.updateConfig("master",await this.templateService.getTableConfig(keys || {}));
+                return this.updateConfig("master",await this.templateService.getTableConfig(keys || {}));
             },
             readDetailConfig: async function (keys) {
-                this.updateConfig("detail",await this.templateService.getViewConfig(keys || {}));
+                return this.updateConfig("detail",await this.templateService.getViewConfig(keys || {}));
+            },
+            readDetailDetailOfferProductConfig: async function (keys) {
+                return this.updateConfig("detailDetailOfferProduct",await this.templateService.getFormConfig(keys || {}));
             },
             updateConfig:function(type,templateResponse){
                 this.oData[`${type}Config`] = {
                     countryTemplate: new CountryTemplate(templateResponse)
                 };
                 this.updateBindings(true);
+                return this.oData[`${type}Config`];
             }
         });
         return GenericFormState;

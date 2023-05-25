@@ -7,14 +7,44 @@
 		confirm=".onConfirmViewSettingsDialog">
 		<sortItems>
 			<ViewSettingsItem
-				text="{i18n>masterSort1}"
-				key="TenderName"
+				text="{i18n>masterSortCountryCode}"
+				key="CountryCode"
 				selected="true"/>
 			<ViewSettingsItem
-				text="{i18n>masterSort2}"
-				key="TenderNo"/>
+				text="{i18n>masterSortTenderID}"
+				key="TenderID"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortClassification}"
+				key="Classification"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortTenderName}"
+				key="TenderName"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortCreatedBy}"
+				key="createdBy"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortDistributorName}"
+				key="DistributorName"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortInstituteName}"
+				key="InstituteName"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortOfferID}"
+				key="OfferID"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortValue}"
+				key="VALUE"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortStatus}"
+				key="STATUS"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortPublicationDate}"
+				key="PublicationDate"/>
+			<ViewSettingsItem
+				text="{i18n>masterSortDueDate}"
+				key="BidDueDate"/>
 		</sortItems>
-		<filterItems>
+		<!-- <filterItems>
 			<ViewSettingsFilterItem
 				id="filterItems"
 				text="{i18n>masterFilterName}"
@@ -35,6 +65,6 @@
 			<ViewSettingsItem
 				text="{i18n>masterGroup1}"
 				key="TenderNo"/>
-		</groupItems>
+		</groupItems> -->
 	</ViewSettingsDialog>
 </core:FragmentDefinition>

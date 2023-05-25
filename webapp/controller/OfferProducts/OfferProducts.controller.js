@@ -5,7 +5,8 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/m/ColumnListItem",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem) {
+	"sap/m/MessageBox"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, MessageBox) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -21,12 +22,23 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
 			this.oRouter = this.oOwnerComponent.getRouter();
+
+			this.defaultModel = this.getOwnerComponent().getModel();
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.objectId = sObjectId;
 			this.offerID = sOfferId;
 			this.selectedTab = iconTabfilter.getKey();
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+				minDate: new Date()
+			});
+	
+			this.setModel(oModel, "ui");
 
 			this._bindForm("OfferForm");
 			this._bindTable("OfferProductsTable");
@@ -103,6 +115,32 @@ sap.ui.define([
 					productId: "1"
 				});
 			}.bind(this));
-		}
+		},
+
+		onOfferFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', true);
+		},
+		onOfferFormSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+
+			if(!this.validateOffer()) return; //error
+			this.defaultModel.submitChanges(); //no error - save
+		},
+		onOfferFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/editMode', false);
+			this.defaultModel.resetChanges();
+		},
+
+		validateOffer: function () {
+			const offer = this.defaultModel.getProperty(this.byId('idOfferForm').getObjectBinding().getPath());
+
+			if (offer.InternalBidDueDate <= offer.NewOfferDueDate) {
+				MessageBox.error("Internal due date can not be before offer due date");
+				this.getModel("ui").setProperty('/editMode', true);
+				return false;
+			}
+
+			return true;
+		},
 	});
 });

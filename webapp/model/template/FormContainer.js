@@ -3,16 +3,22 @@ sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElem
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
       this.formElements = [];
+      this.elementByName = {};
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
         for (const formElement of data.FormElements) {
-          this.formElements.push(new FormElement(formElement));
+          const element = new FormElement(formElement)
+          this.formElements.push(element);
+          this.elementByName[element.label.replace(/\s/g,'')] = element;
         }
         // for(const control of data.Controls){
         //     this.controls.push(new Control(control));
         // }
       }
+    },
+    getFormElementByName: function (formElemLabel) {
+      return this.formElements.find(el => el.label === formElemLabel);
     },
     getJSON: function () {
       return {
