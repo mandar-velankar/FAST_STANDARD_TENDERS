@@ -5,12 +5,15 @@ sap.ui.define([
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Filter",
 	"sap/m/MessageBox",
-	"sap/ui/core/Fragment"
-], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Fragment) {
+	"sap/ui/core/message/Message",
+	"sap/ui/core/Fragment",
+	"sap/ui/core/library"
+], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Message,Fragment,library) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
 	var URLHelper = mobileLibrary.URLHelper;
+	var MessageType = library.MessageType;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
 
@@ -112,7 +115,7 @@ sap.ui.define([
 			this.oMessageManager.removeAllMessages();
 			
 			// Award Criteria	
-			const isAwardCriteriaValid = this.validateAwardCriteria();
+			const isAwardCriteriaValid = this.validateAwardCriteria(event);
 			if(!isAwardCriteriaValid) return;
 			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
@@ -132,6 +135,9 @@ sap.ui.define([
 		},
 
 		onTenderFormCancelBtnPress: function(event){
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
 			this.getModel("ui").setProperty('/editMode', false);
 			this.defaultModel.resetChanges();
 		},
@@ -173,7 +179,7 @@ sap.ui.define([
 			oModel.resetChanges(aItemContexts.map(ctx => ctx.getPath()));
 		},
 
-		validateAwardCriteria: function () {
+		validateAwardCriteria: function (event) {
 
 			let bValid = true;
 			const aAwardCriteriaItems = this.getView().byId("idAwardCriteria").getItems();
@@ -189,6 +195,13 @@ sap.ui.define([
 
 			if (sumWeight > 0 && sumWeight !== 1) {
 				MessageBox.error("Sum of Award Criteria weight must be 100%");
+				// const oMessage = new Message({
+				// 	message: "Sum of Award Criteria weight must be 100%",
+				// 	type: MessageType.Error,
+				// 	target: "/AwardCriteriaTableView(CountryCode='AR',TenderID='AR-21-1007',Criteria='NotDefined')",
+				// 	processor: this.getView().getModel()
+				// });
+				// sap.ui.getCore().getMessageManager().addMessages(oMessage);
 				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
