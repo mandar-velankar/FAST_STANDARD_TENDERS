@@ -24,6 +24,19 @@ sap.ui.define([
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			const oModel = this.getOwnerComponent().getModel();
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Basicinfo", "AwardCriteria"]));
+			oModel.setChangeGroups({
+				"TenderFormView": {
+					groupId: "Basicinfo",  
+				},
+				"PT_TMAWRDCR": {
+					groupId: "AwardCriteria",  
+				},
+				"AwardCriteriaTableView": {
+					groupId: "AwardCriteria",
+				}
+			});
 
 		},
 		onBeforeShow:async function(iconTabfilter,sObjectId){
@@ -72,12 +85,15 @@ sap.ui.define([
 					TenderID: this.objectId,
 				});
 			} else {
-				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+					groupId: "Basicinfo"
+				});
 				path = newEntryContext.getPath();
 			}
 			
 			form?.bindElement({
 				path: path,
+				groupId: "Basicinfo"
 			});
 		},
 
@@ -102,7 +118,8 @@ sap.ui.define([
 					type: "Inactive",
 					cells: cols.map(col => col.getControl().generateControl())
 			  	}),
-			  	templateShareable: true
+			  	templateShareable: true,
+				groupId: "AwardCriteria"
 			});
 		},
 
@@ -121,7 +138,11 @@ sap.ui.define([
 
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this)
+				success: this._onSubmitChangesSuccess.bind(this),
+				groupId: "Basicinfo"
+			}); 
+			this.defaultModel.submitChanges({
+				groupId: "AwardCriteria"
 			}); 
 		},
 
@@ -169,7 +190,8 @@ sap.ui.define([
 					oModel.setProperty(sPath+"/Weight", ctx.getObject().Weight)
 				}else {
 					oModel.createEntry("/PT_TMAWRDCR", {
-						properties: awardCriteriObj
+						properties: awardCriteriObj,
+						groupId: "AwardCriteria"
 					});
 				}
                 
@@ -210,28 +232,28 @@ sap.ui.define([
 		},
 
 
-		onMessagePopoverPress : function (oEvent) {
-			const oSourceControl = oEvent.getSource();
-			this._getMessagePopover().then(function(oMessagePopover){
-				oMessagePopover.openBy(oSourceControl);
-			});
-		},
+		// onMessagePopoverPress : function (oEvent) {
+		// 	const oSourceControl = oEvent.getSource();
+		// 	this._getMessagePopover().then(function(oMessagePopover){
+		// 		oMessagePopover.openBy(oSourceControl);
+		// 	});
+		// },
 
-		_getMessagePopover: function () {
-			const oView = this.getView();
+		// _getMessagePopover: function () {
+		// 	const oView = this.getView();
 
-			// create popover lazily (singleton)
-			if (!this._pMessagePopover) {
-				this._pMessagePopover = Fragment.load({
-					id: oView.getId(),
-					name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
-				}).then(function (oMessagePopover) {
-					oView.addDependent(oMessagePopover);
-					return oMessagePopover;
-				});
-			}
-			return this._pMessagePopover;
-		}
+		// 	// create popover lazily (singleton)
+		// 	if (!this._pMessagePopover) {
+		// 		this._pMessagePopover = Fragment.load({
+		// 			id: oView.getId(),
+		// 			name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
+		// 		}).then(function (oMessagePopover) {
+		// 			oView.addDependent(oMessagePopover);
+		// 			return oMessagePopover;
+		// 		});
+		// 	}
+		// 	return this._pMessagePopover;
+		// }
 
 	});
 });
