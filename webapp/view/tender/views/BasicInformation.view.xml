@@ -24,7 +24,7 @@
 					<Button
 						icon="sap-icon://alert"
 						text="{= ${message>/}.length }"
-						visible="{= ${message>/}.length > 0 }"
+						visible="{= ${message>/}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
 						type="Emphasized"
 						press="onMessagePopoverPress" 
 					/>
@@ -95,7 +95,7 @@
 						<Button
 							icon="sap-icon://alert"
 							text="{= ${message>/}.length }"
-							visible="{= ${message>/}.length > 0 }"
+							visible="{= ${message>/}.length > 0 &amp;&amp; ${ui>/AwardCriteria/editMode}}"
 							type="Emphasized"
 							press="onMessagePopoverPress" 
 						/>

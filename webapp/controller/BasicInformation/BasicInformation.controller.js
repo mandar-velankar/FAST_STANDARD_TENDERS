@@ -236,22 +236,24 @@ sap.ui.define([
 
 			//sum of all award criterias
 			let sumWeight = 0;
+			let contextPath = "";
 			
 			//checks on mandatory fields & calulation of sumWeight
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
-				let weight = oAwardCriteria.getCells()[1].getBinding("value").getValue();
+				contextPath = oAwardCriteria.getBindingContextPath()
+				let weight = oAwardCriteria.getCells()[1].getValue();
 				sumWeight = sumWeight + parseFloat(weight);
 			});
 
 			if (sumWeight > 0 && sumWeight !== 1) {
-				MessageBox.error("Sum of Award Criteria weight must be 100%");
-				// const oMessage = new Message({
-				// 	message: "Sum of Award Criteria weight must be 100%",
-				// 	type: MessageType.Error,
-				// 	target: "/AwardCriteriaTableView(CountryCode='AR',TenderID='AR-21-1007',Criteria='NotDefined')",
-				// 	processor: this.getView().getModel()
-				// });
-				// sap.ui.getCore().getMessageManager().addMessages(oMessage);
+				// MessageBox.error("Sum of Award Criteria weight must be 100%");
+				const oMessage = new Message({
+					message: "Sum of Award Criteria weight must be 100%",
+					type: MessageType.Error,
+					target: `${contextPath}/Weight`,
+					processor: this.getView().getModel()
+				});
+				sap.ui.getCore().getMessageManager().addMessages(oMessage);
 				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
