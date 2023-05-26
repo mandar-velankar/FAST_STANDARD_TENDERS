@@ -42,6 +42,7 @@ sap.ui.define([
 
 			this._bindForm("OfferForm");
 			this._bindTable("OfferProductsTable");
+			this._bindText("TotalAmountOfferProducts");
 		},
 
 		/**
@@ -92,6 +93,22 @@ sap.ui.define([
 			  	}),
 			  	templateShareable: true
 			});
+		},
+
+		_bindText(textId){
+			let path = "";
+			if(textId === 'TotalAmountOfferProducts'){
+				const entity = 'OfferProductsTotalForOffer';
+				const textField = this.byId(`id${textId}`);
+
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					OfferID: this.offerID
+				});
+
+				textField.bindElement({
+					path: path
+				});
+			}
 		},
 
 		/* =========================================================== */
