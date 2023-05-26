@@ -4,7 +4,7 @@ sap.ui.define([
   "sap/m/ViewSettingsItem" 
 ], function (BaseObject, Control, ViewSettingsItem) {
   const Column = BaseObject.extend("com.bayer.SXTENDER.templates.GenericTableComponent.models.Column", {
-    constructor: function (data) {
+    constructor: function (tableId, data) {
       BaseObject.prototype.constructor.call(this);
       if (data) {
         this.id = data.ID;
@@ -12,7 +12,7 @@ sap.ui.define([
         this.importance = data.Importance;
         this.isValueHelpKey = data.IsValueHelpKey;
         this.isValueHelpText = data.IsValueHelpText;
-        this.control = new Control(data.Control);
+        this.control = new Control(tableId, data.Control);
       }
     },
     getControl: function () {

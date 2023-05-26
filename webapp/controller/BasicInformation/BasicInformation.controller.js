@@ -60,7 +60,13 @@ sap.ui.define([
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
-				editMode: false
+				editMode: false,
+				AwardCriteria:{
+					editMode: false
+				},
+				TenderForm:{
+					editMode: false	
+				}
 			});
 	
 			this.setModel(oModel, "ui");
@@ -124,9 +130,41 @@ sap.ui.define([
 		},
 
 		onTenderFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', true);
+			this.getModel("ui").setProperty('/TenderForm/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
+
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesTenderFormSuccess.bind(this),
+				groupId: "Basicinfo"
+			}); 
+		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesTenderFormSuccess: function(res){
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
+		},
+
+		onTenderFormCancelBtnPress: function(event){
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
+			this.getModel("ui").setProperty('/TenderForm/editMode', false);
+			this.defaultModel.resetChanges();
+		},
+		
+		onAwardCriteriaEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/AwardCriteria/editMode', true);
+		},
+		onAwardCriteriaSaveBtnPress: function(event){
 
 			// clear all messages
 			this.oMessageManager.removeAllMessages();
@@ -137,32 +175,22 @@ sap.ui.define([
 			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
 			this.defaultModel.submitChanges({
-				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this),
-				groupId: "Basicinfo"
-			}); 
-			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesAwardCriteriaSuccess.bind(this),
 				groupId: "AwardCriteria"
 			}); 
 		},
-
-		_onSubmitChangesFail: function(error){
-			// not implemented
-		},
-
-		_onSubmitChangesSuccess: function(res){
+		_onSubmitChangesAwardCriteriaSuccess: function(res){
 			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/editMode', false);
+			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 
-		onTenderFormCancelBtnPress: function(event){
+		onAwardCriteriaCancelBtnPress: function(event){
 			// clear all messages
 			this.oMessageManager.removeAllMessages();
 			
-			this.getModel("ui").setProperty('/editMode', false);
+			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 			this.defaultModel.resetChanges();
 		},
-
 
 		/**
 		 * This method changes/updates the odata model PendingChanges list which is used when triggering "submitChanges" method

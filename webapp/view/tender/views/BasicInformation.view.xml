@@ -33,21 +33,21 @@
 						icon="sap-icon://edit"
 						text="Edit"
 						press=".onTenderFormEditBtnPress"
-						visible="{= !${ui>/editMode} }"
+						visible="{= !${ui>/TenderForm/editMode} }"
 					/>
 					<Button
 						id="idTenderFormSaveBtn"
 						icon="sap-icon://save"
 						text="Save"
 						press=".onTenderFormSaveBtnPress"
-						visible="{= ${ui>/editMode} }"
+						visible="{= ${ui>/TenderForm/editMode} }"
 					/>
 					<Button
 						id="idTenderFormCancelBtn"
 						icon="sap-icon://decline"
 						text="Cancel"
 						press=".onTenderFormCancelBtnPress"
-						visible="{= ${ui>/editMode} }"
+						visible="{= ${ui>/TenderForm/editMode} }"
 					/>
 				</Toolbar>
 			</form:toolbar>
@@ -80,19 +80,46 @@
 			</form:formContainers>
 		</form:Form>
 	</VBox>
-	<VBox class='sapUiMediumMargin'>
+	<VBox class='sapUiMediumMarginTop'>
 		<Table id="idAwardCriteria" 
 			columns="{path:'template>xmlView/tableByName/AwardCriteria/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
 			mode="SingleSelectMaster"
-			selectionChange=".onOfferProductPress"
 		>
 			<headerToolbar>
 				<OverflowToolbar>
 					<content>
 						<Title text="{path:'template>xmlView/tableByName/AwardCriteria/title'}" level="H2"/>
 						<ToolbarSpacer />
+						<Button
+							icon="sap-icon://alert"
+							text="{= ${message>/}.length }"
+							visible="{= ${message>/}.length > 0 }"
+							type="Emphasized"
+							press="onMessagePopoverPress" 
+						/>
+						<Button
+							id="idAwardCriteriaEditBtn"
+							icon="sap-icon://edit"
+							text="Edit"
+							press=".onAwardCriteriaEditBtnPress"
+							visible="{= !${ui>/AwardCriteria/editMode} }"
+						/>
+						<Button
+							id="idAwardCriteriaSaveBtn"
+							icon="sap-icon://save"
+							text="Save"
+							press=".onAwardCriteriaSaveBtnPress"
+							visible="{= ${ui>/AwardCriteria/editMode} }"
+						/>
+						<Button
+							id="idAwardCriteriaCancelBtn"
+							icon="sap-icon://decline"
+							text="Cancel"
+							press=".onAwardCriteriaCancelBtnPress"
+							visible="{= ${ui>/AwardCriteria/editMode} }"
+						/>
 					</content>
 				</OverflowToolbar>
 			</headerToolbar>
