@@ -31,7 +31,7 @@ sap.ui.define([
       return new ViewSettingsItem({
         'key': key, 
         'text': text,
-        'selected': index === 0 && true
+        'selected': index === 0 
       });
     },
 
