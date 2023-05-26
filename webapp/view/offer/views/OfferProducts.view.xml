@@ -82,7 +82,7 @@
 		</Table>
 	</VBox>	
 	<VBox class='sapUiMediumMargin' justifyContent="End" alignItems="End">
-		<Text id='idTotalAmountOfferProducts' text='Offer Total: {OfferTotal} EUR'/>
+		<Text id='idTotalAmountOfferProducts' text='{= ${OfferTotal} ? "Offer Total: ${OfferTotal} EUR" : "Offer Total: 0 EUR" }'/>
 	</VBox>	
 
 </mvc:View>
