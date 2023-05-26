@@ -15,6 +15,19 @@ sap.ui.define([
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts", {
 
 		onInit: function () {
+			const oModel = this.getOwnerComponent().getModel();
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["OfferformInfo", "OfferProducts", "TotalAmountOfferProducts"]));
+			oModel.setChangeGroups({
+				"OfferFormView": {
+					groupId: "OfferformInfo",  
+				},
+				"OfferProductsTable": {
+					groupId: "OfferProducts",  
+				},
+				"TotalAmountProducts": {
+					groupId: "TotalAmountOfferProducts",
+				}
+			});
 		},
 		onBeforeShow:async function(iconTabfilter,sObjectId, sOfferId){
 			// get state data
@@ -35,7 +48,10 @@ sap.ui.define([
 				busy: false,
 				delay: 0,
 				editMode: false,
-				minDate: new Date()
+				minDate: new Date(),
+				OfferForm:{
+					editMode: false
+				}
 			});
 	
 			this.setModel(oModel, "ui");
@@ -60,12 +76,15 @@ sap.ui.define([
 					OfferID: this.offerID
 				});
 			} else {
-				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+					groupId: "OfferformInfo"
+				});
 				path = newEntryContext.getPath();
 			}
 			
 			form.bindElement({
 				path: path,
+				groupId: "OfferformInfo"
 			});
 		},
 
@@ -91,7 +110,8 @@ sap.ui.define([
 					type: "Inactive",
 					cells: cols.map(col => col.getControl().generateControl())
 			  	}),
-			  	templateShareable: true
+			  	templateShareable: true,
+				  groupId: "OfferProducts"
 			});
 		},
 
@@ -106,8 +126,9 @@ sap.ui.define([
 				});
 
 				textField.bindElement({
-					path: path
-				});
+					path: path,
+					groupId: "OfferProducts"
+				})
 			}
 		},
 
@@ -135,16 +156,16 @@ sap.ui.define([
 		},
 
 		onOfferFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', true);
+			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
 		onOfferFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', false);
+			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 
 			if(!this.validateOffer()) return; //error
-			this.defaultModel.submitChanges(); //no error - save
+			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', false);
+			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.defaultModel.resetChanges();
 		},
 
@@ -153,7 +174,7 @@ sap.ui.define([
 
 			if (offer.InternalBidDueDate <= offer.NewOfferDueDate) {
 				MessageBox.error("Internal due date can not be before offer due date");
-				this.getModel("ui").setProperty('/editMode', true);
+				this.getModel("ui").setProperty('/OfferForm/editMode', true);
 				return false;
 			}
 
