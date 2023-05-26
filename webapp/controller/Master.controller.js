@@ -12,8 +12,9 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"../model/formatter",
 	"sap/m/ColumnListItem",
-	"sap/ui/core/Item"
-], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem, Item) {
+	"sap/ui/core/Item",
+	"sap/m/MessageToast"
+], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem, Item, MessageToast) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -85,6 +86,23 @@ sap.ui.define([
 			this.getRouter().getRoute("master").attachPatternMatched(this._onMasterMatched, this);
 			this.getRouter().getRoute("object").attachPatternMatched(this._onMasterMatched, this);
 			this.getRouter().attachBypassed(this.onBypassed, this);
+
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
+
+			const oModel = this.getOwnerComponent().getModel();
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Tender"]));
+			oModel.setChangeGroups({
+				"TenderFormView": {
+					groupId: "Tender",  
+					changeSetId: "ID",/*optional*/
+					single: true, /*optional, can be true or false*/
+				}
+			});
 		},
 
 		onCountriesReceived: async function(oEvent){
@@ -510,11 +528,14 @@ sap.ui.define([
 		},
 		_bindCreateTenderForm: async function () {
 			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
-			const form = this.byId("idNewTenderForm")
-			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+			const form = this.byId("idNewTenderForm");
+			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+				groupId: "Tender"
+			});
 			const path = newEntryContext.getPath();
 			form?.bindElement({
-				path: path
+				path: path,
+				groupId: "Tender"
 			});
 			const sElemBindingPath = form.getElementBinding().getPath();
 			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
@@ -525,18 +546,36 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 		},
 		onCloseTenderCreationDialog: function () {
+			this.oMessageManager.removeAllMessages();
 			this.byId("idCreateTenderDialog").close();
 			this.byId("idCreateTenderDialog").destroy();
 			this.getModel().resetChanges();
 		},
 
-		onCreateNewTender: function () {
+		onCreateNewTender: async function () {
+			this.oMessageManager.removeAllMessages();
 			const oNewTenderForm = this.byId("idNewTenderForm");
 			this.setNewTenderPendingChanges(oNewTenderForm);
-			this.getModel().submitChanges();
-			this.onCloseTenderCreationDialog();
+			this.getModel().submitChanges({
+				success: this._onSubmitChangesSuccess.bind(this),
+				error: this._onSubmitChangesFail.bind(this),
+				groupId: "Tender"
+			});
+		},
+		_onSubmitChangesFail: function(error){
+			// not implemented
 		},
 
+		_onSubmitChangesSuccess: function(res){
+			const oNewTenderForm = this.byId("idNewTenderForm");
+			const oNewTender = oNewTenderForm.getElementBinding().getBoundContext().getObject();
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			if (!hasErrorMessages) {
+				MessageToast.show("Tender has been successfully created");
+				this.onCloseTenderCreationDialog();
+				this._showDetail(oNewTender);
+			}
+		},
 		setNewTenderPendingChanges: function (oForm) {
 			const oDefaultModel = oForm.getModel();
 			const oStandModel = oForm.getModel("st");
@@ -548,8 +587,11 @@ sap.ui.define([
 				Active: 1,
 				TenderName: oBoundContext.getObject().TenderName,
 				CountryCode: sSelectedCountry,
-				// InstituteID: 105441,
+				InstituteName: oBoundContext.getObject().InstituteName,
+				InstituteType: oBoundContext.getObject().InstituteType,
+				InstituteID: oBoundContext.getObject().InstituteID,
 				TenderNo: oStandModel.getProperty("/NextTenderNo"),
+				TenderChannel: oBoundContext.getObject().TenderChannel,
 				Classification: oBoundContext.getObject().Classification,
 				ContractExtenseion: oBoundContext.getObject().ContractExtenseion,
 				ContractLength: oBoundContext.getObject().ContractLength,
@@ -558,8 +600,13 @@ sap.ui.define([
 				AwardDate: oBoundContext.getObject().AwardDate,
 				NextPublicationDye: oBoundContext.getObject().NextPublicationDye
 			}
-			oDefaultModel.createEntry("/TenderFormView", {
-				properties: newTenderObj
+			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
+				properties: newTenderObj,
+				groupId: "Tender"
+			});
+			oForm?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "Tender"
 			});
 			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},

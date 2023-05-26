@@ -2,8 +2,9 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/core/routing/History",
 	"../model/formatter",
-	"../model/datatypes/CustomPercentageType"
-], function (Controller, History, formatter, CustomPercentageType) {
+	"../model/datatypes/CustomPercentageType",
+	"sap/ui/core/Fragment",
+], function (Controller, History, formatter, CustomPercentageType, Fragment) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
@@ -80,6 +81,28 @@ sap.ui.define([
 			} else {
 				this.getRouter().navTo("master", {}, true);
 			}
+		},
+		onMessagePopoverPress : function (oEvent) {
+			const oSourceControl = oEvent.getSource();
+			this._getMessagePopover().then(function(oMessagePopover){
+				oMessagePopover.openBy(oSourceControl);
+			});
+		},
+
+		_getMessagePopover: function () {
+			const oView = this.getView();
+
+			// create popover lazily (singleton)
+			if (!this._pMessagePopover) {
+				this._pMessagePopover = Fragment.load({
+					id: oView.getId(),
+					name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
+				}).then(function (oMessagePopover) {
+					oView.addDependent(oMessagePopover);
+					return oMessagePopover;
+				});
+			}
+			return this._pMessagePopover;
 		}
 
 	});
