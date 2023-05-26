@@ -236,31 +236,36 @@ sap.ui.define([
 
 			//sum of all award criterias
 			let sumWeight = 0;
-			let contextPath = "";
+			let contextPath = [];
 			
 			//checks on mandatory fields & calulation of sumWeight
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
-				contextPath = oAwardCriteria.getBindingContextPath()
+				contextPath.push(oAwardCriteria.getBindingContextPath());
 				let weight = oAwardCriteria.getCells()[1].getValue();
 				sumWeight = sumWeight + parseFloat(weight);
 			});
 
 			if (sumWeight > 0 && sumWeight !== 1) {
 				// MessageBox.error("Sum of Award Criteria weight must be 100%");
-				const oMessage = new Message({
+				const messages = new Message({
 					message: "Sum of Award Criteria weight must be 100%",
 					type: MessageType.Error,
-					target: `${contextPath}/Weight`,
+					target: this._createTarget(contextPath),
 					processor: this.getView().getModel()
 				});
-				sap.ui.getCore().getMessageManager().addMessages(oMessage);
+				
+				sap.ui.getCore().getMessageManager().addMessages(messages);
 				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
 
 			return bValid;
 		},
-
+		_createTarget: function (contextPath) {
+			return contextPath.map((path) => {
+				return `${path}/Weight`;
+			})
+		},
 
 		// onMessagePopoverPress : function (oEvent) {
 		// 	const oSourceControl = oEvent.getSource();
