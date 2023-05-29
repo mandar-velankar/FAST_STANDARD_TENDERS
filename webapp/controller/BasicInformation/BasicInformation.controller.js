@@ -39,9 +39,9 @@ sap.ui.define([
 			});
 
 		},
-		onBeforeShow:async function(iconTabfilter,sObjectId){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
 			
-			this.objectId = sObjectId;
+			this.objectId = objectId;
 			this.selectedTab = iconTabfilter.getKey();
 
 			if(this.selectedTab !== "Tender") return; // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.

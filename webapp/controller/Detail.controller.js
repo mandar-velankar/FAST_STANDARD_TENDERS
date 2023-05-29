@@ -79,7 +79,7 @@ sap.ui.define([
 				type: sap.ui.core.mvc.ViewType.XML
 			}).then(view => {
 				view.setBindingContext(context,"template");
-				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId,this.sOfferId);
+				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,{objectId:this.sObjectId,offerId:this.sOfferId,countryCode:this.sCountryCode});
 				iconTabfilter.insertContent(view);
 			});
 			return iconTabfilter;
@@ -98,6 +98,7 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: async function (oEvent) {
+			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
@@ -107,7 +108,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			
 			await this.templateState.read("DETAIL",{
-				countryCode: "BR",
+				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID: "StandardTenders",
 				page: "DETAIL",
 				keys: {

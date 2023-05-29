@@ -51,6 +51,7 @@ sap.ui.define([
 		 */
 		 _onObjectMatched: async function (oEvent) {
 
+			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;
@@ -60,7 +61,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 
 			const detaildetailConfig = await this.templateState.read("DETAIL-OFFERPRODUCTDETAIL", {
-				countryCode: "BR",
+				countryCode: "BR" || this.sCountryCode ,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID: "StandardTenders",
 				page: "DETAIL-OFFERPRODUCTDETAIL",
 				keys: {
@@ -159,6 +160,7 @@ sap.ui.define([
 				oNextUIState = oHelper.getNextUIState(1);
 				this.oRouter.navTo("object", {
 					layout: oNextUIState.layout,
+					countryCode: this.sCountryCode,
 					objectId: this.sObjectId
 				});
 			}.bind(this));

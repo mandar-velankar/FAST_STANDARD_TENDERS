@@ -106,21 +106,21 @@ sap.ui.define([
 		},
 
 		onCountriesReceived: async function(oEvent){
-			const sCountryCode = oEvent.getParameter("data").results[0].CountryCode; // we default to first country in the list
+			const sCountryCode = oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			// set filter which is needed later on
-			if(sCountryCode){
-				this.andFilters.push(new Filter({
-					path: "CountryCode",
-					operator: FilterOperator.Contains,
-					value1: sCountryCode,
-					caseSensitive: false
-				}));
-			}
+			// if(sCountryCode){
+			// 	this.andFilters.push(new Filter({
+			// 		path: "CountryCode",
+			// 		operator: FilterOperator.Contains,
+			// 		value1: sCountryCode,
+			// 		caseSensitive: false
+			// 	}));
+			// }
 
 			this._getTemplateConfig(sCountryCode);	
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
-
+			// this.setFilter(oEvent);
 		},
 		_getNextTenderID: async function (sCountryCode) {
 			return new Promise((resolve, reject) => {
@@ -146,15 +146,15 @@ sap.ui.define([
 				countryCode: "BR" || sCountryCode, // TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID:"StandardTenders",
 				page:"MASTER"
-			}).then(this._onTemplateConfigReceived.bind(this));
+			}).then(this._onTemplateConfigReceived.bind(this,sCountryCode));
 		},
 
 		/**
 		 * This method is called once the template configuration is loaded
 		 */
-		_onTemplateConfigReceived: function(){
+		_onTemplateConfigReceived: function(sCountryCode){
 			const table = this.byId("genericMasterTable");
-			this._bindTable(table);
+			this._bindTable(table,sCountryCode);
 		},
 
 		_bindBrandItems: function(sCountryCode){
@@ -196,9 +196,9 @@ sap.ui.define([
 			});
 		},
 
-		_bindTable: function(table){
-			const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
-			const sCountryCode = oCountrySelectedItem?.getKey();
+		_bindTable: function(table,sCountryCode){
+			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
+			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			table && table.bindItems({
@@ -462,6 +462,7 @@ sap.ui.define([
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getRouter().navTo("object", {
+				countryCode: oItem.CountryCode,
 				objectId : oItem.TenderID, //getBindingContext().getProperty("TenderID")
 				offerId : oItem.OfferID
 			}, bReplace);

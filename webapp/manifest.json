@@ -121,7 +121,7 @@
 					"target": "master"
 				},
 				{
-					"pattern": "detail/{objectId}/{offerId}",
+					"pattern": "detail/{countryCode}/{objectId}/{offerId}",
 					"name": "object",
 					"target": [
 						"master",
@@ -138,7 +138,7 @@
 					]
 				},
 				{
-					"pattern": "PT_TMTEND/{objectId}/OfferProductDetail/{productId}/{layout}",
+					"pattern": "PT_TMTEND/{countryCode}/{objectId}/OfferProductDetail/{productId}/{layout}",
 					"name": "offerProductDetail",
 					"target": [
 						"master",
