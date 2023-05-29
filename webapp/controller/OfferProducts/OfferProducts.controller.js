@@ -29,7 +29,7 @@ sap.ui.define([
 				}
 			});
 		},
-		onBeforeShow:async function(iconTabfilter,sObjectId, sOfferId){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
@@ -40,8 +40,9 @@ sap.ui.define([
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
-			this.objectId = sObjectId;
-			this.offerID = sOfferId;
+			this.objectId = objectId;
+			this.offerID = offerId;
+			this.countryCode = countryCode;
 			this.selectedTab = iconTabfilter.getKey();
 
 			const oModel = new JSONModel({
@@ -148,8 +149,9 @@ sap.ui.define([
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(2);
 				this.oRouter.navTo("offerProductDetail", {
+					country: this.countryCode,
 					layout: oNextUIState.layout,
-					objectId: "AE-15-100-1001",
+					objectId: "AE-15-100-1001" || this.objectId,
 					productId: "1"
 				});
 			}.bind(this));

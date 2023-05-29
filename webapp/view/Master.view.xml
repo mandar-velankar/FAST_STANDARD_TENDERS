@@ -46,7 +46,7 @@
 								dataReceived: '.onCountriesReceived'
 							}
 						}"
-						change=".setFilter"
+						change=".onCountriesReceived"
 					>
 						<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
 					</Select>
