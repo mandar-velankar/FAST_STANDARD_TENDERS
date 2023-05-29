@@ -149,9 +149,10 @@ sap.ui.define([
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(2);
 				this.oRouter.navTo("offerProductDetail", {
-					country: this.countryCode,
+					countryCode: this.countryCode,
 					layout: oNextUIState.layout,
-					objectId: "AE-15-100-1001" || this.objectId,
+					objectId: this.objectId,
+					offerId: this.offerID,
 					productId: "1"
 				});
 			}.bind(this));

@@ -2,8 +2,10 @@ sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/m/library",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail", {
@@ -53,6 +55,7 @@ sap.ui.define([
 
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
+			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;
 
@@ -75,6 +78,7 @@ sap.ui.define([
 				// });
 				// this._bindView("/" + sObjectPath);
 				//this._bindForm("ProductForm");
+				this._filterPriceCondition();
 			}.bind(this));
 
 		},
@@ -129,7 +133,27 @@ sap.ui.define([
 				path: path,
 			});
 		},
-
+		_filterPriceCondition: function () {
+			const oSelectedTender = this._getTender();
+			const oPriceCondBinding = this.byId("idSelectedPriceContition").getBinding("items");
+			const orFilters = [
+				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
+				new Filter("Division",FilterOperator.EQ, oSelectedTender.oOffer.Division),
+				new Filter("Classification",FilterOperator.EQ, oSelectedTender.oTender.Classification),
+			]
+			oPriceCondBinding.filter(orFilters);
+		},
+		_getTender: function () {
+			const sOfferKey = this.getModel().createKey("/OfferFormView", {
+				OfferID: this.sOfferId
+			});
+			const sTenderKey = this.getModel().createKey("/TenderFormView", {
+				TenderID: this.sObjectId
+			});
+			const oOffer = this.getModel().getObject(sOfferKey);
+			const oTender = this.getModel().getObject(sTenderKey);
+			return {oOffer, oTender};
+		},
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
 			var oViewModel = this.getModel("detailDetailView");

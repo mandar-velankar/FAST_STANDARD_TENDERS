@@ -129,7 +129,7 @@
 					]
 				},
 				{
-					"pattern": "PT_TMTEND/{objectId}/AwardedDetail/{productId}/{layout}",
+					"pattern": "detail/{countryCode}/{objectId}/AwardedDetail/{productId}/{layout}",
 					"name": "objectDetail",
 					"target": [
 						"master",
@@ -138,7 +138,7 @@
 					]
 				},
 				{
-					"pattern": "PT_TMTEND/{countryCode}/{objectId}/OfferProductDetail/{productId}/{layout}",
+					"pattern": "detail/{countryCode}/{objectId}/{offerId}/OfferProductDetail/{productId}/{layout}",
 					"name": "offerProductDetail",
 					"target": [
 						"master",

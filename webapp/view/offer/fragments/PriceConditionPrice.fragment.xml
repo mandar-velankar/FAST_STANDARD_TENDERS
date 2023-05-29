@@ -1,0 +1,20 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+	
+	<Label text="Set price by:" class = "sapUiTinyMarginTop sapUiTinyMarginEnd"/>
+	<Select
+		id = "idSelectedPriceContition"
+		items = "{/PriceConditionClassification}"
+		selectedKey="{st>/SelectedPriceCondition}"
+	>
+		<core:Item key="{ConditionType}" text="{ConditionType}"/>
+	</Select>
+
+</core:FragmentDefinition>

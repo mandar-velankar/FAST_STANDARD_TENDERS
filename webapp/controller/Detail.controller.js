@@ -113,7 +113,7 @@ sap.ui.define([
 				page: "DETAIL",
 				keys: {
 					TenderID: this.sObjectId,
-					OfferID: this.sOfferId
+					// OfferID: this.sOfferId
 				}
 			});
 
