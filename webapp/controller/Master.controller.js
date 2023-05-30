@@ -14,7 +14,7 @@ sap.ui.define([
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Item",
 	"sap/m/MessageToast"
-], function (BaseController,  Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter,ColumnListItem, Item, MessageToast) {
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -30,14 +30,14 @@ sap.ui.define([
 		 * Called when the master list controller is instantiated. It sets up the event handling for the master/detail communication and other lifecycle tasks.
 		 * @public
 		 */
-		onInit : function () {
+		onInit: function () {
 			// Control state model
 			var oList = this.byId("genericMasterTable"),
 				oViewModel = this._createViewModel();
-				// Put down master list's original value for busy indicator delay,
-				// so it can be restored later on. Busy handling on the master list is
-				// taken care of by the master list itself.
-				//iOriginalBusyDelay = oList.getBusyIndicatorDelay();
+			// Put down master list's original value for busy indicator delay,
+			// so it can be restored later on. Busy handling on the master list is
+			// taken care of by the master list itself.
+			//iOriginalBusyDelay = oList.getBusyIndicatorDelay();
 
 			// this._oGroupFunctions = {
 			// 	TenderNo : function(oContext) {
@@ -57,17 +57,17 @@ sap.ui.define([
 			// 	}.bind(this)
 			// };
 
-		
+
 			this._oList = oList;
 			// keeps the filter and search state
 			this._oListFilterState = {
-				aFilter : [],
-				aSearch : []
+				aFilter: [],
+				aSearch: []
 			};
 
 			this.orFilters = [];
 			this.andFilters = [];
-			
+
 			this.setModel(oViewModel, "masterView");
 			// Make sure, busy indication is showing immediately so there is no
 			// break after the busy indication for loading the view's meta data is
@@ -98,14 +98,14 @@ sap.ui.define([
 			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Tender"]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
-					groupId: "Tender",  
+					groupId: "Tender",
 					changeSetId: "ID",/*optional*/
 					single: true, /*optional, can be true or false*/
 				}
 			});
 		},
 
-		onCountriesReceived: async function(oEvent){
+		onCountriesReceived: async function (oEvent) {
 			const sCountryCode = oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			// set filter which is needed later on
 			// if(sCountryCode){
@@ -117,7 +117,7 @@ sap.ui.define([
 			// 	}));
 			// }
 
-			this._getTemplateConfig(sCountryCode);	
+			this._getTemplateConfig(sCountryCode);
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			// this.setFilter(oEvent);
@@ -140,34 +140,34 @@ sap.ui.define([
 				return `${sCountryCode}-${year}-${data}`;
 			})
 		},
-		_getTemplateConfig: function(sCountryCode){
+		_getTemplateConfig: function (sCountryCode) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
-			this.templateState.read("MASTER",{ 
+			this.templateState.read("MASTER", {
 				countryCode: "BR" || sCountryCode, // TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
-				appID:"StandardTenders",
-				page:"MASTER"
-			}).then(this._onTemplateConfigReceived.bind(this,sCountryCode));
+				appID: "StandardTenders",
+				page: "MASTER"
+			}).then(this._onTemplateConfigReceived.bind(this, sCountryCode));
 		},
 
 		/**
 		 * This method is called once the template configuration is loaded
 		 */
-		_onTemplateConfigReceived: function(sCountryCode){
+		_onTemplateConfigReceived: function (sCountryCode) {
 			const table = this.byId("genericMasterTable");
-			this._bindTable(table,sCountryCode);
+			this._bindTable(table, sCountryCode);
 		},
 
-		_bindBrandItems: function(sCountryCode){
-			const oSelectBrands = this.byId("idSlctBrand");	
+		_bindBrandItems: function (sCountryCode) {
+			const oSelectBrands = this.byId("idSlctBrand");
 			oSelectBrands?.bindItems({
-				path: "/CountryTenderBrands", 
+				path: "/CountryTenderBrands",
 				filters: [
-					new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode)
+					new Filter("COUNTRYCODE", FilterOperator.EQ, sCountryCode)
 				],
-				sorter: new Sorter ({
-					path: 'BRANDNAME', 
+				sorter: new Sorter({
+					path: 'BRANDNAME',
 					descending: false
 				}),
 				template: new sap.ui.core.Item({
@@ -175,19 +175,19 @@ sap.ui.define([
 					text: "{BRANDNAME}"
 				}),
 				templateShareable: true
-			});	
+			});
 		},
 
-		_bindStatusses: function(sCountryCode){
-			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
-			const oSelectStatus = this.byId("idSlctStatus");	
+		_bindStatusses: function (sCountryCode) {
+			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
+			const oSelectStatus = this.byId("idSlctStatus");
 			oSelectStatus?.bindItems({
-				path: "/CountryStatusses", 
+				path: "/CountryStatusses",
 				filters: [
-					new Filter("CountryCode",FilterOperator.EQ, sCountryCode)
+					new Filter("CountryCode", FilterOperator.EQ, sCountryCode)
 				],
-				sorter: new Sorter ({
-					path: 'Status', 
+				sorter: new Sorter({
+					path: 'Status',
 					descending: false
 				}),
 				template: new Item({
@@ -198,21 +198,22 @@ sap.ui.define([
 			});
 		},
 
-		_bindTable: function(table,sCountryCode){
+		_bindTable: function (table, sCountryCode) {
 			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
 			// const sCountryCode = oCountrySelectedItem?.getKey();
-			const oFilterCountry = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
+			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			table && table.bindItems({
-			  path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`, 
-			  filters: [oFilterCountry],
-			//   model: '',
-			  template: new ColumnListItem({
-				type: "Active",
-				cells: cols.map(col => col.getControl().generateControl())
-			  }),
-			  templateShareable: true
+				path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
+				filters: [oFilterCountry],
+				//   model: '',
+				template: new ColumnListItem({
+					type: "Active",
+					cells: cols.map(col => col.getControl().generateControl())
+				}),
+				templateShareable: true
 			});
+			this.setFilter();
 		},
 		/* =========================================================== */
 		/* event handlers                                              */
@@ -224,7 +225,7 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent the update finished event
 		 * @public
 		 */
-		onUpdateFinished : function (oEvent) {
+		onUpdateFinished: function (oEvent) {
 			// update the master list object counter after new data is loaded
 			this._updateListItemCount(oEvent.getParameter("total"));
 		},
@@ -263,7 +264,7 @@ sap.ui.define([
 		 * and group settings and refreshes the list binding.
 		 * @public
 		 */
-		onRefresh : function () {
+		onRefresh: function () {
 			//this._oList.getBinding("items").refresh();
 		},
 
@@ -272,7 +273,7 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent the button press event
 		 * @public
 		 */
-		onOpenViewSettings : function (oEvent) {
+		onOpenViewSettings: function (oEvent) {
 			var sDialogTab = "sort";
 			// if (oEvent.getSource() instanceof sap.m.Button) {
 			// 	var sButtonId = oEvent.getSource().getId();
@@ -288,7 +289,7 @@ sap.ui.define([
 					id: this.getView().getId(),
 					name: "com.bayer.tender.statenderapp.view.ViewSettingsDialog",
 					controller: this
-				}).then(function(oDialog){
+				}).then(function (oDialog) {
 					// connect dialog to the root view of this component (models, lifecycle)
 					this.getView().addDependent(oDialog);
 					oDialog.addStyleClass(this.getOwnerComponent().getContentDensityClass());
@@ -308,7 +309,7 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent the confirm event
 		 * @public
 		 */
-		onConfirmViewSettingsDialog : function (oEvent) {
+		onConfirmViewSettingsDialog: function (oEvent) {
 			// var aFilterItems = oEvent.getParameters().filterItems,
 			// 	aFilters = this.andFilters,
 			// 	aCaptions = [];
@@ -364,7 +365,7 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent the list selectionChange event
 		 * @public
 		 */
-		onSelectionChange : function (oEvent) {
+		onSelectionChange: function (oEvent) {
 			var oList = oEvent.getSource(),
 				data = oEvent.getParameter("listItem").getBindingContext().getObject(),//oEvent.getParameter("data"),
 				bSelected = oEvent.getParameter("selected");
@@ -372,7 +373,7 @@ sap.ui.define([
 			// skip navigation when deselecting an item in multi selection mode
 			if (!(oList.getMode() === "MultiSelect" && !bSelected)) {
 				// get the list item, either from the listItem parameter or from the event's source itself (will depend on the device-dependent mode).
-				this._showDetail(data||oList);
+				this._showDetail(data || oList);
 			}
 		},
 
@@ -381,7 +382,7 @@ sap.ui.define([
 		 * If there was an object selected in the master list, that selection is removed.
 		 * @public
 		 */
-		onBypassed : function () {
+		onBypassed: function () {
 			this._oList.removeSelections(true);
 		},
 
@@ -393,10 +394,10 @@ sap.ui.define([
 		 * @public
 		 * @returns {sap.m.GroupHeaderListItem} group header with non-capitalized caption.
 		 */
-		createGroupHeader : function (oGroup) {
+		createGroupHeader: function (oGroup) {
 			return new GroupHeaderListItem({
-				title : oGroup.text,
-				upperCase : false
+				title: oGroup.text,
+				upperCase: false
 			});
 		},
 
@@ -405,7 +406,7 @@ sap.ui.define([
 		 * We navigate back in the browser historz
 		 * @public
 		 */
-		onNavBack : function() {
+		onNavBack: function () {
 			// eslint-disable-next-line sap-no-history-manipulation
 			history.go(-1);
 		},
@@ -415,7 +416,7 @@ sap.ui.define([
 		/* =========================================================== */
 
 
-		_createViewModel : function() {
+		_createViewModel: function () {
 			return new JSONModel({
 				isFilterBarVisible: false,
 				filterBarLabel: "",
@@ -428,10 +429,10 @@ sap.ui.define([
 			});
 		},
 
-		_onMasterMatched : async function() {
+		_onMasterMatched: async function () {
 			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
-			
+
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			// await this.templateState.read("MASTER",{
@@ -459,14 +460,14 @@ sap.ui.define([
 		 * @param {sap.m.ObjectListItem} oItem selected Item
 		 * @private
 		 */
-		_showDetail : function (oItem) {
+		_showDetail: function (oItem) {
 			var bReplace = !Device.system.phone;
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
-				objectId : oItem.TenderID, //getBindingContext().getProperty("TenderID")
-				offerId : oItem.OfferID
+				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
+				offerId: oItem.OfferID
 			}, bReplace);
 		},
 
@@ -475,7 +476,7 @@ sap.ui.define([
 		 * @param {integer} iTotalItems the total number of items in the list
 		 * @private
 		 */
-		_updateListItemCount : function (iTotalItems) {
+		_updateListItemCount: function (iTotalItems) {
 			var sTitle;
 			// only update the counter if the length is final
 			if (this._oList.getBinding("items").isLengthFinal()) {
@@ -488,7 +489,7 @@ sap.ui.define([
 		 * Internal helper method to apply both filter and search state together on the list binding
 		 * @private
 		 */
-		_applyFilterSearch : function () {
+		_applyFilterSearch: function () {
 			var aFilters = this._oListFilterState.aSearch.concat(this._oListFilterState.aFilter),
 				oViewModel = this.getModel("masterView");
 			this._oList.getBinding("items").filter(aFilters, "Application");
@@ -506,26 +507,26 @@ sap.ui.define([
 		 * @param {string} sFilterBarText the selected filter value
 		 * @private
 		 */
-		_updateFilterBar : function (sFilterBarText) {
+		_updateFilterBar: function (sFilterBarText) {
 			var oViewModel = this.getModel("masterView");
 			oViewModel.setProperty("/isFilterBarVisible", (this._oListFilterState.aFilter.length > 0));
 			oViewModel.setProperty("/filterBarLabel", this.getResourceBundle().getText("masterFilterBarText", [sFilterBarText]));
 		},
 
-		onOpenCreateTenderDialog : function () {
+		onOpenCreateTenderDialog: function () {
 			const that = this;
 			// create dialog lazily
 			if (!this.byId("idCreateTenderDialog")) {
 				this.tenderCreationDialog = Fragment.load({
 					id: that.getView().getId(),
 					name: "com.bayer.tender.statenderapp.view.tender.fragments.NewTenderDialog",
-                    controller: that,
+					controller: that,
 				}).then(function (oDialog) {
 					that.getView().addDependent(oDialog);
-                    oDialog.open();
+					oDialog.open();
 					that._bindCreateTenderForm();
-                })
-			}else {
+				})
+			} else {
 				this.byId("idCreateTenderDialog").open();
 			}
 		},
@@ -565,11 +566,11 @@ sap.ui.define([
 				groupId: "Tender"
 			});
 		},
-		_onSubmitChangesFail: function(error){
+		_onSubmitChangesFail: function (error) {
 			// not implemented
 		},
 
-		_onSubmitChangesSuccess: function(res){
+		_onSubmitChangesSuccess: function (res) {
 			const oNewTenderForm = this.byId("idNewTenderForm");
 			const oNewTender = oNewTenderForm.getElementBinding().getBoundContext().getObject();
 			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
@@ -613,142 +614,56 @@ sap.ui.define([
 			});
 			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},
+		addFilter: function ({ path, operator, value, checkDecimals ,parseDate}) {
+			const tableConfig = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable();
+			if (tableConfig.hasColumn(path)) {
+				if(parseDate){
+					value = this.formatter.parseDate(value, "yyyy-MM-dd");
+				}
+				if (!checkDecimals || /^[0-9]*[.]?[0-9]+$/.test(value)) {
+					this.orFilters.push(new Filter({
+						path: path,
+						operator: operator,
+						value1: checkDecimals?Math.floor(value):value,
+						value2: checkDecimals?Math.ceil(value):'',
+						caseSensitive: false
+					}));
+				}
+			}
+		},
 		setFilter: function (oEvent) {
-
 			this.orFilters = [];
 			this.andFilters = [];
 
-			const tableConfig = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable();
-
 			let sSearch = this.byId('idSearch').getValue();
 
+			const filterFields = [{ path: "CountryCode", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "TenderID", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "Classification", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "TenderName", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "createdBy", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "DistributorName", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "InstituteName", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "OfferID", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "VALUE", operator: FilterOperator.BT, value: sSearch, checkDecimals: true },
+			{ path: "STATUS", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "PublicationDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
+			{ path: "BidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  }
+			];
+
 			if (sSearch) {
-
-				if(tableConfig.hasColumn("CountryCode")){
-					this.orFilters.push(new Filter({
-						path: "CountryCode",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-				
-				if(tableConfig.hasColumn("TenderID")){
-					this.orFilters.push(new Filter({
-						path: "TenderID",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
+				for (const filterField of filterFields) {
+					this.addFilter(filterField);
 				}
 
-				if(tableConfig.hasColumn("Classification")){
-					this.orFilters.push(new Filter({
-						path: "Classification",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("TenderName")){
-					this.orFilters.push(new Filter({
-						path: "TenderName",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("createdBy")){
-					this.orFilters.push(new Filter({
-						path: "createdBy",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("DistributorName")){
-					this.orFilters.push(new Filter({
-						path: "DistributorName",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("InstituteName")){
-					this.orFilters.push(new Filter({
-						path: "InstituteName",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("OfferID")){
-					this.orFilters.push(new Filter({
-						path: "OfferID",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("VALUE")){
-					// regex checks for numbers (decimals included)
-					if(/^[0-9]*[.]?[0-9]+$/.test(sSearch)){
-						this.orFilters.push(new Filter({
-							path: "VALUE",
-							operator: FilterOperator.BT,
-							value1: Math.floor(sSearch),
-							value2: Math.ceil(sSearch)
-						}));
-					}
-				}
-
-				if(tableConfig.hasColumn("STATUS")){
-					this.orFilters.push(new Filter({
-						path: "STATUS",
-						operator: FilterOperator.Contains,
-						value1: sSearch,
-						caseSensitive: false
-					}));
-				}
-
-				if(tableConfig.hasColumn("PublicationDate")){
-					const publicationDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
-					if(publicationDate){
-						this.orFilters.push(new Filter({
-							path: "PublicationDate",
-							operator: FilterOperator.EQ,
-							value1: publicationDate,
-							caseSensitive: false
-						}));
-					}
-				}
-
-				if(tableConfig.hasColumn("BidDueDate")){
-					const bidDueDate = this.formatter.parseDate(sSearch, "yyyy-MM-dd");
-					if(bidDueDate){
-						this.orFilters.push(new Filter({
-							path: "BidDueDate",
-							operator: FilterOperator.EQ,
-							value1: bidDueDate,
-							caseSensitive: false
-						}));
-					}
-				}
-				
 				this.andFilters.push(new Filter(this.orFilters, false));
 			}
 
 			// Dropdown filters
 			// Country
-			const oCountrySelectedItem =  this.byId("idSlctCountry").getSelectedItem();
+			const oCountrySelectedItem = this.byId("idSlctCountry").getSelectedItem();
 			const sCountryCode = oCountrySelectedItem?.getKey();
-			if(sCountryCode){
+			if (sCountryCode) {
 				this.andFilters.push(new Filter({
 					path: "CountryCode",
 					operator: FilterOperator.Contains,
@@ -756,19 +671,19 @@ sap.ui.define([
 					caseSensitive: false
 				}));
 			}
-			
-			const isCountrySelectChanged = oEvent.getParameter("id").toLowerCase().includes("idslctcountry");
-			if(isCountrySelectChanged){
+
+			const isCountrySelectChanged = oEvent?.getParameter("id").toLowerCase().includes("idslctcountry");
+			if (isCountrySelectChanged) {
 				this._bindBrandItems(sCountryCode);
 				this._bindStatusses(sCountryCode);
 			}
 
 			// Brands
 			// const oFilterBrands = new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode);
-			const oSelectBrands = this.byId("idSlctBrand");	
+			const oSelectBrands = this.byId("idSlctBrand");
 			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
-			if(sBrandId && !sBrandId.toLowerCase().includes('all_brands')){
+			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
 				this.andFilters.push(new Filter({
 					path: "BrandID",
 					operator: FilterOperator.Contains,
@@ -779,10 +694,10 @@ sap.ui.define([
 
 			// Status 
 			// const oFilterStatus = new Filter("CountryCode",FilterOperator.EQ, sCountryCode);
-			const oSelectStatus = this.byId("idSlctStatus");	
+			const oSelectStatus = this.byId("idSlctStatus");
 			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
 			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
-			if(sStatus && !sStatus.toLowerCase().includes('all')){
+			if (sStatus && !sStatus.toLowerCase().includes('all')) {
 				this.andFilters.push(new Filter({
 					path: "STATUS",
 					operator: FilterOperator.Contains,
@@ -792,20 +707,20 @@ sap.ui.define([
 			}
 
 
-			if(this.andFilters.length > 0){
+			if (this.andFilters.length > 0) {
 				const oFilters = new Filter(this.andFilters, true);
 
 				//Binding to table with the filters and the sorters
 				this._oList.getBinding("items")?.filter(oFilters, FilterType.Application);
-			}else{
+			} else {
 				this._oList.getBinding('items').aApplicationFilters = [];
 				this._oList.getBinding("items")?.filter();
 			}
-			
+
 			if (this._oList.getBinding("items")?.isSuspended()) {
 				this._oList.getBinding("items")?.resume();
 			}
-			
+
 		}
 	});
 
