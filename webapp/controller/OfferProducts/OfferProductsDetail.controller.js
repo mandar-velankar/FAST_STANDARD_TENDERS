@@ -39,6 +39,19 @@ sap.ui.define([
 			// this.setModel(oViewModel, "detailView");
 
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
+			const oModel = this.getOwnerComponent().getModel();
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["PricingForm"]));
+			oModel.setChangeGroups({
+				"PriceConditionPriceView": {
+					groupId: "PricingForm",  
+				}
+			});
 		},
 
 		/* =========================================================== */
@@ -80,7 +93,7 @@ sap.ui.define([
 				// });
 				// this._bindView("/" + sObjectPath);
 				//this._bindForm("ProductForm");
-				this._filterPriceCondition();
+				this._filterPriceCondition();	
 			}.bind(this));
 
 		},
@@ -119,12 +132,16 @@ sap.ui.define([
 				editMode: false,
 				ProductForm:{
 					editMode: false
+				},
+				PricingForm:{
+					editMode: false
 				}
 			});
 	
 			this.setModel(oModel, "ui");
 
 			this._bindForm("ProductForm");
+			this._filterPricingForm({offerID: this.sOfferId, productID:this.productId});
 		},
 
 		/**
@@ -264,6 +281,46 @@ sap.ui.define([
 		onOfferDetailFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.defaultModel.resetChanges();
+		},
+
+		onPricingFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', true);
+		},
+		onPricingFormSaveBtnPress: function(event){
+
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		onPricingFormCancelBtnPress: function(event){
+			this.oMessageManager.removeAllMessages();
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.defaultModel.resetChanges();
+		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesSuccess: function(res){
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/PricingForm/editMode', false);
+		},
+
+		_filterPricingForm: function ({offerID, productID}) {
+			const oPricingForm = this.byId("idPricingForm");
+			const oPricingFormBinding = oPricingForm.getBinding("formContainers");
+			const aFilters = [
+				new Filter("OfferID",FilterOperator.EQ, offerID),
+				new Filter("ProductCode",FilterOperator.EQ, productID),
+			]
+			oPricingFormBinding.filter(aFilters);
 		},
     });
 });
