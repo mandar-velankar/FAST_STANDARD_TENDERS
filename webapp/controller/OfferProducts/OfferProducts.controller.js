@@ -145,6 +145,7 @@ sap.ui.define([
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
 
 			let oNextUIState = "";
+			const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
 
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(2);
@@ -153,7 +154,7 @@ sap.ui.define([
 					layout: oNextUIState.layout,
 					objectId: this.objectId,
 					offerId: this.offerID,
-					productId: "1"
+					productId: selectedProductCode
 				});
 			}.bind(this));
 		},

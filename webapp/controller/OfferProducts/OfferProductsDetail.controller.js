@@ -69,8 +69,10 @@ sap.ui.define([
 				page: "DETAIL-OFFERPRODUCTDETAIL",
 				keys: {
 					TenderID: this.sObjectId,
-				}
+				},
 			});
+
+			this.onBeforeShow(this.sObjectId, this.sOfferId);
 
 			this.getModel().metadataLoaded().then(function () {
 				// var sObjectPath = this.getModel().createKey("PublicSalesOpportunities", {
@@ -98,7 +100,7 @@ sap.ui.define([
 			oViewModel.setProperty("/busy", false);
 		},
 
-		onBeforeShow:async function(iconTabfilter,sObjectId){
+		onBeforeShow:async function(sObjectId, sOfferId){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
@@ -106,7 +108,21 @@ sap.ui.define([
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.objectId = sObjectId;
-			this.selectedTab = iconTabfilter.getKey();
+			this.offerId = sOfferId;
+			//this.selectedTab = iconTabfilter.getKey();
+			
+			this.defaultModel = this.getOwnerComponent().getModel();
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+				ProductForm:{
+					editMode: false
+				}
+			});
+	
+			this.setModel(oModel, "ui");
 
 			this._bindForm("ProductForm");
 		},
@@ -122,7 +138,11 @@ sap.ui.define([
 			let path = "";
 			if (this.objectId) {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-					TenderID: this.objectId,
+					TenderID: this.sObjectId,
+					OfferID: this.sOfferId,
+					Active: '1',
+					ProductCode: this.productId,
+					LotID: '1'
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
@@ -185,7 +205,8 @@ sap.ui.define([
 				this.oRouter.navTo("object", {
 					layout: oNextUIState.layout,
 					countryCode: this.sCountryCode,
-					objectId: this.sObjectId
+					objectId: this.sObjectId,
+					offerId: this.sOfferId
 				});
 			}.bind(this));
 		},
@@ -201,6 +222,20 @@ sap.ui.define([
 				// reset to previous layout
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
-		}
+		},
+
+		onOfferDetailFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/ProductForm/editMode', true);
+		},
+		onOfferDetailFormSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/ProductForm/editMode', false);
+
+			//if(!this.validateOffer()) return; //error
+			//this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+		},
+		onOfferDetailFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/ProductForm/editMode', false);
+			this.defaultModel.resetChanges();
+		},
     });
 });
