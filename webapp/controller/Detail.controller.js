@@ -29,7 +29,7 @@ sap.ui.define([
 				delay: 0,
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
-
+			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 
 			this.setModel(oViewModel, "detailView");

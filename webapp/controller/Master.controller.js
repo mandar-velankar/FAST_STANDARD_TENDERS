@@ -141,6 +141,8 @@ sap.ui.define([
 			})
 		},
 		_getTemplateConfig: function(sCountryCode){
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.templateState.read("MASTER",{ 
 				countryCode: "BR" || sCountryCode, // TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
