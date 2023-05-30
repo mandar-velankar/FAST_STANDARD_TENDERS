@@ -91,7 +91,26 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                                                 "FormElements": {
                                                     $expand: {
                                                         "Controls": {
-                                                            $expand: "Properties"
+                                                            $expand: {
+                                                                "Properties": "Properties",
+                                                                "ValueHelp": {
+                                                                    $expand: {
+                                                                        "Table": {
+                                                                            $expand: {
+                                                                                "Columns": {
+                                                                                    $expand: {
+                                                                                        "Control": {
+                                                                                            $expand: "Properties"
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        "Filters": {},
+                                                                        "StaticValues": {},
+                                                                    }
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
