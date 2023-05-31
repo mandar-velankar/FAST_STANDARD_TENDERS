@@ -526,12 +526,12 @@ sap.ui.define([
 			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const form = this.byId("idNewTenderForm");
 			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-				groupId: "Tender"
+				groupId: "Basicinfo"
 			});
 			const path = newEntryContext.getPath();
 			form?.bindElement({
 				path: path,
-				groupId: "Tender"
+				groupId: "Basicinfo"
 			});
 			const sElemBindingPath = form.getElementBinding().getPath();
 			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
@@ -555,7 +555,7 @@ sap.ui.define([
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
-				groupId: "Tender"
+				groupId: "Basicinfo"
 			});
 		},
 		_onSubmitChangesFail: function (error) {
@@ -598,11 +598,11 @@ sap.ui.define([
 			}
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
 				properties: newTenderObj,
-				groupId: "Tender"
+				groupId: "Basicinfo"
 			});
 			oForm?.bindElement({
 				path: oNewBindingCtx.getPath(),
-				groupId: "Tender"
+				groupId: "Basicinfo"
 			});
 			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},
