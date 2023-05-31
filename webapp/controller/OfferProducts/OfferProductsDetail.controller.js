@@ -5,8 +5,12 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator) {
+	"sap/ui/core/message/Message",
+	"sap/ui/core/library"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library) {
 	"use strict";
+
+	var MessageType = library.MessageType;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail", {
 		onInit: function () {
@@ -265,20 +269,18 @@ sap.ui.define([
 			// clear all messages
 			this.oMessageManager.removeAllMessages();
 
+			if(!this.validateProduct()) return;
+
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesProductFormSuccess.bind(this),
+				success: this._onSubmitChangesSuccess.bind(this, "ProductForm"),
 				groupId: "ProductFormDetail"
 			}); 
+
 		},
 
 		_onSubmitChangesFail: function(error){
 			// not implemented
-		},
-
-		_onSubmitChangesTenderFormSuccess: function(res){
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/ProductForm/editMode', false);
 		},
 
 		onOfferDetailFormCancelBtnPress: function(event){
@@ -296,7 +298,7 @@ sap.ui.define([
 			
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this),
+				success: this._onSubmitChangesSuccess("PricingForm").bind(this),
 				groupId: "PricingForm"
 			}); 
 		},
@@ -307,13 +309,9 @@ sap.ui.define([
 			this.defaultModel.resetChanges();
 		},
 
-		_onSubmitChangesFail: function(error){
-			// not implemented
-		},
-
-		_onSubmitChangesSuccess: function(res){
+		_onSubmitChangesSuccess: function(form){
 			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/${form}/editMode`, false);
 		},
 
 		_filterPricingForm: function ({offerID, productID}) {
@@ -327,10 +325,30 @@ sap.ui.define([
 		},
 
 		validateProduct: function () {
-			const product = this.defaultModel.getProperty(this.byId('idProductForm').getObjectBinding().getPath());
+			const contextPath = this.byId('idProductForm').getObjectBinding().getPath();
+			const product = this.defaultModel.getProperty(contextPath);
+			let messages = [];
 
-			if (!product.RequestedVolume || !product.UnitPerPack) {
-				MessageBox.error("Please enter all mandatory fields");
+			if (!product.RequestedVolume) {
+				messages.push(new Message({
+					message: "Please enter the requested volume",
+					type: MessageType.Error,
+					target: `${contextPath}/RequestedVolume`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!product.UnitPerPack){
+				messages.push(new Message({
+					message: "Please enter the unit per pack",
+					type: MessageType.Error,
+					target: `${contextPath}/UnitPerPack`,
+					processor: this.getView().getModel()
+				}));
+			}
+			
+			if(messages.length > 0){
+				sap.ui.getCore().getMessageManager().addMessages(messages);
 				this.getModel("ui").setProperty('/ProductForm/editMode', true);
 				return false;
 			}
