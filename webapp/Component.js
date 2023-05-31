@@ -39,7 +39,15 @@ sap.ui.define([
 		},
 
 		setModelChangeGroups: function(oModel){
-			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Basicinfo", "AwardCriteria", "OfferformInfo", "OfferProducts", "TotalAmountOfferProducts", "ProductFormDetail", "PricingForm", "Tender"]));
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat([
+				"Basicinfo", 
+				"AwardCriteria", 
+				"OfferformInfo", 
+				"OfferProducts", 
+				"TotalAmountOfferProducts", 
+				"ProductFormDetail", 
+				"PricingForm"
+			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
 					groupId: "Basicinfo",  
@@ -64,11 +72,6 @@ sap.ui.define([
 				},
 				"OfferProductsDetailView": {
 					groupId: "ProductFormDetail"
-				},
-				"TenderFormView": {
-					groupId: "Tender",  
-					changeSetId: "ID",/*optional*/
-					single: true, /*optional, can be true or false*/
 				}
 			});
 		},

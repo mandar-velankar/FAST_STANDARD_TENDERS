@@ -174,11 +174,12 @@ sap.ui.define([
 		},
 
 		onAwardCriteriaCancelBtnPress: function(event){
+			const targets = this._getTargets("AwardCriteriaTableView");
 			// clear all messages
 			this.oMessageManager.removeAllMessages();
 			
 			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
-			this.defaultModel.resetChanges();
+			this.defaultModel.resetChanges(targets);
 		},
 
 		/**
@@ -255,7 +256,10 @@ sap.ui.define([
 				return `${path}/Weight`;
 			})
 		},
-
+		_getTargets: function (entity) {
+			entity = entity.toLowerCase();
+			return this.getModel("message").getData().filter(el => el.target.toLowerCase().includes(entity));
+		}
 		// onMessagePopoverPress : function (oEvent) {
 		// 	const oSourceControl = oEvent.getSource();
 		// 	this._getMessagePopover().then(function(oMessagePopover){
