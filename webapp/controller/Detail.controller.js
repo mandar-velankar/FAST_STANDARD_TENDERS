@@ -102,7 +102,7 @@ sap.ui.define([
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
-
+			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			

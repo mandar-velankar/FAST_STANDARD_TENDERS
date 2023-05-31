@@ -98,7 +98,7 @@ sap.ui.define([
 		},
 
 		onCountriesReceived: async function (oEvent) {
-			const sCountryCode = oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
+			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			// set filter which is needed later on
 			// if(sCountryCode){
 			// 	this.andFilters.push(new Filter({
