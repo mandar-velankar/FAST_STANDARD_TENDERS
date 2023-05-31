@@ -9,7 +9,7 @@ sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
         this.tableId = data.TableID;
         this.entity = data.Entity;
         for (const col of data.Columns) {
-          this.columns.push(new Column(col));
+          this.columns.push(new Column(this.tableId,col));
         }
       }
     },

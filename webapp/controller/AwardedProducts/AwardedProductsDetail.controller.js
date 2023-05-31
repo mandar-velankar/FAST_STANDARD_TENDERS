@@ -50,7 +50,7 @@ sap.ui.define([
 		 * @private
 		 */
 		 _onObjectMatched: function (oEvent) {
-
+			this.countryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;

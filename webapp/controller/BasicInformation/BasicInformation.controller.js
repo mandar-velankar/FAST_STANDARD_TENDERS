@@ -24,11 +24,13 @@ sap.ui.define([
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			const oModel = this.getOwnerComponent().getModel();
+			
 
 		},
-		onBeforeShow:async function(iconTabfilter,sObjectId){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
 			
-			this.objectId = sObjectId;
+			this.objectId = objectId;
 			this.selectedTab = iconTabfilter.getKey();
 
 			if(this.selectedTab !== "Tender") return; // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
@@ -47,7 +49,13 @@ sap.ui.define([
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
-				editMode: false
+				editMode: false,
+				AwardCriteria:{
+					editMode: false
+				},
+				TenderForm:{
+					editMode: false	
+				}
 			});
 	
 			this.setModel(oModel, "ui");
@@ -72,12 +80,15 @@ sap.ui.define([
 					TenderID: this.objectId,
 				});
 			} else {
-				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+					groupId: "Basicinfo"
+				});
 				path = newEntryContext.getPath();
 			}
 			
 			form?.bindElement({
 				path: path,
+				groupId: "Basicinfo"
 			});
 		},
 
@@ -102,14 +113,47 @@ sap.ui.define([
 					type: "Inactive",
 					cells: cols.map(col => col.getControl().generateControl())
 			  	}),
-			  	templateShareable: true
+			  	templateShareable: true,
+				groupId: "AwardCriteria"
 			});
 		},
 
 		onTenderFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', true);
+			this.getModel("ui").setProperty('/TenderForm/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
+
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesTenderFormSuccess.bind(this),
+				groupId: "Basicinfo"
+			}); 
+		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesTenderFormSuccess: function(res){
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
+		},
+
+		onTenderFormCancelBtnPress: function(event){
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+			
+			this.getModel("ui").setProperty('/TenderForm/editMode', false);
+			this.defaultModel.resetChanges();
+		},
+		
+		onAwardCriteriaEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/AwardCriteria/editMode', true);
+		},
+		onAwardCriteriaSaveBtnPress: function(event){
 
 			// clear all messages
 			this.oMessageManager.removeAllMessages();
@@ -120,28 +164,23 @@ sap.ui.define([
 			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
 			this.defaultModel.submitChanges({
-				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this)
+				success: this._onSubmitChangesAwardCriteriaSuccess.bind(this),
+				groupId: "AwardCriteria"
 			}); 
 		},
-
-		_onSubmitChangesFail: function(error){
-			// not implemented
-		},
-
-		_onSubmitChangesSuccess: function(res){
+		_onSubmitChangesAwardCriteriaSuccess: function(res){
 			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/editMode', false);
+			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 
-		onTenderFormCancelBtnPress: function(event){
+		onAwardCriteriaCancelBtnPress: function(event){
+			const targets = this._getTargets("AwardCriteriaTableView");
 			// clear all messages
 			this.oMessageManager.removeAllMessages();
 			
-			this.getModel("ui").setProperty('/editMode', false);
-			this.defaultModel.resetChanges();
+			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
+			this.defaultModel.resetChanges(targets);
 		},
-
 
 		/**
 		 * This method changes/updates the odata model PendingChanges list which is used when triggering "submitChanges" method
@@ -169,7 +208,8 @@ sap.ui.define([
 					oModel.setProperty(sPath+"/Weight", ctx.getObject().Weight)
 				}else {
 					oModel.createEntry("/PT_TMAWRDCR", {
-						properties: awardCriteriObj
+						properties: awardCriteriObj,
+						groupId: "AwardCriteria"
 					});
 				}
                 
@@ -186,52 +226,62 @@ sap.ui.define([
 
 			//sum of all award criterias
 			let sumWeight = 0;
+			let contextPath = [];
 			
 			//checks on mandatory fields & calulation of sumWeight
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
-				let weight = oAwardCriteria.getCells()[1].getBinding("value").getValue();
+				contextPath.push(oAwardCriteria.getBindingContextPath());
+				let weight = oAwardCriteria.getCells()[1].getValue();
 				sumWeight = sumWeight + parseFloat(weight);
 			});
 
 			if (sumWeight > 0 && sumWeight !== 1) {
-				MessageBox.error("Sum of Award Criteria weight must be 100%");
-				// const oMessage = new Message({
-				// 	message: "Sum of Award Criteria weight must be 100%",
-				// 	type: MessageType.Error,
-				// 	target: "/AwardCriteriaTableView(CountryCode='AR',TenderID='AR-21-1007',Criteria='NotDefined')",
-				// 	processor: this.getView().getModel()
-				// });
-				// sap.ui.getCore().getMessageManager().addMessages(oMessage);
+				// MessageBox.error("Sum of Award Criteria weight must be 100%");
+				const messages = new Message({
+					message: "Sum of Award Criteria weight must be 100%",
+					type: MessageType.Error,
+					target: this._createTarget(contextPath),
+					processor: this.getView().getModel()
+				});
+				
+				sap.ui.getCore().getMessageManager().addMessages(messages);
 				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
 
 			return bValid;
 		},
-
-
-		onMessagePopoverPress : function (oEvent) {
-			const oSourceControl = oEvent.getSource();
-			this._getMessagePopover().then(function(oMessagePopover){
-				oMessagePopover.openBy(oSourceControl);
-			});
+		_createTarget: function (contextPath) {
+			return contextPath.map((path) => {
+				return `${path}/Weight`;
+			})
 		},
-
-		_getMessagePopover: function () {
-			const oView = this.getView();
-
-			// create popover lazily (singleton)
-			if (!this._pMessagePopover) {
-				this._pMessagePopover = Fragment.load({
-					id: oView.getId(),
-					name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
-				}).then(function (oMessagePopover) {
-					oView.addDependent(oMessagePopover);
-					return oMessagePopover;
-				});
-			}
-			return this._pMessagePopover;
+		_getTargets: function (entity) {
+			entity = entity.toLowerCase();
+			return this.getModel("message").getData().filter(el => el.target.toLowerCase().includes(entity));
 		}
+		// onMessagePopoverPress : function (oEvent) {
+		// 	const oSourceControl = oEvent.getSource();
+		// 	this._getMessagePopover().then(function(oMessagePopover){
+		// 		oMessagePopover.openBy(oSourceControl);
+		// 	});
+		// },
+
+		// _getMessagePopover: function () {
+		// 	const oView = this.getView();
+
+		// 	// create popover lazily (singleton)
+		// 	if (!this._pMessagePopover) {
+		// 		this._pMessagePopover = Fragment.load({
+		// 			id: oView.getId(),
+		// 			name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
+		// 		}).then(function (oMessagePopover) {
+		// 			oView.addDependent(oMessagePopover);
+		// 			return oMessagePopover;
+		// 		});
+		// 	}
+		// 	return this._pMessagePopover;
+		// }
 
 	});
 });

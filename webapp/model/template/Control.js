@@ -2,11 +2,12 @@
 sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input", "sap/m/DatePicker", "./ValueHelp"], function (Text, BaseObject, ControlProperty, Input, DatePicker, ValueHelp) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
-    constructor: function (data) {
+    constructor: function (parentId,data) {
       BaseObject.prototype.constructor.call(this);
       this.properties = [];
       this.propertyByName = {};
       if (data) {
+        this.parentId = parentId;
         this.id = data.ID;
         this.type = data.Type;
         this.properties = data.Properties.map(property => new ControlProperty(property));
@@ -18,7 +19,7 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input",
       const props = {};
       for (const prop of this.properties) {
         if(prop.getName() === "enabled"){
-          props[prop.getName()] = prop.getIsBinding() ? '{= '+prop.getValue()+' && ${ui>/editMode}}' : prop.getValue();
+          props[prop.getName()] = prop.getIsBinding() ? '{= '+prop.getValue()+' && ${ui>/'+this.parentId+'/editMode}}' : prop.getValue();
         }else{
           props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : prop.getValue();
         }

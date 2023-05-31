@@ -1,6 +1,6 @@
 sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElement) {
   const FormContainer = BaseObject.extend("com.bayer.tender.statenderapp.model.template.FormContainer", {
-    constructor: function (data) {
+    constructor: function (formId, data) {
       BaseObject.prototype.constructor.call(this);
       this.formElements = [];
       this.elementByName = {};
@@ -8,7 +8,7 @@ sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElem
         this.id = data.ID;
         this.title = data.Title;
         for (const formElement of data.FormElements) {
-          const element = new FormElement(formElement)
+          const element = new FormElement(formId, formElement)
           this.formElements.push(element);
           this.elementByName[element.label.replace(/\s/g,'')] = element;
         }

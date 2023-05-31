@@ -29,9 +29,8 @@ sap.ui.define([
 				delay: 0,
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
-
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
-
+			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
 
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
@@ -79,7 +78,7 @@ sap.ui.define([
 				type: sap.ui.core.mvc.ViewType.XML
 			}).then(view => {
 				view.setBindingContext(context,"template");
-				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,this.sObjectId,this.sOfferId);
+				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,{objectId:this.sObjectId,offerId:this.sOfferId,countryCode:this.sCountryCode});
 				iconTabfilter.insertContent(view);
 			});
 			return iconTabfilter;
@@ -98,6 +97,7 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: async function (oEvent) {
+			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
@@ -107,7 +107,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			
 			await this.templateState.read("DETAIL",{
-				countryCode: "BR",
+				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID: "StandardTenders",
 				page: "DETAIL",
 				keys: {
@@ -239,6 +239,7 @@ sap.ui.define([
 		 * Set the full screen mode to false and navigate to master page
 		 */
 		onCloseDetailPress: function () {
+			sap.ui.getCore().getMessageManager().removeAllMessages();
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			// No item should be selected on master after detail page is closed
 			this.getOwnerComponent().oListSelector.clearMasterListSelection();
