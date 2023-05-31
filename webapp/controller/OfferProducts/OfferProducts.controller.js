@@ -5,8 +5,9 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/m/ColumnListItem",
+	"sap/ui/core/Fragment",
 	"sap/m/MessageBox"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, MessageBox) {
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -15,6 +16,14 @@ sap.ui.define([
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts", {
 
 		onInit: function () {
+
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
+
 			const oModel = this.getOwnerComponent().getModel();
 			
 		},
@@ -158,6 +167,68 @@ sap.ui.define([
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/OfferForm/editMode', false);
+			this.defaultModel.resetChanges();
+		},
+
+		onOpenCreateOfferDialog : function () {
+			const that = this;
+			// create dialog lazily
+			if (!this.byId("idCreateOfferDialog")) {
+				this.offerCreationDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.NewOfferDialog",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+                    oDialog.open();
+					that._bindCreateOfferForm();
+                })
+			}else {
+				this.byId("idCreateOfferDialog").open();
+			}
+		},
+
+		_bindCreateOfferForm: async function () {
+			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getForm().getEntity();
+			const form = this.byId("idNewOfferForm");
+			let path = "";
+			if (this.objectId) {
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					TenderID: this.objectId,
+					OfferID: this.offerID
+				});
+			} else {
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+					groupId: "OfferformInfo"
+				});
+				path = newEntryContext.getPath();
+			}
+			
+			form.bindElement({
+				path: path,
+				groupId: "OfferformInfo"
+			});
+
+			// const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+			// 	groupId: "OfferformInfo"
+			// });
+			// const path = newEntryContext.getPath();
+			// form?.bindElement({
+			// 	path: path,
+			// 	groupId: "OfferformInfo"
+			// });
+			const sElemBindingPath = form.getElementBinding().getPath();
+			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
+
+			this.getModel("ui").setProperty('/OfferForm/editMode', true);
+		},
+
+
+		onCloseOfferCreationDialog: function () {
+			this.oMessageManager.removeAllMessages();
+			this.byId("idCreateOfferDialog").close();
+			this.byId("idCreateOfferDialog").destroy();
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.defaultModel.resetChanges();
 		},

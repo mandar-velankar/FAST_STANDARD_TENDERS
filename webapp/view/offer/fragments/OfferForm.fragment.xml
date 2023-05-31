@@ -1,0 +1,40 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+	
+		<form:Form
+			id="idNewOfferForm"
+			editable="true"
+			formContainers="{path:'template>/detailConfig/countryTemplate/template/form/formContainers',templateShareable:true}"> 
+			<!-- <form:title>
+				<core:Title text="{template>title}" />
+			</form:title> -->
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanL="{template>layout/labelSpanL}"
+					labelSpanM="{template>layout/labelSpanM}"
+					emptySpanL="{template>layout/emptySpanL}"
+					emptySpanM="{template>layout/emptySpanM}"
+					columnsXL="{template>layout/columnsXL}"
+					columnsL="{template>layout/columnsL}"
+					columnsM="{template>layout/columnsM}" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+</core:FragmentDefinition>
