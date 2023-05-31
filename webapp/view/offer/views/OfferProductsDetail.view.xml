@@ -14,7 +14,8 @@
             <f:DynamicPageTitle>
                 <f:heading>
                     <Title
-                        text="Product Detail"
+                        id = "idProductPackNameOfferProductDetail"
+                        text="{ProductPackName}"
                         level="H2"
                     />
                 </f:heading>
