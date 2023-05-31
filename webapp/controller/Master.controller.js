@@ -95,14 +95,6 @@ sap.ui.define([
 			this.oMessageManager.registerObject(this.getView(), true);
 
 			const oModel = this.getOwnerComponent().getModel();
-			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Tender"]));
-			oModel.setChangeGroups({
-				"TenderFormView": {
-					groupId: "Tender",
-					changeSetId: "ID",/*optional*/
-					single: true, /*optional, can be true or false*/
-				}
-			});
 		},
 
 		onCountriesReceived: async function (oEvent) {

@@ -25,18 +25,7 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
-			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Basicinfo", "AwardCriteria"]));
-			oModel.setChangeGroups({
-				"TenderFormView": {
-					groupId: "Basicinfo",  
-				},
-				"PT_TMAWRDCR": {
-					groupId: "AwardCriteria",  
-				},
-				"AwardCriteriaTableView": {
-					groupId: "AwardCriteria",
-				}
-			});
+			
 
 		},
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){

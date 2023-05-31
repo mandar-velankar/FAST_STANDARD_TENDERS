@@ -31,8 +31,46 @@ sap.ui.define([
 			// call the base component's init function and create the App view
 			UIComponent.prototype.init.apply(this, arguments);
 
+			//set all change groups application wide
+			this.setModelChangeGroups(this.getModel());
+
 			// create the views based on the url/hash
 			this.getRouter().initialize();
+		},
+
+		setModelChangeGroups: function(oModel){
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["Basicinfo", "AwardCriteria", "OfferformInfo", "OfferProducts", "TotalAmountOfferProducts", "ProductFormDetail", "PricingForm", "Tender"]));
+			oModel.setChangeGroups({
+				"TenderFormView": {
+					groupId: "Basicinfo",  
+				},
+				"PT_TMAWRDCR": {
+					groupId: "AwardCriteria",  
+				},
+				"AwardCriteriaTableView": {
+					groupId: "AwardCriteria",
+				},
+				"OfferFormView": {
+					groupId: "OfferformInfo",  
+				},
+				"OfferProductsTable": {
+					groupId: "OfferProducts",  
+				},
+				"TotalAmountProducts": {
+					groupId: "TotalAmountOfferProducts",
+				},
+				"PriceConditionPriceView": {
+					groupId: "PricingForm",  
+				},
+				"OfferProductsDetailView": {
+					groupId: "ProductFormDetail"
+				},
+				"TenderFormView": {
+					groupId: "Tender",  
+					changeSetId: "ID",/*optional*/
+					single: true, /*optional, can be true or false*/
+				}
+			});
 		},
 
 		/**

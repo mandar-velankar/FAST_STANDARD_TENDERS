@@ -15,17 +15,7 @@ sap.ui.define([
 			this.oRouter = this.oOwnerComponent.getRouter();
 			this.oDynamicPage = this.byId("idProductForm");
 
-			// // Model used to manipulate control states. The chosen values make sure,
-			// // detail page is busy indication immediately so there is no break in
-			// // between the busy indication for loading the view's meta data
-			// var oViewModel = new JSONModel({
-			// 	busy: false,
-			// 	delay: 0,
-			// 	lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
-			// });
-
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
-			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 
 			// /*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
 			// this.setModel(this.paState.getModel(), "pa");
@@ -46,12 +36,7 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
-			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["PricingForm"]));
-			oModel.setChangeGroups({
-				"PriceConditionPriceView": {
-					groupId: "PricingForm",  
-				}
-			});
+			
 		},
 
 		/* =========================================================== */
@@ -76,6 +61,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 
+
 			const detaildetailConfig = await this.templateState.read("DETAIL-OFFERPRODUCTDETAIL", {
 				countryCode: "BR" || this.sCountryCode ,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID: "StandardTenders",
@@ -95,7 +81,6 @@ sap.ui.define([
 				//this._bindForm("ProductForm");
 				this._filterPriceCondition();	
 			}.bind(this));
-
 		},
 
 		/**
@@ -107,7 +92,7 @@ sap.ui.define([
 		 */
 		_bindView: function (sObjectPath) {
 			// Set busy indicator during view binding
-			var oViewModel = this.getModel("detailDetailView");
+			var oViewModel = this.getModel(sObjectPath);
 
 			// If the view was not bound yet its not busy, only if the binding requests data it is set to busy again
 			oViewModel.setProperty("/busy", false);
@@ -153,7 +138,7 @@ sap.ui.define([
 			const entity = this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
-			if (this.objectId) {
+			if (this.sObjectId) {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 					TenderID: this.sObjectId,
 					OfferID: this.sOfferId,
@@ -162,12 +147,15 @@ sap.ui.define([
 					LotID: '1'
 				});
 			} else {
-				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+					groupId: "ProductFormDetail"
+				});
 				path = newEntryContext.getPath();
 			}
-			
+
 			form.bindElement({
 				path: path,
+				groupId: "ProductFormDetail",
 			});
 		},
 		_filterPriceCondition: async function () {
@@ -273,11 +261,26 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/ProductForm/editMode', true);
 		},
 		onOfferDetailFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 
-			//if(!this.validateOffer()) return; //error
-			//this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesProductFormSuccess.bind(this),
+				groupId: "ProductFormDetail"
+			}); 
 		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesTenderFormSuccess: function(res){
+			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/ProductForm/editMode', false);
+		},
+
 		onOfferDetailFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.defaultModel.resetChanges();
@@ -321,6 +324,18 @@ sap.ui.define([
 				new Filter("ProductCode",FilterOperator.EQ, productID),
 			]
 			oPricingFormBinding.filter(aFilters);
+		},
+
+		validateProduct: function () {
+			const product = this.defaultModel.getProperty(this.byId('idProductForm').getObjectBinding().getPath());
+
+			if (!product.RequestedVolume || !product.UnitPerPack) {
+				MessageBox.error("Please enter all mandatory fields");
+				this.getModel("ui").setProperty('/ProductForm/editMode', true);
+				return false;
+			}
+
+			return true;
 		},
     });
 });

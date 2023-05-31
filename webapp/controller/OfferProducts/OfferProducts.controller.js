@@ -16,18 +16,7 @@ sap.ui.define([
 
 		onInit: function () {
 			const oModel = this.getOwnerComponent().getModel();
-			oModel.setDeferredGroups(oModel.getDeferredGroups().concat(["OfferformInfo", "OfferProducts", "TotalAmountOfferProducts"]));
-			oModel.setChangeGroups({
-				"OfferFormView": {
-					groupId: "OfferformInfo",  
-				},
-				"OfferProductsTable": {
-					groupId: "OfferProducts",  
-				},
-				"TotalAmountProducts": {
-					groupId: "TotalAmountOfferProducts",
-				}
-			});
+			
 		},
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
 			// get state data
