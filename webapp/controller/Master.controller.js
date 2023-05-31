@@ -432,7 +432,6 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			this.tenderID = oEvent.getParameter("arguments").objectId;
 			if (!this.tenderID) {
-				this.byId("genericMasterTable").getBinding("items").aFilters = [];
 				this.setFilter();
 			}
 			
@@ -719,7 +718,7 @@ sap.ui.define([
 				const oFilters = new Filter(this.andFilters, true);
 				// this._oList.getBinding("items").aFilters = []
 				//Binding to table with the filters and the sorters
-				this._oList.getBinding("items")?.filter(oFilters, FilterType.Application);
+				this._oList.getBinding("items")?.filter(oFilters);
 			} else {
 				this._oList.getBinding('items').aApplicationFilters = [];
 				this._oList.getBinding("items")?.filter();
