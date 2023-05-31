@@ -59,7 +59,8 @@ sap.ui.define([
 				this.oRouter.navTo("objectDetail", {
 					layout: oNextUIState.layout,
 					objectId: "AE-15-100-1001",
-					productId: "1"
+					productId: "1",
+					countryCode: this.getModel("st").getProperty("/SelectedCountry")
 				});
 			}.bind(this));
 		}

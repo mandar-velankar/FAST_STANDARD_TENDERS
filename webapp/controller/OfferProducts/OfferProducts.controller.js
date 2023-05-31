@@ -15,8 +15,10 @@ sap.ui.define([
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts", {
 
 		onInit: function () {
+			const oModel = this.getOwnerComponent().getModel();
+			
 		},
-		onBeforeShow:async function(iconTabfilter,sObjectId, sOfferId){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
@@ -27,21 +29,26 @@ sap.ui.define([
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
-			this.objectId = sObjectId;
-			this.offerID = sOfferId;
+			this.objectId = objectId;
+			this.offerID = offerId;
+			this.countryCode = countryCode;
 			this.selectedTab = iconTabfilter.getKey();
 
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				editMode: false,
-				minDate: new Date()
+				minDate: new Date(),
+				OfferForm:{
+					editMode: false
+				}
 			});
 	
 			this.setModel(oModel, "ui");
 
 			this._bindForm("OfferForm");
 			this._bindTable("OfferProductsTable");
+			this._bindText("TotalAmountOfferProducts");
 		},
 
 		/**
@@ -59,12 +66,15 @@ sap.ui.define([
 					OfferID: this.offerID
 				});
 			} else {
-				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {});
+				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
+					groupId: "OfferformInfo"
+				});
 				path = newEntryContext.getPath();
 			}
 			
 			form.bindElement({
 				path: path,
+				groupId: "OfferformInfo"
 			});
 		},
 
@@ -90,8 +100,26 @@ sap.ui.define([
 					type: "Inactive",
 					cells: cols.map(col => col.getControl().generateControl())
 			  	}),
-			  	templateShareable: true
+			  	templateShareable: true,
+				  groupId: "OfferProducts"
 			});
+		},
+
+		_bindText(textId){
+			let path = "";
+			if(textId === 'TotalAmountOfferProducts'){
+				const entity = 'OfferProductsTotalForOffer';
+				const textField = this.byId(`id${textId}`);
+
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					OfferID: this.offerID
+				});
+
+				textField.bindElement({
+					path: path,
+					groupId: "OfferProducts"
+				})
+			}
 		},
 
 		/* =========================================================== */
@@ -106,28 +134,31 @@ sap.ui.define([
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
 
 			let oNextUIState = "";
+			const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
 
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(2);
 				this.oRouter.navTo("offerProductDetail", {
+					countryCode: this.countryCode,
 					layout: oNextUIState.layout,
-					objectId: "AE-15-100-1001",
-					productId: "1"
+					objectId: this.objectId,
+					offerId: this.offerID,
+					productId: selectedProductCode
 				});
 			}.bind(this));
 		},
 
 		onOfferFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', true);
+			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
 		onOfferFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', false);
+			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 
 			if(!this.validateOffer()) return; //error
-			this.defaultModel.submitChanges(); //no error - save
+			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
-			this.getModel("ui").setProperty('/editMode', false);
+			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.defaultModel.resetChanges();
 		},
 
@@ -136,7 +167,7 @@ sap.ui.define([
 
 			if (offer.InternalBidDueDate <= offer.NewOfferDueDate) {
 				MessageBox.error("Internal due date can not be before offer due date");
-				this.getModel("ui").setProperty('/editMode', true);
+				this.getModel("ui").setProperty('/OfferForm/editMode', true);
 				return false;
 			}
 

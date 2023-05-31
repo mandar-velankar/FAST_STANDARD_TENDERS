@@ -1,6 +1,6 @@
 sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
   const FormElement = BaseObject.extend("com.bayer.tender.statenderapp.model.template.FormElement", {
-    constructor: function (data) {
+    constructor: function (formId,data) {
       BaseObject.prototype.constructor.call(this);
       this.controls = [];
       if (data) {
@@ -8,7 +8,7 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
         this.label = data.Label;
         this.visible = data.Visible;
         for (const control of data.Controls) {
-          this.controls.push(new Control(control));
+          this.controls.push(new Control(formId, control));
         }
         // for(const control of data.Controls){
         //     this.controls.push(new Control(control));

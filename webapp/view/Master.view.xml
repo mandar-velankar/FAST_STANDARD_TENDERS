@@ -46,7 +46,7 @@
 								dataReceived: '.onCountriesReceived'
 							}
 						}"
-						change=".setFilter"
+						change=".onCountriesReceived"
 					>
 						<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
 					</Select>
@@ -90,6 +90,7 @@
 					growing="true"
 					growingThreshold="15"
 					growingScrollToLoad="false"
+					busyIndicatorDelay="0"
 				>
 					<columns>
 						<Column importance="{template>importance}" >

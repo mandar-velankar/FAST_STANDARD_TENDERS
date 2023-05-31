@@ -15,6 +15,13 @@
         </content>
 
         <buttons>
+			<Button
+				icon="sap-icon://alert"
+				text="{= ${message>/}.length }"
+				visible="{= ${message>/}.length > 0 }"
+				type="Emphasized"
+				press="onMessagePopoverPress" 
+			/>
             <Button id="addSelectedSOProducts" text="Create" press=".onCreateNewTender"/>
             <Button id="cancelDialog" text="Cancel" press=".onCloseTenderCreationDialog" />
         </buttons>

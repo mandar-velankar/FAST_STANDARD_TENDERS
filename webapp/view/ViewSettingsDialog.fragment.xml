@@ -4,8 +4,13 @@
 
 	<ViewSettingsDialog
 		id="viewSettingsDialog"
-		confirm=".onConfirmViewSettingsDialog">
-		<sortItems>
+		confirm=".onConfirmViewSettingsDialog"
+		sortItems="{
+			path:'template>/masterConfig/countryTemplate/template/table/columns',
+			factory:'.sorterFactory',
+			templateShareable:true
+		}">
+		<!-- <sortItems>
 			<ViewSettingsItem
 				text="{i18n>masterSortCountryCode}"
 				key="CountryCode"
@@ -43,7 +48,7 @@
 			<ViewSettingsItem
 				text="{i18n>masterSortDueDate}"
 				key="BidDueDate"/>
-		</sortItems>
+		</sortItems> -->
 		<!-- <filterItems>
 			<ViewSettingsFilterItem
 				id="filterItems"
