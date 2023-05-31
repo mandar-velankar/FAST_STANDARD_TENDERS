@@ -21,7 +21,7 @@
 				<Toolbar>
 					<Title text="{template>title}"/>
 					<ToolbarSpacer />
-					<Button text="New Offer" icon="sap-icon://add" press="onCreateProductOffer" visible="{= !${ui>/OfferForm/editMode} }"/>
+					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" visible="{= !${ui>/OfferForm/editMode} }" />
 					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferFormEditBtnPress" visible="{= !${ui>/OfferForm/editMode} }"/>
