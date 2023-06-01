@@ -130,6 +130,7 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			this._bindForm("ProductForm");
+			this._bindText("ProductPackNameOfferProductDetail");
 			this._filterPricingForm({offerID: this.sOfferId, productID:this.productId});
 		},
 
@@ -162,6 +163,31 @@ sap.ui.define([
 				groupId: "ProductFormDetail",
 			});
 		},
+
+		/**
+		 * This method bind a text field from the entity
+		 * FYI: the textField is a concatination of "id" + textId (id defined in the view for the text field)
+		 */
+		_bindText(textId){
+			let path = "";
+			if(textId === 'ProductPackNameOfferProductDetail'){
+				const entity = 'OfferProductsTableView';
+				const textField = this.byId(`id${textId}`);
+
+				if (this.sObjectId) {
+					path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+						TenderID: this.sObjectId,
+						OfferID: this.sOfferId
+					});
+				}
+
+				textField.bindElement({
+					path: path,
+					groupId: "ProductFormDetail"
+				})
+			}
+		},
+
 		_filterPriceCondition: async function () {
 			const oSelectedTender = await this._getTender(this.sObjectId);
 			const oSelectedOffer = await this._getOffer(this.sOfferId);

@@ -36,10 +36,6 @@ sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "
       if(!tabName) tabName = this.tabs[0].title;
       return this.tabs.find(t=>t.title === tabName);
     },
-
-    getForm:function (){
-      return this.form;
-    },
    
     getJSON: function () {
       return {

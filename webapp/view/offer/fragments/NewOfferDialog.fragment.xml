@@ -1,0 +1,30 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+
+<Dialog id = "idCreateOfferDialog" title="New Offer" contentWidth="800px" contentHeight="400px">
+
+		<content>
+			<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.OfferForm" type="XML"/>
+        </content>
+
+        <buttons>
+			<Button
+				icon="sap-icon://alert"
+				text="{= ${message>/}.length }"
+				visible="{= ${message>/}.length > 0 }"
+				type="Emphasized"
+				press="onMessagePopoverPress" 
+			/>
+            <Button id="addSelectedSOProducts" text="Create" press=".onCreateNewOffer"/>
+            <Button id="cancelDialog" text="Cancel" press=".onCloseOfferCreationDialog" />
+        </buttons>
+</Dialog>
+
+</core:FragmentDefinition>
