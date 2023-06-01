@@ -20,7 +20,7 @@ sap.ui.define([
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
 			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
-
+			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 
@@ -69,7 +69,7 @@ sap.ui.define([
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
-			if (this.objectId) {
+			if (this.objectId && this.offerID) {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 					TenderID: this.objectId,
 					OfferID: this.offerID

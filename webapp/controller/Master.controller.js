@@ -465,10 +465,11 @@ sap.ui.define([
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.filterMasterTable(oItem.TenderID);
+			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
 				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
-				offerId: oItem.OfferID
+				// offerId: oItem.OfferID
 			}, bReplace);
 		},
 		filterMasterTable: function (tenderID) {

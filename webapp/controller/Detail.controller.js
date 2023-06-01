@@ -97,9 +97,10 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: async function (oEvent) {
+			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
-			this.sOfferId = oEvent.getParameter("arguments").offerId;
+			this.sOfferId = selectedTender?.OfferID;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
@@ -112,7 +113,7 @@ sap.ui.define([
 				page: "DETAIL",
 				keys: {
 					TenderID: this.sObjectId,
-					OfferID: this.sOfferId
+					// OfferID: this.sOfferId
 				}
 			});
 
@@ -260,6 +261,9 @@ sap.ui.define([
 				// reset to previous layout
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
+		},
+		onTabSelect: function (event) {
+			const selectedTabKey = event.getParameter("key");
 		}
 	});
 
