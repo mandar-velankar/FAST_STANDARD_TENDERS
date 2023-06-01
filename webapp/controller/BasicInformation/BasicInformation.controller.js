@@ -167,7 +167,7 @@ sap.ui.define([
 			}); 
 		},
 		_onSubmitChangesAwardCriteriaSuccess: function(res){
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			const hasErrorMessages = this._getMessages("AwardCriteriaTableView").length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 
@@ -226,7 +226,7 @@ sap.ui.define([
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
 				contextPath.push(oAwardCriteria.getBindingContextPath());
 				let weight = oAwardCriteria.getBindingContext().getProperty("Weight");
-				sumWeight = sumWeight + weight;
+				sumWeight = sumWeight + parseInt(weight);
 			});
 
 			if (sumWeight > 0 && sumWeight !== 1) {

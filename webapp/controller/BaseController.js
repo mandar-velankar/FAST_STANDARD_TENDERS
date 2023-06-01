@@ -126,7 +126,8 @@ sap.ui.define([
 		 * @returns Array<String> - Targets
 		 */
 		_getTargets: function (entity) {
-			return this.getModel("message").getData().filter(el => el.target.toLowerCase().includes(entity.toLowerCase())).map(e=>e.target);
+			const pendingChanges = this.getModel().getPendingChanges();
+			return Object.keys(pendingChanges).filter(el => el.toLowerCase().includes(entity.toLowerCase())).map(e=>"/" + e);
 		},
 
 	});
