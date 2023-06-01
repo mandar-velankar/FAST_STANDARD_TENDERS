@@ -123,8 +123,8 @@ sap.ui.define([
 		},
 		onTenderFormSaveBtnPress: function(event){
 
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
+			const messages = this._getMessages("TenderFormView");
+			this.oMessageManager.removeMessages(messages);
 			
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
@@ -138,16 +138,14 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesTenderFormSuccess: function(res){
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			const messages = this._getMessages("TenderFormView");
+			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
 		},
 
 		onTenderFormCancelBtnPress: function(event){
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
-			
+			this.cancelPendingChanges("TenderFormView");	
 			this.getModel("ui").setProperty('/TenderForm/editMode', false);
-			this.defaultModel.resetChanges();
 		},
 		
 		onAwardCriteriaEditBtnPress: function(event){
@@ -155,8 +153,8 @@ sap.ui.define([
 		},
 		onAwardCriteriaSaveBtnPress: function(event){
 
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
+			const messages = this._getMessages("AwardCriteriaTableView");
+			this.oMessageManager.removeMessages(messages);
 			
 			// Award Criteria	
 			const isAwardCriteriaValid = this.validateAwardCriteria(event);
@@ -169,18 +167,14 @@ sap.ui.define([
 			}); 
 		},
 		_onSubmitChangesAwardCriteriaSuccess: function(res){
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			const hasErrorMessages = this._getMessages("AwardCriteriaTableView").length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 
 		onAwardCriteriaCancelBtnPress: function(event){
-			const targets = this._getTargets("AwardCriteriaTableView");
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
-			
+			this.cancelPendingChanges("AwardCriteriaTableView");
 			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
-			this.defaultModel.resetChanges(targets);
-		},
+		},	
 
 		/**
 		 * This method changes/updates the odata model PendingChanges list which is used when triggering "submitChanges" method
@@ -231,7 +225,7 @@ sap.ui.define([
 			//checks on mandatory fields & calulation of sumWeight
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
 				contextPath.push(oAwardCriteria.getBindingContextPath());
-				let weight = oAwardCriteria.getCells()[1].getValue();
+				let weight = oAwardCriteria.getBindingContext().getProperty("Weight");
 				sumWeight = sumWeight + parseFloat(weight);
 			});
 
@@ -256,10 +250,7 @@ sap.ui.define([
 				return `${path}/Weight`;
 			})
 		},
-		_getTargets: function (entity) {
-			entity = entity.toLowerCase();
-			return this.getModel("message").getData().filter(el => el.target.toLowerCase().includes(entity));
-		}
+
 		// onMessagePopoverPress : function (oEvent) {
 		// 	const oSourceControl = oEvent.getSource();
 		// 	this._getMessagePopover().then(function(oMessagePopover){

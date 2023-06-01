@@ -75,7 +75,7 @@
 			</f:DynamicPageHeader>
 		</f:header>
 		<f:content>	
-			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{path: 'template>/detailConfig/countryTemplate/template/tabs', factory: '.tabsFactory'}">
+			<IconTabBar id="detailTabBar" class="sapUiResponsiveContentPadding" items="{path: 'template>/detailConfig/countryTemplate/template/tabs', factory: '.tabsFactory'}" select="onTabSelect">
 					<!-- iconTabfilters are generated in tabsFactory implementation in the controller -->
 			</IconTabBar>
 			<!-- <IconTabBar

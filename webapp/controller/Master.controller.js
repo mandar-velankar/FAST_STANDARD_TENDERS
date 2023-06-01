@@ -98,7 +98,7 @@ sap.ui.define([
 		},
 
 		onCountriesReceived: async function (oEvent) {
-			const sCountryCode = oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
+			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			// set filter which is needed later on
 			// if(sCountryCode){
 			// 	this.andFilters.push(new Filter({
@@ -149,6 +149,9 @@ sap.ui.define([
 		_onTemplateConfigReceived: function (sCountryCode) {
 			const table = this.byId("genericMasterTable");
 			this._bindTable(table, sCountryCode);
+			if (this.tenderID) {
+				this.filterMasterTable(this.tenderID);
+			}
 		},
 
 		_bindBrandItems: function (sCountryCode) {
@@ -421,12 +424,17 @@ sap.ui.define([
 			});
 		},
 
-		_onMasterMatched: async function () {
+		_onMasterMatched: async function (oEvent) {
 			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
 
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.tenderID = oEvent.getParameter("arguments").objectId;
+			if (!this.tenderID) {
+				this.setFilter();
+			}
+			
 			// await this.templateState.read("MASTER",{
 			// 	countryCode:"BR",
 			// 	appID:"StandardTenders",
@@ -456,13 +464,21 @@ sap.ui.define([
 			var bReplace = !Device.system.phone;
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.filterMasterTable(oItem.TenderID);
+			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
 				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
-				offerId: oItem.OfferID
+				// offerId: oItem.OfferID
 			}, bReplace);
 		},
-
+		filterMasterTable: function (tenderID) {
+			this.byId("genericMasterTable").getBinding("items").filter(new Filter({
+				path: "TenderID",
+				operator: FilterOperator.EQ,
+				value1: tenderID
+			}));
+		},
 		/**
 		 * Sets the item count on the master list header
 		 * @param {integer} iTotalItems the total number of items in the list
@@ -701,9 +717,9 @@ sap.ui.define([
 
 			if (this.andFilters.length > 0) {
 				const oFilters = new Filter(this.andFilters, true);
-
+				// this._oList.getBinding("items").aFilters = []
 				//Binding to table with the filters and the sorters
-				this._oList.getBinding("items")?.filter(oFilters, FilterType.Application);
+				this._oList.getBinding("items")?.filter(oFilters);
 			} else {
 				this._oList.getBinding('items').aApplicationFilters = [];
 				this._oList.getBinding("items")?.filter();
