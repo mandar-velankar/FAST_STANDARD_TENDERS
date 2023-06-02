@@ -106,8 +106,8 @@ sap.ui.define([
 		},
 
 		cancelPendingChanges: function(entity){
-			const targets = this._getTargets(entity);
-			const messages = this._getMessages(entity);
+			const targets = this.getTargets(entity);
+			const messages = this.getMessages(entity);
 			const messageManager = sap.ui.getCore().getMessageManager();
 			messageManager.removeMessages(messages);
 			this.getOwnerComponent().getModel().resetChanges(targets);
@@ -117,7 +117,7 @@ sap.ui.define([
 		 * This method returns the error messages from the MessageManager for a given entity
 		 * @returns Array<Object<Message>>
 		 */
-		_getMessages: function (entity) {
+		getMessages: function (entity) {
 			return this.getModel("message").getData().filter(el => el.target.toLowerCase().includes(entity.toLowerCase()));
 		},
 
@@ -125,7 +125,7 @@ sap.ui.define([
 		 * This method returns the targets from the MessageMaager message for a given entity
 		 * @returns Array<String> - Targets
 		 */
-		_getTargets: function (entity) {
+		getTargets: function (entity) {
 			const pendingChanges = this.getModel().getPendingChanges();
 			return Object.keys(pendingChanges).filter(el => el.toLowerCase().includes(entity.toLowerCase())).map(e=>"/" + e);
 		},

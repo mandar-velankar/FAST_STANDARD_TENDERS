@@ -123,7 +123,7 @@ sap.ui.define([
 		},
 		onTenderFormSaveBtnPress: function(event){
 
-			const messages = this._getMessages("TenderFormView");
+			const messages = this.getMessages("TenderFormView");
 			this.oMessageManager.removeMessages(messages);
 			
 			this.defaultModel.submitChanges({
@@ -138,7 +138,7 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesTenderFormSuccess: function(res){
-			const messages = this._getMessages("TenderFormView");
+			const messages = this.getMessages("TenderFormView");
 			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
 		},
@@ -153,7 +153,7 @@ sap.ui.define([
 		},
 		onAwardCriteriaSaveBtnPress: function(event){
 
-			const messages = this._getMessages("AwardCriteriaTableView");
+			const messages = this.getMessages("AwardCriteriaTableView");
 			this.oMessageManager.removeMessages(messages);
 			
 			// Award Criteria	
@@ -167,7 +167,7 @@ sap.ui.define([
 			}); 
 		},
 		_onSubmitChangesAwardCriteriaSuccess: function(res){
-			const hasErrorMessages = this._getMessages("AwardCriteriaTableView").length > 0;
+			const hasErrorMessages = this.getMessages("AwardCriteriaTableView").length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 

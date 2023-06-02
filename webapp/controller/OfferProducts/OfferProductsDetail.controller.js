@@ -281,25 +281,26 @@ sap.ui.define([
 		},
 		onPricingFormSaveBtnPress: function(event){
 
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
+			const messages = this.getMessages("PriceConditionPriceView");
+			this.oMessageManager.removeMessages(messages);
 			
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess("PricingForm").bind(this),
+				success: this._onSubmitChangesSuccess.bind(this),
 				groupId: "PricingForm"
 			}); 
 		},
 
 		onPricingFormCancelBtnPress: function(event){
-			this.oMessageManager.removeAllMessages();
+			const messages = this.getMessages("PriceConditionPriceView");
+			this.oMessageManager.removeMessages(messages);
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.defaultModel.resetChanges();
+			this.cancelPendingChanges("PriceConditionPriceView");
 		},
 
-		_onSubmitChangesSuccess: function(form){
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty(`/${form}/editMode`, false);
+		_onSubmitChangesSuccess: function(res){
+			const hasErrorMessages =  this.getMessages("PriceConditionPriceView").length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
 
 		_filterPricingForm: function ({offerID, productID}) {

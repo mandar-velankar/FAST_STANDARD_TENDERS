@@ -722,7 +722,7 @@ sap.ui.define([
 				//Binding to table with the filters and the sorters
 				this._oList.getBinding("items")?.filter(oFilters);
 			} else {
-				this._oList.getBinding('items').aApplicationFilters = [];
+				// this._oList.getBinding('items').aApplicationFilters = []; // TODO: check why this was needed
 				this._oList.getBinding("items")?.filter();
 			}
 
