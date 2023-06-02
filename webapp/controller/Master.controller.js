@@ -149,6 +149,7 @@ sap.ui.define([
 		_onTemplateConfigReceived: function (sCountryCode) {
 			const table = this.byId("genericMasterTable");
 			this._bindTable(table, sCountryCode);
+			this.tenderID = this.getRouter().getHashChanger().getHash().split("/").splice(2, 1).join("/");
 			if (this.tenderID) {
 				this.filterMasterTable(this.tenderID);
 			}
@@ -469,7 +470,7 @@ sap.ui.define([
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
 				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
-				// offerId: oItem.OfferID
+				offerId: oItem?.OfferID || "NA"
 			}, bReplace);
 		},
 		filterMasterTable: function (tenderID) {
