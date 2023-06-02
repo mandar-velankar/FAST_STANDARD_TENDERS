@@ -5,8 +5,9 @@ sap.ui.define([
 	"sap/ui/core/ComponentContainer",
 	"sap/m/library",
 	"sap/m/IconTabFilter",
-	"sap/ui/core/mvc/XMLView"
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, XMLView) {
+	"sap/ui/core/mvc/XMLView",
+	"sap/ui/core/routing/HashChanger"
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, XMLView, HashChanger) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -30,6 +31,9 @@ sap.ui.define([
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
 
@@ -100,20 +104,22 @@ sap.ui.define([
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
-			this.sOfferId = selectedTender?.OfferID;
+			this.sOfferId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
-			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			
+			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
+
+			this.setSelectedTabKey();
+
 			await this.templateState.read("DETAIL",{
 				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID: "StandardTenders",
 				page: "DETAIL",
 				keys: {
 					TenderID: this.sObjectId,
-					// OfferID: this.sOfferId
+					OfferID: this.sOfferId
 				}
 			});
 
@@ -141,10 +147,17 @@ sap.ui.define([
 			// });
 
 			this.getModel().metadataLoaded().then( function() {
-			 	var sObjectPath = this.getModel().createKey("TenderMasterView", {
-			 		TenderID :  this.sObjectId,
-					OfferID : this.sOfferId
-			 	});
+				let sObjectPath = "";
+			 	if (this.sOfferId && this.sOfferId !== "NA") {
+					sObjectPath = this.getModel().createKey("TenderMasterView", {
+						TenderID :  this.sObjectId,
+					   OfferID : this.sOfferId
+					});
+				}else {
+					sObjectPath = this.getModel().createKey("TenderFormView", {
+						TenderID :  this.sObjectId
+					});
+				}
 			 	this._bindView("/" + sObjectPath);
 			}.bind(this));
 		},
@@ -245,6 +258,7 @@ sap.ui.define([
 			// No item should be selected on master after detail page is closed
 			this.getOwnerComponent().oListSelector.clearMasterListSelection();
 			this.getRouter().navTo("master");
+			this.getModel('st').setProperty("/selectedTab", "");
 		},
 
 		/**
@@ -263,7 +277,38 @@ sap.ui.define([
 			}
 		},
 		onTabSelect: function (event) {
-			const selectedTabKey = event.getParameter("key");
+			const selectedTabKey = event.getParameter("key").toLowerCase();
+			let hash = this.getRouter().getHashChanger().getHash();
+			const offerId = this.sOfferId || this.getModel("st").getProperty("/SelectedTender/OfferID") || "NA";
+			this.changeHash({selectedTabKey, hash, offerId});
+		},
+		changeHash: function ({selectedTabKey, hash, offerId}) {
+			hash = hash.split("/").splice(0, 3).join("/");
+			switch (selectedTabKey) {
+				case "tender":
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "offer":
+					hash = hash + "/" + offerId + "/Offer";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "overview":
+					hash = hash + "/" + offerId + "/Overview";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "awards":
+					hash = hash + "/" + offerId + "/Awards";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				default:
+					break;
+			}
+		},
+		setSelectedTabKey: function () {
+			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(4,1).join("");
+			if (selectedTabKey == "Offer" || selectedTabKey == "Overview" || selectedTabKey == "Awards") {
+				this.getModel('st').setProperty("/selectedTab", selectedTabKey);
+			}
 		}
 	});
 

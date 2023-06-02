@@ -121,7 +121,7 @@
 					"target": "master"
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}",
+					"pattern": "detail/{countryCode}/{objectId}/:offerId:",
 					"name": "object",
 					"target": [
 						"master",
@@ -129,8 +129,24 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/Offer/{offerId}/{layout}",
+					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Offer",
 					"name": "objectDetailOffer",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Overview",
+					"name": "objectDetailOverview",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Awards",
+					"name": "objectDetailAwards",
 					"target": [
 						"master",
 						"object"
@@ -174,6 +190,14 @@
 				},
 				"objectDetailOffer": {
 					"viewName": "offer/views/OfferProducts",
+					"controlAggregation": "endColumnPages"
+				},
+				"objectDetailOverview": {
+					"viewName": "overview/views/Information",
+					"controlAggregation": "endColumnPages"
+				},
+				"objectDetailAwards": {
+					"viewName": "awards/views/AwardedProducts",
 					"controlAggregation": "endColumnPages"
 				},
 				"offerProductDetail": {
