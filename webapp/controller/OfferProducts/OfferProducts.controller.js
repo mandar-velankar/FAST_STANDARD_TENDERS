@@ -56,10 +56,19 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			this._bindForm("OfferForm");
-			this._bindTable("OfferProductsTable");
+			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
 			this._bindText("TotalAmountOfferProducts");
 		},
-
+		_onObjectMatched: async function (oEvent) {
+			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
+			this.countryCode = oEvent.getParameter("arguments").countryCode;
+			this.tenderId = oEvent.getParameter("arguments").objectId;
+			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			// this.getModel("appView").setProperty("/editable", false);
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+		},
 		/**
 		 * This method bind a given form to its entity from the ui configuration template.
 		 * FYI: the form ID in the View is a concatination of "id" + formName

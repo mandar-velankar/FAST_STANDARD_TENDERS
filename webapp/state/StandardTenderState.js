@@ -21,7 +21,9 @@ sap.ui.define(
                 this.odataModel = model;
                 this.standardTenderService = new StandardTenderService(model);
             },
-
+            getService: function () {
+                return this.standardTenderService;
+            },
             getOdataModel: function(){
                 return this.odataModel;
             },
@@ -30,6 +32,13 @@ sap.ui.define(
                 return this.standardTenderService.saveAwardCriteria(aContext);        
             },
 
+            getTender: function (tenderId) {
+                return this.getService().getTender(tenderId);
+            },
+
+            getOffer: function (offerId) {
+                return this.getService().getOffer(offerId);
+            }
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':

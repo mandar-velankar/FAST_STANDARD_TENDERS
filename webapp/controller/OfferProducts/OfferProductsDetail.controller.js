@@ -36,7 +36,7 @@ sap.ui.define([
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
 			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
-
+			this.stState = this.getOwnerComponent().getModel("st");
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
@@ -189,8 +189,8 @@ sap.ui.define([
 		},
 
 		_filterPriceCondition: async function () {
-			const oSelectedTender = await this._getTender(this.sObjectId);
-			const oSelectedOffer = await this._getOffer(this.sOfferId);
+			const oSelectedTender = await this.stState.getService().getTender(this.sObjectId);
+			const oSelectedOffer = await this.stState.getService().getOffer(this.sOfferId);
 			const oPriceCondBinding = this.byId("idSelectedPriceContition").getBinding("items");
 			const orFilters = [
 				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
@@ -198,44 +198,6 @@ sap.ui.define([
 				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification)
 			]
 			oPriceCondBinding.filter(orFilters);
-		},
-		_getTender: async function (tenderID) {
-			const sTenderKey = this.getModel().createKey("/TenderFormView", {
-				TenderID: tenderID
-			});
-			let oTender = this.getModel().getObject(sTenderKey);
-			if (!oTender) {
-				return new Promise((resolve, reject) => {
-					this.getModel().read("/TenderFormView", {
-						filters: [
-							new Filter("TenderID", "EQ", tenderID)
-						],
-						success: function (res) {
-							resolve(res?.results[0])
-						}
-					});
-				})
-			}
-			return oTender;
-		},
-		_getOffer: async function (offerID) {
-			const sOfferKey = this.getModel().createKey("/OfferFormView", {
-				OfferID: offerID
-			});
-			let oOffer = this.getModel().getObject(sOfferKey);
-			if (!oOffer) {
-				return new Promise((resolve, reject) => {
-					this.getModel().read("/OfferFormView", {
-						filters: [
-							new Filter("OfferID", "EQ", offerID)
-						],
-						success: function (res) {
-							resolve(res?.results[0])
-						}
-					});
-				})
-			}
-			return oOffer;
 		},
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();

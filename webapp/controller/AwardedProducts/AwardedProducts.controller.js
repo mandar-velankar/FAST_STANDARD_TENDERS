@@ -37,8 +37,20 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
 
 			this.setModel(oViewModel, "detailView");
-
+			
+			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
+		},
+
+		_onObjectMatched: async function (oEvent) {
+			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
+			this.countryCode = oEvent.getParameter("arguments").countryCode;
+			this.tenderId = oEvent.getParameter("arguments").objectId;
+			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			// this.getModel("appView").setProperty("/editable", false);
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
 		},
 
 		/* =========================================================== */
