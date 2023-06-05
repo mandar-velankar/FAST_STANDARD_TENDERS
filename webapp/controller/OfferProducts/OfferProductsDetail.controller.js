@@ -6,8 +6,9 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"sap/ui/core/message/Message",
-	"sap/ui/core/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library) {
+	"sap/ui/core/library",
+	"sap/ui/model/Context"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -131,7 +132,7 @@ sap.ui.define([
 
 			this._bindForm("ProductForm");
 			this._bindText("ProductPackNameOfferProductDetail");
-			this._filterPricingForm({offerID: this.sOfferId, productID:this.productId});
+			this.bindPricingForm({offerID: this.sOfferId, productID:this.productId,tenderID: this.sObjectId});
 		},
 
 		/**
@@ -311,6 +312,18 @@ sap.ui.define([
 				new Filter("ProductCode",FilterOperator.EQ, productID),
 			]
 			oPricingFormBinding.filter(aFilters);
+		},
+
+		bindPricingForm({offerID, productID, tenderID}){
+			const form = this.byId("idPricingForm");
+			const path = this.getModel().createKey("/PriceConditionPriceView", {
+				"OfferID": offerID,
+				"TenderID": tenderID,
+				"ProductCode": productID
+			});
+			this.getModel().read(path);
+			const context = new Context(this.getModel(), path);
+      		form.setBindingContext(context);
 		},
 
 		validateProduct: function () {

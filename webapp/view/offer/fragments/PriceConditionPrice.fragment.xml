@@ -17,10 +17,6 @@
 	<form:Form
 		id="idPricingForm"
 		editable="true"
-		formContainers="{
-			path:'/PriceConditionPriceView',
-			templateShareable:true
-		}"
 	>
 		<form:toolbar>
 			<Toolbar>
