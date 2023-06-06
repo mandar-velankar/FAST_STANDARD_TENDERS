@@ -321,9 +321,12 @@ sap.ui.define([
 				"TenderID": tenderID,
 				"ProductCode": productID
 			});
-			this.getModel().read(path);
-			const context = new Context(this.getModel(), path);
-      		form.setBindingContext(context);
+
+			form.bindElement({
+				path: path,
+				groupId: "PricingForm" 
+			});
+
 		},
 
 		validateProduct: function () {
@@ -357,5 +360,23 @@ sap.ui.define([
 
 			return true;
 		},
+
+		calculatePricingFormFields: function(event){
+			const value = Number(event.getParameter("newValue"));
+			const property = event.getSource().getBindingPath("value");
+			const context = event.getSource().getBindingContext();
+			const priceObj = context.getObject();
+
+			let offerPrice = property.toLowerCase().includes("offerprice") ? value : priceObj.OfferPrice;
+			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+
+			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / 100;
+			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+
+			context.getModel().setProperty("OfferPrice", offerPrice, context);
+			context.getModel().setProperty("Discount", discount.toFixed(2), context);
+			context.getModel().setProperty("NetPrice", netPrice.toFixed(2), context);
+
+		}
     });
 });
