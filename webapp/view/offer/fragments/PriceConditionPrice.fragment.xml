@@ -17,10 +17,6 @@
 	<form:Form
 		id="idPricingForm"
 		editable="true"
-		formContainers="{
-			path:'/PriceConditionPriceView',
-			templateShareable:true
-		}"
 	>
 		<form:toolbar>
 			<Toolbar>
@@ -28,10 +24,10 @@
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"
-					text="{= ${message>/}.length }"
-					visible="{= ${message>/}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
+					text="{= ${messages>/priceCondPrice}.length }"
+					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
 					type="Emphasized"
-					press="onMessagePopoverPress" 
+					press="onMessagePopoverPress($event, 'priceCondPrice')" 
 				/>
 				<Button
 					icon="sap-icon://edit"
@@ -74,14 +70,14 @@
 				<form:formElements>
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
-							<Input value="{Price0}" enabled="false"/>
+							<Input value="{BasePrice}" enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>Discount}" >
 						<form:fields>
 							<Input
 								value="{
-									path: 'Level1Discount1',
+									path: 'Discount',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -90,23 +86,40 @@
 					</form:FormElement>
 					<form:FormElement label="{i18n>OfferPrice}" >
 						<form:fields>
-							<Input value="{Price1}" enabled="{ui>/PricingForm/editMode}"/>
+							<Input 
+								id = "idOfferPrice"
+								value="{
+									path: 'OfferPrice',
+									type: 'sap.ui.model.odata.type.Decimal',
+									constraints: {
+										minimumFractionDigits: 0,
+										maximumFractionDigits: 2
+									},
+									formatOptions:{
+										minFractionDigits:0,
+										maxFractionDigits:2
+									}
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".calculatePricingFormFields"
+							/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>Deductions}" >
 						<form:fields>
 							<Input
 								value="{
-									path: 'Level2Discount1',
+									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".calculatePricingFormFields"
 							/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>NetPrice}" >
 						<form:fields>
-							<Input value="{Price2}" enabled="false"/>
+							<Input value="{NetPrice}" enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 				</form:formElements>

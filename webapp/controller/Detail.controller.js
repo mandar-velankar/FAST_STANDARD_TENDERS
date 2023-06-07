@@ -30,12 +30,17 @@ sap.ui.define([
 				delay: 0,
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
+			const messagesModel = new JSONModel({
+				basicInfoMsg: [],
+				awardCriteriaMsg: []
+			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
+			this.setModel(messagesModel, "messages");
 
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
@@ -113,6 +118,26 @@ sap.ui.define([
 
 			this.setSelectedTabKey();
 
+			this.getModel().metadataLoaded().then( async function() {
+				!this.selectedOfferHasBinding() && this._bindView();
+			}.bind(this));
+		},
+
+		selectedOfferHasBinding: function(){
+			return this.getView().getBindingContext()?.getObject()?.OfferID === this.sOfferId;
+		},
+
+		/**
+		 * Binds the view to the object path. Makes sure that detail view displays
+		 * a busy indicator while data for the corresponding element binding is loaded.
+		 * @function
+		 * @param {string} sObjectPath path to the object to be bound to the view.
+		 * @private
+		 */
+		_bindView: async function () {
+
+			let sObjectPath = "";
+
 			await this.templateState.read("DETAIL",{
 				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
 				appID: "StandardTenders",
@@ -129,47 +154,17 @@ sap.ui.define([
 				filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
 			});
 
-			// await this.getModel().metadataLoaded();
-			// let path = "";
-			// if (sObjectId) {
-			// 	path = this.getModel().createKey(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(selectedTab)}`, {
-			// 		TenderID: sObjectId,
-			// 	});
-			// } else {
-			// 	const newEntryContext = this.getModel().createEntry(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {});
-			// 	path = newEntryContext.getPath();
-			// }
-			
-			// this.getView().bindElement({
-			// 	path: path,
-			// 	//`/${this.GenericFormStateData.countryTemplate.getTemplate().getEntity()}`,
-			// 	// model: 'data'
-			// });
+			if(this.sOfferId && this.sOfferId !== "NA") {
+				sObjectPath = this.getModel().createKey("TenderMasterView", {
+					TenderID :  this.sObjectId,
+					OfferID : this.sOfferId
+				});
+			}else {
+				sObjectPath = this.getModel().createKey("TenderFormView", {
+					TenderID :  this.sObjectId
+				});
+			}
 
-			this.getModel().metadataLoaded().then( function() {
-				let sObjectPath = "";
-			 	if (this.sOfferId && this.sOfferId !== "NA") {
-					sObjectPath = this.getModel().createKey("TenderMasterView", {
-						TenderID :  this.sObjectId,
-					   OfferID : this.sOfferId
-					});
-				}else {
-					sObjectPath = this.getModel().createKey("TenderFormView", {
-						TenderID :  this.sObjectId
-					});
-				}
-			 	this._bindView("/" + sObjectPath);
-			}.bind(this));
-		},
-
-		/**
-		 * Binds the view to the object path. Makes sure that detail view displays
-		 * a busy indicator while data for the corresponding element binding is loaded.
-		 * @function
-		 * @param {string} sObjectPath path to the object to be bound to the view.
-		 * @private
-		 */
-		_bindView: function (sObjectPath) {
 			// Set busy indicator during view binding
 			var oViewModel = this.getModel("detailView");
 
@@ -178,7 +173,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/editmode", false);
 
 			this.getView().bindElement({
-				path: sObjectPath,
+				path: "/" + sObjectPath,
 				/*parameters: {
 					expand: "Institute,Offer"
 				},*/
@@ -253,10 +248,11 @@ sap.ui.define([
 		 * Set the full screen mode to false and navigate to master page
 		 */
 		onCloseDetailPress: function () {
-			sap.ui.getCore().getMessageManager().removeAllMessages();
+			this.cancelAllPendingChanges();
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			// No item should be selected on master after detail page is closed
 			this.getOwnerComponent().oListSelector.clearMasterListSelection();
+			this.getView().unbindElement();
 			this.getRouter().navTo("master");
 			this.getModel('st').setProperty("/selectedTab", "");
 		},
@@ -286,6 +282,7 @@ sap.ui.define([
 			hash = hash.split("/").splice(0, 3).join("/");
 			switch (selectedTabKey) {
 				case "tender":
+					hash = hash + "/" + offerId;
 					this.getRouter().getHashChanger().replaceHash(hash);
 					break;
 				case "offer":

@@ -6,13 +6,16 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"sap/ui/core/message/Message",
-	"sap/ui/core/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library) {
+	"sap/ui/core/library",
+	"sap/ui/model/Context"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context) {
 	"use strict";
 
 	var MessageType = library.MessageType;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail", {
+
+		formatter: formatter,
 		onInit: function () {
 
 			this.oOwnerComponent = this.getOwnerComponent();
@@ -40,6 +43,10 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
+			const messagesModel = new JSONModel({
+				priceCondPrice: []
+			});
+			this.setModel(messagesModel, "messages");
 			
 		},
 
@@ -131,7 +138,7 @@ sap.ui.define([
 
 			this._bindForm("ProductForm");
 			this._bindText("ProductPackNameOfferProductDetail");
-			this._filterPricingForm({offerID: this.sOfferId, productID:this.productId});
+			this.bindPricingForm({offerID: this.sOfferId, productID:this.productId,tenderID: this.sObjectId});
 		},
 
 		/**
@@ -281,25 +288,27 @@ sap.ui.define([
 		},
 		onPricingFormSaveBtnPress: function(event){
 
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
+			// const messages = this.getMessages("PriceConditionPriceView");
+			// this.oMessageManager.removeMessages(messages);
 			
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess("PricingForm").bind(this),
+				success: this._onSubmitChangesSuccess.bind(this),
 				groupId: "PricingForm"
 			}); 
 		},
 
 		onPricingFormCancelBtnPress: function(event){
-			this.oMessageManager.removeAllMessages();
+			const messages = this.getMessages("PriceConditionPriceView");
+			this.oMessageManager.removeMessages(messages);
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.defaultModel.resetChanges();
+			this.cancelPendingChanges("PriceConditionPriceView", "priceCondPrice");
 		},
 
-		_onSubmitChangesSuccess: function(form){
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty(`/${form}/editMode`, false);
+		_onSubmitChangesSuccess: function(res){
+			const hasErrorMessages =  this.getMessages("idOfferPrice").length > 0;
+			this.setMessageSection("idOfferPrice", "priceCondPrice");
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
 
 		_filterPricingForm: function ({offerID, productID}) {
@@ -310,6 +319,21 @@ sap.ui.define([
 				new Filter("ProductCode",FilterOperator.EQ, productID),
 			]
 			oPricingFormBinding.filter(aFilters);
+		},
+
+		bindPricingForm({offerID, productID, tenderID}){
+			const form = this.byId("idPricingForm");
+			const path = this.getModel().createKey("/PriceConditionPriceView", {
+				"OfferID": offerID,
+				"TenderID": tenderID,
+				"ProductCode": productID
+			});
+
+			form.bindElement({
+				path: path,
+				groupId: "PricingForm" 
+			});
+
 		},
 
 		validateProduct: function () {
@@ -343,5 +367,23 @@ sap.ui.define([
 
 			return true;
 		},
+
+		calculatePricingFormFields: function(event){
+			const value = Number(event.getParameter("newValue"));
+			const property = event.getSource().getBindingPath("value");
+			const context = event.getSource().getBindingContext();
+			const priceObj = context.getObject();
+
+			let offerPrice = property.toLowerCase().includes("offerprice") ? value : priceObj.OfferPrice;
+			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+
+			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
+			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+
+			context.getModel().setProperty("OfferPrice", this.formatter.formatFloat(offerPrice), context);
+			context.getModel().setProperty("Discount", this.formatter.formatFloat(discount), context);
+			context.getModel().setProperty("NetPrice", this.formatter.formatFloat(netPrice), context);
+
+		}
     });
 });
