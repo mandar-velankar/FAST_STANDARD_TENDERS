@@ -229,7 +229,7 @@ sap.ui.define([
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
 				contextPath.push(oAwardCriteria.getBindingContextPath());
 				let weight = oAwardCriteria.getBindingContext().getProperty("Weight");
-				sumWeight = sumWeight + parseFloat(weight);
+				sumWeight = sumWeight + Number(parseFloat(weight).toFixed(1));
 			});
 
 			if (sumWeight > 0 && sumWeight !== 1) {
