@@ -30,12 +30,17 @@ sap.ui.define([
 				delay: 0,
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
+			const messagesModel = new JSONModel({
+				basicInfoMsg: [],
+				awardCriteriaMsg: []
+			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
+			this.setModel(messagesModel, "messages");
 
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
@@ -113,55 +118,43 @@ sap.ui.define([
 
 			this.setSelectedTabKey();
 
-			await this.templateState.read("DETAIL",{
-				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
-				appID: "StandardTenders",
-				page: "DETAIL",
-				keys: {
-					TenderID: this.sObjectId,
-					OfferID: this.sOfferId
-				}
-			});
+			this.getModel().metadataLoaded().then( async function() {
+				const viewBindingObj = this.getView().getBindingContext()?.getObject();
+				this.checkViewBinding(viewBindingObj);
+			}.bind(this));
+		},
+		checkViewBinding: async function (viewBindingObj) {
+			let sObjectPath = "";
+			if (viewBindingObj?.OfferID !== this.sOfferId) {
+				await this.templateState.read("DETAIL",{
+					countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+					appID: "StandardTenders",
+					page: "DETAIL",
+					keys: {
+						TenderID: this.sObjectId,
+						OfferID: this.sOfferId
+					}
+				});
+	
+				// get awarded criteria of the selected tender 
+				// this is needed at a later stage to check on existing Award Criteria
+				this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
+					filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
+				});
 
-			// get awarded criteria of the selected tender 
-			// this is needed at a later stage to check on existing Award Criteria
-			this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
-				filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
-			});
-
-			// await this.getModel().metadataLoaded();
-			// let path = "";
-			// if (sObjectId) {
-			// 	path = this.getModel().createKey(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(selectedTab)}`, {
-			// 		TenderID: sObjectId,
-			// 	});
-			// } else {
-			// 	const newEntryContext = this.getModel().createEntry(`/${this.templateStateData.detailConfig.countryTemplate.getTemplate().getEntity()}`, {});
-			// 	path = newEntryContext.getPath();
-			// }
-			
-			// this.getView().bindElement({
-			// 	path: path,
-			// 	//`/${this.GenericFormStateData.countryTemplate.getTemplate().getEntity()}`,
-			// 	// model: 'data'
-			// });
-
-			this.getModel().metadataLoaded().then( function() {
-				let sObjectPath = "";
-			 	if (this.sOfferId && this.sOfferId !== "NA") {
+				if (this.sOfferId && this.sOfferId !== "NA") {
 					sObjectPath = this.getModel().createKey("TenderMasterView", {
 						TenderID :  this.sObjectId,
-					   OfferID : this.sOfferId
+					OfferID : this.sOfferId
 					});
 				}else {
 					sObjectPath = this.getModel().createKey("TenderFormView", {
 						TenderID :  this.sObjectId
 					});
 				}
-			 	this._bindView("/" + sObjectPath);
-			}.bind(this));
+				this._bindView("/" + sObjectPath);
+			}
 		},
-
 		/**
 		 * Binds the view to the object path. Makes sure that detail view displays
 		 * a busy indicator while data for the corresponding element binding is loaded.
@@ -253,10 +246,11 @@ sap.ui.define([
 		 * Set the full screen mode to false and navigate to master page
 		 */
 		onCloseDetailPress: function () {
-			sap.ui.getCore().getMessageManager().removeAllMessages();
+			this.cancelAllPendingChanges();
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			// No item should be selected on master after detail page is closed
 			this.getOwnerComponent().oListSelector.clearMasterListSelection();
+			this.getView().unbindElement();
 			this.getRouter().navTo("master");
 			this.getModel('st').setProperty("/selectedTab", "");
 		},
@@ -286,6 +280,7 @@ sap.ui.define([
 			hash = hash.split("/").splice(0, 3).join("/");
 			switch (selectedTabKey) {
 				case "tender":
+					hash = hash + "/" + offerId;
 					this.getRouter().getHashChanger().replaceHash(hash);
 					break;
 				case "offer":

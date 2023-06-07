@@ -82,13 +82,29 @@ sap.ui.define([
 				this.getRouter().navTo("master", {}, true);
 			}
 		},
-		onMessagePopoverPress : function (oEvent) {
+		onMessagePopoverPress : function (oEvent, sectionName) {
 			const oSourceControl = oEvent.getSource();
-			this._getMessagePopover().then(function(oMessagePopover){
-				oMessagePopover.openBy(oSourceControl);
-			});
+			const popover = this.createMessagePopover(sectionName);
+			const messagesModel = this.getModel("messages");
+			popover.setModel(messagesModel, "messages");
+			popover.openBy(oSourceControl)
+			// this._getMessagePopover().then(function(oMessagePopover){
+			// 	oMessagePopover.openBy(oSourceControl);
+			// });
 		},
-
+		createMessagePopover: function (sectionName) {
+			return new sap.m.MessagePopover({
+				items: {
+					path: `messages>/${sectionName}`,
+					template: new sap.m.MessageItem({
+						type: "{messages>type}",
+						title: "{messages>message}",
+						subtitle: "{messages>additionalText}",
+						description: "{messages>description}"
+					})
+				}
+			})
+		},
 		_getMessagePopover: function () {
 			const oView = this.getView();
 
@@ -105,14 +121,24 @@ sap.ui.define([
 			return this._pMessagePopover;
 		},
 
-		cancelPendingChanges: function(entity){
+		cancelPendingChanges: function(entity, msgPropName){
 			const targets = this.getTargets(entity);
 			const messages = this.getMessages(entity);
 			const messageManager = sap.ui.getCore().getMessageManager();
 			messageManager.removeMessages(messages);
+			this.getModel("messages").setProperty(`/${msgPropName}`, {});
 			this.getOwnerComponent().getModel().resetChanges(targets);
 		},
 
+		cancelAllPendingChanges: function () {
+			const messageManager = sap.ui.getCore().getMessageManager();
+			messageManager.removeMessages();
+			const msgSectionKeys = Object.keys(this.getModel("messages").getData());
+			for (let key in msgSectionKeys) {
+				this.getModel("messages").setProperty(`/${msgSectionKeys[key]}`, []);
+			}
+			this.getOwnerComponent().getModel().resetChanges();
+		},
 		/**
 		 * This method returns the error messages from the MessageManager for a given entity
 		 * @returns Array<Object<Message>>
@@ -129,7 +155,10 @@ sap.ui.define([
 			const pendingChanges = this.getModel().getPendingChanges();
 			return Object.keys(pendingChanges).filter(el => el.toLowerCase().includes(entity.toLowerCase())).map(e=>"/" + e);
 		},
-
+		setMessageSection: function (entity, sectionName) {
+			const messages = this.getMessages(entity);
+			this.getModel("messages").setProperty(`/${sectionName}`, messages);
+		}
 	});
 
 });

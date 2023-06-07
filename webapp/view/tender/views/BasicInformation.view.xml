@@ -23,10 +23,10 @@
 					<ToolbarSpacer/>
 					<Button
 						icon="sap-icon://alert"
-						text="{= ${message>/}.length }"
-						visible="{= ${message>/}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
+						text="{= ${messages>/basicInfoMsg}.length }"
+						visible="{= ${messages>/basicInfoMsg}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
 						type="Emphasized"
-						press="onMessagePopoverPress" 
+						press="onMessagePopoverPress($event, 'basicInfoMsg')" 
 					/>
 					<Button
 						id="idTenderFormEditBtn"
@@ -94,10 +94,10 @@
 						<ToolbarSpacer />
 						<Button
 							icon="sap-icon://alert"
-							text="{= ${message>/}.length }"
-							visible="{= ${message>/}.length > 0 &amp;&amp; ${ui>/AwardCriteria/editMode}}"
+							text="{= ${messages>/awardCriteriaMsg}.length }"
+							visible="{= ${messages>/awardCriteriaMsg}.length > 0 &amp;&amp; ${ui>/AwardCriteria/editMode}}"
 							type="Emphasized"
-							press="onMessagePopoverPress" 
+							press="onMessagePopoverPress($event, 'awardCriteriaMsg')"  
 						/>
 						<Button
 							id="idAwardCriteriaEditBtn"

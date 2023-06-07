@@ -68,6 +68,11 @@ sap.ui.define([
 			this.orFilters = [];
 			this.andFilters = [];
 
+			const messagesModel = new JSONModel({
+				newTenderMsg: [],
+			})
+			this.setModel(messagesModel, "messages");
+
 			this.setModel(oViewModel, "masterView");
 			// Make sure, busy indication is showing immediately so there is no
 			// break after the busy indication for loading the view's meta data is
@@ -543,12 +548,12 @@ sap.ui.define([
 			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const form = this.byId("idNewTenderForm");
 			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-				groupId: "Basicinfo"
+				groupId: "NewTender"
 			});
 			const path = newEntryContext.getPath();
 			form?.bindElement({
 				path: path,
-				groupId: "Basicinfo"
+				groupId: "NewTender"
 			});
 			const sElemBindingPath = form.getElementBinding().getPath();
 			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
@@ -559,20 +564,20 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 		},
 		onCloseTenderCreationDialog: function () {
-			this.oMessageManager.removeAllMessages();
+			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
+			this.cancelPendingChanges(bindingPath, "newTenderMsg");
 			this.byId("idCreateTenderDialog").close();
 			this.byId("idCreateTenderDialog").destroy();
-			this.getModel().resetChanges();
 		},
 
 		onCreateNewTender: async function () {
-			this.oMessageManager.removeAllMessages();
+			
 			const oNewTenderForm = this.byId("idNewTenderForm");
 			this.setNewTenderPendingChanges(oNewTenderForm);
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
-				groupId: "Basicinfo"
+				groupId: "NewTender"
 			});
 		},
 		_onSubmitChangesFail: function (error) {
@@ -580,13 +585,15 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccess: function (res) {
-			const oNewTenderForm = this.byId("idNewTenderForm");
-			const oNewTender = oNewTenderForm.getElementBinding().getBoundContext().getObject();
-			const hasErrorMessages = this.getView().getModel('message').getData().length > 0;
+			const newTenderCtx = this.byId("idNewTenderForm").getElementBinding().getBoundContext();
+			const ctxPath = newTenderCtx.getPath().replace("/", "");
+			const messages = this.getMessages(ctxPath);
+			const hasErrorMessages = messages.length > 0;
+			this.setMessageSection(ctxPath, "newTenderMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Tender has been successfully created");
 				this.onCloseTenderCreationDialog();
-				this._showDetail(oNewTender);
+				this._showDetail(newTenderCtx.getObject());
 			}
 		},
 		setNewTenderPendingChanges: function (oForm) {
@@ -615,11 +622,11 @@ sap.ui.define([
 			}
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
 				properties: newTenderObj,
-				groupId: "Basicinfo"
+				groupId: "NewTender"
 			});
 			oForm?.bindElement({
 				path: oNewBindingCtx.getPath(),
-				groupId: "Basicinfo"
+				groupId: "NewTender"
 			});
 			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},

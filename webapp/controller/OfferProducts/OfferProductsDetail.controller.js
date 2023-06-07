@@ -43,6 +43,10 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
+			const messagesModel = new JSONModel({
+				priceCondPrice: []
+			});
+			this.setModel(messagesModel, "messages");
 			
 		},
 
@@ -284,8 +288,8 @@ sap.ui.define([
 		},
 		onPricingFormSaveBtnPress: function(event){
 
-			const messages = this.getMessages("PriceConditionPriceView");
-			this.oMessageManager.removeMessages(messages);
+			// const messages = this.getMessages("PriceConditionPriceView");
+			// this.oMessageManager.removeMessages(messages);
 			
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
@@ -298,11 +302,12 @@ sap.ui.define([
 			const messages = this.getMessages("PriceConditionPriceView");
 			this.oMessageManager.removeMessages(messages);
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges("PriceConditionPriceView");
+			this.cancelPendingChanges("PriceConditionPriceView", "priceCondPrice");
 		},
 
 		_onSubmitChangesSuccess: function(res){
-			const hasErrorMessages =  this.getMessages("PriceConditionPriceView").length > 0;
+			const hasErrorMessages =  this.getMessages("idOfferPrice").length > 0;
+			this.setMessageSection("idOfferPrice", "priceCondPrice");
 			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
 
