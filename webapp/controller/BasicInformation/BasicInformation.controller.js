@@ -123,7 +123,7 @@ sap.ui.define([
 		},
 		onTenderFormSaveBtnPress: function(event){
 
-			const messages = this._getMessages("TenderFormView");
+			const messages = this.getMessages("TenderFormView");
 			this.oMessageManager.removeMessages(messages);
 			
 			this.defaultModel.submitChanges({
@@ -138,13 +138,14 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesTenderFormSuccess: function(res){
-			const messages = this._getMessages("TenderFormView");
+			const messages = this.getMessages("TenderFormView");
+			this.setMessageSection("TenderFormView", "basicInfoMsg");
 			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
 		},
 
 		onTenderFormCancelBtnPress: function(event){
-			this.cancelPendingChanges("TenderFormView");	
+			this.cancelPendingChanges("TenderFormView", "basicInfoMsg");	
 			this.getModel("ui").setProperty('/TenderForm/editMode', false);
 		},
 		
@@ -153,11 +154,12 @@ sap.ui.define([
 		},
 		onAwardCriteriaSaveBtnPress: function(event){
 
-			const messages = this._getMessages("AwardCriteriaTableView");
-			this.oMessageManager.removeMessages(messages);
+			// const messages = this.getMessages("AwardCriteriaTableView");
+			// this.oMessageManager.removeMessages(messages);
 			
 			// Award Criteria	
 			const isAwardCriteriaValid = this.validateAwardCriteria(event);
+			this.setMessageSection("AwardCriteriaTableView", "awardCriteriaMsg");
 			if(!isAwardCriteriaValid) return;
 			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
 
@@ -167,12 +169,13 @@ sap.ui.define([
 			}); 
 		},
 		_onSubmitChangesAwardCriteriaSuccess: function(res){
-			const hasErrorMessages = this._getMessages("AwardCriteriaTableView").length > 0;
+			const hasErrorMessages = this.getMessages("AwardCriteriaTableView").length > 0;
+			this.setMessageSection("AwardCriteriaTableView", "awardCriteriaMsg");
 			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 
 		onAwardCriteriaCancelBtnPress: function(event){
-			this.cancelPendingChanges("AwardCriteriaTableView");
+			this.cancelPendingChanges("AwardCriteriaTableView", "awardCriteriaMsg");
 			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},	
 
@@ -226,7 +229,7 @@ sap.ui.define([
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
 				contextPath.push(oAwardCriteria.getBindingContextPath());
 				let weight = oAwardCriteria.getBindingContext().getProperty("Weight");
-				sumWeight = sumWeight + parseFloat(weight);
+				sumWeight = sumWeight + Number(parseFloat(weight).toFixed(1));
 			});
 
 			if (sumWeight > 0 && sumWeight !== 1) {

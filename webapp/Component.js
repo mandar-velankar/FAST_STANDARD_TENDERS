@@ -40,6 +40,7 @@ sap.ui.define([
 
 		setModelChangeGroups: function(oModel){
 			oModel.setDeferredGroups(oModel.getDeferredGroups().concat([
+				"NewTender",
 				"Basicinfo", 
 				"AwardCriteria", 
 				"OfferformInfo", 
@@ -49,6 +50,9 @@ sap.ui.define([
 				"PricingForm"
 			]));
 			oModel.setChangeGroups({
+				"TenderFormView": {
+					groupId: "NewTender",  
+				},
 				"TenderFormView": {
 					groupId: "Basicinfo",  
 				},
