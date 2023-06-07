@@ -119,42 +119,14 @@ sap.ui.define([
 			this.setSelectedTabKey();
 
 			this.getModel().metadataLoaded().then( async function() {
-				const viewBindingObj = this.getView().getBindingContext()?.getObject();
-				this.checkViewBinding(viewBindingObj);
+				!this.selectedOfferHasBinding() && this._bindView();
 			}.bind(this));
 		},
-		checkViewBinding: async function (viewBindingObj) {
-			let sObjectPath = "";
-			if (viewBindingObj?.OfferID !== this.sOfferId) {
-				await this.templateState.read("DETAIL",{
-					countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
-					appID: "StandardTenders",
-					page: "DETAIL",
-					keys: {
-						TenderID: this.sObjectId,
-						OfferID: this.sOfferId
-					}
-				});
-	
-				// get awarded criteria of the selected tender 
-				// this is needed at a later stage to check on existing Award Criteria
-				this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
-					filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
-				});
 
-				if (this.sOfferId && this.sOfferId !== "NA") {
-					sObjectPath = this.getModel().createKey("TenderMasterView", {
-						TenderID :  this.sObjectId,
-					OfferID : this.sOfferId
-					});
-				}else {
-					sObjectPath = this.getModel().createKey("TenderFormView", {
-						TenderID :  this.sObjectId
-					});
-				}
-				this._bindView("/" + sObjectPath);
-			}
+		selectedOfferHasBinding: function(){
+			return this.getView().getBindingContext()?.getObject()?.OfferID === this.sOfferId;
 		},
+
 		/**
 		 * Binds the view to the object path. Makes sure that detail view displays
 		 * a busy indicator while data for the corresponding element binding is loaded.
@@ -162,7 +134,37 @@ sap.ui.define([
 		 * @param {string} sObjectPath path to the object to be bound to the view.
 		 * @private
 		 */
-		_bindView: function (sObjectPath) {
+		_bindView: async function () {
+
+			let sObjectPath = "";
+
+			await this.templateState.read("DETAIL",{
+				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				appID: "StandardTenders",
+				page: "DETAIL",
+				keys: {
+					TenderID: this.sObjectId,
+					OfferID: this.sOfferId
+				}
+			});
+
+			// get awarded criteria of the selected tender 
+			// this is needed at a later stage to check on existing Award Criteria
+			this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
+				filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
+			});
+
+			if(this.sOfferId && this.sOfferId !== "NA") {
+				sObjectPath = this.getModel().createKey("TenderMasterView", {
+					TenderID :  this.sObjectId,
+					OfferID : this.sOfferId
+				});
+			}else {
+				sObjectPath = this.getModel().createKey("TenderFormView", {
+					TenderID :  this.sObjectId
+				});
+			}
+
 			// Set busy indicator during view binding
 			var oViewModel = this.getModel("detailView");
 
@@ -171,7 +173,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/editmode", false);
 
 			this.getView().bindElement({
-				path: sObjectPath,
+				path: "/" + sObjectPath,
 				/*parameters: {
 					expand: "Institute,Offer"
 				},*/
