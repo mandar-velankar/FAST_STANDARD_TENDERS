@@ -26,6 +26,14 @@ sap.ui.define([
 			return oPercentFormat.format(value);
 		},
 
+		formatFloat: function(value){
+			if(!value) return;
+			var floatInstance = NumberFormat.getFloatInstance({
+				maxFractionDigits: 2
+			});
+			return floatInstance.format(value);
+		},
+
 		formatDate: function(date, pattern){
 			return DateFormat.getDateInstance({pattern: pattern, UTC: true}).format(date);
 		},

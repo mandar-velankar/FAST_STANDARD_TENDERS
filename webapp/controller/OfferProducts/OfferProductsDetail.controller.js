@@ -14,6 +14,8 @@ sap.ui.define([
 	var MessageType = library.MessageType;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail", {
+
+		formatter: formatter,
 		onInit: function () {
 
 			this.oOwnerComponent = this.getOwnerComponent();
@@ -373,9 +375,9 @@ sap.ui.define([
 			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / 100;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 
-			context.getModel().setProperty("OfferPrice", offerPrice, context);
-			context.getModel().setProperty("Discount", discount.toFixed(2), context);
-			context.getModel().setProperty("NetPrice", netPrice.toFixed(2), context);
+			context.getModel().setProperty("OfferPrice", this.formatter.formatFloat(offerPrice), context);
+			context.getModel().setProperty("Discount", this.formatter.formatFloat(discount), context);
+			context.getModel().setProperty("NetPrice", this.formatter.formatFloat(netPrice), context);
 
 		}
     });
