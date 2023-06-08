@@ -10,7 +10,7 @@
 	>
 		<form:toolbar>
 			<Toolbar>
-				<Title text="{i18n>Price}"/>
+				<Title text="{i18n>Discount}"/>
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"

@@ -392,14 +392,14 @@ sap.ui.define([
 		},
 
 		loadPriceConditionFragment: function(name, context){
+			const vbox = this.byId("idPriceConditionVbox");
+			vbox.destroyItems();
 			Fragment.load({
 				id: this.getView().getId(),
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${name}`,
 				controller: this
 			}).then(function (form) {
 				this.onPriceConditionLoadSuccess(form, context);
-				const vbox = this.byId("idPriceConditionVbox");
-				vbox.destroyItems();
 				vbox.addItem(form);
 			}.bind(this));
 		},
