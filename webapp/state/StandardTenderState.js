@@ -8,7 +8,9 @@ sap.ui.define(
     function (JSONModel, ODataModel, CountryTemplate, StandardTenderService) {
         return JSONModel.extend("com.bayer.tender.statenderapp.state.StandardTenderState", {
             constructor: function (url) {
-                JSONModel.prototype.constructor.call(this, {});
+                JSONModel.prototype.constructor.call(this, {
+                    SelectedPriceCondition: "Price"
+                });
                 this.url = url;
                 const model = new ODataModel({
                     serviceUrl: url,
