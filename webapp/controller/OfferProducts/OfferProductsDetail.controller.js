@@ -353,24 +353,49 @@ sap.ui.define([
 			return true;
 		},
 
-		calculatePricingFormFields: function(event){
+		calculatePricingFormFields: function(event, priceConditionType){
 			const value = event.getParameter("newValue");
 			if(!value) return;
 			const type = event.getSource().getBinding('value').getType();
 			const parsedValue = this.getParsedValue(value,type);
 			const property = event.getSource().getBindingPath("value");
 			const context = event.getSource().getBindingContext();
+			
+			switch(priceConditionType.toLowerCase()){
+				case "price":
+					this.calculatePriceConditionType({property, value: parsedValue, context});
+					break;
+				case "discount":
+					this.calculateDiscountConditionType({property, value: parsedValue, context});
+					break;
+			}
+
+		},
+
+		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 
-			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(parsedValue).toFixed(2) : priceObj.OfferPrice;
-			let deductions = property.toLowerCase().includes("deductions") ? parsedValue / 100 : priceObj.Deductions;
+			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
 
 			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
+		},
 
+		calculateDiscountConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let discount = property.toLowerCase().includes("discount") ? value / 100 : priceObj.Discount;
+			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+
+			let offerPrice = parseFloat(priceObj.BasePrice) * (1 - discount);
+			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+
+			context.getModel().setProperty("OfferPrice", offerPrice, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
 
 		getParsedValue: function(value, type){
@@ -383,8 +408,8 @@ sap.ui.define([
 		},
 
 		loadPriceCondition: function(){
-			const selectedPriceConditon = this.getModel('st').getProperty("/SelectedPriceCondition");
-			this.loadPriceConditionFragment(selectedPriceConditon, {
+			const selectedPriceConditonName = this.getModel('st').getProperty("/SelectedPriceConditionType");
+			this.loadPriceConditionFragment(selectedPriceConditonName, {
 				offerID: this.sOfferId, 
 				productID:this.productId,
 				tenderID: this.sObjectId
@@ -399,17 +424,18 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${name}`,
 				controller: this
 			}).then(function (form) {
-				this.onPriceConditionLoadSuccess(form, context);
+				this.onPriceConditionLoadSuccess(name, form, context);
 				vbox.addItem(form);
 			}.bind(this));
 		},
 
-		onPriceConditionLoadSuccess: function(form, context){
-			this.bindPricingForm(form, context);
+		onPriceConditionLoadSuccess: function(name, form, context){
+			this.bindPricingForm(name, form, context);
 		},
 
-		bindPricingForm(form, {offerID, productID, tenderID}){
-			const path = this.getModel().createKey("/PriceConditionPriceView", {
+		bindPricingForm(name, form, {offerID, productID, tenderID}){
+			let entityName = `/PriceCondition${name}View`
+			const path = this.getModel().createKey(entityName, {
 				"OfferID": offerID,
 				"TenderID": tenderID,
 				"ProductCode": productID

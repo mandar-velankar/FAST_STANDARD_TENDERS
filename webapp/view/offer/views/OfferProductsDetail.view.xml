@@ -128,7 +128,7 @@
                     <Select
                         id = "idSelectedPriceContition"
                         items = "{/PriceConditionClassification}"
-                        selectedKey="{st>/SelectedPriceCondition}"
+                        selectedKey="{st>/SelectedPriceConditionType}"
                         change="onPriceConditionChange"
                     >
                         <core:Item key="{ConditionType}" text="{ConditionType}"/>

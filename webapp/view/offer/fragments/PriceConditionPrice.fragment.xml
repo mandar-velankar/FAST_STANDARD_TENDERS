@@ -87,7 +87,7 @@
 									}	
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".calculatePricingFormFields"
+								liveChange=".calculatePricingFormFields($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -99,7 +99,7 @@
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".calculatePricingFormFields"
+								liveChange=".calculatePricingFormFields($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
