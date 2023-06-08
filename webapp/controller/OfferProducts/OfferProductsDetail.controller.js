@@ -126,6 +126,7 @@ sap.ui.define([
 				busy: false,
 				delay: 0,
 				editMode: false,
+				currency: "EUR",
 				ProductForm:{
 					editMode: false
 				},
@@ -367,21 +368,32 @@ sap.ui.define([
 		},
 
 		calculatePricingFormFields: function(event){
-			const value = Number(event.getParameter("newValue"));
+			const value = event.getParameter("newValue");
+			if(!value) return;
+			const type = event.getSource().getBinding('value').getType();
+			const parsedValue = this.getParsedValue(value,type);
 			const property = event.getSource().getBindingPath("value");
 			const context = event.getSource().getBindingContext();
 			const priceObj = context.getObject();
 
-			let offerPrice = property.toLowerCase().includes("offerprice") ? value : priceObj.OfferPrice;
-			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(parsedValue).toFixed(2) : priceObj.OfferPrice;
+			let deductions = property.toLowerCase().includes("deductions") ? parsedValue / 100 : priceObj.Deductions;
 
 			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 
-			context.getModel().setProperty("OfferPrice", this.formatter.formatFloat(offerPrice), context);
-			context.getModel().setProperty("Discount", this.formatter.formatFloat(discount), context);
-			context.getModel().setProperty("NetPrice", this.formatter.formatFloat(netPrice), context);
+			context.getModel().setProperty("Discount", discount, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
 
+		},
+
+		getParsedValue: function(value, type){
+			switch(type.getName().toLowerCase()){
+				case "currency":
+					return this.formatter.parseCurrency(value)[0];
+				default:
+					return value;
+			}
 		}
     });
 });

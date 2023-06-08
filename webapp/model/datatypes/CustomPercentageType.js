@@ -5,7 +5,9 @@ sap.ui.define([
 ], function (SimpleType,ValidateException,NumberFormat) {
     "use strict";
 
-    const oPercentFormat = NumberFormat.getPercentInstance();
+    const oPercentFormat = NumberFormat.getPercentInstance({
+        maxFractionDigits: 2
+    });
 
     return SimpleType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
 
