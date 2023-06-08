@@ -565,7 +565,7 @@ sap.ui.define([
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
-			this.cancelPendingChanges(bindingPath, "newTenderMsg");
+			this.cancelPendingChanges([bindingPath], "newTenderMsg");
 			this.byId("idCreateTenderDialog").close();
 			this.byId("idCreateTenderDialog").destroy();
 		},
@@ -587,9 +587,8 @@ sap.ui.define([
 		_onSubmitChangesSuccess: function (res) {
 			const newTenderCtx = this.byId("idNewTenderForm").getElementBinding().getBoundContext();
 			const ctxPath = newTenderCtx.getPath().replace("/", "");
-			const messages = this.getMessages(ctxPath);
-			const hasErrorMessages = messages.length > 0;
-			this.setMessageSection(ctxPath, "newTenderMsg");
+			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
+			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Tender has been successfully created");
 				this.onCloseTenderCreationDialog();

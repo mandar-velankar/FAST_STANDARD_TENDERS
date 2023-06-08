@@ -124,7 +124,9 @@ sap.ui.define([
 		},
 
 		selectedOfferHasBinding: function(){
-			return this.getView().getBindingContext()?.getObject()?.OfferID === this.sOfferId;
+			const selectedOffer = this.getView().getBindingContext()?.getObject();
+			if (selectedOffer && !selectedOffer.OfferID) selectedOffer.OfferID = "NA";
+			return selectedOffer?.OfferID === this.sOfferId;
 		},
 
 		/**
@@ -138,15 +140,7 @@ sap.ui.define([
 
 			let sObjectPath = "";
 
-			await this.templateState.read("DETAIL",{
-				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
-				appID: "StandardTenders",
-				page: "DETAIL",
-				keys: {
-					TenderID: this.sObjectId,
-					OfferID: this.sOfferId
-				}
-			});
+			this.gettemplateConfig();
 
 			// get awarded criteria of the selected tender 
 			// this is needed at a later stage to check on existing Award Criteria
@@ -188,7 +182,17 @@ sap.ui.define([
 				}
 			});
 		},
-
+		gettemplateConfig: async function () {
+			await this.templateState.read("DETAIL",{
+				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				appID: "StandardTenders",
+				page: "DETAIL",
+				keys: {
+					TenderID: this.sObjectId,
+					OfferID: this.sOfferId
+				}
+			});
+		},
 		_onBindingChange: function () {
 			var oView = this.getView(),
 				oElementBinding = oView.getElementBinding();
