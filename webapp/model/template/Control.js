@@ -1,5 +1,13 @@
 //todo: dependencies are required for dynamic loading of controls, need to find a better solution
-sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input", "sap/m/DatePicker", "./ValueHelp"], function (Text, BaseObject, ControlProperty, Input, DatePicker, ValueHelp) {
+sap.ui.define(["sap/m/Text", 
+               "../BaseObject", 
+               "./ControlPoperty", 
+               "sap/m/Input", 
+               "sap/m/DatePicker", 
+               "./ValueHelp",
+               "../../service/StandardSingletonService",
+               "sap/ui/model/Filter"
+], function (Text, BaseObject, ControlProperty, Input, DatePicker, ValueHelp, StandardSingletonService, Filter) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (parentId,data) {
@@ -46,9 +54,20 @@ sap.ui.define(["sap/m/Text", "../BaseObject", "./ControlPoperty", "sap/m/Input",
       if (this.valueHelp && this.type === "Select"){
         if(this.valueHelp.table && this.valueHelp.table.entity){
           let oItemTemplate = this.generateItemTemplate(this.valueHelp.table);
+          let filters = [];
+
+          if(this.valueHelp.filters.length > 0){
+            filters = this.valueHelp.filters.map(filter => {
+              let value = StandardSingletonService[`get${filter.path}`]();
+              return new Filter(filter.path, filter.operator, value);
+            });
+          }
+
           control.bindItems({ 
               path: `/${this.valueHelp.table.entity}`,
-              template: oItemTemplate 
+              template: oItemTemplate,
+              filters: filters,
+              templateShareable: true
           });
         } else {
           this.valueHelp.staticValues.forEach(item => {

@@ -13,8 +13,9 @@ sap.ui.define([
 	"../model/formatter",
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Item",
-	"sap/m/MessageToast"
-], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast) {
+	"sap/m/MessageToast",
+	"../service/StandardSingletonService"
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -685,6 +686,8 @@ sap.ui.define([
 					value1: sCountryCode,
 					caseSensitive: false
 				}));
+
+				StandardSingletonService.setCountryCode(sCountryCode);
 			}
 
 			const isCountrySelectChanged = oEvent?.getParameter("id").toLowerCase().includes("idslctcountry");
