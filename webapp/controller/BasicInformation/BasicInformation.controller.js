@@ -1,5 +1,6 @@
 sap.ui.define([
 	"../BaseController",
+	"../../model/formatter",
 	"sap/ui/model/json/JSONModel",
 	"sap/m/library",
 	"sap/m/ColumnListItem",
@@ -8,7 +9,7 @@ sap.ui.define([
 	"sap/ui/core/message/Message",
 	"sap/ui/core/Fragment",
 	"sap/ui/core/library"
-], function (BaseController, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Message,Fragment,library) {
+], function (BaseController, formatter, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Message,Fragment,library) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -16,6 +17,8 @@ sap.ui.define([
 	var MessageType = library.MessageType;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation", {
+
+		formatter: formatter,
 
 		onInit: function () {
 			// set message model
@@ -220,6 +223,7 @@ sap.ui.define([
 
 			let bValid = true;
 			const aAwardCriteriaItems = this.getView().byId("idAwardCriteria").getItems();
+			const controller = this;
 
 			//sum of all award criterias
 			let sumWeight = 0;
@@ -229,19 +233,23 @@ sap.ui.define([
 			aAwardCriteriaItems.forEach(function (oAwardCriteria) {
 				contextPath.push(oAwardCriteria.getBindingContextPath());
 				let weight = oAwardCriteria.getBindingContext().getProperty("Weight");
-				sumWeight = sumWeight + Number(parseFloat(weight).toFixed(1));
+				sumWeight = sumWeight + Number(weight) * 100;
 			});
 
-			if (sumWeight > 0 && sumWeight !== 1) {
-				// MessageBox.error("Sum of Award Criteria weight must be 100%");
-				const messages = new Message({
-					message: "Sum of Award Criteria weight must be 100%",
-					type: MessageType.Error,
-					target: this._createTarget(contextPath),
-					processor: this.getView().getModel()
-				});
+			if (Number.isNaN(sumWeight) || sumWeight !== 100) {
+				const target = this._createTarget(contextPath);
+				const messages = this.getMessages(target);
+
+				if(messages.length === 0){
+					const msg = new Message({
+						message: "Sum of Award Criteria weight must be 100%",
+						type: MessageType.Error,
+						target: target,
+						processor: this.getView().getModel()
+					});
+					sap.ui.getCore().getMessageManager().addMessages(msg);
+				}
 				
-				sap.ui.getCore().getMessageManager().addMessages(messages);
 				this.getModel("ui").setProperty('/editMode', true);
 				return false;
 			}
