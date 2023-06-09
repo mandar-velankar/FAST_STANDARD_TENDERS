@@ -357,7 +357,7 @@ sap.ui.define([
 			const value = event.getParameter("newValue");
 			if(!value) return;
 			const type = event.getSource().getBinding('value').getType();
-			const parsedValue = this.getParsedValue(value,type);
+			const parsedValue = type.getModelFormat().parse(value);
 			const property = event.getSource().getBindingPath("value");
 			const context = event.getSource().getBindingContext();
 			
@@ -374,38 +374,23 @@ sap.ui.define([
 
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-
 			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
-
 			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
-
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
 
 		calculateDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-
 			let discount = property.toLowerCase().includes("discount") ? value / 100 : priceObj.Discount;
 			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
-
 			let offerPrice = parseFloat(priceObj.BasePrice) * (1 - discount);
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
-
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
-		},
-
-		getParsedValue: function(value, type){
-			switch(type.getName().toLowerCase()){
-				case "currency":
-					return this.formatter.parseCurrency(value)[0];
-				default:
-					return value;
-			}
-		},
+		},	
 
 		loadPriceCondition: function(){
 			const selectedPriceConditonName = this.getModel('st').getProperty("/SelectedPriceConditionType");
