@@ -19,6 +19,7 @@ sap.ui.define([
           this.searchable = data.Searchable
           this.selectedFieldID = data.SelectedFieldID;
           this.selectedFieldName = data.SelectedFieldName;
+          this.selectedField = data.SelectedField;
           this.table = new com.bayer.tender.statenderapp.model.template.Table(data.Table);
           this.filters = data.Filters.map(filter => new TemplateFilter(filter));
           this.staticValues = data.StaticValues.map(value => new TemplateStaticValue(value));
@@ -37,12 +38,15 @@ sap.ui.define([
       handleCloseValueHelp: function (oEvent,originalInputField) {
         const oParam = oEvent.getParameter("selectedItem")
         const selectedItem = oParam.getBindingContext().getObject();
-        const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
-        originalInputField.getModel().setProperty(path, selectedItem[this.selectedFieldName]);
 
-        if(this.selectedFieldID){
-          const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + this.selectedFieldID;
-          originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[this.selectedFieldID]);
+        if (this.selectedField && this.selectedField.length > 0) {
+          this.selectedField.forEach(field => {
+              const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
+              originalInputField.getModel().setProperty(path, selectedItem[field.Name]);
+
+              const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
+              originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]);
+          })
         }
       },
       onHandleValueHelpRequest: async function (oEvent) {
