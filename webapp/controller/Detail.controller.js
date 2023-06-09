@@ -32,6 +32,7 @@ sap.ui.define([
 			});
 			const messagesModel = new JSONModel({
 				basicInfoMsg: [],
+				offerProductsMsg: [],
 				awardCriteriaMsg: []
 			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);

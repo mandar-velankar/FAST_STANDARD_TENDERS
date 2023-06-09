@@ -6,8 +6,10 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Fragment",
-	"sap/m/MessageBox"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox) {
+	"sap/m/MessageBox",
+	"sap/m/MessageToast",
+	"sap/ui/Device"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox, MessageToast, Device) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -177,7 +179,7 @@ sap.ui.define([
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			this.defaultModel.resetChanges();
+			//this.defaultModel.resetChanges();
 		},
 
 		onOpenCreateOfferDialog : function () {
@@ -202,31 +204,22 @@ sap.ui.define([
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const form = this.byId("idNewOfferForm");
 			let path = "";
-			if (this.objectId) {
+			if (this.offerID && this.offerID != "NA") {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 					TenderID: this.objectId,
 					OfferID: this.offerID
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-					groupId: "OfferformInfo"
+					groupId: "NewOffer"
 				});
 				path = newEntryContext.getPath();
 			}
-			
 			form.bindElement({
 				path: path,
-				groupId: "OfferformInfo"
+				groupId: "NewOffer"
 			});
 
-			// const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-			// 	groupId: "OfferformInfo"
-			// });
-			// const path = newEntryContext.getPath();
-			// form?.bindElement({
-			// 	path: path,
-			// 	groupId: "OfferformInfo"
-			// });
 			const sElemBindingPath = form.getElementBinding().getPath();
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 
@@ -234,12 +227,129 @@ sap.ui.define([
 		},
 
 
-		onCloseOfferCreationDialog: function () {
+		_getNextOfferID: async function (sTenderId) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/TenderOffers", {
+					filters: [
+						new Filter("TENDERID", "EQ", sTenderId)
+					],
+					success: function (res) {
+						let nextOfferId = res?.results[0]?.NEXTOFFERID || 1;
+						resolve(nextOfferId);
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/TenderOfferNo", data);
+				return `${sTenderId}-${data}`;
+			})
+		},
+
+		onCreateNewOffer: async function () {
 			this.oMessageManager.removeAllMessages();
+			const oNewOfferForm = this.byId("idNewOfferForm");
+			const nextOfferID = await this._getNextOfferID(this.objectId);
+			this.setNewOfferPendingChanges(oNewOfferForm,nextOfferID);
+			this.getModel().submitChanges({
+				success: this._onSubmitChangesSuccess.bind(this),
+				error: this._onSubmitChangesFail.bind(this),
+				groupId: "NewOffer"
+			});
+		},
+
+		setNewOfferPendingChanges: async function (oForm,nextOfferID) {
+			const oDefaultModel = oForm.getModel();
+			const oStandModel = oForm.getModel("ui");
+			const oBoundContext = oForm.getElementBinding().getBoundContext();
+
+			const newOfferObj = {
+				TenderID: this.objectId,
+				Active: 1,
+				OfferID: nextOfferID,
+				CountryCode: this.countryCode,
+				ActiveOffer: 1,
+				TenderOfferNo: oStandModel.getProperty("/TenderOfferNo"),
+				RevisedOfferNo: 0,
+				CreationDate: new Date().toISOString(),
+                SubmissionDate: new Date().toISOString(),
+                SubmittedOn: new Date().toISOString(),
+				Currency: oBoundContext.getObject().Currency,
+				DistributorID: oBoundContext.getObject().DistributorID,
+				InternalBidDueDate: oBoundContext.getObject().InternalBidDueDate,
+				SellingCompany: oBoundContext.getObject().SellingCompany,
+				Division: oBoundContext.getObject().Division,
+				WholesaleOffer: oBoundContext.getObject().WholesaleOffer			
+			}
+
+			const statusObj = {
+					TenderID: this.objectId,
+					OfferID: nextOfferID,
+					CountryCode: this.countryCode,
+					Active: 1,
+					STATUS: "Offer Created",
+					Date: new Date().toISOString().slice(0,10)
+			}
+
+			const offerCtx = oDefaultModel.createEntry("/OfferFormView", {
+				properties: newOfferObj,
+				groupId: "NewOffer"
+			});
+
+			const statusCtx = oDefaultModel.createEntry("/PT_TMTNOFST", {
+				properties: statusObj,
+				context: offerCtx,
+				groupId: "NewOffer"
+			});
+
+			oForm?.bindElement({
+				path: offerCtx.getPath(),
+				groupId: "NewOffer"
+			});
+			
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+			
+		},
+
+		_onSubmitChangesFail: function (error) {
+			// not implemented
+		},
+
+		_onSubmitChangesSuccess: function (res) {
+			const newOfferCtx = this.byId("idNewOfferForm").getElementBinding().getBoundContext();
+			const ctxPath = newOfferCtx.getPath().replace("/", "");
+			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
+			this.setMessageSection([ctxPath], "offerProductsMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Offer has been successfully created");
+				this.onCloseOfferCreationDialog();
+				this._showDetail(newOfferCtx.getObject());
+				this.getOwnerComponent().getModel().refresh(true);
+			}
+		},
+
+		/**
+		 * Shows the selected item on the detail page
+		 * On phones a additional history entry is created
+		 * @param {sap.m.ObjectListItem} oItem selected Item
+		 * @private
+		 */
+		_showDetail: function (oItem) {
+			var bReplace = !Device.system.phone;
+			// set the layout property of FCL control to show two columns
+			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.getRouter().navTo("object", {
+				countryCode: oItem.CountryCode,
+				objectId: oItem.TenderID,
+				offerId: oItem.OfferID
+			}, bReplace);
+		},
+
+		onCloseOfferCreationDialog: function () {
+			// this.oMessageManager.removeAllMessages();
+			this.cancelPendingChanges(["OfferFormView"], "offerProductsMsg");
 			this.byId("idCreateOfferDialog").close();
 			this.byId("idCreateOfferDialog").destroy();
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			this.defaultModel.resetChanges();
+			// this.defaultModel.resetChanges();
 		},
 
 		validateOffer: function () {
