@@ -4,6 +4,7 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
         constructor: function (model) {
             Object.prototype.constructor.call(this);
             this.model = model;
+            this.requestCache = {};
         },
         getTableConfig: async function ({ countryCode, appID, page }) {
             // const keys = await this.model.requestKeyPredicate('/CountryTemplate', {
@@ -12,6 +13,9 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
             //     Page: page
             // });
             const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}')`;
+            if(this.requestCache[`TableConfig-CountryTemplate${keys}`]){
+                return Promise.resolve(this.requestCache[`TableConfig-CountryTemplate${keys}`]);
+            }
             const templateBinding = this.model.bindContext(`/CountryTemplate${keys}`, null, {
                 $expand: {
                     "Template": {
@@ -68,7 +72,8 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                     }
                 }
             });
-            return await templateBinding.requestObject();
+            this.requestCache[`TableConfig-CountryTemplate${keys}`] = await templateBinding.requestObject();
+            return this.requestCache[`TableConfig-CountryTemplate${keys}`];
         },
         getFormConfig: async function ({ countryCode, appID, page }) {
             // const keys = await this.model.requestKeyPredicate('/CountryTemplate', {
@@ -77,6 +82,10 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
             //     Page: page || 'DETAIL'
             // });
             const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}')`;
+            
+            if(this.requestCache[`FormConfig-CountryTemplate${keys}`]){
+                return Promise.resolve(this.requestCache[`FormConfig-CountryTemplate${keys}`]);
+            }
             const templateBinding = this.model.bindContext(`/CountryTemplate${keys}`, null, {
                 $expand: {
                     "Template": {
@@ -122,7 +131,8 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                         }
                     }
             });
-            return await templateBinding.requestObject();
+            this.requestCache[`FormConfig-CountryTemplate${keys}`] = await templateBinding.requestObject();
+            return this.requestCache[`FormConfig-CountryTemplate${keys}`];
         },
         getViewConfig: async function ({ countryCode, appID, page }) {
             // const keys = await this.model.requestKeyPredicate('/CountryTemplate', {
@@ -131,6 +141,9 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
             //     Page: page || 'DETAIL'
             // });
             const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}')`;
+            if(this.requestCache[`ViewConfig-CountryTemplate${keys}`]){
+                return Promise.resolve(this.requestCache[`ViewConfig-CountryTemplate${keys}`]);
+            }
             const templateBinding = this.model.bindContext(`/CountryTemplate${keys}`, null, {
                 $expand: {
                     "Template": {
@@ -232,7 +245,8 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                     }
                 }
             });
-            return await templateBinding.requestObject();
+            this.requestCache[`ViewConfig-CountryTemplate${keys}`] = await templateBinding.requestObject();
+            return this.requestCache[`ViewConfig-CountryTemplate${keys}`];
         }
     });
     return TemplateService;
