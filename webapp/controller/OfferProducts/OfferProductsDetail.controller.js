@@ -7,8 +7,9 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"sap/ui/core/message/Message",
 	"sap/ui/core/library",
-	"sap/ui/model/Context"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context) {
+	"sap/ui/model/Context",
+	"sap/ui/core/Fragment"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -126,6 +127,7 @@ sap.ui.define([
 				busy: false,
 				delay: 0,
 				editMode: false,
+				currency: "EUR",
 				ProductForm:{
 					editMode: false
 				},
@@ -138,8 +140,8 @@ sap.ui.define([
 
 			this._bindForm("ProductForm");
 			this._bindText("ProductPackNameOfferProductDetail");
-			this.bindPricingForm({offerID: this.sOfferId, productID:this.productId,tenderID: this.sObjectId});
-		},
+			this.loadPriceCondition();
+		},		
 
 		/**
 		 * This method bind a given form to its entity from the ui configuration template.
@@ -288,9 +290,9 @@ sap.ui.define([
 		},
 		onPricingFormSaveBtnPress: function(event){
 
-			// const messages = this.getMessages("PriceConditionPriceView");
-			// this.oMessageManager.removeMessages(messages);
-			
+			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView"]).length > 0;
+			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView"], "priceCondPrice");
+			if(hasErrorMessages) return;
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccess.bind(this),
@@ -299,15 +301,13 @@ sap.ui.define([
 		},
 
 		onPricingFormCancelBtnPress: function(event){
-			const messages = this.getMessages("PriceConditionPriceView");
-			this.oMessageManager.removeMessages(messages);
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges("PriceConditionPriceView", "priceCondPrice");
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView"], "priceCondPrice");
 		},
 
 		_onSubmitChangesSuccess: function(res){
-			const hasErrorMessages =  this.getMessages("idOfferPrice").length > 0;
-			this.setMessageSection("idOfferPrice", "priceCondPrice");
+			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView"]).length > 0;
+			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView"], "priceCondPrice");
 			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
 
@@ -319,22 +319,7 @@ sap.ui.define([
 				new Filter("ProductCode",FilterOperator.EQ, productID),
 			]
 			oPricingFormBinding.filter(aFilters);
-		},
-
-		bindPricingForm({offerID, productID, tenderID}){
-			const form = this.byId("idPricingForm");
-			const path = this.getModel().createKey("/PriceConditionPriceView", {
-				"OfferID": offerID,
-				"TenderID": tenderID,
-				"ProductCode": productID
-			});
-
-			form.bindElement({
-				path: path,
-				groupId: "PricingForm" 
-			});
-
-		},
+		},	
 
 		validateProduct: function () {
 			const contextPath = this.byId('idProductForm').getObjectBinding().getPath();
@@ -368,22 +353,86 @@ sap.ui.define([
 			return true;
 		},
 
-		calculatePricingFormFields: function(event){
-			const value = Number(event.getParameter("newValue"));
+		calculatePricingFormFields: function(event, priceConditionType){
+			const value = event.getParameter("newValue");
+			if(!value) return;
+			const type = event.getSource().getBinding('value').getType();
+			const parsedValue = type.getModelFormat().parse(value);
 			const property = event.getSource().getBindingPath("value");
 			const context = event.getSource().getBindingContext();
+			
+			switch(priceConditionType.toLowerCase()){
+				case "price":
+					this.calculatePriceConditionType({property, value: parsedValue, context});
+					break;
+				case "discount":
+					this.calculateDiscountConditionType({property, value: parsedValue, context});
+					break;
+			}
+
+		},
+
+		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-
-			let offerPrice = property.toLowerCase().includes("offerprice") ? value : priceObj.OfferPrice;
+			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
-
 			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+			context.getModel().setProperty("Discount", discount, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
+		},
 
-			context.getModel().setProperty("OfferPrice", this.formatter.formatFloat(offerPrice), context);
-			context.getModel().setProperty("Discount", this.formatter.formatFloat(discount), context);
-			context.getModel().setProperty("NetPrice", this.formatter.formatFloat(netPrice), context);
+		calculateDiscountConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			let discount = property.toLowerCase().includes("discount") ? value / 100 : priceObj.Discount;
+			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+			let offerPrice = parseFloat(priceObj.BasePrice) * (1 - discount);
+			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+			context.getModel().setProperty("OfferPrice", offerPrice, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
+		},	
 
+		loadPriceCondition: function(){
+			const selectedPriceConditonName = this.getModel('st').getProperty("/SelectedPriceConditionType");
+			this.loadPriceConditionFragment(selectedPriceConditonName, {
+				offerID: this.sOfferId, 
+				productID:this.productId,
+				tenderID: this.sObjectId
+			});
+		},
+
+		loadPriceConditionFragment: function(name, context){
+			const vbox = this.byId("idPriceConditionVbox");
+			vbox.destroyItems();
+			Fragment.load({
+				id: this.getView().getId(),
+				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${name}`,
+				controller: this
+			}).then(function (form) {
+				this.onPriceConditionLoadSuccess(name, form, context);
+				vbox.addItem(form);
+			}.bind(this));
+		},
+
+		onPriceConditionLoadSuccess: function(name, form, context){
+			this.bindPricingForm(name, form, context);
+		},
+
+		bindPricingForm(name, form, {offerID, productID, tenderID}){
+			let entityName = `/PriceCondition${name}View`
+			const path = this.getModel().createKey(entityName, {
+				"OfferID": offerID,
+				"TenderID": tenderID,
+				"ProductCode": productID
+			});
+			form.bindElement({
+				path: path,
+				groupId: "PricingForm" 
+			});
+		},
+
+		onPriceConditionChange: function(event){
+			this.loadPriceCondition();
 		}
     });
 });

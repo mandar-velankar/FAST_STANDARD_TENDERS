@@ -3,16 +3,6 @@
 	xmlns:core="sap.ui.core" 
 	xmlns:form="sap.ui.layout.form" 
 >
-	
-	<Label text="Set price by:" class = "sapUiTinyMarginTop sapUiTinyMarginEnd"/>
-	<Select
-		id = "idSelectedPriceContition"
-		items = "{/PriceConditionClassification}"
-		selectedKey="{st>/SelectedPriceCondition}"
-	>
-		<core:Item key="{ConditionType}" text="{ConditionType}"/>
-	</Select>
-
 	<!-- FORM WITH Pricing DATA -->
 	<form:Form
 		id="idPricingForm"
@@ -89,19 +79,15 @@
 							<Input 
 								id = "idOfferPrice"
 								value="{
-									path: 'OfferPrice',
-									type: 'sap.ui.model.odata.type.Decimal',
-									constraints: {
-										minimumFractionDigits: 0,
-										maximumFractionDigits: 2
-									},
-									formatOptions:{
-										minFractionDigits:0,
-										maxFractionDigits:2
-									}
+									parts: ['OfferPrice', 'ui>/currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: false,
+										preserveDecimals: false
+									}	
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".calculatePricingFormFields"
+								liveChange=".calculatePricingFormFields($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -113,13 +99,22 @@
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".calculatePricingFormFields"
+								liveChange=".calculatePricingFormFields($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>NetPrice}" >
 						<form:fields>
-							<Input value="{NetPrice}" enabled="false"/>
+							<Input 
+								value="{
+									parts: ['NetPrice', 'ui>/currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: false,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 				</form:formElements>

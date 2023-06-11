@@ -1,0 +1,126 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>
+	<!-- FORM WITH Pricing DATA -->
+	<form:Form
+		id="idPricingForm"
+		editable="true"
+	>
+		<form:toolbar>
+			<Toolbar>
+				<Title text="{i18n>Discount}"/>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/priceCondPrice}.length }"
+					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'priceCondPrice')" 
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onPricingFormEditBtnPress"
+					visible="{= !${ui>/PricingForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onPricingFormSaveBtnPress"
+					visible="{= ${ui>/PricingForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onPricingFormCancelBtnPress"
+					visible="{= ${ui>/PricingForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>BasePrice}" >
+						<form:fields>
+							<Input value="{BasePrice}" enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>Discount}" >
+						<form:fields>
+							<Input
+								value="{
+									path: 'Discount',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".calculatePricingFormFields($event, 'Discount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>OfferPrice}" >
+						<form:fields>
+							<Input 
+								id = "idOfferPrice"
+								value="{
+									parts: ['OfferPrice', 'ui>/currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: false,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"
+								liveChange=".calculatePricingFormFields($event, 'Discount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>Deductions}" >
+						<form:fields>
+							<Input
+								value="{
+									path: 'Deductions',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".calculatePricingFormFields($event, 'Discount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>NetPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NetPrice', 'ui>/currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: false,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+
+</core:FragmentDefinition>

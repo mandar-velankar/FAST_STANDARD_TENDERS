@@ -5,16 +5,19 @@ sap.ui.define([
 	"sap/ui/core/ComponentContainer",
 	"sap/m/library",
 	"sap/m/IconTabFilter",
-	"sap/ui/core/mvc/XMLView",
-	"sap/ui/core/routing/HashChanger"
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter, XMLView, HashChanger) {
+	"sap/m/IconTabBar",
+	"sap/ui/core/mvc/View",
+	"sap/ui/core/mvc/ViewType",
+	"sap/ui/core/routing/HashChanger",
+	"sap/ui/model/Context"
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Detail", {
-
+		views:{},
 		formatter: formatter,
 
 		/* =========================================================== */
@@ -32,6 +35,7 @@ sap.ui.define([
 			});
 			const messagesModel = new JSONModel({
 				basicInfoMsg: [],
+				offerProductsMsg: [],
 				awardCriteriaMsg: []
 			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
@@ -71,27 +75,60 @@ sap.ui.define([
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
 		},
-		tabsFactory: function (id, context) {
-			const tab = context.getObject();
-			const xmlView = tab.getXMLView();
+		createIconTab: function(){
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
 			
+			const iconTabBar = new IconTabBar({
+				items:this.templateStateData.detailConfig.countryTemplate.template.tabs.map((tab,idx)=>this.tabsFactory(tab,idx)),
+				select:(event)=>this.onTabSelect(event),
+				selectedKey:"{st>/selectedTab}"
+			});
+			this.byId("detailPage").setContent(iconTabBar)
+		},
+		tabsFactory: function (tab,idx){
+			const xmlView = tab.getXMLView();
+			const viewName = `com.bayer.tender.statenderapp.view.${tab.title.toLowerCase()}.views.${xmlView.getName()}`;
+			const viewData = {
+				objectId:this.sObjectId,
+				offerId:this.sOfferId,
+				countryCode:this.sCountryCode
+			};
 
-			const iconTabfilter = new IconTabFilter({
-				text: "{template>title}",
-				key: "{template>title}"
+			const iconTabFilter = new IconTabFilter({
+				text: tab.title,
+				key: tab.title
 			}); 
 
-			xmlView && XMLView.create({
-				viewName: `com.bayer.tender.statenderapp.view.${tab.title.toLowerCase()}.views.${xmlView.getName()}`,
-				viewId: `id${xmlView.getName()}`,
-				type: sap.ui.core.mvc.ViewType.XML
-			}).then(view => {
-				view.setBindingContext(context,"template");
-				view.getController().onBeforeShow && view.getController().onBeforeShow(iconTabfilter,{objectId:this.sObjectId,offerId:this.sOfferId,countryCode:this.sCountryCode});
-				iconTabfilter.insertContent(view);
-			});
-			return iconTabfilter;
+			const viewConfig = {
+				viewName, 
+				tab: iconTabFilter, 
+				context:new Context(this.getModel("template"), `/detailConfig/countryTemplate/template/tabs/${idx}`),
+				data: viewData 
+			};
 
+			if(!this.views[viewName]){	
+				xmlView && this.getOwnerComponent().runAsOwner(()=>{
+					View.create({
+						viewName: viewName,
+						viewId: `id${xmlView.getName()}`,
+						type: sap.ui.core.mvc.ViewType.XML
+					}).then(view => {
+						this.views[viewName] = view;
+						this.getView().addDependent(this.views[viewName]);
+						this.updateTabView(viewConfig);
+					});
+				});
+			}else{			
+				this.updateTabView(viewConfig)	
+			}
+			return iconTabFilter;
+
+		},
+		updateTabView:function({viewName,tab,context,data}){
+			this.views[viewName].setBindingContext(context,"template");
+			this.views[viewName].getController().onBeforeShow && this.views[viewName].getController().onBeforeShow(tab,data);	
+			tab.insertContent(this.views[viewName]);
 		},
 
 		
@@ -124,7 +161,9 @@ sap.ui.define([
 		},
 
 		selectedOfferHasBinding: function(){
-			return this.getView().getBindingContext()?.getObject()?.OfferID === this.sOfferId;
+			const selectedOffer = this.getView().getBindingContext()?.getObject();
+			if (selectedOffer && !selectedOffer.OfferID) selectedOffer.OfferID = "NA";
+			return selectedOffer?.OfferID === this.sOfferId;
 		},
 
 		/**
@@ -138,15 +177,7 @@ sap.ui.define([
 
 			let sObjectPath = "";
 
-			await this.templateState.read("DETAIL",{
-				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
-				appID: "StandardTenders",
-				page: "DETAIL",
-				keys: {
-					TenderID: this.sObjectId,
-					OfferID: this.sOfferId
-				}
-			});
+			this.gettemplateConfig();
 
 			// get awarded criteria of the selected tender 
 			// this is needed at a later stage to check on existing Award Criteria
@@ -188,7 +219,18 @@ sap.ui.define([
 				}
 			});
 		},
-
+		gettemplateConfig: async function () {
+			await this.templateState.read("DETAIL",{
+				countryCode: "BR"||this.sCountryCode,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				appID: "StandardTenders",
+				page: "DETAIL",
+				keys: {
+					TenderID: this.sObjectId,
+					OfferID: this.sOfferId
+				}
+			});
+			this.createIconTab();
+		},
 		_onBindingChange: function () {
 			var oView = this.getView(),
 				oElementBinding = oView.getElementBinding();

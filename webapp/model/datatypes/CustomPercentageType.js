@@ -5,12 +5,13 @@ sap.ui.define([
 ], function (SimpleType,ValidateException,NumberFormat) {
     "use strict";
 
-    const oPercentFormat = NumberFormat.getPercentInstance();
+    const oPercentFormat = NumberFormat.getPercentInstance({
+        maxFractionDigits: 2
+    });
 
     return SimpleType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
 
         formatValue: function(value) {
-            // return (oValue * 100).toFixed(2);
 			return oPercentFormat.format(value);
         },
 
@@ -21,9 +22,20 @@ sap.ui.define([
         },
 
         validateValue: function(oValue) {
-
             if(oValue > 1) {
                 throw new ValidateException("Not a valid percentage!");
+            }
+        },
+
+        /**
+         * Override
+         * see https://sapui5.netweaver.ondemand.com/sdk/#/api/sap.ui.model.SimpleType%23methods/Summary
+         * @returns 
+         */
+        getModelFormat: function(){
+            return {
+                format: value =>  this.formatValue(value),
+                parse: value =>  this.parseValue(value)
             }
         }
 

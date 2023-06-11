@@ -4,7 +4,9 @@ sap.ui.define([
 	"../model/formatter",
 	"../model/datatypes/CustomPercentageType",
 	"sap/ui/core/Fragment",
-], function (Controller, History, formatter, CustomPercentageType, Fragment) {
+	"sap/m/MessagePopover",
+	"sap/m/MessageItem"
+], function (Controller, History, formatter, CustomPercentageType, Fragment, MessagePopover, MessageItem) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
@@ -93,10 +95,10 @@ sap.ui.define([
 			// });
 		},
 		createMessagePopover: function (sectionName) {
-			return new sap.m.MessagePopover({
+			return new MessagePopover({
 				items: {
 					path: `messages>/${sectionName}`,
-					template: new sap.m.MessageItem({
+					template: new MessageItem({
 						type: "{messages>type}",
 						title: "{messages>message}",
 						subtitle: "{messages>additionalText}",
@@ -105,25 +107,25 @@ sap.ui.define([
 				}
 			})
 		},
-		_getMessagePopover: function () {
-			const oView = this.getView();
+		// _getMessagePopover: function () {
+		// 	const oView = this.getView();
 
-			// create popover lazily (singleton)
-			if (!this._pMessagePopover) {
-				this._pMessagePopover = Fragment.load({
-					id: oView.getId(),
-					name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
-				}).then(function (oMessagePopover) {
-					oView.addDependent(oMessagePopover);
-					return oMessagePopover;
-				});
-			}
-			return this._pMessagePopover;
-		},
+		// 	// create popover lazily (singleton)
+		// 	if (!this._pMessagePopover) {
+		// 		this._pMessagePopover = Fragment.load({
+		// 			id: oView.getId(),
+		// 			name: "com.bayer.tender.statenderapp.view.generic.fragments.MessagePopover"
+		// 		}).then(function (oMessagePopover) {
+		// 			oView.addDependent(oMessagePopover);
+		// 			return oMessagePopover;
+		// 		});
+		// 	}
+		// 	return this._pMessagePopover;
+		// },
 
-		cancelPendingChanges: function(entity, msgPropName){
-			const targets = this.getTargets(entity);
-			const messages = this.getMessages(entity);
+		cancelPendingChanges: function(entities, msgPropName){
+			const targets = this.getTargets(entities);
+			const messages = this.getMessages(entities);
 			const messageManager = sap.ui.getCore().getMessageManager();
 			messageManager.removeMessages(messages);
 			this.getModel("messages").setProperty(`/${msgPropName}`, {});
@@ -143,20 +145,26 @@ sap.ui.define([
 		 * This method returns the error messages from the MessageManager for a given entity
 		 * @returns Array<Object<Message>>
 		 */
-		getMessages: function (entity) {
-			return this.getModel("message").getData().filter(el => el.target.toLowerCase().includes(entity.toLowerCase()));
+		getMessages: function (entities) {
+			return this.getModel("message").getData().filter(el => {
+				let entityIndex = entities.findIndex(entity => el.target.toLowerCase().includes(entity.toLowerCase()));
+				if(entityIndex > -1) return el; 
+			});
 		},
 
 		/**
 		 * This method returns the targets from the MessageMaager message for a given entity
 		 * @returns Array<String> - Targets
 		 */
-		getTargets: function (entity) {
+		getTargets: function (entities) {
 			const pendingChanges = this.getModel().getPendingChanges();
-			return Object.keys(pendingChanges).filter(el => el.toLowerCase().includes(entity.toLowerCase())).map(e=>"/" + e);
+			return Object.keys(pendingChanges).filter(el => {
+				const entityIndex = entities.findIndex(entity => el.toLowerCase().includes(entity.toLowerCase()));
+				if (entityIndex > -1) return el; 
+			}).map(e=>"/" + e);
 		},
-		setMessageSection: function (entity, sectionName) {
-			const messages = this.getMessages(entity);
+		setMessageSection: function (entities, sectionName) {
+			const messages = this.getMessages(entities);
 			this.getModel("messages").setProperty(`/${sectionName}`, messages);
 		}
 	});
