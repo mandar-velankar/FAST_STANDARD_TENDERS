@@ -13,8 +13,9 @@ sap.ui.define([
 	"../model/formatter",
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Item",
-	"sap/m/MessageToast"
-], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast) {
+	"sap/m/MessageToast",
+	"../service/StandardSingletonService"
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -565,7 +566,7 @@ sap.ui.define([
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
-			this.cancelPendingChanges(bindingPath, "newTenderMsg");
+			this.cancelPendingChanges([bindingPath], "newTenderMsg");
 			this.byId("idCreateTenderDialog").close();
 			this.byId("idCreateTenderDialog").destroy();
 		},
@@ -587,9 +588,8 @@ sap.ui.define([
 		_onSubmitChangesSuccess: function (res) {
 			const newTenderCtx = this.byId("idNewTenderForm").getElementBinding().getBoundContext();
 			const ctxPath = newTenderCtx.getPath().replace("/", "");
-			const messages = this.getMessages(ctxPath);
-			const hasErrorMessages = messages.length > 0;
-			this.setMessageSection(ctxPath, "newTenderMsg");
+			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
+			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Tender has been successfully created");
 				this.onCloseTenderCreationDialog();
@@ -686,6 +686,8 @@ sap.ui.define([
 					value1: sCountryCode,
 					caseSensitive: false
 				}));
+
+				StandardSingletonService.setCountryCode(sCountryCode);
 			}
 
 			const isCountrySelectChanged = oEvent?.getParameter("id").toLowerCase().includes("idslctcountry");

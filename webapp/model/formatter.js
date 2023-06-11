@@ -4,6 +4,12 @@ sap.ui.define([
 ], function (NumberFormat,DateFormat) {
 	"use strict";
 
+	const floatInstance = NumberFormat.getFloatInstance({
+		maxFractionDigits: 2
+	});
+
+	const currencyInstance = NumberFormat.getCurrencyInstance();
+
 	return {
 		/**
 		 * Rounds the currency value to 2 digits
@@ -28,10 +34,22 @@ sap.ui.define([
 
 		formatFloat: function(value){
 			if(!value) return;
-			var floatInstance = NumberFormat.getFloatInstance({
-				maxFractionDigits: 2
-			});
 			return floatInstance.format(value);
+		},
+
+		parseFloat: function(value){
+			if(!value) return;
+			return floatInstance.parse(value);
+		},
+
+		formatCurrency: function(value){
+			if(!value) return;
+			return currencyInstance.format(value);
+		},
+
+		parseCurrency: function(value){
+			if(!value) return;
+			return currencyInstance.parse(value);
 		},
 
 		formatDate: function(date, pattern){

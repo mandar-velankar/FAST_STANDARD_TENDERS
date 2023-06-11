@@ -16,12 +16,12 @@
 
         <buttons>
 			<Button
-				icon="sap-icon://alert"
-				text="{= ${message>/}.length }"
-				visible="{= ${message>/}.length > 0 }"
-				type="Emphasized"
-				press="onMessagePopoverPress" 
-			/>
+					icon="sap-icon://alert"
+					text="{= ${messages>/offerProductsMsg}.length }"
+					visible="{= ${messages>/offerProductsMsg}.length > 0}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'offerProductsMsg')" 
+				/>
             <Button id="addSelectedSOProducts" text="Create" press=".onCreateNewOffer"/>
             <Button id="cancelDialog" text="Cancel" press=".onCloseOfferCreationDialog" />
         </buttons>

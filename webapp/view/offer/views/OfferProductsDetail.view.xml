@@ -124,7 +124,18 @@
                     expandable="true"
                     headerText="Pricing Info"
                 >
-					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionPrice" type="XML"/>
+                    <Label text="Set price by:" class="sapUiSmallMarginBegin sapUiTinyMarginTop sapUiTinyMarginEnd"/>
+                    <Select
+                        id = "idSelectedPriceContition"
+                        items = "{/PriceConditionClassification}"
+                        selectedKey="{st>/SelectedPriceConditionType}"
+                        change="onPriceConditionChange"
+                    >
+                        <core:Item key="{ConditionType}" text="{ConditionType}"/>
+                    </Select>
+                    <VBox id="idPriceConditionVbox" class="sapUiNoMargin">
+                        <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
+                    </VBox>
 				</Panel>
             </VBox>
         </f:content>

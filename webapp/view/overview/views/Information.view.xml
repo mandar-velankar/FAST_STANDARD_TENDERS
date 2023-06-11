@@ -15,13 +15,32 @@
 				<Title text="Tender and Offer Details" />
 				<ToolbarSpacer />
 				<Button id="ApprovalButtonId" text="Approvals" icon="sap-icon://validate" press="onApprovalsPress" enabled="true"/>
-				<MenuButton text="Download Word" id="btnDownloadWordQuotation" visible="{= ${fastAppData>/WordTemplates}.length > 0 }">
+
+				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false">
 					<menu>
-						<Menu itemSelected="onMenuAction" items="{fastAppData>/WordTemplates}">
-							<MenuItem text="{fastAppData>WordTemplates/name}" icon="sap-icon://download" press=".onDownloadWord"/>
+						<Menu itemSelected="onMenuAction">
+							<MenuItem text="Word" icon="sap-icon://doc-attachment">
+								<items>
+									<MenuItem text="Public Customer" />
+									<MenuItem text="Private Customer" />
+								</items>
+							</MenuItem>
+							<MenuItem text="PDF" icon="sap-icon://pdf-attachment">
+								<items>
+									<MenuItem text="Public Customer" />
+									<MenuItem text="Private Customer" />
+								</items>
+							</MenuItem>
+							<MenuItem text="Excel" icon="sap-icon://excel-attachment">
+								<items>
+									<MenuItem text="Public Customer" />
+									<MenuItem text="Private Customer" />
+								</items>
+							</MenuItem>
 						</Menu>
 					</menu>
 				</MenuButton>
+
 				<Button
 					id="btnSubmitQuotation"
 					text="{i18n>SubmitQuotation}"
