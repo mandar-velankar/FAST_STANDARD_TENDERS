@@ -75,7 +75,7 @@ sap.ui.define([
 
 
 			const detaildetailConfig = await this.templateState.read("DETAIL-OFFERPRODUCTDETAIL", {
-				countryCode: "BR" || this.sCountryCode ,// TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				countryCode: this.sCountryCode ,
 				appID: "StandardTenders",
 				page: "DETAIL-OFFERPRODUCTDETAIL",
 				keys: {
