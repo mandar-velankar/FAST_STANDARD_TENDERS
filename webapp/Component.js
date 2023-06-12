@@ -81,6 +81,9 @@ sap.ui.define([
 				"PriceConditionPriceView": {
 					groupId: "PricingForm",  
 				},
+				"PriceConditionDiscountView": {
+					groupId: "PricingForm",  
+				},
 				"OfferProductsDetailView": {
 					groupId: "ProductFormDetail"
 				}

@@ -143,7 +143,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.templateState.read("MASTER", {
-				countryCode: "BR" || sCountryCode, // TODO: this is hardcoded country. We need to remove the hard coded value once we have more country config
+				countryCode: sCountryCode, 
 				appID: "StandardTenders",
 				page: "MASTER"
 			}).then(this._onTemplateConfigReceived.bind(this, sCountryCode));

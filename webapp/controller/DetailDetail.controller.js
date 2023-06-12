@@ -32,6 +32,7 @@ sap.ui.define([
 		_onObjectMatched: async function (oEvent) {
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sProductId = oEvent.getParameter("arguments").productId;
+			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.getModel("appView").setProperty("/layout", "ThreeColumnsEndExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 
@@ -39,7 +40,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 
 			const detaildetailConfig = await this.templateState.read("DETAIL-DETAIL", {
-				countryCode: "BR",
+				countryCode: this.sCountryCode,
 				appID: "StandardTenders",
 				page: "DETAIL-DETAIL",
 				keys: {

@@ -173,7 +173,6 @@ sap.ui.define([
 		},
 		_onSubmitChangesAwardCriteriaSuccess: function(res){
 			const hasErrorMessages = this.getMessages(["AwardCriteriaTableView"]).length > 0;
-			this.setMessageSection("AwardCriteriaTableView", "awardCriteriaMsg");
 			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
 		},
 
