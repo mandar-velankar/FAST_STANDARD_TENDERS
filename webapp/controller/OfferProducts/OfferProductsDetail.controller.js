@@ -375,7 +375,7 @@ sap.ui.define([
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
-			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+			let deductions = property.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 			context.getModel().setProperty("Discount", discount, context);
@@ -384,8 +384,8 @@ sap.ui.define([
 
 		calculateDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			let discount = property.toLowerCase().includes("discount") ? value / 100 : priceObj.Discount;
-			let deductions = property.toLowerCase().includes("deductions") ? value / 100 : priceObj.Deductions;
+			let discount = property.toLowerCase().includes("discount") ? value : priceObj.Discount;
+			let deductions = property.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let offerPrice = parseFloat(priceObj.BasePrice) * (1 - discount);
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
@@ -401,7 +401,7 @@ sap.ui.define([
 			});
 		},
 
-		loadPriceConditionFragment: function(name, context){
+		loadPriceConditionFragment: function(name, contextData){
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
 			Fragment.load({
@@ -409,13 +409,13 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${name}`,
 				controller: this
 			}).then(function (form) {
-				this.onPriceConditionLoadSuccess(name, form, context);
+				this.onPriceConditionLoadSuccess(name, form, contextData);
 				vbox.addItem(form);
 			}.bind(this));
 		},
 
-		onPriceConditionLoadSuccess: function(name, form, context){
-			this.bindPricingForm(name, form, context);
+		onPriceConditionLoadSuccess: function(name, form, contextData){
+			this.bindPricingForm(name, form, contextData);
 		},
 
 		bindPricingForm(name, form, {offerID, productID, tenderID}){
