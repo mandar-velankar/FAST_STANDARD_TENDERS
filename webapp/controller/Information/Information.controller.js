@@ -13,7 +13,12 @@ sap.ui.define([
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Information.Information", {
 		onInit: function () {
-			
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
 			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
 		},
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode}) {
@@ -98,29 +103,25 @@ sap.ui.define([
 		},
 		
 		onOverviewTenderFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/AwardCriteria/editMode', true);
+			this.getModel("ui").setProperty('/OverviewForm/editMode', true);
 		},
 		onOverviewTenderFormSaveBtnPress: function(event){
 			
-			// Award Criteria	
-			const isAwardCriteriaValid = this.validateAwardCriteria(event);
-			this.setMessageSection(["AwardCriteriaTableView"], "awardCriteriaMsg");
-			if(!isAwardCriteriaValid) return;
-			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
+			this.setMessageSection(["OfferValidation"], "overviewTenderFormMsg");
 
 			this.defaultModel.submitChanges({
-				success: this._onSubmitChangesAwardCriteriaSuccess.bind(this),
-				groupId: "AwardCriteria"
+				success: this.onOverviewTenderFormSuccess.bind(this),
+				groupId: "OverviewForm"
 			}); 
 		},
-		_onSubmitChangesAwardCriteriaSuccess: function(res){
-			const hasErrorMessages = this.getMessages(["AwardCriteriaTableView"]).length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
+		onOverviewTenderFormSuccess: function(res){
+			const hasErrorMessages = this.getMessages(["OfferValidation"]).length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/OverviewForm/editMode', false);
 		},
 
 		onOverviewTenderFormCancelBtnPress: function(event){
-			this.cancelPendingChanges(["AwardCriteriaTableView"], "awardCriteriaMsg");
-			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
+			this.cancelPendingChanges(["OfferValidation"], "overviewTenderFormMsg");
+			this.getModel("ui").setProperty('/OverviewForm/editMode', false);
 		}	
 	})
 });
