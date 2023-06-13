@@ -14,6 +14,31 @@
 			<OverflowToolbar style="Standard" design="Solid">
 				<Title text="Tender and Offer Details" />
 				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/overviewTenderFormMsg}.length }"
+					visible="{= ${messages>/overviewTenderFormMsg}.length > 0 &amp;&amp; ${ui>/OverviewTender/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'overviewTenderFormMsg')"  
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onOverviewTenderFormEditBtnPress"
+					visible="{= !${ui>/OverviewTender/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onOverviewTenderFormSaveBtnPress"
+					visible="{= ${ui>/OverviewTender/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onOverviewTenderFormCancelBtnPress"
+					visible="{= ${ui>/OverviewTender/editMode} }"
+				/>
 				<Button id="ApprovalButtonId" text="Approvals" icon="sap-icon://validate" press="onApprovalsPress" enabled="true"/>
 
 				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false">

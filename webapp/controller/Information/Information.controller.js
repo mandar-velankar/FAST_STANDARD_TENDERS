@@ -95,6 +95,32 @@ sap.ui.define([
 				],
 				template: prodInfoTemplate
 			})
-		}
-    });
+		},
+		
+		onOverviewTenderFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/AwardCriteria/editMode', true);
+		},
+		onOverviewTenderFormSaveBtnPress: function(event){
+			
+			// Award Criteria	
+			const isAwardCriteriaValid = this.validateAwardCriteria(event);
+			this.setMessageSection(["AwardCriteriaTableView"], "awardCriteriaMsg");
+			if(!isAwardCriteriaValid) return;
+			this.setAwardCriteriaPrendingChanges(this.defaultModel,this.oAwardCriteriaTable);
+
+			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesAwardCriteriaSuccess.bind(this),
+				groupId: "AwardCriteria"
+			}); 
+		},
+		_onSubmitChangesAwardCriteriaSuccess: function(res){
+			const hasErrorMessages = this.getMessages(["AwardCriteriaTableView"]).length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
+		},
+
+		onOverviewTenderFormCancelBtnPress: function(event){
+			this.cancelPendingChanges(["AwardCriteriaTableView"], "awardCriteriaMsg");
+			this.getModel("ui").setProperty('/AwardCriteria/editMode', false);
+		}	
+	})
 });
