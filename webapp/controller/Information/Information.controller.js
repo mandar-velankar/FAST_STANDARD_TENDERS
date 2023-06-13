@@ -42,7 +42,7 @@ sap.ui.define([
 			});
 	
 			this.setModel(oModel, "ui");
-			// if (this.offerId !== "NA") this.bindTable();
+			if (this.offerId && this.offerId !== "NA") this.bindTable();
 			this.bindForm(this.selectedTab);
 		},
 		_onObjectMatched: async function (oEvent) {
