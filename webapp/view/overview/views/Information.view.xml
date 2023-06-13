@@ -50,25 +50,75 @@
 			</OverflowToolbar>
 		</headerToolbar>
 		<content>
-			<form:SimpleForm id="idGeneralInfo" editable="false" maxContainerCols="2" layout="ResponsiveGridLayout" labelSpanL="2" labelSpanM="2"
-								emptySpanL="0" emptySpanM="0" columnsL="2" columnsM="2" class="editableForm" visible="true">
-				<form:content>
-						<Label text="Offer Date"/>
-						<Text text="01-08-2015"/>
-
-						<Label text="Offer Validity"/>
-						<Text text="03-03-2016"/>
-
-						<Label text="Shipping Terms"/>
-						<Text text="First shipment 10 days after receiving a PO "/>
-
-						<Label text="Payment Terms"/>
-						<Text text="30 Days"/>
-
-						<Label text="Delivery Terms"/>
-						<Text text="30 Days"/>
-				</form:content>
-			</form:SimpleForm>
+			<form:Form
+			id="idOverviewForm"
+			editable="true"
+			formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/Overview/xmlView/formByName/OverviewForm/formContainers',templateShareable:true}">
+			<!-- <form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="{template>title}"/>
+					<ToolbarSpacer/>
+					<Button
+						icon="sap-icon://alert"
+						text="{= ${messages>/basicInfoMsg}.length }"
+						visible="{= ${messages>/basicInfoMsg}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
+						type="Emphasized"
+						press="onMessagePopoverPress($event, 'basicInfoMsg')" 
+					/>
+					<Button
+						id="idTenderFormEditBtn"
+						icon="sap-icon://edit"
+						text="Edit"
+						press=".onTenderFormEditBtnPress"
+						visible="{= !${ui>/TenderForm/editMode} }"
+					/>
+					<Button
+						id="idTenderFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onTenderFormSaveBtnPress"
+						visible="{= ${ui>/TenderForm/editMode} }"
+					/>
+					<Button
+						id="idTenderFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onTenderFormCancelBtnPress"
+						visible="{= ${ui>/TenderForm/editMode} }"
+					/>
+				</Toolbar>
+			</form:toolbar> -->
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="{template>layout/labelSpanXL}"
+					labelSpanL="{template>layout/labelSpanL}"
+					labelSpanM="{template>layout/labelSpanM}"
+					labelSpanS="{template>layout/labelSpanS}"
+					adjustLabelSpan="{template>layout/adjustLabelSpan}"
+					emptySpanXL="{template>layout/emptySpanXL}"
+					emptySpanL="{template>layout/emptySpanL}"
+					emptySpanM="{template>layout/emptySpanM}"
+					emptySpanS="{template>layout/emptySpanS}"
+					columnsXL="{template>layout/columnsXL}"
+					columnsL="{template>layout/columnsL}"
+					columnsM="{template>layout/columnsM}"
+					singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
 		</content>
 	</Panel>
 
@@ -79,8 +129,11 @@
 			</OverflowToolbar>
 		</headerToolbar>
 		<content>
-			<Table id="productInformationTableId" 
-				mode="SingleSelectMaster">
+			<Table 
+				id="idProductInformationTable" 
+				mode="SingleSelectMaster"
+				
+			>
 				<columns>
 					<Column>
 						<Label text="Product" wrapping="true"/>
@@ -101,29 +154,11 @@
 				<items>
 					<ColumnListItem>
 						<cells>
-							<Text text="ADEMPAS 0,5MG 42TAB"/>	
+							<Text text="{ProductPackName}"/>	
 							<Text text="100"/>
 							<Text text="20.43 EUR"/>	
 							<Text text="200.43 EUR"/>
-							<Text text="2000.43 EUR"/>					
-						</cells>
-					</ColumnListItem>
-					<ColumnListItem>
-						<cells>
-							<Text text="ADEMPAS 2,0MG 42TAB"/>	
-							<Text text="10"/>
-							<Text text="20.43 EUR"/>	
-							<Text text="200.43 EUR"/>
-							<Text text="200.43 EUR"/>					
-						</cells>
-					</ColumnListItem>
-					<ColumnListItem>
-						<cells>
-							<Text text="ADEMPAS 2,5MG 42TAB"/>	
-							<Text text="100"/>
-							<Text text="20.43 EUR"/>	
-							<Text text="200.43 EUR"/>
-							<Text text="2000.43 EUR"/>					
+							<Text text="{TotalAmount}"/>					
 						</cells>
 					</ColumnListItem>
 				</items>
