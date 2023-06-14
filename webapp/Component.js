@@ -48,7 +48,8 @@ sap.ui.define([
 				"OfferProducts", 
 				"TotalAmountOfferProducts", 
 				"ProductFormDetail", 
-				"PricingForm"
+				"PricingForm",
+				"OverviewForm"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
