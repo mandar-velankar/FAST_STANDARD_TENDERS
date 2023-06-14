@@ -74,7 +74,7 @@ sap.ui.define([
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName("OverviewForm").getEntity();
 			const path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 				OFFERID: this.offerId,
-				groupId: "overviewGroup"
+				groupId: "OverviewForm"
 			});
 			const context = new Context(this.getModel(), path);
 			overviewForm.setBindingContext(context);
