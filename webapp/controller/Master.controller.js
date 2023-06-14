@@ -138,15 +138,23 @@ sap.ui.define([
 				return `${sCountryCode}-${year}-${data}`;
 			})
 		},
-		_getTemplateConfig: function (sCountryCode) {
+		_getTemplateConfig: async function (sCountryCode) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
-			this.templateState.read("MASTER", {
-				countryCode: sCountryCode, 
-				appID: "StandardTenders",
-				page: "MASTER"
-			}).then(this._onTemplateConfigReceived.bind(this, sCountryCode));
+			try {
+				await this.templateState.read("MASTER", {
+					countryCode: sCountryCode, 
+					appID: "StandardTenders",
+					page: "MASTER"
+				});
+				this._onTemplateConfigReceived(sCountryCode)
+			} catch (error) {
+				console.error(error);
+				const table = this.byId("genericMasterTable");
+				table.removeAllColumns(); 
+				table.unbindItems();
+			}
 		},
 
 		/**

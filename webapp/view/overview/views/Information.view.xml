@@ -14,9 +14,41 @@
 			<OverflowToolbar style="Standard" design="Solid">
 				<Title text="Tender and Offer Details" />
 				<ToolbarSpacer />
-				<Button id="ApprovalButtonId" text="Approvals" icon="sap-icon://validate" press="onApprovalsPress" enabled="true"/>
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/overviewTenderFormMsg}.length }"
+					visible="{= ${messages>/overviewTenderFormMsg}.length > 0 &amp;&amp; ${ui>/OverviewForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'overviewTenderFormMsg')"  
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onOverviewTenderFormEditBtnPress"
+					visible="{= !${ui>/OverviewForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onOverviewTenderFormSaveBtnPress"
+					visible="{= ${ui>/OverviewForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onOverviewTenderFormCancelBtnPress"
+					visible="{= ${ui>/OverviewForm/editMode} }"
+				/>
+				<Button 
+					id="ApprovalButtonId" 
+					text="Approvals" 
+					icon="sap-icon://validate" 
+					press="onApprovalsPress" 
+					visible="{= !${ui>/OverviewForm/editMode}}"
+					enabled="true"
+				/>
 
-				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false">
+				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}">
 					<menu>
 						<Menu itemSelected="onMenuAction">
 							<MenuItem text="Word" icon="sap-icon://doc-attachment">
@@ -46,29 +78,81 @@
 					text="{i18n>SubmitQuotation}"
 					icon="sap-icon://sys-enter"
 					press=".onSubmitQuotation"
-					enabled="false"/>
+					enabled="false"
+					visible="{= !${ui>/OverviewForm/editMode}}"
+				/>
 			</OverflowToolbar>
 		</headerToolbar>
 		<content>
-			<form:SimpleForm id="idGeneralInfo" editable="false" maxContainerCols="2" layout="ResponsiveGridLayout" labelSpanL="2" labelSpanM="2"
-								emptySpanL="0" emptySpanM="0" columnsL="2" columnsM="2" class="editableForm" visible="true">
-				<form:content>
-						<Label text="Offer Date"/>
-						<Text text="01-08-2015"/>
-
-						<Label text="Offer Validity"/>
-						<Text text="03-03-2016"/>
-
-						<Label text="Shipping Terms"/>
-						<Text text="First shipment 10 days after receiving a PO "/>
-
-						<Label text="Payment Terms"/>
-						<Text text="30 Days"/>
-
-						<Label text="Delivery Terms"/>
-						<Text text="30 Days"/>
-				</form:content>
-			</form:SimpleForm>
+			<form:Form
+			id="idOverviewForm"
+			editable="true"
+			formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/Overview/xmlView/formByName/OverviewForm/formContainers',templateShareable:true}">
+			<!-- <form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="{template>title}"/>
+					<ToolbarSpacer/>
+					<Button
+						icon="sap-icon://alert"
+						text="{= ${messages>/basicInfoMsg}.length }"
+						visible="{= ${messages>/basicInfoMsg}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
+						type="Emphasized"
+						press="onMessagePopoverPress($event, 'basicInfoMsg')" 
+					/>
+					<Button
+						id="idTenderFormEditBtn"
+						icon="sap-icon://edit"
+						text="Edit"
+						press=".onTenderFormEditBtnPress"
+						visible="{= !${ui>/TenderForm/editMode} }"
+					/>
+					<Button
+						id="idTenderFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onTenderFormSaveBtnPress"
+						visible="{= ${ui>/TenderForm/editMode} }"
+					/>
+					<Button
+						id="idTenderFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onTenderFormCancelBtnPress"
+						visible="{= ${ui>/TenderForm/editMode} }"
+					/>
+				</Toolbar>
+			</form:toolbar> -->
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="{template>layout/labelSpanXL}"
+					labelSpanL="{template>layout/labelSpanL}"
+					labelSpanM="{template>layout/labelSpanM}"
+					labelSpanS="{template>layout/labelSpanS}"
+					adjustLabelSpan="{template>layout/adjustLabelSpan}"
+					emptySpanXL="{template>layout/emptySpanXL}"
+					emptySpanL="{template>layout/emptySpanL}"
+					emptySpanM="{template>layout/emptySpanM}"
+					emptySpanS="{template>layout/emptySpanS}"
+					columnsXL="{template>layout/columnsXL}"
+					columnsL="{template>layout/columnsL}"
+					columnsM="{template>layout/columnsM}"
+					singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
 		</content>
 	</Panel>
 
@@ -79,8 +163,11 @@
 			</OverflowToolbar>
 		</headerToolbar>
 		<content>
-			<Table id="productInformationTableId" 
-				mode="SingleSelectMaster">
+			<Table 
+				id="idProductInformationTable" 
+				mode="SingleSelectMaster"
+				
+			>
 				<columns>
 					<Column>
 						<Label text="Product" wrapping="true"/>
@@ -101,104 +188,15 @@
 				<items>
 					<ColumnListItem>
 						<cells>
-							<Text text="ADEMPAS 0,5MG 42TAB"/>	
+							<Text text="{ProductPackName}"/>	
 							<Text text="100"/>
 							<Text text="20.43 EUR"/>	
 							<Text text="200.43 EUR"/>
-							<Text text="2000.43 EUR"/>					
-						</cells>
-					</ColumnListItem>
-					<ColumnListItem>
-						<cells>
-							<Text text="ADEMPAS 2,0MG 42TAB"/>	
-							<Text text="10"/>
-							<Text text="20.43 EUR"/>	
-							<Text text="200.43 EUR"/>
-							<Text text="200.43 EUR"/>					
-						</cells>
-					</ColumnListItem>
-					<ColumnListItem>
-						<cells>
-							<Text text="ADEMPAS 2,5MG 42TAB"/>	
-							<Text text="100"/>
-							<Text text="20.43 EUR"/>	
-							<Text text="200.43 EUR"/>
-							<Text text="2000.43 EUR"/>					
+							<Text text="{TotalAmount}"/>					
 						</cells>
 					</ColumnListItem>
 				</items>
 			</Table>
 		</content>
 	</Panel>
-
-	<Panel expandable="false" width="auto" class="sapUiResponsiveMargin" backgroundDesign="Solid">
-	<form:SimpleForm id="idRemarksIfno" editable="false" maxContainerCols="3" layout="ResponsiveGridLayout" labelSpanL="12" labelSpanM="12"
-                        emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" class="editableForm" visible="true">
-		<form:content>
-			
-			<VBox fitContainer="true" alignItems="Stretch">
-				<items>					
-					<HBox visible="true">
-						<items>
-								
-							<!-- Remarks -->
-							<VBox class="sapUiSmallMarginEnd" width="50%" >
-								<items>
-									<Label text="{i18n>qStandardRemark}" design="Bold"/>
-									<FormattedText htmlText="{fastAppData>/OfferValidation/REMARKS}" class="sapMText" />
-								</items>
-							</VBox>
-									
-							<!-- Additional remarks -->
-							<VBox class="sapUiSmallMarginEnd" width="50%" alignItems="Start">
-								<items>
-									<Label text="{i18n>qCustomRemark}" design="Bold"/>
-									<TextArea id="idCustomRemark" value="{path: 'fastAppData>/OfferValidation/CUSTOM_REMARKS'}" maxLength="500" enabled="false" height="10rem" width="30rem"/>
-								</items>
-							</VBox>									
-								
-						</items>
-					</HBox>
-					<Toolbar width="100%" height="1px" visible="true"/>	
-					<HBox visible="true">
-						<items>
-							<!-- Issued by -->
-							<VBox class="sapUiSmallMarginEnd" width="48%">
-								<items>
-									<Label text="{i18n>qIssuedBy}" design="Bold"/>
-									<Select id="idSelectIssuedBy" 
-										showSecondaryValues="true"
-										selectedKey="{fastAppData>/OfferValidation/SELLING_COMPANY_AS1}" 
-										enabled="false" 
-											items="{ path: 'fastAppData>/EditOffer/Signatories/results'}">
-										<core:ListItem text="{fastAppData>NAME}" additionalText="{fastAppData>TITLE}" key="{fastAppData>AUTHORIZED_SIGNATORY}"/>
-									</Select>
-								</items>
-							</VBox>																
-							<VBox width="1%">
-							</VBox>	
-							<!-- Company stamp -->
-							<VBox class="sapUiSmallMarginEnd" width="48%" alignItems="Start">
-								<items>
-									<Label text="{i18n>qCompanyStamp}" design="Bold"/>
-									<Select id="idSelectCompanyStamp" 
-										showSecondaryValues="true"
-										selectedKey="{fastAppData>/OfferValidation/SELLING_COMPANY_AS2}" 
-										enabled="false" 
-										items="{ path: 'fastAppData>/EditOffer/Signatories/results'}">
-											<core:ListItem text="{fastAppData>NAME}" additionalText="{fastAppData>TITLE}" key="{fastAppData>AUTHORIZED_SIGNATORY}"/>
-									</Select>
-								</items>
-							</VBox>
-									
-						</items>
-					</HBox>
-				</items>
-			</VBox>
-			
-		</form:content>
-	</form:SimpleForm>
-	
-	</Panel>
-
 </mvc:View>
