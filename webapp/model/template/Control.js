@@ -86,7 +86,7 @@ sap.ui.define(["sap/m/Text",
     },
     
     generateItemTemplate: function (table) {
-      let key = table?.columns?.find(column => column.isValueHelpKey)?.control?.properties?.find(prop => prop.name === 'text')?.value;
+      let key = table?.columns?.find(column => column.isValueHelpKey)?.control?.properties?.find(prop => prop.name === 'key')?.value;
       let text = table?.columns?.find(column => column.isValueHelpText)?.control?.properties?.find(prop => prop.name === 'text')?.value;
       return new sap.ui.core.Item({'key': `{${key}}`, 'text': `{${text}}`});
     },
