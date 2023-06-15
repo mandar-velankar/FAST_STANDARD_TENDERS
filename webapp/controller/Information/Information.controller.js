@@ -89,7 +89,7 @@ sap.ui.define([
 					new Filter({
 						path: "OFFER_ID",
 						operator: FilterOperator.EQ,
-						value1: "SA-16-100-1288-BPH-11" || this.offerId
+						value1: this.offerId
 					}),
 				],
 				template: prodInfoTemplate
