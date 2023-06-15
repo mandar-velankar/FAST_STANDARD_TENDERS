@@ -311,7 +311,7 @@ sap.ui.define([
 			if(hasErrorMessages) return;
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this),
+				success: this._onSubmitChangesSuccess.bind(this, "PricingForm"),
 				groupId: "PricingForm"
 			}); 
 		},
@@ -321,10 +321,18 @@ sap.ui.define([
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 		},
 
-		_onSubmitChangesSuccess: function(res){
-			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
-			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+		_onSubmitChangesSuccess: function(form){
+			let hasErrorMessages = [];
+			if(form === 'PricingForm'){
+				hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
+				this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			}
+
+			if(form === 'ProductForm'){
+				//todo - rework error messages for product details form
+			}
+			
+			(!hasErrorMessages || hasErrorMessages?.length === 0) && this.getModel("ui").setProperty(`/${form}/editMode`, false);
 		},
 
 		// _filterPricingForm: function ({offerID, productID}) {
