@@ -209,15 +209,15 @@ sap.ui.define([
 				/*parameters: {
 					expand: "Institute,Offer"
 				},*/
-				events: {
-					change: this._onBindingChange.bind(this),
-					dataRequested: function () {
-						oViewModel.setProperty("/busy", true);
-					},
-					dataReceived: function () {
-						oViewModel.setProperty("/busy", false);
-					}
-				}
+				// events: {
+				// 	change: this._onBindingChange.bind(this),
+				// 	dataRequested: function () {
+				// 		oViewModel.setProperty("/busy", true);
+				// 	},
+				// 	dataReceived: function () {
+				// 		oViewModel.setProperty("/busy", false);
+				// 	}
+				// }
 			});
 		},
 		gettemplateConfig: async function () {
@@ -232,33 +232,33 @@ sap.ui.define([
 			});
 			this.createIconTab();
 		},
-		_onBindingChange: function () {
-			var oView = this.getView(),
-				oElementBinding = oView.getElementBinding();
+		// _onBindingChange: function () {
+		// 	var oView = this.getView(),
+		// 		oElementBinding = oView.getElementBinding();
 
-			// No data for the binding
-			if (!oElementBinding.getBoundContext()) {
-				this.getRouter().getTargets().display("detailObjectNotFound");
-				// if object could not be found, the selection in the master list
-				// does not make sense anymore.
-				this.getOwnerComponent().oListSelector.clearMasterListSelection();
-				return;
-			}
+		// 	// No data for the binding
+		// 	if (!oElementBinding.getBoundContext()) {
+		// 		this.getRouter().getTargets().display("detailObjectNotFound");
+		// 		// if object could not be found, the selection in the master list
+		// 		// does not make sense anymore.
+		// 		this.getOwnerComponent().oListSelector.clearMasterListSelection();
+		// 		return;
+		// 	}
 
-			var sPath = oElementBinding.getPath(),
-				oResourceBundle = this.getResourceBundle(),
-				oObject = oView.getModel().getObject(sPath),
-				sObjectId = oObject.TenderID,
-				sObjectName = oObject.TenderName,
-				oViewModel = this.getModel("detailView");
+		// 	var sPath = oElementBinding.getPath(),
+		// 		oResourceBundle = this.getResourceBundle(),
+		// 		oObject = oView.getModel().getObject(sPath),
+		// 		sObjectId = oObject.TenderID,
+		// 		sObjectName = oObject.TenderName,
+		// 		oViewModel = this.getModel("detailView");
 
-			this.getOwnerComponent().oListSelector.selectAListItem(sPath);
+		// 	this.getOwnerComponent().oListSelector.selectAListItem(sPath);
 
-			oViewModel.setProperty("/shareSendEmailSubject",
-				oResourceBundle.getText("shareSendEmailObjectSubject", [sObjectId]));
-			oViewModel.setProperty("/shareSendEmailMessage",
-				oResourceBundle.getText("shareSendEmailObjectMessage", [sObjectName, sObjectId, location.href]));
-		},
+		// 	oViewModel.setProperty("/shareSendEmailSubject",
+		// 		oResourceBundle.getText("shareSendEmailObjectSubject", [sObjectId]));
+		// 	oViewModel.setProperty("/shareSendEmailMessage",
+		// 		oResourceBundle.getText("shareSendEmailObjectMessage", [sObjectName, sObjectId, location.href]));
+		// },
 
 		_onMetadataLoaded: function () {
 			// Store original busy indicator delay for the detail view
