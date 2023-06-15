@@ -409,37 +409,38 @@ sap.ui.define([
 		},	
 
 		loadPriceCondition: function(){
-			const selectedPriceConditonName = this.getModel('st').getProperty("/SelectedPriceConditionType");
-			this.loadPriceConditionFragment(selectedPriceConditonName, {
+			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
+			this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
 				productID:this.productId,
 				tenderID: this.sObjectId
 			});
 		},
 
-		loadPriceConditionFragment: function(name, contextData){
+		loadPriceConditionFragment: function(conditionType, contextData){
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
 			Fragment.load({
 				id: this.getView().getId(),
-				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${name}`,
+				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
-				this.onPriceConditionLoadSuccess(name, form, contextData);
+				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
 			}.bind(this));
 		},
 
-		onPriceConditionLoadSuccess: function(name, form, contextData){
-			this.bindPricingForm(name, form, contextData);
+		onPriceConditionLoadSuccess: function(conditionType, form, contextData){
+			this.bindPricingForm(conditionType, form, contextData);
 		},
 
-		bindPricingForm(name, form, {offerID, productID, tenderID}){
-			let entityName = `/PriceCondition${name}View`
+		bindPricingForm(conditionType, form, {offerID, productID, tenderID}){
+			let entityName = `/PriceCondition${conditionType}View`
 			const path = this.getModel().createKey(entityName, {
 				"OfferID": offerID,
 				"TenderID": tenderID,
-				"ProductCode": productID
+				"ProductCode": productID,
+				"ConditionType": conditionType
 			});
 			form.bindElement({
 				path: path,
