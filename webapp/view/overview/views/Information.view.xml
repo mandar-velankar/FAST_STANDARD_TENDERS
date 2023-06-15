@@ -153,8 +153,11 @@
 						<cells>
 							<Text text="{PRODUCTNAME}"/>	
 							<Text text="{
-								path: 'REQUESTED_QUANTITY',
-								formatter: '.formatter.formatText'
+								parts: [
+									{path: 'REQUESTED_QUANTITY'},
+									{path: 'UNIT'}
+								],
+								formatter: '.formatRequestedQty'
 							}"/>
 
 							<ObjectStatus 
@@ -163,7 +166,11 @@
 										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
 										{path: 'CURRENCY'}
 									],
-									type: 'sap.ui.model.type.Currency'
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
 								}"
 							/>	
 							<ObjectStatus 
@@ -172,16 +179,17 @@
 										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
 										{path: 'CURRENCY'}
 									],
-									type: 'sap.ui.model.type.Currency'
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
 								}"
 							/>
 							<ObjectStatus 
 								text="{
-									parts: [
-										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
-										{path: 'CURRENCY'}
-									],
-									type: 'sap.ui.model.type.Currency'
+									path: '',
+									formatter: '.calculateTotalAmount'
 								}"
 							/>					
 						</cells>

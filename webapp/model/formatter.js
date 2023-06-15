@@ -18,12 +18,12 @@ sap.ui.define([
 		 * @param {string} sValue value to be formatted
 		 * @returns {string} formatted currency value with 2 digits
 		 */
-		currencyValue : function (sValue) {
+		currencyValue : function (sValue, currency) {
 			if (!sValue) {
 				return "";
 			}
 
-			return parseFloat(sValue).toFixed(2);
+			return parseFloat(sValue).toFixed(2) + " " + currency;
 		},
 
 		formatPercentage: function(value){
