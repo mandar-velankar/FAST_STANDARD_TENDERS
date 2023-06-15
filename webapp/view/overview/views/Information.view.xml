@@ -9,10 +9,17 @@
 	xmlns:tnt="sap.tnt"
 	xmlns:u="sap.uxap">
 
-	<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" backgroundDesign="Solid" expanded="true">
-		<headerToolbar>
-			<OverflowToolbar style="Standard" design="Solid">
-				<Title text="Tender and Offer Details" />
+	
+			<form:Form
+			id="idOverviewForm"
+			editable="true"
+			formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/Overview/xmlView/formByName/OverviewForm/formContainers',templateShareable:true}">
+			<form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="Tender and Offer Details" />
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"
@@ -48,7 +55,7 @@
 					enabled="true"
 				/>
 
-				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}">
+				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}" class = "sapUiSmallMarginTop">
 					<menu>
 						<Menu itemSelected="onMenuAction">
 							<MenuItem text="Word" icon="sap-icon://doc-attachment">
@@ -81,50 +88,9 @@
 					enabled="false"
 					visible="{= !${ui>/OverviewForm/editMode}}"
 				/>
-			</OverflowToolbar>
-		</headerToolbar>
-		<content>
-			<form:Form
-			id="idOverviewForm"
-			editable="true"
-			formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/Overview/xmlView/formByName/OverviewForm/formContainers',templateShareable:true}">
-			<!-- <form:title>
-				<core:Title text="{template>title}" />
-			</form:title>
-			<form:toolbar>
-				<Toolbar>
-					<Title text="{template>title}"/>
-					<ToolbarSpacer/>
-					<Button
-						icon="sap-icon://alert"
-						text="{= ${messages>/basicInfoMsg}.length }"
-						visible="{= ${messages>/basicInfoMsg}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
-						type="Emphasized"
-						press="onMessagePopoverPress($event, 'basicInfoMsg')" 
-					/>
-					<Button
-						id="idTenderFormEditBtn"
-						icon="sap-icon://edit"
-						text="Edit"
-						press=".onTenderFormEditBtnPress"
-						visible="{= !${ui>/TenderForm/editMode} }"
-					/>
-					<Button
-						id="idTenderFormSaveBtn"
-						icon="sap-icon://save"
-						text="Save"
-						press=".onTenderFormSaveBtnPress"
-						visible="{= ${ui>/TenderForm/editMode} }"
-					/>
-					<Button
-						id="idTenderFormCancelBtn"
-						icon="sap-icon://decline"
-						text="Cancel"
-						press=".onTenderFormCancelBtnPress"
-						visible="{= ${ui>/TenderForm/editMode} }"
-					/>
+					
 				</Toolbar>
-			</form:toolbar> -->
+			</form:toolbar>
 			<form:layout>
 				<form:ResponsiveGridLayout
 					labelSpanXL="{template>layout/labelSpanXL}"
@@ -153,21 +119,18 @@
 				</form:FormContainer>
 			</form:formContainers>
 		</form:Form>
-		</content>
-	</Panel>
+	
 
-	<Panel expandable="true" width="auto" class="sapUiResponsiveMargin" expanded="true" backgroundDesign="Solid">
-		<headerToolbar>
-			<OverflowToolbar style="Standard" design="Solid">
-					<Title text="Product Information" />
-			</OverflowToolbar>
-		</headerToolbar>
-		<content>
 			<Table 
 				id="idProductInformationTable" 
 				mode="SingleSelectMaster"
-				
+				items = "{/OfferProductValidation}"
 			>
+			<headerToolbar>
+			<OverflowToolbar>
+					<Title text="Product Information" />
+			</OverflowToolbar>
+			</headerToolbar>
 				<columns>
 					<Column>
 						<Label text="Product" wrapping="true"/>
@@ -188,15 +151,41 @@
 				<items>
 					<ColumnListItem>
 						<cells>
-							<Text text="{ProductPackName}"/>	
-							<Text text="100"/>
-							<Text text="20.43 EUR"/>	
-							<Text text="200.43 EUR"/>
-							<Text text="{TotalAmount}"/>					
+							<Text text="{PRODUCTNAME}"/>	
+							<Text text="{
+								path: 'REQUESTED_QUANTITY',
+								formatter: '.formatter.formatText'
+							}"/>
+
+							<ObjectStatus 
+								text="{
+									parts: [
+										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
+										{path: 'CURRENCY'}
+									],
+									type: 'sap.ui.model.type.Currency'
+								}"
+							/>	
+							<ObjectStatus 
+								text="{
+									parts: [
+										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
+										{path: 'CURRENCY'}
+									],
+									type: 'sap.ui.model.type.Currency'
+								}"
+							/>
+							<ObjectStatus 
+								text="{
+									parts: [
+										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
+										{path: 'CURRENCY'}
+									],
+									type: 'sap.ui.model.type.Currency'
+								}"
+							/>					
 						</cells>
 					</ColumnListItem>
 				</items>
 			</Table>
-		</content>
-	</Panel>
 </mvc:View>

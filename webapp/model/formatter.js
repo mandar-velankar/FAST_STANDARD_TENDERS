@@ -58,6 +58,10 @@ sap.ui.define([
 
 		parseDate: function(date, pattern){
 			return DateFormat.getDateInstance({pattern: pattern, UTC: true}).parse(date);
+		},
+
+		formatText: function (value) {
+			return parseInt(value);
 		}
 	};
 });
