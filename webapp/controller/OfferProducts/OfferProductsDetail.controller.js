@@ -286,12 +286,28 @@ sap.ui.define([
 		},
 
 		onPricingFormEditBtnPress: function(event){
+			this.rebasePrice();
 			this.getModel("ui").setProperty('/PricingForm/editMode', true);
 		},
+
+		rebasePrice: function(){
+			const pricingForm = this.byId("idPricingForm");
+			const context = pricingForm.getElementBinding().getBoundContext();
+			const boundObject = context.getObject();
+			const contextPath = context.getPath();
+			if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
+				context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
+			}
+		},
+
 		onPricingFormSaveBtnPress: function(event){
 
-			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView"]).length > 0;
-			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView"], "priceCondPrice");
+			const hasErrorMessages =  this.getMessages([
+				"idOfferPrice", 
+				"PriceConditionPriceView",
+				"PriceConditionDiscountView"
+			]).length > 0;
+			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
 			if(hasErrorMessages) return;
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
@@ -302,24 +318,24 @@ sap.ui.define([
 
 		onPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView"], "priceCondPrice");
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 		},
 
 		_onSubmitChangesSuccess: function(res){
-			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView"]).length > 0;
-			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView"], "priceCondPrice");
+			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
+			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
 
-		_filterPricingForm: function ({offerID, productID}) {
-			const oPricingForm = this.byId("idPricingForm");
-			const oPricingFormBinding = oPricingForm.getBinding("formContainers");
-			const aFilters = [
-				new Filter("OfferID",FilterOperator.EQ, offerID),
-				new Filter("ProductCode",FilterOperator.EQ, productID),
-			]
-			oPricingFormBinding.filter(aFilters);
-		},	
+		// _filterPricingForm: function ({offerID, productID}) {
+		// 	const oPricingForm = this.byId("idPricingForm");
+		// 	const oPricingFormBinding = oPricingForm.getBinding("formContainers");
+		// 	const aFilters = [
+		// 		new Filter("OfferID",FilterOperator.EQ, offerID),
+		// 		new Filter("ProductCode",FilterOperator.EQ, productID),
+		// 	]
+		// 	oPricingFormBinding.filter(aFilters);
+		// },	
 
 		validateProduct: function () {
 			const contextPath = this.byId('idProductForm').getObjectBinding().getPath();
