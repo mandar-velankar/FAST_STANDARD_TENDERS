@@ -89,7 +89,7 @@ sap.ui.define([
 					new Filter({
 						path: "OFFER_ID",
 						operator: FilterOperator.EQ,
-						value1: this.offerId
+						value1: "SA-16-100-1288-BPH-11" || this.offerId
 					}),
 				],
 				template: prodInfoTemplate
@@ -128,6 +128,26 @@ sap.ui.define([
 					}
 				});
 			});
+		},
+
+		calculateTotalAmount: function (offer) {
+			const unit = offer.UNIT;
+			const currency = offer.CURRENCY || "";
+			let totalAmount = "";
+			switch (unit) {
+				case "Unit":
+					totalAmount = parseInt(offer.REQUESTED_QUANTITY) * offer.REQ_PRICE_UNIT_OFFER_CURRENCY;
+					break;
+				case "Pack":
+					totalAmount = parseInt(offer.REQUESTED_QUANTITY) * offer.REQ_PRICE_PACK_OFFER_CURRENCY;
+					break;
+				default:
+					break;
+			}
+			return `${totalAmount.toFixed(2)} ${currency}`;
+		},
+		formatRequestedQty: function (quantity, unit) {
+			return parseInt(quantity) + " " + unit;
 		}
 	})
 });
