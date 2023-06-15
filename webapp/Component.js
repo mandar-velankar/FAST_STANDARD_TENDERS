@@ -87,6 +87,9 @@ sap.ui.define([
 				},
 				"OfferProductsDetailView": {
 					groupId: "ProductFormDetail"
+				},
+				"OfferValidation": {
+					groupId: "OverviewForm"
 				}
 			});
 		},
