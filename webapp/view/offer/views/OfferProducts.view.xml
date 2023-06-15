@@ -23,7 +23,7 @@
 					<ToolbarSpacer />
 					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" visible="{= !${ui>/OfferForm/editMode} }" />
-					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" visible="{= !${ui>/OfferForm/editMode} }"/>
+					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" visible="{= !${ui>/OfferForm/editMode} }" type="Reject"/>
 					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferFormEditBtnPress" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<Button
 						id="idOfferFormSaveBtn"
@@ -31,6 +31,7 @@
 						text="Save"
 						press=".onOfferFormSaveBtnPress"
 						visible="{= ${ui>/OfferForm/editMode} }"
+						type="Accept"
 					/>
 					<Button
 						id="idOfferFormCancelBtn"
@@ -38,6 +39,7 @@
 						text="Cancel"
 						press=".onOfferFormCancelBtnPress"
 						visible="{= ${ui>/OfferForm/editMode} }"
+						type="Reject"
 					/>
 				</Toolbar>
 			</form:toolbar>
