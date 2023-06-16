@@ -270,10 +270,18 @@ sap.ui.define([
 
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this, "ProductForm"),
+				success: this._onSubmitChangesSuccessProductForm.bind(this),
 				groupId: "ProductFormDetail"
 			}); 
 
+		},
+
+		_onSubmitChangesSuccessProductForm: function(res){
+			
+			const hasErrorMessages =  this.getView().getModel('message').getData().length > 0;
+			/*todo - rework error messages for product detail form to new way of working
+			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");*/
+			!hasErrorMessages && this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 		},
 
 		_onSubmitChangesFail: function(error){
@@ -311,7 +319,7 @@ sap.ui.define([
 			if(hasErrorMessages) return;
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this, "PricingForm"),
+				success: this._onSubmitChangesSuccess.bind(this),
 				groupId: "PricingForm"
 			}); 
 		},
@@ -321,18 +329,10 @@ sap.ui.define([
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 		},
 
-		_onSubmitChangesSuccess: function(form){
-			let hasErrorMessages = [];
-			if(form === 'PricingForm'){
-				hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
-				this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			}
-
-			if(form === 'ProductForm'){
-				//todo - rework error messages for product details form
-			}
-			
-			(!hasErrorMessages || hasErrorMessages?.length === 0) && this.getModel("ui").setProperty(`/${form}/editMode`, false);
+		_onSubmitChangesSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
+			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
 
 		// _filterPricingForm: function ({offerID, productID}) {
