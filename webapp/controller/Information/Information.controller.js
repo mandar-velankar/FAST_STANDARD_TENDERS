@@ -44,13 +44,38 @@ sap.ui.define([
 				minDate: new Date(),
 				OverviewForm:{
 					editMode: false
-				}
+				},
+				enableApprovalButton: false
 			});
 			
 			this.setModel(oModel, "ui");
 
 			this.bindFields();
+			
+			await this.approvalButtonEnableCheck();
+			
 		},
+
+		/**
+		 * 
+		 * @returns This methods includes logic to enable/disable the ApprovalButton
+		 */
+		approvalButtonEnableCheck: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/ProductPricesCheckView", {
+					filters: [
+						new Filter("OfferID", "EQ", this.offerId)
+					],
+					success: function (res) {
+						let allProductPricesSet = res?.results[0]?.allProductPricesSet;
+						resolve(allProductPricesSet);
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/enableApprovalButton", data);
+			})
+		},
+
 		bindFields: async function () {
 			if (this.offerId && this.offerId !== "NA") {
 				await this.getOfferValidation(this.offerId);
@@ -68,6 +93,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.bindFields();
+			await this.approvalButtonEnableCheck();
 		},
 		bindForm: function (tabName) {
 			const overviewForm = this.byId("idOverviewForm");
