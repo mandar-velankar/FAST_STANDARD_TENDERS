@@ -127,7 +127,7 @@ sap.ui.define([
 		onTenderFormSaveBtnPress: function(event){
 
 			const messages = this.getMessages(["TenderFormView"]);
-			this.oMessageManager.removeMessages(messages);
+			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 			
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),

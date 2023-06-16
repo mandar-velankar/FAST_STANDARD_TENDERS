@@ -58,6 +58,11 @@
 		<form:formContainers>
 			<form:FormContainer>
 				<form:formElements>
+					<form:FormElement label="{i18n>CurrentBasePrice}" >
+						<form:fields>
+							<Input value="{CurrentBasePrice}" enabled="false"/>
+						</form:fields>
+					</form:FormElement>
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
 							<Input value="{BasePrice}" enabled="false"/>
@@ -87,7 +92,7 @@
 									}	
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".calculatePricingFormFields($event, 'Price')"
+								liveChange=".onPricingFormLiveChange($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -99,7 +104,7 @@
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".calculatePricingFormFields($event, 'Price')"
+								liveChange=".onPricingFormLiveChange($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
