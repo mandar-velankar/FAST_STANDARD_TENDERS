@@ -294,11 +294,17 @@ sap.ui.define([
 		},
 
 		onPricingFormEditBtnPress: function(event){
-			this.rebasePrice();
+			const conditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
+			this.rebasePrice(conditonType);
 			this.getModel("ui").setProperty('/PricingForm/editMode', true);
 		},
 
-		rebasePrice: function(){
+		/**
+		 * Recaltulate the price based on the current base price and the provided condition type.
+		 * When master data changes (registered price), the current base price and the (saved) base price will be different.
+		 * @param {string} conditionType - The type of condition.
+		 */
+		rebasePrice: function(conditonType){
 			const pricingForm = this.byId("idPricingForm");
 			const context = pricingForm.getElementBinding().getBoundContext();
 			const boundObject = context.getObject();
@@ -306,6 +312,7 @@ sap.ui.define([
 			if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
 				context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
 			}
+			this.calculatePricingFormFields({conditonType,context});
 		},
 
 		onPricingFormSaveBtnPress: function(event){
@@ -316,7 +323,6 @@ sap.ui.define([
 				"PriceConditionDiscountView"
 			]).length > 0;
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
-			if(hasErrorMessages) return;
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccess.bind(this),
@@ -376,46 +382,91 @@ sap.ui.define([
 
 			return true;
 		},
-
-		calculatePricingFormFields: function(event, priceConditionType){
+		
+		/**
+		 * Event handler for pricing form live change.
+		 *
+		 * @param {object} event - The event object.
+		 * @param {string} conditionType - The condition type.
+		 */
+		onPricingFormLiveChange:function(event, conditonType){
 			const value = event.getParameter("newValue");
 			if(!value) return;
 			const type = event.getSource().getBinding('value').getType();
 			const parsedValue = type.getModelFormat().parse(value);
 			const property = event.getSource().getBindingPath("value");
 			const context = event.getSource().getBindingContext();
-			
-			switch(priceConditionType.toLowerCase()){
-				case "price":
-					this.calculatePriceConditionType({property, value: parsedValue, context});
-					break;
-				case "discount":
-					this.calculateDiscountConditionType({property, value: parsedValue, context});
-					break;
-			}
-
+			this.calculatePricingFormFields({
+				conditonType,
+				value: parsedValue,
+				property,
+				context
+			});
 		},
 
+		/**
+		 * Calculate pricing form fields based on the condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.conditionType - The condition type.
+		 * @param {number|string} options.value - The value for the calculation.
+		 * @param {string} options.property - The property name for the calculation.
+		 * @param {object} options.context - The ui5 context object.
+		 */
+		calculatePricingFormFields: function({conditonType,value,property,context}){
+			switch(conditonType.toLowerCase()){
+				case "price":
+					this.calculatePriceConditionType({property, value, context});
+					break;
+				case "discount":
+					this.calculateDiscountConditionType({property, value, context});
+					break;
+			}
+		},
+
+		/**
+		 * Calculate price condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			let offerPrice = property.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
-			let deductions = property.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
 
+		/**
+		 * Calculate discount condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */		
 		calculateDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			let discount = property.toLowerCase().includes("discount") ? value : priceObj.Discount;
-			let deductions = property.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let offerPrice = parseFloat(priceObj.BasePrice) * (1 - discount);
+			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let offerPrice = parseFloat(priceObj.CurrentBasePrice) * (1 - discount);
 			let netPrice = parseFloat(offerPrice) * (1 - deductions);
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
 
+		/**
+		 * Load the price condition fragment based on the selected price condition type.
+		 *
+		 * @returns {void}
+		 */
 		loadPriceCondition: function(){
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			this.loadPriceConditionFragment(selectedPriceConditonType, {
