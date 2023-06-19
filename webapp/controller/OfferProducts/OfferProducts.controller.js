@@ -277,7 +277,7 @@ sap.ui.define([
 				InternalBidDueDate: oBoundContext.getObject().InternalBidDueDate,
 				SellingCompany: oBoundContext.getObject().SellingCompany,
 				Division: oBoundContext.getObject().Division,
-				WholesaleOffer: oBoundContext.getObject().WholesaleOffer			
+				WholesaleOffer: oBoundContext.getObject().WholesaleOffer || "No"		
 			}
 
 			const statusObj = {
