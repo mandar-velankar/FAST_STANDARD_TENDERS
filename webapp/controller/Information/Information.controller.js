@@ -91,9 +91,10 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
-			this.templateStateData = this.templateState.getData();
+			this.templateStateData = this.templateState.getData();			
 			this.bindFields();
 			await this.approvalButtonEnableCheck();
+			this.getOwnerComponent().getModel().refresh(true);			
 		},
 		bindForm: function (tabName) {
 			const overviewForm = this.byId("idOverviewForm");
