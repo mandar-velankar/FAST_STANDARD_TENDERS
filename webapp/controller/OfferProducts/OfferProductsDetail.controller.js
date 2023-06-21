@@ -329,7 +329,7 @@ sap.ui.define([
 				groupId: "PricingForm"
 			}); 
 		},
-
+		
 		onPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
@@ -338,8 +338,25 @@ sap.ui.define([
 		_onSubmitChangesSuccess: function(res){
 			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPriceView",
+				"PriceConditionDiscountView"
+			]);
 			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
+
+		/**
+		 * Invalidate all entries of the given entity type in the model data.
+		 * Mark entries of the provided entity type in the model cache as invalid. 
+		 * Next time a context binding or list binding is done, the entry will be detected as invalid and will be refreshed from the server.
+		 *
+		 * @param {Array<string>} entityTypes - An array of entity type names.
+		 * @returns {void}
+		 */
+		invalidateEntityType(entityTypes=[]){
+			entityTypes.forEach(type => this.defaultModel.invalidateEntityType(`StandardAppService.${type}`));
+		},
+
 
 		// _filterPricingForm: function ({offerID, productID}) {
 		// 	const oPricingForm = this.byId("idPricingForm");
@@ -479,13 +496,14 @@ sap.ui.define([
 		loadPriceConditionFragment: function(conditionType, contextData){
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
-			Fragment.load({
+			return Fragment.load({
 				id: this.getView().getId(),
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
+				return form;
 			}.bind(this));
 		},
 
@@ -508,6 +526,7 @@ sap.ui.define([
 		},
 
 		onPriceConditionChange: function(event){
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 			this.loadPriceCondition();
 		}
     });
