@@ -59,7 +59,7 @@ sap.ui.define([
 
 			this._bindForm("OfferForm");
 			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
-			this._bindText("TotalAmountOfferProducts");
+			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
 		},
 		_onObjectMatched: async function (oEvent) {
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
@@ -80,7 +80,7 @@ sap.ui.define([
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
-			if (this.objectId && this.offerID) {
+			if (this.objectId && this.offerID && this.offerID !== "NA") {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 					TenderID: this.objectId,
 					OfferID: this.offerID
@@ -277,7 +277,7 @@ sap.ui.define([
 				InternalBidDueDate: oBoundContext.getObject().InternalBidDueDate,
 				SellingCompany: oBoundContext.getObject().SellingCompany,
 				Division: oBoundContext.getObject().Division,
-				WholesaleOffer: oBoundContext.getObject().WholesaleOffer			
+				WholesaleOffer: oBoundContext.getObject().WholesaleOffer || "No"		
 			}
 
 			const statusObj = {
