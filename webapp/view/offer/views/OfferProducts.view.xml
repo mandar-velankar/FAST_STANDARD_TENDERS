@@ -64,13 +64,15 @@
 			columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
-			mode="SingleSelectMaster"
+			mode="MultiSelect"
 			selectionChange=".onOfferProductPress">
 			<headerToolbar>
 				<OverflowToolbar>
 					<content>
 						<Title text="{path:'template>xmlView/tableByName/OfferProductsTable/title'}" level="H2"/>
 						<ToolbarSpacer />
+					<Button text="Add Product" icon="sap-icon://add" press=".onOpenAddProductDialog" visible="{= !${ui>/OfferForm/editMode} }" enabled="{= ${ui>/OfferStatus} === 'Offer Created'}"/>
+					<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteProduct" visible="{= !${ui>/OfferForm/editMode} }" enabled="{= ${ui>/enableDeleteProductButton}}"/>
 					</content>
 				</OverflowToolbar>
 			</headerToolbar>

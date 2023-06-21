@@ -25,6 +25,7 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			this.stState = this.getOwnerComponent().getModel("st");
 
 			const oModel = this.getOwnerComponent().getModel();
 			
@@ -52,7 +53,8 @@ sap.ui.define([
 				minDate: new Date(),
 				OfferForm:{
 					editMode: false
-				}
+				},
+				enableDeleteProductButton: false
 			});
 	
 			this.setModel(oModel, "ui");
@@ -66,10 +68,15 @@ sap.ui.define([
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
 			this.tenderId = oEvent.getParameter("arguments").objectId;
 			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			let oTable = this.byId("idOfferProductsTable");
+			let aItems = oTable.getItems();
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			if(aItems.length < 0) this.getModel("ui").setProperty('/enableDeleteProductButton', false);
+			const oSelectedOffer = await this.stState.getService().getOffer(this.offerId);
+			this.getModel("ui").setProperty('/OfferStatus', oSelectedOffer?.OfferStatus);
 		},
 		/**
 		 * This method bind a given form to its entity from the ui configuration template.
@@ -152,6 +159,10 @@ sap.ui.define([
 
 			var deliveryPath = objContext.getPath(),
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
+			let bSelected = oEvent?.getParameter("selected");
+			let oTable = this.byId("idOfferProductsTable");
+			let aSelectedItems = oTable.getSelectedItems();
+			(bSelected || aSelectedItems.length > 0)? this.getModel("ui").setProperty('/enableDeleteProductButton', true) : this.getModel("ui").setProperty('/enableDeleteProductButton', false);
 
 			let oNextUIState = "";
 			const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
@@ -322,6 +333,7 @@ sap.ui.define([
 				MessageToast.show("Offer has been successfully created");
 				this.onCloseOfferCreationDialog();
 				this._showDetail(newOfferCtx.getObject());
+				this.getModel("ui").setProperty('/OfferStatus', "Offer Created");
 				this.getOwnerComponent().getModel().refresh(true);
 			}
 		},
