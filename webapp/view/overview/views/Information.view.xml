@@ -52,7 +52,7 @@
 					icon="sap-icon://validate" 
 					press="onApprovalsPress" 
 					visible="{= !${ui>/OverviewForm/editMode}}"
-					enabled="true"
+					enabled="{= ${ui>/enableApprovalButton} }"
 				/>
 
 				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}" class = "sapUiSmallMarginTop">
