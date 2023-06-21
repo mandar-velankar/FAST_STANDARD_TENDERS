@@ -40,7 +40,23 @@ sap.ui.define(
 
             getOffer: function (offerId) {
                 return this.getService().getOffer(offerId);
-            }
+            },
+
+            getOfferProductValidation: function (offerID){
+                return this.getService().getOfferProductValidation(offerID);
+            },
+
+            getOfferStatus: function (offerID){
+                return this.getService().getOfferStatus(offerID);
+            },
+
+            getPreApprovedPrice: function (instituteID, countryCode){
+                return this.getService().getPreApprovedPrice(instituteID, countryCode);
+            },
+
+            loadApprovalsForOffer: function (offerID, instituteID, countryCode, model){
+                return this.getService().loadApprovalsForOffer(offerID, instituteID, countryCode, model);
+            },
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':

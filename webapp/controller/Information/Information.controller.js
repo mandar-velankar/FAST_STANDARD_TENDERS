@@ -5,8 +5,9 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
-	"sap/ui/model/Context"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Context) {
+	"sap/ui/model/Context",
+	"sap/ui/core/Fragment"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Context, Fragment) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -17,10 +18,13 @@ sap.ui.define([
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
 			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+			
+			this.stState = this.getOwnerComponent().getModel("st");
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
+
 		},
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode}) {
 			this.templateState = this.getOwnerComponent().getModel("template");
@@ -54,6 +58,10 @@ sap.ui.define([
 			
 			await this.approvalButtonEnableCheck();
 			
+		},
+
+		onCloseApprovalDialog: function(){
+			this.oDialog.close();
 		},
 
 		/**
@@ -175,6 +183,113 @@ sap.ui.define([
 		},
 		formatRequestedQty: function (quantity, unit) {
 			return parseInt(quantity) + " " + unit;
-		}
+		},
+
+		onApprovalsPress : function () {
+			this._bindApprovalsForm();
+		},
+
+		_bindApprovalsForm: async function () {
+			
+			const form = this.byId("idNewOfferForm");
+			const offerValidation = this.getOwnerComponent().getModel().getProperty(`/OfferValidation('${this.offerId}')`);
+			const offerProductValidation = await this.stState.getOfferProductValidation(this.offerId);
+			const tender = this.getOwnerComponent().getModel().getProperty(`/TenderFormView('${this.tenderId}')`);
+
+			if(offerValidation.IN_POLICY === false){
+				let aProductsNotValid = [];
+				let productNames = [];
+				if(Array.isArray(offerProductValidation)){
+					aProductsNotValid = offerProductValidation.filter(product => product.IN_POLICY !== true);
+					productNames = aProductsNotValid.map(product => product.PRODUCTNAME);
+				}
+
+				if(!Array.isArray(offerProductValidation) && offerProductValidation.IN_POLICY !== true){
+					aProductsNotValid.push(offerProductValidation);
+					productNames.push(offerProductValidation.PRODUCTNAME);
+				}
+
+				if(aProductsNotValid.length > 0 ){
+					sap.m.MessageBox.error(`The following products do not have prices that comply with their pricing policy: \n\n ${productNames.join()}`);
+				}
+			} else {
+
+				const offerStatus = await this.stState.getOfferStatus(this.offerId);
+
+				//Cancel of appproval is only possible when offer status = "Awaiting Approval"
+				let bCancelEnabled = false;
+				let bSendApprovalEnabled = false;
+
+				if (offerStatus.STATUS === "Awaiting Approval") {
+					bCancelEnabled = true;
+				}
+
+				if (offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded" && offerStatus.STATUS !== "In FOC Negotiation" && offerStatus.STATUS !== "Appeal in Progress" && offerStatus.STATUS !== "Delivery Ongoing" ) {
+					bSendApprovalEnabled = true;
+				}
+
+				const approvalsForOffer=  await this.stState.loadApprovalsForOffer(this.offerId, tender.InstituteID, tender.CountryCode, this.getModel());
+				this.getModel().setProperty("/ApprovalsSelectedOffer", approvalsForOffer);
+
+				const that = this;
+				// create dialog lazily
+				if (!this.byId("idApprovalsPopup")) {
+					this.approvalsDialog = Fragment.load({
+						id: that.getView().getId(),
+						name: "com.bayer.tender.statenderapp.view.overview.fragments.Approvals",
+						controller: that,
+					}).then(function (oDialog) {
+						that.getView().addDependent(oDialog);
+						oDialog.open();
+					})
+				}else {
+					this.byId("idApprovalsPopup").open();
+				}
+
+				//enable / disable buttons
+				this.byId("btnCancelApproval").setEnabled(bCancelEnabled);
+				this.byId("btnSendApproval").setEnabled(bSendApprovalEnabled);
+
+
+				//Set grouping Mandatory or Optional
+				var mGroupFunctions = {
+					MandatoryOptional: function (oContext) {
+						var sApproverTypeSection = oContext.getProperty("ApproverTypeSection");
+						var key, text;
+
+						//check for approvertypes that indicate they are mandatory approvers
+						if (sApproverTypeSection === 1) {
+							//Mandatory
+							key = "Mandatory";
+							text = "Mandatory Approvals";
+						} else {
+							key = "Optional";
+							text = "Optional Approvals";
+						} 
+						return {
+							key: key,
+							text: text
+						};
+					}
+				};
+
+				//Get table of approvals
+				var oTable = sap.ui.getCore().byId("idMandatoryTable"),
+					oBinding = oTable.getBinding("items"),
+					sPath,
+					bDescending,
+					vGroup,
+					aGroups = [];
+
+				//Actual grouping
+				sPath = "MandatoryOptional";
+				bDescending = false;
+				vGroup = mGroupFunctions[sPath];
+				aGroups.push(new Sorter(sPath, bDescending, vGroup));
+				// apply the selected group settings
+				oBinding.sort(aGroups);
+
+			} 
+		},
 	})
 });
