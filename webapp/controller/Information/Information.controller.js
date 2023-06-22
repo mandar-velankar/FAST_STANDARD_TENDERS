@@ -6,8 +6,9 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"sap/ui/model/Context",
-	"sap/ui/core/Fragment"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Context, Fragment) {
+	"sap/ui/core/Fragment",
+	"sap/ui/model/Sorter"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Context, Fragment, Sorter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -61,7 +62,7 @@ sap.ui.define([
 		},
 
 		onCloseApprovalDialog: function(){
-			this.oDialog.close();
+			this.byId("idApprovalsPopup").close();
 		},
 
 		/**
@@ -185,111 +186,177 @@ sap.ui.define([
 			return parseInt(quantity) + " " + unit;
 		},
 
-		onApprovalsPress : function () {
-			this._bindApprovalsForm();
+		formatApprovalStatus: function (approvalStatus) {
+			try {
+				switch(approvalStatus) {
+				  case "Approved":
+				    return "Success";
+				  case "Rejected":
+				    return "Error";
+				  case "Waiting":
+				  	return "Warning";
+				  case "Notification Sent":
+				  	return "Success";
+				  default:
+				    return "None";
+				}
+			} catch (err) {
+				return "None";
+			}
+		},
+
+		formatHierarchy: function(approverTypes){
+			if(approverTypes){
+				return this.getModel().getProperty(`/${approverTypes[0]}/Hierarchy`);
+			}
+		},
+
+		formatSendingEnabled: function (ApprovalStatus, ApproverTypeSection) {
+			//enable disable
+			var bEnabled;
+			
+			
+			//check status & approvertype
+			if(
+				ApprovalStatus !== 'Waiting'
+				&& ApprovalStatus !== 'Processing'
+				&& ApprovalStatus !== 'Cancelling'
+				&& !(ApproverTypeSection === 1) //not mandatory
+			){
+				//only Approved, rejected or notification sent, send will be enabled to resend approvals
+				bEnabled = true;
+			}else{
+				bEnabled = false;
+			}
+			
+			return bEnabled;
+		},
+
+		onApprovalsPress : async function () {
+			this.getView().setBusy(true);
+			
+			await this._createApprovalsDialog();
+			await this._bindApprovalsTable();
+			await this._bindApprovalsForm();
+
+			this.getView().setBusy(false);
+		},
+
+		_createApprovalsDialog: async function(){
+			
+			let that = this;
+
+			if (!this.byId("idApprovalsPopup")) {
+				this.approvalsDialog = await Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.overview.fragments.Approvals",
+					controller: that,
+				}).then(function (oDialog) {
+					oDialog.setResizable(true);
+					oDialog.setStretch(true);
+					that.getView().addDependent(oDialog);
+					oDialog.open();
+				});
+			}else {
+				this.byId("idApprovalsPopup").open();
+			}
+		},
+
+		_filterApprovalTypes: async function (){
+			const oApprovalsTableBinding = this.byId("idMandatoryTable").getBinding("items");
+			const orFilters = [
+				new Filter("OfferId",FilterOperator.EQ, this.offerId)
+			]
+			oApprovalsTableBinding.filter(orFilters);
+		},
+
+		_enableApprovalCancelButtons: async function(){
+			const offerStatus = await this.stState.getOfferStatus(this.offerId);
+
+			//enable / disable buttons
+			this.byId("btnCancelApproval").setEnabled(offerStatus.STATUS === "Awaiting Approval" ? true : false);
+			this.byId("btnSendApproval").setEnabled(offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded" && offerStatus.STATUS !== "In FOC Negotiation" && offerStatus.STATUS !== "Appeal in Progress" && offerStatus.STATUS !== "Delivery Ongoing" ? true : false);
+		},
+
+		_showApprovalsPricingError: async function(){
+			const offerProductValidation = await this.stState.getOfferProductValidation(this.offerId);
+
+			let aProductsNotValid = [];
+			let productNames = [];
+			if(Array.isArray(offerProductValidation)){
+				aProductsNotValid = offerProductValidation.filter(product => product.IN_POLICY !== true);
+				productNames = aProductsNotValid.map(product => product.PRODUCTNAME);
+			}
+
+			if(!Array.isArray(offerProductValidation) && offerProductValidation.IN_POLICY !== true){
+				aProductsNotValid.push(offerProductValidation);
+				productNames.push(offerProductValidation.PRODUCTNAME);
+			}
+
+			if(aProductsNotValid.length > 0 ){
+				sap.m.MessageBox.error(`The following products do not have prices that comply with their pricing policy: \n\n ${productNames.join()}`);
+			}
 		},
 
 		_bindApprovalsForm: async function () {
 			
-			const form = this.byId("idNewOfferForm");
 			const offerValidation = this.getOwnerComponent().getModel().getProperty(`/OfferValidation('${this.offerId}')`);
-			const offerProductValidation = await this.stState.getOfferProductValidation(this.offerId);
-			const tender = this.getOwnerComponent().getModel().getProperty(`/TenderFormView('${this.tenderId}')`);
 
 			if(offerValidation.IN_POLICY === false){
-				let aProductsNotValid = [];
-				let productNames = [];
-				if(Array.isArray(offerProductValidation)){
-					aProductsNotValid = offerProductValidation.filter(product => product.IN_POLICY !== true);
-					productNames = aProductsNotValid.map(product => product.PRODUCTNAME);
-				}
-
-				if(!Array.isArray(offerProductValidation) && offerProductValidation.IN_POLICY !== true){
-					aProductsNotValid.push(offerProductValidation);
-					productNames.push(offerProductValidation.PRODUCTNAME);
-				}
-
-				if(aProductsNotValid.length > 0 ){
-					sap.m.MessageBox.error(`The following products do not have prices that comply with their pricing policy: \n\n ${productNames.join()}`);
-				}
+				await this._showApprovalsPricingError();
 			} else {
-
-				const offerStatus = await this.stState.getOfferStatus(this.offerId);
-
-				//Cancel of appproval is only possible when offer status = "Awaiting Approval"
-				let bCancelEnabled = false;
-				let bSendApprovalEnabled = false;
-
-				if (offerStatus.STATUS === "Awaiting Approval") {
-					bCancelEnabled = true;
-				}
-
-				if (offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded" && offerStatus.STATUS !== "In FOC Negotiation" && offerStatus.STATUS !== "Appeal in Progress" && offerStatus.STATUS !== "Delivery Ongoing" ) {
-					bSendApprovalEnabled = true;
-				}
-
-				const approvalsForOffer=  await this.stState.loadApprovalsForOffer(this.offerId, tender.InstituteID, tender.CountryCode, this.getModel());
-				this.getModel().setProperty("/ApprovalsSelectedOffer", approvalsForOffer);
-
-				const that = this;
-				// create dialog lazily
-				if (!this.byId("idApprovalsPopup")) {
-					this.approvalsDialog = Fragment.load({
-						id: that.getView().getId(),
-						name: "com.bayer.tender.statenderapp.view.overview.fragments.Approvals",
-						controller: that,
-					}).then(function (oDialog) {
-						that.getView().addDependent(oDialog);
-						oDialog.open();
-					})
-				}else {
-					this.byId("idApprovalsPopup").open();
-				}
-
-				//enable / disable buttons
-				this.byId("btnCancelApproval").setEnabled(bCancelEnabled);
-				this.byId("btnSendApproval").setEnabled(bSendApprovalEnabled);
-
-
-				//Set grouping Mandatory or Optional
-				var mGroupFunctions = {
-					MandatoryOptional: function (oContext) {
-						var sApproverTypeSection = oContext.getProperty("ApproverTypeSection");
-						var key, text;
-
-						//check for approvertypes that indicate they are mandatory approvers
-						if (sApproverTypeSection === 1) {
-							//Mandatory
-							key = "Mandatory";
-							text = "Mandatory Approvals";
-						} else {
-							key = "Optional";
-							text = "Optional Approvals";
-						} 
-						return {
-							key: key,
-							text: text
-						};
-					}
-				};
-
-				//Get table of approvals
-				var oTable = sap.ui.getCore().byId("idMandatoryTable"),
-					oBinding = oTable.getBinding("items"),
-					sPath,
-					bDescending,
-					vGroup,
-					aGroups = [];
-
-				//Actual grouping
-				sPath = "MandatoryOptional";
-				bDescending = false;
-				vGroup = mGroupFunctions[sPath];
-				aGroups.push(new Sorter(sPath, bDescending, vGroup));
-				// apply the selected group settings
-				oBinding.sort(aGroups);
-
+				await this._filterApprovalTypes();
+				await this._enableApprovalCancelButtons();
+				this._setApprovalsPopupGrouping();
 			} 
+		},
+
+		_setApprovalsPopupGrouping: function(){
+			//Set grouping Mandatory or Optional
+			let mGroupFunctions = {
+				MandatoryOptional: function (oContext) {
+					var sApproverTypeSection = oContext.getProperty("ApproverTypeSection");
+					var key, text;
+
+					//check for approvertypes that indicate they are mandatory approvers
+					if (sApproverTypeSection === 1) {
+						//Mandatory
+						key = "Mandatory";
+						text = "Mandatory Approvals";
+					} else {
+						key = "Optional";
+						text = "Optional Approvals";
+					} 
+					return {
+						key: key,
+						text: text
+					};
+				}
+			};
+
+			//Actual grouping & apply the selected group settings
+			const aGroups = [new Sorter("ApproverTypeSection", false,  mGroupFunctions["MandatoryOptional"])];
+			this.byId("idMandatoryTable")?.getBinding("items")?.sort(aGroups);
+
+		},
+
+		_bindApprovalsTable: function () {
+			const approversTable = this.byId("idMandatoryTable");
+			const approversTemplate = approversTable.getBindingInfo("items").template;
+			approversTable.bindItems({
+				path: "/OfferProductOfferStatus",
+				filters: [
+					new Filter({
+						path: "OfferId",
+						operator: FilterOperator.EQ,
+						value1: this.offerId
+					}),
+				],
+				parameters: {
+					expand: "ApproverList,ApproverTypes"
+				},
+				template: approversTemplate
+			})
 		},
 	})
 });

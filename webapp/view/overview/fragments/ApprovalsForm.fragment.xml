@@ -6,8 +6,8 @@
 				<items>						
 						<!-- Table with mandatory approvals -->
 						<Table id="idMandatoryTable" 
-							items="{path: '/ApprovalsSelectedOffer', parameters: {'expand': 'ApproverList,ApproverTypes'}}" 
-							alternateRowColors="true">
+							   items = "{path: '/OfferProductOfferStatus', parameters: {'expand': 'ApproverList,ApproverTypes'}}" 
+							   alternateRowColors="true">
 								
 								<!-- table header with title & buttons -->
 								<headerToolbar>
@@ -15,10 +15,6 @@
 											<content>
 												<Title text="Mandatory/Optional approvals" level="H2"/>
 												<ToolbarSpacer />
-												<!-- This will be handled outside this application 
-												<Button icon="sap-icon://employee-approvals" text="{i18n>Approve}" type="Accept" press="onApprovePress"/>
-												<Button icon="sap-icon://employee-rejections" text="{i18n>Reject}" type="Reject" press="onRejectPress"/>
-												-->
 												<Button icon="sap-icon://refresh" text="{i18n>Refresh}" type="Default" press="onRefreshApprovalsPress"/>
 											</content>
 										</OverflowToolbar>
@@ -66,7 +62,12 @@
 											<Label text="{ApproverType}"/>
 
 											<!-- Hierarchy -->
-											<Input value="{ApproverTypes/results/0/Hierarchy}" required="true"/>
+											<Input value="{ 
+														parts:[
+																{path:'ApproverTypes'}
+															  ],
+														formatter: '.formatHierarchy'
+													}" required="true"/>
 
 											<!-- Content -->
 											<Label text="{ApprovalContent}"/>
@@ -76,7 +77,7 @@
 												class="sapUiSmallMarginBottom"
 												text="{ApprovalStatus}"
 												state="{ parts:[{path:'ApprovalStatus'}],
-														 formatter: '.formatter.status'}"
+														 formatter: '.formatApprovalStatus'}"
 											/>
 											
 											<Select selectedKey="{send}"
@@ -85,7 +86,7 @@
 																{path:'ApprovalStatus'},
 																{path:'ApproverTypeSection'}
 															  ],
-														formatter: '.formatter.sendingEnabled'
+														formatter: '.formatSendingEnabled'
 													}"
 											        >
 												<items>
@@ -96,7 +97,7 @@
 											
 											<!-- Name -->
 											<Select selectedKey="{ApproverEmailID}" 
-													items="{ path: 'ApproverList/results', templateShareable: false }" 
+													items="{ path: 'ApproverList', templateShareable: false }" 
 													width="250px" 
 													enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling'}">
 												<core:Item text="{ApproverName}" key="{ApproverEmailID}"/>
@@ -130,15 +131,9 @@
 														enabled="false"/>
 											
 										</cells>
-										
 									</ColumnListItem>
-									
 								</items>
-								
 						</Table>
-							
 				</items>
-			
 		</VBox>
-					
 </core:FragmentDefinition>

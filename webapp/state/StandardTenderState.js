@@ -50,13 +50,6 @@ sap.ui.define(
                 return this.getService().getOfferStatus(offerID);
             },
 
-            getPreApprovedPrice: function (instituteID, countryCode){
-                return this.getService().getPreApprovedPrice(instituteID, countryCode);
-            },
-
-            loadApprovalsForOffer: function (offerID, instituteID, countryCode, model){
-                return this.getService().loadApprovalsForOffer(offerID, instituteID, countryCode, model);
-            },
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':
