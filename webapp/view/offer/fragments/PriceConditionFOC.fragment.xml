@@ -1,0 +1,79 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>
+	<form:Form
+		id="idFOCForm"
+		editable="true"
+	>
+		<form:toolbar>
+			<Toolbar>
+				<Title text="{i18n>FOC}"/>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/priceCondFoc}.length }"
+					visible="{= ${messages>/priceCondFoc}.length > 0 &amp;&amp; ${ui>/FocForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'priceCondFoc')" 
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onButtonFocFormEditPress"
+					visible="{= !${ui>/FocForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onButtonFocFormSavePress"
+					visible="{= ${ui>/FocForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onButtonFocFormCancelPress"
+					visible="{= ${ui>/FocForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>PriceConditionFOCFragment.FreeGoodsForOtherProducts}">
+						<form:fields>            
+							<MultiInput 
+								valueHelpOnly="true" 
+								valueHelpRequest=".onMultiInputProductsValueHelpRequest" 
+								tokens="{fastAppData>FreeGoodsOther}" 
+								enabled="{ui>/FocForm/editMode}"
+							>
+								<tokens>
+									<Token key="{fastAppData>ProductPackId}" text="{fastAppData>ProductName}" editable="false"></Token>
+								</tokens>
+							</MultiInput>
+						</form:fields>
+					</form:FormElement>	
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+
+</core:FragmentDefinition>
