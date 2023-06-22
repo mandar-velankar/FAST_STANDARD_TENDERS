@@ -10,7 +10,11 @@
 
 	<!--<f:DynamicPage id="idAwardedProducts" toggleHeaderOnTitleClick="false">
 		<f:content>-->
-			<Table id="AwardedProducts" 
+			<Table 
+				id="idAwardedProducts" 
+				items = "{
+					path: '/AwardedProductsDetailView'
+				}"
 				mode="SingleSelectMaster"
 				delete="onDeleteAwardedProduct"
 				selectionChange=".onAwardedProductPress">
@@ -25,20 +29,8 @@
 				<items>
 					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
 						<cells>
-							<Text text="ADEMPAS 0,5MG 42TAB"/>	
-							<Text text="Won"/>					
-						</cells>
-					</ColumnListItem>
-					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
-						<cells>
-							<Text text="ADEMPAS 2,0MG 42TAB"/>		
-							<Text text="Lost"/>					
-						</cells>
-					</ColumnListItem>
-					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
-						<cells>
-							<Text text="ADEMPAS 2,5MG 42TAB"/>	
-							<Text text="Lost"/>					
+							<Text text="{AwardedProduct}"/>	
+							<Text text="{Outcome}"/>					
 						</cells>
 					</ColumnListItem>
 				</items>

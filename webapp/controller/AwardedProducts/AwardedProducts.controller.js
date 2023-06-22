@@ -2,8 +2,10 @@ sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/m/library",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -42,6 +44,34 @@ sap.ui.define([
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
 
+		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode}) {
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			this.oOwnerComponent = this.getOwnerComponent();
+			this.oRouter = this.oOwnerComponent.getRouter();
+
+			this.defaultModel = this.getOwnerComponent().getModel();
+			
+			//this.getView().getBindingContext("template"); // get current tab data
+			// await this.getOwnerComponent().getModel().metadataLoaded();
+			this.tenderId = objectId;
+			this.offerId = offerId;
+			this.countryCode = countryCode;
+			this.selectedTab = iconTabfilter.getKey();
+
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+				minDate: new Date(),
+				enableApprovalButton: false
+			});
+			
+			this.setModel(oModel, "ui");
+
+			this.bindTable();
+		},
+
 		_onObjectMatched: async function (oEvent) {
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
@@ -53,26 +83,39 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 		},
 
+		bindTable: function () {
+			const awarderProductsTable = this.byId("idAwardedProducts");
+			const template = awarderProductsTable.getBindingInfo("items").template
+
+			awarderProductsTable.bindItems({
+				path: "/AwardedProductsDetailView",
+				filters: [
+					new Filter("OfferID", "EQ", this.offerId)
+				],
+				template: template
+			})
+		},
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
 
-		onAwardedProductPress: function(oEvent){
+		onAwardedProductPress: function(event){
 			/*const objContext = oEvent.getParameter("listItem").getBindingContext("pa");
 			const selectedObj = objContext?.getObject();
 
 			var deliveryPath = objContext.getPath(),
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
-
+			const selectedProductCode = event.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
 			let oNextUIState = "";
 
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(2);
 				this.oRouter.navTo("objectDetail", {
 					layout: oNextUIState.layout,
-					objectId: "AE-15-100-1001",
-					productId: "1",
-					countryCode: this.getModel("st").getProperty("/SelectedCountry")
+					objectId: this.tenderId,
+					offerId: this.offerId,
+					productId: selectedProductCode,
+					countryCode: this.countryCode
 				});
 			}.bind(this));
 		}
