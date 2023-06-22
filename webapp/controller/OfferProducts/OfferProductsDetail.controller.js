@@ -569,5 +569,49 @@ sap.ui.define([
 			// ]);
 			// !hasErrorMessages && this.getModel("ui").setProperty(`/FocForm/editMode`, false);
 		},
+
+		onMultiInputProductsValueHelpRequest: async function(event){
+			const dialog = await this.getPriceConditionFocDialog();
+			dialog.open();
+		},
+
+
+		/**
+		 * Retrieves the price condition FOC dialog.
+		 *
+		 * @returns {Promise} A promise that resolves to the FOC dialog.
+		 */
+		getPriceConditionFocDialog: function(){
+			const view = this.getView();
+			if (!this.dialogFocProducts) {
+				this.dialogFocProducts = Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC_OtherProducts",
+					controller: this
+				}).then(function (dialog) {
+					// connect dialog to the root view of this component (models, lifecycle)
+					view.addDependent(dialog);
+					return dialog;
+				});
+			}
+			return this.dialogFocProducts;	
+		},
+
+		onButtonApplyFocOtherProductsPress:function(event){
+
+		},
+
+		onButtonCancelFocOtherProductsPress: async function(event){
+			const dialog = await this.getPriceConditionFocDialog();
+			dialog.close(); 
+		},
+
+		onButtonAddFocOtherProductsPress: function(event){
+
+		},
+
+		onButtonDeleteOtherProductPress: function(event){
+
+		},
     });
 });
