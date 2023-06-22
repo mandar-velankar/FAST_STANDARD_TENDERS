@@ -1,72 +1,126 @@
-<mvc:View controllerName="com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail" xmlns="sap.uxap" xmlns:m="sap.m" xmlns:f="sap.f"
-	xmlns:form="sap.ui.layout.form" xmlns:mvc="sap.ui.core.mvc" xmlns:t="sap.ui.table" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"
-	xmlns:viz.data="sap.viz.ui5.data" xmlns:viz="sap.viz.ui5.controls" xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds">
-
-	<f:DynamicPage
-		id="idDynamicPage"
-		toggleHeaderOnTitleClick="false">
-		<f:title>
-			<f:DynamicPageTitle>
-				<f:heading>
-					<m:FlexBox
-						wrap="Wrap"
-						fitContainer="true"
-						alignItems="Center">
-						<m:Title
-							text="Awarded Product Detail"
-							wrapping="true"
-							class="sapUiTinyMarginEnd"
-						/>
-					</m:FlexBox>
-				</f:heading>
-				<f:navigationActions>
-					<m:OverflowToolbarButton
-						type="Transparent"
-						icon="sap-icon://full-screen"
-						press=".handleFullScreen"
-						tooltip="Enter Full Screen Mode"
-						visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
-					/>
-					<m:OverflowToolbarButton
-						type="Transparent"
-						icon="sap-icon://exit-full-screen"
-						press=".handleFullScreen"
-						tooltip="Exit Full Screen Mode"
-						visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
-					/>
-					<m:OverflowToolbarButton
-						type="Transparent"
-						icon="sap-icon://decline"
-						press=".handleClose"
-						tooltip="Close column"
-						visible="{= ${detailDetailView>/actionButtonsInfo/endColumn/closeColumn} !== null }"
-					/>
-				</f:navigationActions>
-			</f:DynamicPageTitle>
-		</f:title>
-		<f:content>
-			<form:SimpleForm
-				editable="true"
-				maxContainerCols="1"
-				layout="ColumnLayout"
-				columnsL="1" >
-				<form:content>
-					<m:Label text="Contract No"/>
-					<m:Input value="5634534534234" enabled="false"/>
-					<m:Label text="Product"/>
-					<m:Input value="10003223" enabled="false"/>
-					<m:Label text="Currency"/>
-					<m:Input value="EUR" enabled="false"/>
-					<m:Label text="FOC"/>
-					<m:Input value="" enabled="false"/>
-					<m:Label text="UoM"/>
-					<m:Input value="Units" enabled="false"/>
-					<m:Label text="Outcome"/>
-					<m:Input value="Won" enabled="false"/>
-					<m:Label text="Reason"/>
-					<m:Input value="" enabled="false"/>
-				</form:content>
-			</form:SimpleForm>
-		</f:content>
-	</f:DynamicPage>
+<mvc:View
+    controllerName="com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail"
+    xmlns="sap.uxap"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:t="sap.ui.table"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+>
+    <f:DynamicPage
+        id="idDynamicPage"
+        toggleHeaderOnTitleClick="false"
+    >
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <m:FlexBox
+                        wrap="Wrap"
+                        fitContainer="true"
+                        alignItems="Center"
+                    >
+                        <m:Title
+                            text="Awarded Product: {AwardedProduct}"
+                            wrapping="true"
+                            class="sapUiTinyMarginEnd"
+                        />
+                    </m:FlexBox>
+                </f:heading>
+                <f:navigationActions>
+                    <m:OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://full-screen"
+                        press=".handleFullScreen"
+                        tooltip="Enter Full Screen Mode"
+                        visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+                    />
+                    <m:OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://exit-full-screen"
+                        press=".handleFullScreen"
+                        tooltip="Exit Full Screen Mode"
+                        visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+                    />
+                    <m:OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://decline"
+                        press=".handleClose"
+                        tooltip="Close column"
+                        visible="{= ${detailDetailView>/actionButtonsInfo/endColumn/closeColumn} !== null }"
+                    />
+                </f:navigationActions>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <m:VBox>
+				<m:Panel 
+					expandable="true"
+                    headerText="Award Details">
+					<form:Form
+						id="idAwardedProductsDetailForm"
+						editable="true"
+						formContainers="{path:'template>/detailDetailAwardedProductConfig/countryTemplate/template/form/formContainers',templateShareable:true}"
+					>
+						<!-- <form:title>
+								<core:Title text="{template>title}" />
+							</form:title> -->
+							<form:toolbar>
+								<m:Toolbar>
+									<m:ToolbarSpacer />
+									<m:Button id="idAwardProductEditbtn" icon="sap-icon://edit" text="Edit" press=".onButtonAwardDetailFormEditPress" visible="{= !${ui>/AwardedProductForm/editMode} }"/>
+									<m:Button
+										id="idOfferDetailFormSaveBtn"
+										icon="sap-icon://save"
+										text="Save"
+										press=".onButtonAwardProductDetailFormSavePress"
+										visible="{= ${ui>/AwardedProductForm/editMode} }"
+									/>
+									<m:Button
+										id="idOfferDetailFormCancelBtn"
+										icon="sap-icon://decline"
+										text="Cancel"
+										press=".onButtonAwardProductDetailFormCancelPress"
+										visible="{= ${ui>/AwardedProductForm/editMode} }"
+									/>
+                        		</m:Toolbar>
+							</form:toolbar>
+						<form:layout>
+							<form:ResponsiveGridLayout
+								labelSpanXL="{template>layout/labelSpanXL}"
+								labelSpanL="{template>layout/labelSpanL}"
+								labelSpanM="{template>layout/labelSpanM}"
+								labelSpanS="{template>layout/labelSpanS}"
+								adjustLabelSpan="{template>layout/adjustLabelSpan}"
+								emptySpanXL="{template>layout/emptySpanXL}"
+								emptySpanL="{template>layout/emptySpanL}"
+								emptySpanM="{template>layout/emptySpanM}"
+								emptySpanS="{template>layout/emptySpanS}"
+								columnsXL="{template>layout/columnsXL}"
+								columnsL="{template>layout/columnsL}"
+								columnsM="{template>layout/columnsM}"
+								singleContainerFullSize="{template>layout/singleContainerFullSize}"
+							/>
+						</form:layout>
+						<form:formContainers>
+							<form:FormContainer
+								formElements="{path:'template>formElements',templateShareable:true}"
+							>
+								<form:formElements>
+									<form:FormElement
+										label="{template>label}"
+										fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
+									/>
+								</form:formElements>
+							</form:FormContainer>
+						</form:formContainers>
+					</form:Form>
+				</m:Panel>
+			</m:VBox>
+        </f:content>
+    </f:DynamicPage>
 </mvc:View>
