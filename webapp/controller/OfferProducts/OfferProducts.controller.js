@@ -54,7 +54,12 @@ sap.ui.define([
 				OfferForm:{
 					editMode: false
 				},
-				enableDeleteProductButton: false
+				OfferProductTable:{
+					enableDeleteProductButton: false,
+					editMode: false,
+					tableSelectionMode: 'SingleSelectMaster',
+				}
+				
 			});
 	
 			this.setModel(oModel, "ui");
@@ -68,15 +73,10 @@ sap.ui.define([
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
 			this.tenderId = oEvent.getParameter("arguments").objectId;
 			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
-			let oTable = this.byId("idOfferProductsTable");
-			let aItems = oTable.getItems();
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			if(aItems.length < 0) this.getModel("ui").setProperty('/enableDeleteProductButton', false);
-			const oSelectedOffer = await this.stState.getService().getOffer(this.offerId);
-			this.getModel("ui").setProperty('/OfferStatus', oSelectedOffer?.OfferStatus);
 		},
 		/**
 		 * This method bind a given form to its entity from the ui configuration template.
@@ -159,24 +159,52 @@ sap.ui.define([
 
 			var deliveryPath = objContext.getPath(),
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
-			let bSelected = oEvent?.getParameter("selected");
-			let oTable = this.byId("idOfferProductsTable");
-			let aSelectedItems = oTable.getSelectedItems();
-			(bSelected || aSelectedItems.length > 0)? this.getModel("ui").setProperty('/enableDeleteProductButton', true) : this.getModel("ui").setProperty('/enableDeleteProductButton', false);
+			let offerProductTableEditMode = this.getModel("ui").getProperty('/OfferProductTable/editMode');
+		
+			if(!offerProductTableEditMode){
+				let oNextUIState = "";
+				const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
 
-			let oNextUIState = "";
-			const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
+				this.oOwnerComponent.getHelper().then(function (oHelper) {
+					oNextUIState = oHelper.getNextUIState(2);
+					this.oRouter.navTo("offerProductDetail", {
+						countryCode: this.countryCode,
+						layout: oNextUIState.layout,
+						objectId: this.objectId,
+						offerId: this.offerID,
+						productId: selectedProductCode
+					});
+				}.bind(this));
+			}
+			else{
+				let bSelected = oEvent?.getParameter("selected");
+				let oTable = this.byId("idOfferProductsTable");
+				let aSelectedItems = oTable.getSelectedItems();
+				(bSelected || aSelectedItems.length > 0)? this.getModel("ui").setProperty('/OfferProductTable/enableDeleteProductButton', true) : this.getModel("ui").setProperty('/OfferProductTable/enableDeleteProductButton', false);
+			}
+		},
 
-			this.oOwnerComponent.getHelper().then(function (oHelper) {
-				oNextUIState = oHelper.getNextUIState(2);
-				this.oRouter.navTo("offerProductDetail", {
-					countryCode: this.countryCode,
-					layout: oNextUIState.layout,
-					objectId: this.objectId,
-					offerId: this.offerID,
-					productId: selectedProductCode
-				});
-			}.bind(this));
+		onOfferProductTableEditBtnPress: async function(event){
+			let oAddOfferProductButton = this.byId("AddOfferProductBtnId");
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', true);
+			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'MultiSelect');
+			this.byId("idOfferProductsTable").removeSelections();
+			const oSelectedOffer = await this.stState.getService().getOffer(this.offerId);
+			if(oSelectedOffer.OfferStatus === "Offer Created") oAddOfferProductButton.setEnabled(true);
+
+		},
+
+		onOfferProductTableSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
+
+			// if(!this.validateOffer()) return; //error
+			// this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+		},
+		onOfferProductTableCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
+			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
+			this.byId("idOfferProductsTable").removeSelections();
+			//this.defaultModel.resetChanges();
 		},
 
 		onOfferFormEditBtnPress: function(event){
