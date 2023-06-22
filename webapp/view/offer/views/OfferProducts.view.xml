@@ -59,30 +59,44 @@
 		</form:Form>
 	</VBox>
 
-	<VBox class='sapUiMediumMargin'>
-		<Table id="idOfferProductsTable" 
-			columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
-			class="sapFDynamicPageAlignContent"
-			width="auto"
-			mode="SingleSelectMaster"
-			selectionChange=".onOfferProductPress">
-			<headerToolbar>
-				<OverflowToolbar>
-					<content>
-						<Title text="{path:'template>xmlView/tableByName/OfferProductsTable/title'}" level="H2"/>
-						<ToolbarSpacer />
-					<Button text="Add Product" icon="sap-icon://add" press=".onOpenAddProductDialog" visible="{= !${ui>/OfferForm/editMode} }" enabled="{= ${ui>/OfferStatus} === 'Offer Created'}"/>
-					<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteProduct" visible="{= !${ui>/OfferForm/editMode} }" enabled="{= ${ui>/enableDeleteProductButton}}"/>
-					</content>
-				</OverflowToolbar>
-			</headerToolbar>
-			<columns>
-				<Column>
-					<Text text="{template>title}" />
-				</Column>
-			</columns>
-		</Table>
-	</VBox>	
+	<Table id="idOfferProductsTable" 
+		columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
+		class="sapFDynamicPageAlignContent"
+		width="auto"
+		mode="{= ${ui>/OfferProductTable/tableSelectionMode}}"
+		selectionChange=".onOfferProductPress">
+		<headerToolbar>
+			<OverflowToolbar>
+				<content>
+					<Title text="{path:'template>xmlView/tableByName/OfferProductsTable/title'}" level="H2"/>
+					<ToolbarSpacer />
+				<Button id="AddOfferProductBtnId" text="Add Product" icon="sap-icon://add" press=".onOpenAddProductDialog" visible="{= ${ui>/OfferProductTable/editMode} }"/>
+				<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteProduct" visible="{= ${ui>/OfferProductTable/editMode} }" enabled="{= ${ui>/OfferProductTable/enableDeleteProductButton}}"/>
+				<Button id="editOfferProductButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferProductTableEditBtnPress" visible="{= !${ui>/OfferProductTable/editMode} }"/>
+				<Button
+					id="idOfferProductTableSaveBtn"
+					icon="sap-icon://save"
+					text="Save"
+					press=".onOfferProductTableSaveBtnPress"
+					visible="{= ${ui>/OfferProductTable/editMode} }"
+				/>
+				<Button
+					id="idOfferProductTableCancelBtn"
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onOfferProductTableCancelBtnPress"
+					visible="{= ${ui>/OfferProductTable/editMode} }"
+				/>
+				</content>
+			</OverflowToolbar>
+		</headerToolbar>
+		<columns>
+			<Column>
+				<Text text="{template>title}" />
+			</Column>
+		</columns>
+	</Table>
+
 	<VBox class='sapUiMediumMargin' justifyContent="End" alignItems="End">
 		<Text id='idTotalAmountOfferProducts' text='{= ${OfferTotal} ? "Offer Total: " + ${OfferTotal} + " EUR" : "Offer Total: 0 EUR" }' />
 	</VBox>	
