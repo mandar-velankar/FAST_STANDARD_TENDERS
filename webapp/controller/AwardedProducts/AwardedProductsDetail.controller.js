@@ -52,6 +52,7 @@ sap.ui.define([
 		 _onObjectMatched: function (oEvent) {
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
+			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;
 
@@ -101,9 +102,11 @@ sap.ui.define([
 			let oNextUIState = "";
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(1);
-				this.oRouter.navTo("object", {
+				this.oRouter.navTo("objectDetailAwards", {
 					layout: oNextUIState.layout,
-					objectId: this.sObjectId
+					objectId: this.sObjectId,
+					offerId: this.offerId,
+					countryCode: this.countryCode
 				});
 			}.bind(this));
 		},

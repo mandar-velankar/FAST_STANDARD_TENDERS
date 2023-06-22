@@ -59,7 +59,6 @@
 		</form:Form>
 	</VBox>
 
-
 	<Table id="idOfferProductsTable" 
 		columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
 		class="sapFDynamicPageAlignContent"

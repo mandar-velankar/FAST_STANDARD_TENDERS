@@ -122,7 +122,7 @@
                 </Panel>
                 <Panel
                     expandable="true"
-                    headerText="Pricing Info"
+                    headerText="{i18n>OfferProductsDetailView.PricingInfo}"
                 >
                     <Label text="Set price by:" class="sapUiSmallMarginBegin sapUiTinyMarginTop sapUiTinyMarginEnd"/>
                     <Select
@@ -136,6 +136,12 @@
                     <VBox id="idPriceConditionVbox" class="sapUiNoMargin">
                         <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
                     </VBox>
+				</Panel>
+                 <Panel
+                    expandable="true"
+                    headerText="{i18n>OfferProductsDetailView.FreeGoods}"
+                >
+                    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC" type="XML"/>
 				</Panel>
             </VBox>
         </f:content>

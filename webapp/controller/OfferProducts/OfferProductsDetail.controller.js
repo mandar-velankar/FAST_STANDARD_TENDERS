@@ -45,7 +45,8 @@ sap.ui.define([
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
 			const messagesModel = new JSONModel({
-				priceCondPrice: []
+				priceCondPrice: [],
+				priceCondFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -132,6 +133,9 @@ sap.ui.define([
 					editMode: false
 				},
 				PricingForm:{
+					editMode: false
+				},
+				FocForm:{
 					editMode: false
 				}
 			});
@@ -528,6 +532,42 @@ sap.ui.define([
 		onPriceConditionChange: function(event){
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 			this.loadPriceCondition();
-		}
+		},
+
+		/**
+		 * FocForm event handlers
+		 */
+		onButtonFocFormEditPress: function(event){
+			this.getModel("ui").setProperty('/FocForm/editMode', true);
+		},	
+
+		onButtonFocFormSavePress: function(event){
+			// const hasErrorMessages =  this.getMessages([
+			// 	"idOfferPrice", 
+			// 	"PriceConditionPriceView",
+			// 	"PriceConditionDiscountView"
+			// ]).length > 0;
+			// this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
+			// this.defaultModel.submitChanges({
+			// 	error: this._onSubmitChangesFail.bind(this),
+			// 	success: this._onSubmitChangesFocFormSuccess.bind(this),
+			// 	groupId: "PricingForm"
+			// }); 
+		},
+		
+		onButtonFocFormCancelPress: function(event){
+			this.getModel("ui").setProperty('/FocForm/editMode', false);
+			// this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+		},
+
+		_onSubmitChangesFocFormSuccess: function(res){
+			// const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
+			// this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			// this.invalidateEntityType([
+			// 	"PriceConditionPriceView",
+			// 	"PriceConditionDiscountView"
+			// ]);
+			// !hasErrorMessages && this.getModel("ui").setProperty(`/FocForm/editMode`, false);
+		},
     });
 });
