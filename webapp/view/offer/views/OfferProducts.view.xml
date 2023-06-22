@@ -64,7 +64,7 @@
 			columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
 			class="sapFDynamicPageAlignContent"
 			width="auto"
-			mode="MultiSelect"
+			mode="SingleSelectMaster"
 			selectionChange=".onOfferProductPress">
 			<headerToolbar>
 				<OverflowToolbar>
