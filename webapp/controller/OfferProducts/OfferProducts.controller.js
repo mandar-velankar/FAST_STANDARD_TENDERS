@@ -184,12 +184,40 @@ sap.ui.define([
 			}
 		},
 
+		onOpenAddOfferProductDialog : function () {
+			const that = this;
+			// create dialog lazily
+			if (!this.byId("idAddOfferProduct")) {
+				this.offerCreationDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.AddProduct",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+                    oDialog.open();
+				//	that._bindCreateOfferForm();
+                })
+			}else {
+				this.byId("idAddOfferProduct").open();
+			}
+		},
+
+		
+		onCloseAddOfferProductDialog: function () {
+			// this.oMessageManager.removeAllMessages();
+			//this.cancelPendingChanges(["OfferFormView"], "offerProductsMsg");
+			this.byId("idAddOfferProduct").close();
+			this.byId("idAddOfferProduct").destroy();
+			//this.getModel("ui").setProperty('/OfferForm/editMode', false);
+			// this.defaultModel.resetChanges();
+		},
+		
 		onOfferProductTableEditBtnPress: async function(event){
 			let oAddOfferProductButton = this.byId("AddOfferProductBtnId");
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', true);
 			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'MultiSelect');
 			this.byId("idOfferProductsTable").removeSelections();
-			const oSelectedOffer = await this.stState.getService().getOffer(this.offerId);
+			const oSelectedOffer = await this.stState.getService().getOffer(this.offerID);
 			if(oSelectedOffer.OfferStatus === "Offer Created") oAddOfferProductButton.setEnabled(true);
 
 		},
@@ -402,6 +430,6 @@ sap.ui.define([
 			}
 
 			return true;
-		},
+		}, 
 	});
 });
