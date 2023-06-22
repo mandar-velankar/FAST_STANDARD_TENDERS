@@ -40,7 +40,16 @@ sap.ui.define(
 
             getOffer: function (offerId) {
                 return this.getService().getOffer(offerId);
-            }
+            },
+
+            getOfferProductValidation: function (offerID){
+                return this.getService().getOfferProductValidation(offerID);
+            },
+
+            getOfferStatus: function (offerID){
+                return this.getService().getOfferStatus(offerID);
+            },
+
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':
