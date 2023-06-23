@@ -4,13 +4,14 @@ sap.ui.define([
 	"../../model/formatter",
 	"sap/m/library",
 	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator",
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Fragment",
 	"sap/m/MessageBox",
 	"sap/m/MessageToast",
 	"sap/m/Token",
 	"sap/ui/Device"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device) {
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -233,6 +234,20 @@ sap.ui.define([
 							selected: "{ui>SELECTED}"
 						})
 					},
+					liveChange: function (oEvent) {
+						let sValue = oEvent.getParameter("value");
+						const oFilter = [
+							new Filter("BRAND_NAME", FilterOperator.Contains, sValue),
+							new Filter("BRAND_ID", FilterOperator.Contains, sValue)
+						]
+						oEvent.getSource().getBinding("items").filter(new Filter(oFilter));
+					},
+					confirm: function (oEvent) {
+						that._handleCloseBrandNameList(oEvent);
+					},
+					cancel: function (oEvent) {
+						that._handleCloseBrandNameList(oEvent);
+					}
 					
 				});
 			}
@@ -240,6 +255,53 @@ sap.ui.define([
 			this.getView().addDependent(this._valueHelpSelectBrandDialog);
 			this._valueHelpSelectBrandDialog.open();
 
+		},
+
+		_handleCloseBrandNameList: function (oEvent) { 
+
+			var that = this;
+
+			//selected brands
+			var aContexts = oEvent.getParameter("selectedContexts");
+			if (aContexts && aContexts.length) {
+
+				MessageToast.show("The following brands were selected: " + aContexts.map(function (oContext) {
+					return oContext.getObject().BRAND_NAME;
+				}).join(", "));
+
+				//get multi input box
+				const oBrandList = this.byId("idBrandList");
+				let aBrandTokens = [];
+				let aBrands = [];
+
+				//push the selected brands 
+				aContexts.map(function (oContext) {
+
+					var oToken = new Token({
+						text: oContext.getObject().BRAND_NAME,
+						key: oContext.getObject().BRAND_ID
+					});
+					aBrandTokens.push(oToken);
+
+					//Brands for filtering
+					const oBrand = {
+						BRAND_ID: oContext.getObject().BRAND_ID
+					}
+					aBrands.push(oBrand);
+
+				});
+
+				//add the array of tokens to the multi input
+				oBrandList.setTokens(aBrandTokens);
+
+				// const aFilteredBrandProducts = this.filterBrandProducts(aBrands);
+				// this.soaState.setProductCollection(aFilteredBrandProducts);
+
+			} else {
+
+				MessageToast.show("No new item was selected.");
+
+			}
 		},
 		
 		onOfferProductTableEditBtnPress: async function(event){
