@@ -133,10 +133,12 @@ sap.ui.define([
 					editMode: false
 				},
 				PricingForm:{
-					editMode: false
+					editMode: false,
+					mainPriceConditionID: null
 				},
 				FocForm:{
-					editMode: false
+					editMode: false,
+					hasMainPriceCondition: false
 				}
 			});
 	
@@ -208,10 +210,12 @@ sap.ui.define([
 			const orFilters = [
 				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
 				new Filter("Division",FilterOperator.EQ, oSelectedOffer.Division),
-				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification)
+				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
+				new Filter("ConditionType",FilterOperator.NE, 'FOC')	
 			]
 			oPriceCondBinding.filter(orFilters);
 		},
+	
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
 			var oViewModel = this.getModel("detailDetailView");
@@ -301,6 +305,7 @@ sap.ui.define([
 			const conditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			this.rebasePrice(conditonType);
 			this.getModel("ui").setProperty('/PricingForm/editMode', true);
+			this.getModel("ui").setProperty('/FocForm/editMode', false);
 		},
 
 		/**
@@ -486,17 +491,24 @@ sap.ui.define([
 		/**
 		 * Load the price condition fragment based on the selected price condition type.
 		 *
-		 * @returns {void}
+		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
 		 */
 		loadPriceCondition: function(){
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
-			this.loadPriceConditionFragment(selectedPriceConditonType, {
+			return this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
 				productID:this.productId,
 				tenderID: this.sObjectId
 			});
 		},
 
+		/**
+		 * Loads the price condition fragment based on the specified condition type and context data.
+		 *
+		 * @param {string} conditionType - The type of the price condition fragment to load.
+		 * @param {object} contextData - The context data to pass to the price condition fragment.
+		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
+		 */
 		loadPriceConditionFragment: function(conditionType, contextData){
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
@@ -525,13 +537,67 @@ sap.ui.define([
 			});
 			form.bindElement({
 				path: path,
-				groupId: "PricingForm" 
+				groupId: "PricingForm",
+				events: {
+					dataReceived: this.onPricingFormDataReceived.bind(this)
+				}
 			});
+		},
+
+		/**
+		 * Handles the event when pricing form data is received.
+		 *
+		 * @param {object} event - The event object containing the pricing form data.
+		 * @returns {void}
+		 */
+		onPricingFormDataReceived: function(event){
+			const priceCondition = event.getParameter('data');
+			const binding = this.byId("idFOCMultiInput").getBinding("tokens");
+			this.setMainPriceCondition(priceCondition);
+			this.filterFreeGoodsOther(priceCondition.PriceConditionID, binding);
+		},
+
+		filterFreeGoodsOther: async function (priceConditionID, binding) {
+			if(!priceConditionID) return;
+			const filters = [
+				new Filter("PriceCondition_ID",FilterOperator.EQ, priceConditionID)	
+			]
+			binding.filter(filters);
 		},
 
 		onPriceConditionChange: function(event){
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			this.loadPriceCondition();
+			this.loadPriceCondition().then(form => {
+				const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
+				this.setMainPriceCondition(priceCondition);
+			});
+		},
+
+		setMainPriceCondition: function(priceCondition){
+			if(!priceCondition) return;
+			this.setHasMainPriceCondition(priceCondition.hasPriceCondition);
+			this.setMainPriceConditionID(priceCondition.PriceConditionID);
+		},
+
+		/**
+		 * Sets the value of the "hasMainPriceCondition" property in the "ui" model.
+		 *
+		 * @param {boolean} [hasPriceCondition=false] - The new value for the "hasMainPriceCondition" property.
+		 * Defaults to `false` if not provided.
+		 * @returns {boolean}
+		 */
+		setHasMainPriceCondition: function(hasPriceCondition = false){
+			this.getModel("ui").setProperty("/FocForm/hasMainPriceCondition", hasPriceCondition);
+			return hasPriceCondition;
+		},
+
+		setMainPriceConditionID: function(id){
+			this.getModel("ui").setProperty("/PricingForm/mainPriceConditionID", id);
+			return id;
+		},
+
+		getMainPriceConditionID: function(){
+			return this.getModel("ui").getProperty("/PricingForm/mainPriceConditionID");
 		},
 
 		/**
@@ -539,6 +605,7 @@ sap.ui.define([
 		 */
 		onButtonFocFormEditPress: function(event){
 			this.getModel("ui").setProperty('/FocForm/editMode', true);
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 		},	
 
 		onButtonFocFormSavePress: function(event){
@@ -572,6 +639,8 @@ sap.ui.define([
 
 		onMultiInputProductsValueHelpRequest: async function(event){
 			const dialog = await this.getPriceConditionFocDialog();
+			const binding = this.byId("idFreeGoodsOtherTable").getBinding("items");
+			this.filterFreeGoodsOther(this.getMainPriceConditionID(), binding);
 			dialog.open();
 		},
 

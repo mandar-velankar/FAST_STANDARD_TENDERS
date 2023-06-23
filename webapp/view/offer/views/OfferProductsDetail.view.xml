@@ -124,12 +124,16 @@
                     expandable="true"
                     headerText="{i18n>OfferProductsDetailView.PricingInfo}"
                 >
-                    <Label text="Set price by:" class="sapUiSmallMarginBegin sapUiTinyMarginTop sapUiTinyMarginEnd"/>
+                    <Label 
+                        text="Set price by:" 
+                        class="sapUiSmallMarginBegin sapUiTinyMarginTop sapUiTinyMarginEnd"
+                    />
                     <Select
                         id = "idSelectedPriceContition"
                         items = "{/PriceConditionClassification}"
                         selectedKey="{st>/SelectedPriceConditionType}"
                         change="onPriceConditionChange"
+                        enabled="{= !${ui>/PricingForm/editMode} &amp;&amp; !${ui>/FocForm/editMode} }"
                     >
                         <core:Item key="{ConditionType}" text="{ConditionType}"/>
                     </Select>

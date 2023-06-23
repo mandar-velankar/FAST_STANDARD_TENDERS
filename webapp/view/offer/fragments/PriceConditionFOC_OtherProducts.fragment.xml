@@ -8,7 +8,10 @@
 			<Button text="Cancel" press=".onButtonCancelFocOtherProductsPress" />
 		</buttons>
 
-        <Table items="{path:'fastAppData>FreeGoodsOther'}">
+        <Table 
+            id="idFreeGoodsOtherTable"
+            items="{path:'/FreeGoodsOther'}"
+        >
 		<headerToolbar>
 			<OverflowToolbar>
 				<content>
@@ -46,11 +49,11 @@
                         showValueHelp="true" 
                         valueHelpOnly="true" 
                         valueHelpRequest=".onProductNameInputValueHelpRequest" 
-                        value="{fastAppData>ProductName}" 
+                        value="{ProductName}" 
                     />
                     <Select 
                         forceSelection="false" 
-                        selectedKey="{fastAppData>FreeGoodsOther_ABS_PCT}"
+                        selectedKey="{FreeGoodsOther_ABS_PCT}"
                     >
                         <core:Item key="ABS" text="Absolute" />
                         <core:Item key="PCT" text="Percentage" />
@@ -59,34 +62,34 @@
                     <HBox>
                         <Input 
                             type="Number" 
-                            value="{path:'fastAppData>FreeGoodsOther'}" 
-                            valueState="{fastAppData>FreeGoodsOtherValueState}" 
+                            value="{path:'FreeGoodsOther'}" 
+                            valueState="{FreeGoodsOtherValueState}" 
                             visible="{= 
-                                ${fastAppData>FreeGoodsOther_ABS_PCT} === 'ABS' || 
-                                ${fastAppData>FreeGoodsOther_ABS_PCT} === 'STP' ? true : false 
+                                ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
+                                ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false 
                             }"
                         />
                         <Input  
                             value="{
-                                path:'fastAppData>FreeGoodsOther',
+                                path:'FreeGoodsOther',
                                 type: '.types.percent'
                             }" 
-                            valueState="{fastAppData>FreeGoodsOtherValueState}" 
+                            valueState="{FreeGoodsOtherValueState}" 
                             visible="{= 
-                                ${fastAppData>FreeGoodsOther_ABS_PCT} === 'PCT' ? true : false 
+                                ${FreeGoodsOther_ABS_PCT} === 'PCT' ? true : false 
                             }"
                         /> 
                     </HBox>
                     <Input 
                         type="Number" 
-                        value="{path:'fastAppData>FreeGoodsOther_Step'}" 
-                        valueState="{fastAppData>FreeGoodsOtherStepValueState}" 
-                        enabled="{= ${fastAppData>FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
+                        value="{path:'FreeGoodsOther_Step'}" 
+                        valueState="{FreeGoodsOtherStepValueState}" 
+                        enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
                     />
                     <Text 
                         text="{= 
-                            ${fastAppData>FreeGoodsOther_ABS_PCT} === 'ABS' || 
-                            ${fastAppData>FreeGoodsOther_ABS_PCT} === 'STP' ? ${fastAppData>UOM}: '%'
+                            ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
+                            ${FreeGoodsOther_ABS_PCT} === 'STP' ? ${UOM}: '%'
                         }">
                     </Text> 
                     <Button 

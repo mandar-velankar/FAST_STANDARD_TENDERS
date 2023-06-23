@@ -22,6 +22,7 @@
 					icon="sap-icon://edit"
 					text="Edit"
 					press=".onButtonFocFormEditPress"
+					enabled="{ui>/FocForm/hasMainPriceCondition}"
 					visible="{= !${ui>/FocForm/editMode} }"
 				/>
 				<Button
@@ -60,13 +61,14 @@
 					<form:FormElement label="{i18n>PriceConditionFOCFragment.FreeGoodsForOtherProducts}">
 						<form:fields>            
 							<MultiInput 
+								id="idFOCMultiInput"
 								valueHelpOnly="true" 
 								valueHelpRequest=".onMultiInputProductsValueHelpRequest" 
-								tokens="{fastAppData>FreeGoodsOther}" 
+								tokens="{/FreeGoodsOther}" 
 								enabled="{ui>/FocForm/editMode}"
 							>
 								<tokens>
-									<Token key="{fastAppData>ProductPackId}" text="{fastAppData>ProductName}" editable="false"></Token>
+									<Token key="{ProductPackId}" text="{ProductName}" editable="false"></Token>
 								</tokens>
 							</MultiInput>
 						</form:fields>
