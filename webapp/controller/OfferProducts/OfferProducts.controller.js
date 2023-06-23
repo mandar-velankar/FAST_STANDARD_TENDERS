@@ -8,8 +8,9 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"sap/m/MessageBox",
 	"sap/m/MessageToast",
+	"sap/m/Token",
 	"sap/ui/Device"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox, MessageToast, Device) {
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -64,6 +65,8 @@ sap.ui.define([
 	
 			this.setModel(oModel, "ui");
 
+			await this.getCountryBrands(this.countryCode);
+			await this.getCountryBrandProducts(this.countryCode);
 			this._bindForm("OfferForm");
 			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
@@ -210,6 +213,33 @@ sap.ui.define([
 			this.byId("idAddOfferProduct").destroy();
 			//this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			// this.defaultModel.resetChanges();
+		},
+
+		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender
+		brandNameList_f4: function () { 
+
+			const that = this;
+
+			if (!this._valueHelpSelectBrandDialog) {
+				this._valueHelpSelectBrandDialog = new sap.m.SelectDialog(this.createId("idValueHelpSelectBrandDialog"), {
+					title: "Brand Name",
+					multiSelect: true,
+					rememberSelections: false,
+					items: {
+						path: "ui>/OfferProductTable/countryBrands",
+						template: new sap.m.StandardListItem({
+							title: "{ui>BRAND_NAME}",
+							description: "{ui>BRAND_ID}",
+							selected: "{ui>SELECTED}"
+						})
+					},
+					
+				});
+			}
+
+			this.getView().addDependent(this._valueHelpSelectBrandDialog);
+			this._valueHelpSelectBrandDialog.open();
+
 		},
 		
 		onOfferProductTableEditBtnPress: async function(event){
@@ -431,5 +461,35 @@ sap.ui.define([
 
 			return true;
 		}, 
+		
+		getCountryBrands: async function (countryCode) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CountryBrands", {
+					filters: [
+						new Filter("COUNTRY_CODE", "EQ", countryCode)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/OfferProductTable/countryBrands", data.results);
+			})
+		},
+
+		getCountryBrandProducts: async function (countryCode) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CountryBrandProducts", {
+					filters: [
+						new Filter("COUNTRY_CODE", "EQ", countryCode)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/OfferProductTable/countryBrandProducts", data.results);
+			})
+		},
 	});
 });
