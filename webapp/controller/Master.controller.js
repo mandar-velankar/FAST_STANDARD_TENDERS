@@ -90,7 +90,6 @@ sap.ui.define([
 			});
 
 			this.getRouter().getRoute("master").attachPatternMatched(this._onMasterMatched, this);
-			this.getRouter().getRoute("object").attachPatternMatched(this._onMasterMatched, this);
 			this.getRouter().attachBypassed(this.onBypassed, this);
 
 			// set message model
@@ -484,7 +483,8 @@ sap.ui.define([
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
 				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
-				offerId: oItem?.OfferID || "NA"
+				offerId: oItem?.OfferID || "NA",
+				layout: "TwoColumnsMidExpanded"
 			}, bReplace);
 		},
 		filterMasterTable: function (tenderID) {

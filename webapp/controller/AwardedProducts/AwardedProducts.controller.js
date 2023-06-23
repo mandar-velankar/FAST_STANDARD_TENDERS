@@ -110,7 +110,7 @@ sap.ui.define([
 
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(2);
-				this.oRouter.navTo("objectDetail", {
+				this.oRouter.navTo("awardProductsDetail", {
 					layout: oNextUIState.layout,
 					objectId: this.tenderId,
 					offerId: this.offerId,
