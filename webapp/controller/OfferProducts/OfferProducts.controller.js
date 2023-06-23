@@ -259,10 +259,10 @@ sap.ui.define([
 
 		_handleCloseBrandNameList: function (oEvent) { 
 
-			var that = this;
+			let that = this;
 
 			//selected brands
-			var aContexts = oEvent.getParameter("selectedContexts");
+			let aContexts = oEvent.getParameter("selectedContexts");
 			if (aContexts && aContexts.length) {
 
 				MessageToast.show("The following brands were selected: " + aContexts.map(function (oContext) {
@@ -277,7 +277,7 @@ sap.ui.define([
 				//push the selected brands 
 				aContexts.map(function (oContext) {
 
-					var oToken = new Token({
+					const oToken = new Token({
 						text: oContext.getObject().BRAND_NAME,
 						key: oContext.getObject().BRAND_ID
 					});
