@@ -19,18 +19,7 @@
 						showCloseButton="true"
 						class="sapUiMediumMarginBottom">
 					</MessageStrip>
-					
-					<!-- message strip -->
-					<MessageStrip
-						id="inProductsStripID"
-						type="Success"
-						text="{fastAppData>/MercadoInProductsMessage}"
-						visible="{= ${fastAppData>/MercadoInProductsMessage} === '' ? false : true }"
-						enableFormattedText="true"
-						showIcon="true"
-						showCloseButton="true"
-						class="sapUiMediumMarginBottom">
-					</MessageStrip>
+				
 					
 					
 					<!-- Select brand -->
