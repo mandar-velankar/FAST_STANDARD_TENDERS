@@ -5,7 +5,8 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator) {
+	"../../service/StandardSingletonService"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -88,7 +89,7 @@ sap.ui.define([
 			const template = awarderProductsTable.getBindingInfo("items").template
 
 			awarderProductsTable.bindItems({
-				path: "/AwardedProductsDetailView",
+				path: "/AwardedProducts",
 				filters: [
 					new Filter("OfferID", "EQ", this.offerId)
 				],
@@ -106,6 +107,10 @@ sap.ui.define([
 			var deliveryPath = objContext.getPath(),
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
 			const selectedProductCode = event.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
+			const selectedProductOutcome = event.getParameter("listItem")?.getBindingContext()?.getObject()?.Outcome;
+
+			StandardSingletonService.setOutcome(selectedProductOutcome);
+
 			let oNextUIState = "";
 
 			this.oOwnerComponent.getHelper().then(function (oHelper) {

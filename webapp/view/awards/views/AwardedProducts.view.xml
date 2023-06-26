@@ -13,7 +13,7 @@
 			<Table 
 				id="idAwardedProducts" 
 				items = "{
-					path: '/AwardedProductsDetailView'
+					path: '/AwardedProducts'
 				}"
 				mode="SingleSelectMaster"
 				delete="onDeleteAwardedProduct"

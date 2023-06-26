@@ -95,12 +95,15 @@ sap.ui.define([
 			});
 	
 			this.setModel(uiModel, "ui");
-			const awardedProductPath = this.getModel().createKey("/AwardedProductsDetailView", {
+
+			const awardedProductPath = this.getModel().createKey("/AwardedProductFormView", {
 				OfferID: this.offerId,
 				ProductCode: this.productId,
 				LotID: "1"
 			});
+			
 			this._bindView(awardedProductPath);
+			this.bindForm(awardedProductPath)
 			
 		},
 
@@ -134,6 +137,14 @@ sap.ui.define([
 
 		},
 
+		bindForm: function (awardedProductPath) {
+			const awardedProductForm = this.byId("idAwardedProductsDetailForm");
+
+			awardedProductForm.bindElement({
+				path: awardedProductPath,
+				groupId: "AwardedProduct"
+			})
+		},
 
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
@@ -154,7 +165,11 @@ sap.ui.define([
 		},
 
 		onButtonAwardProductDetailFormSavePress: function(event){
-
+			this.defaultModel.submitChanges({
+				error: () => {},
+				success: () => {},
+				groupId: "AwardedProduct"
+			}); 
 		},
 		
 		onButtonAwardProductDetailFormCancelPress: function(event){
