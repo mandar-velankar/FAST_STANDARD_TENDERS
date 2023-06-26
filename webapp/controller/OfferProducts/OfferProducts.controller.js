@@ -4,12 +4,14 @@ sap.ui.define([
 	"../../model/formatter",
 	"sap/m/library",
 	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator",
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Fragment",
 	"sap/m/MessageBox",
 	"sap/m/MessageToast",
+	"sap/m/Token",
 	"sap/ui/Device"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, ColumnListItem, Fragment, MessageBox, MessageToast, Device) {
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -25,6 +27,7 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			this.stState = this.getOwnerComponent().getModel("st");
 
 			const oModel = this.getOwnerComponent().getModel();
 			
@@ -52,11 +55,19 @@ sap.ui.define([
 				minDate: new Date(),
 				OfferForm:{
 					editMode: false
+				},
+				OfferProductTable:{
+					enableDeleteProductButton: false,
+					editMode: false,
+					tableSelectionMode: 'SingleSelectMaster',
 				}
+				
 			});
 	
 			this.setModel(oModel, "ui");
 
+			await this.getCountryBrands(this.countryCode);
+			await this.getCountryBrandProducts(this.countryCode);
 			this._bindForm("OfferForm");
 			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
@@ -152,20 +163,168 @@ sap.ui.define([
 
 			var deliveryPath = objContext.getPath(),
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
+			let offerProductTableEditMode = this.getModel("ui").getProperty('/OfferProductTable/editMode');
+		
+			if(!offerProductTableEditMode){
+				let oNextUIState = "";
+				const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
 
-			let oNextUIState = "";
-			const selectedProductCode = oEvent.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
+				this.oOwnerComponent.getHelper().then(function (oHelper) {
+					oNextUIState = oHelper.getNextUIState(2);
+					this.oRouter.navTo("offerProductDetail", {
+						countryCode: this.countryCode,
+						layout: oNextUIState.layout,
+						objectId: this.objectId,
+						offerId: this.offerID,
+						productId: selectedProductCode
+					});
+				}.bind(this));
+			}
+			else{
+				let bSelected = oEvent?.getParameter("selected");
+				let oTable = this.byId("idOfferProductsTable");
+				let aSelectedItems = oTable.getSelectedItems();
+				(bSelected || aSelectedItems.length > 0)? this.getModel("ui").setProperty('/OfferProductTable/enableDeleteProductButton', true) : this.getModel("ui").setProperty('/OfferProductTable/enableDeleteProductButton', false);
+			}
+		},
 
-			this.oOwnerComponent.getHelper().then(function (oHelper) {
-				oNextUIState = oHelper.getNextUIState(2);
-				this.oRouter.navTo("offerProductDetail", {
-					countryCode: this.countryCode,
-					layout: oNextUIState.layout,
-					objectId: this.objectId,
-					offerId: this.offerID,
-					productId: selectedProductCode
+		onOpenAddOfferProductDialog : function () {
+			const that = this;
+			// create dialog lazily
+			if (!this.byId("idAddOfferProduct")) {
+				this.offerCreationDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.AddProduct",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+                    oDialog.open();
+				//	that._bindCreateOfferForm();
+                })
+			}else {
+				this.byId("idAddOfferProduct").open();
+			}
+		},
+
+		
+		onCloseAddOfferProductDialog: function () {
+			// this.oMessageManager.removeAllMessages();
+			//this.cancelPendingChanges(["OfferFormView"], "offerProductsMsg");
+			this.byId("idAddOfferProduct").close();
+			this.byId("idAddOfferProduct").destroy();
+			//this.getModel("ui").setProperty('/OfferForm/editMode', false);
+			// this.defaultModel.resetChanges();
+		},
+
+		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender
+		brandNameList_f4: function () { 
+
+			const that = this;
+
+			if (!this._valueHelpSelectBrandDialog) {
+				this._valueHelpSelectBrandDialog = new sap.m.SelectDialog(this.createId("idValueHelpSelectBrandDialog"), {
+					title: "Brand Name",
+					multiSelect: true,
+					rememberSelections: false,
+					items: {
+						path: "ui>/OfferProductTable/countryBrands",
+						template: new sap.m.StandardListItem({
+							title: "{ui>BRAND_NAME}",
+							description: "{ui>BRAND_ID}",
+							selected: "{ui>SELECTED}"
+						})
+					},
+					liveChange: function (oEvent) {
+						let sValue = oEvent.getParameter("value");
+						const oFilter = [
+							new Filter("BRAND_NAME", FilterOperator.Contains, sValue),
+							new Filter("BRAND_ID", FilterOperator.Contains, sValue)
+						]
+						oEvent.getSource().getBinding("items").filter(new Filter(oFilter));
+					},
+					confirm: function (oEvent) {
+						that._handleCloseBrandNameList(oEvent);
+					},
+					cancel: function (oEvent) {
+						that._handleCloseBrandNameList(oEvent);
+					}
+					
 				});
-			}.bind(this));
+			}
+
+			this.getView().addDependent(this._valueHelpSelectBrandDialog);
+			this._valueHelpSelectBrandDialog.open();
+
+		},
+
+		_handleCloseBrandNameList: function (oEvent) { 
+
+			let that = this;
+
+			//selected brands
+			let aContexts = oEvent.getParameter("selectedContexts");
+			if (aContexts && aContexts.length) {
+
+				MessageToast.show("The following brands were selected: " + aContexts.map(function (oContext) {
+					return oContext.getObject().BRAND_NAME;
+				}).join(", "));
+
+				//get multi input box
+				const oBrandList = this.byId("idBrandList");
+				let aBrandTokens = [];
+				let aBrands = [];
+
+				//push the selected brands 
+				aContexts.map(function (oContext) {
+
+					const oToken = new Token({
+						text: oContext.getObject().BRAND_NAME,
+						key: oContext.getObject().BRAND_ID
+					});
+					aBrandTokens.push(oToken);
+
+					//Brands for filtering
+					const oBrand = {
+						BRAND_ID: oContext.getObject().BRAND_ID
+					}
+					aBrands.push(oBrand);
+
+				});
+
+				//add the array of tokens to the multi input
+				oBrandList.setTokens(aBrandTokens);
+
+				// const aFilteredBrandProducts = this.filterBrandProducts(aBrands);
+				// this.soaState.setProductCollection(aFilteredBrandProducts);
+
+			} else {
+
+				MessageToast.show("No new item was selected.");
+
+			}
+		},
+		
+		onOfferProductTableEditBtnPress: async function(event){
+			let oAddOfferProductButton = this.byId("AddOfferProductBtnId");
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', true);
+			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'MultiSelect');
+			this.byId("idOfferProductsTable").removeSelections();
+			const oSelectedOffer = await this.stState.getService().getOffer(this.offerID);
+			if(oSelectedOffer.OfferStatus === "Offer Created") oAddOfferProductButton.setEnabled(true);
+
+		},
+
+		onOfferProductTableSaveBtnPress: function(event){
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
+
+			// if(!this.validateOffer()) return; //error
+			// this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+		},
+		onOfferProductTableCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
+			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
+			this.byId("idOfferProductsTable").removeSelections();
+			//this.defaultModel.resetChanges();
 		},
 
 		onOfferFormEditBtnPress: function(event){
@@ -322,6 +481,7 @@ sap.ui.define([
 				MessageToast.show("Offer has been successfully created");
 				this.onCloseOfferCreationDialog();
 				this._showDetail(newOfferCtx.getObject());
+				this.getModel("ui").setProperty('/OfferStatus', "Offer Created");
 				this.getOwnerComponent().getModel().refresh(true);
 			}
 		},
@@ -362,6 +522,36 @@ sap.ui.define([
 			}
 
 			return true;
+		}, 
+		
+		getCountryBrands: async function (countryCode) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CountryBrands", {
+					filters: [
+						new Filter("COUNTRY_CODE", "EQ", countryCode)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/OfferProductTable/countryBrands", data.results);
+			})
+		},
+
+		getCountryBrandProducts: async function (countryCode) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CountryBrandProducts", {
+					filters: [
+						new Filter("COUNTRY_CODE", "EQ", countryCode)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/OfferProductTable/countryBrandProducts", data.results);
+			})
 		},
 	});
 });
