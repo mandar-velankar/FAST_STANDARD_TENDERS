@@ -22,7 +22,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
                         return this.readDetailConfig(keys);
                     case 'DETAIL-OFFERPRODUCTDETAIL':
                         return this.readDetailDetailOfferProductConfig(keys);
-
+                    case 'DETAIL-AWARDEDRODUCTDETAIL':
+                        return this.readDetailDetailAwardedProductConfig(keys);
                     default:
                         break;
                 }
@@ -35,6 +36,9 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
             },
             readDetailDetailOfferProductConfig: async function (keys) {
                 return this.updateConfig("detailDetailOfferProduct",await this.templateService.getFormConfig(keys || {}));
+            },
+            readDetailDetailAwardedProductConfig: async function (keys) {
+                return this.updateConfig("detailDetailAwardedProduct",await this.templateService.getFormConfig(keys || {}));
             },
             updateConfig:function(type,templateResponse){
                 this.oData[`${type}Config`] = {

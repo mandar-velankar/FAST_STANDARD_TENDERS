@@ -22,7 +22,7 @@ sap.ui.define([
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
 
-			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 
 			/*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
@@ -34,7 +34,7 @@ sap.ui.define([
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
 
-			this.setModel(oViewModel, "detailView");
+			this.setModel(oViewModel, "detailDetailView");
 
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
@@ -51,37 +51,100 @@ sap.ui.define([
 		 */
 		 _onObjectMatched: function (oEvent) {
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
-			this.sObjectId = oEvent.getParameter("arguments").objectId;
+			this.tenderId = oEvent.getParameter("arguments").objectId;
+			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;
 
 			this.getModel("appView").setProperty("/layout", this.layout);
 
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+
+			this.getAwardedProductsTemplateConfig();
+			
+			this.onBeforeShow(this.tenderId, this.offerId);
 			this.getModel().metadataLoaded().then(function () {
-				var sObjectPath = this.getModel().createKey("PublicSalesOpportunities", {
-					ID: this.sObjectId
-				});
-				this._bindView("/" + sObjectPath);
+				
 			}.bind(this));
 
 		},
 
+		onBeforeShow:async function(tenderId, offerId){
+			// get state data
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			
+			//this.getView().getBindingContext("template"); // get current tab data
+			// await this.getOwnerComponent().getModel().metadataLoaded();
+			this.tenderId = tenderId;
+			this.offerId = offerId;
+			//this.selectedTab = iconTabfilter.getKey();
+			
+			this.defaultModel = this.getOwnerComponent().getModel();
+
+			const uiModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				editMode: false,
+				minDate: new Date(),
+				AwardedProductForm:{
+					editMode: false
+				},
+				enableDeleteProductButton: false
+			});
+	
+			this.setModel(uiModel, "ui");
+
+			const awardedProductPath = this.getModel().createKey("/AwardedProductFormView", {
+				OfferID: this.offerId,
+				ProductCode: this.productId,
+				LotID: "1"
+			});
+			
+			this._bindView(awardedProductPath);
+			this.bindForm(awardedProductPath)
+			
+		},
+
+		getAwardedProductsTemplateConfig: async function () {
+			await this.templateState.read("DETAIL-AWARDEDRODUCTDETAIL", {
+				countryCode: this.countryCode,
+				appID: "StandardTenders",
+				page: "DETAIL-AWARDEDRODUCTDETAIL",
+				keys: {
+					TenderID: this.tenderId,
+				},
+			});
+		},
 		/**
 		 * Binds the view to the object path. Makes sure that detail view displays
 		 * a busy indicator while data for the corresponding element binding is loaded.
 		 * @function
-		 * @param {string} sObjectPath path to the object to be bound to the view.
+		 * @param {string} awardedProductPath path to the object to be bound to the view.
 		 * @private
 		 */
-		_bindView: function (sObjectPath) {
+		_bindView: function (awardedProductPath) {
 			// Set busy indicator during view binding
 			var oViewModel = this.getModel("detailDetailView");
 
 			// If the view was not bound yet its not busy, only if the binding requests data it is set to busy again
 			oViewModel.setProperty("/busy", false);
 
+			this.getView().bindElement({
+				path: awardedProductPath
+			})
+
 		},
 
+		bindForm: function (awardedProductPath) {
+			const awardedProductForm = this.byId("idAwardedProductsDetailForm");
+
+			awardedProductForm.bindElement({
+				path: awardedProductPath,
+				groupId: "AwardedProduct"
+			})
+		},
 
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
@@ -97,13 +160,31 @@ sap.ui.define([
 			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);*/
 		},
 
+		onButtonAwardDetailFormEditPress: function(event){
+			this.getModel("ui").setProperty('/AwardedProductForm/editMode', true);
+		},
+
+		onButtonAwardProductDetailFormSavePress: function(event){
+			this.defaultModel.submitChanges({
+				error: () => {},
+				success: () => {},
+				groupId: "AwardedProduct"
+			}); 
+		},
+		
+		onButtonAwardProductDetailFormCancelPress: function(event){
+			this.getModel("ui").setProperty('/AwardedProductForm/editMode', false);
+		},
+
 		handleClose: function() {
 			let oNextUIState = "";
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(1);
-				this.oRouter.navTo("object", {
+				this.oRouter.navTo("objectDetailAwards", {
 					layout: oNextUIState.layout,
-					objectId: this.sObjectId
+					objectId: this.tenderId,
+					offerId: this.offerId,
+					countryCode: this.countryCode
 				});
 			}.bind(this));
 		},

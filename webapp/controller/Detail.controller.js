@@ -44,6 +44,7 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
 			this.setModel(messagesModel, "messages");
 
@@ -148,7 +149,8 @@ sap.ui.define([
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
-			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.layout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
+			this.getModel("appView").setProperty("/layout", this.layout);
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();

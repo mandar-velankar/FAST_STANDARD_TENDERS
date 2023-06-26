@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/ui/base/Object",
-    "sap/ui/model/Filter"
-], function (Object, Filter) {
+    "sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator"
+], function (Object, Filter, FilterOperator) {
 
     return Object.extend("com.bayer.tender.statenderapp.service.StandardTenderService", {
         constructor: function (model) {
@@ -47,6 +48,35 @@ sap.ui.define([
 			return oOffer;
 		},
 
-        
+		getOfferProductValidation: async function (offerID){
+			let oOfferProductValidation = this.model.getObject(sOfferProductValidationKey);
+			if(!oOfferProductValidation){
+				return new Promise((resolve, reject) => {
+					this.model.read("/OfferProductValidation", {
+						filters: [
+							new Filter("OFFER_ID", "EQ", offerID)
+						],
+						success: function (res) {
+							resolve(res?.results)
+						}
+					});
+				})
+			}
+			return oOfferProductValidation;
+		},
+
+		getOfferStatus: async function (offerID){
+			return new Promise((resolve, reject) => {
+				this.model.read("/OfferStatus", {
+					filters: [
+						new Filter("OFFER_ID", "EQ", offerID)
+					],
+					success: function (res) {
+						resolve(res?.results[0])
+					}
+				});
+			})
+		},
+
     });
 });

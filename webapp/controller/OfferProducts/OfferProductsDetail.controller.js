@@ -8,8 +8,9 @@ sap.ui.define([
 	"sap/ui/core/message/Message",
 	"sap/ui/core/library",
 	"sap/ui/model/Context",
-	"sap/ui/core/Fragment"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment) {
+	"sap/ui/core/Fragment",
+	"sap/m/Token"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -45,7 +46,8 @@ sap.ui.define([
 			this.oMessageManager.registerObject(this.getView(), true);
 			const oModel = this.getOwnerComponent().getModel();
 			const messagesModel = new JSONModel({
-				priceCondPrice: []
+				priceCondPrice: [],
+				priceCondFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -132,7 +134,12 @@ sap.ui.define([
 					editMode: false
 				},
 				PricingForm:{
-					editMode: false
+					editMode: false,
+					mainPriceConditionID: null
+				},
+				FocForm:{
+					editMode: false,
+					hasMainPriceCondition: false
 				}
 			});
 	
@@ -204,10 +211,12 @@ sap.ui.define([
 			const orFilters = [
 				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
 				new Filter("Division",FilterOperator.EQ, oSelectedOffer.Division),
-				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification)
+				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
+				new Filter("ConditionType",FilterOperator.NE, 'FOC')	
 			]
 			oPriceCondBinding.filter(orFilters);
 		},
+	
 		_onMetadataLoaded: function () {
 			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
 			var oViewModel = this.getModel("detailDetailView");
@@ -297,6 +306,7 @@ sap.ui.define([
 			const conditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			this.rebasePrice(conditonType);
 			this.getModel("ui").setProperty('/PricingForm/editMode', true);
+			this.getModel("ui").setProperty('/FocForm/editMode', false);
 		},
 
 		/**
@@ -329,7 +339,7 @@ sap.ui.define([
 				groupId: "PricingForm"
 			}); 
 		},
-
+		
 		onPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
@@ -338,8 +348,25 @@ sap.ui.define([
 		_onSubmitChangesSuccess: function(res){
 			const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPriceView",
+				"PriceConditionDiscountView"
+			]);
 			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 		},
+
+		/**
+		 * Invalidate all entries of the given entity type in the model data.
+		 * Mark entries of the provided entity type in the model cache as invalid. 
+		 * Next time a context binding or list binding is done, the entry will be detected as invalid and will be refreshed from the server.
+		 *
+		 * @param {Array<string>} entityTypes - An array of entity type names.
+		 * @returns {void}
+		 */
+		invalidateEntityType(entityTypes=[]){
+			entityTypes.forEach(type => this.defaultModel.invalidateEntityType(`StandardAppService.${type}`));
+		},
+
 
 		// _filterPricingForm: function ({offerID, productID}) {
 		// 	const oPricingForm = this.byId("idPricingForm");
@@ -465,27 +492,35 @@ sap.ui.define([
 		/**
 		 * Load the price condition fragment based on the selected price condition type.
 		 *
-		 * @returns {void}
+		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
 		 */
 		loadPriceCondition: function(){
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
-			this.loadPriceConditionFragment(selectedPriceConditonType, {
+			return this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
 				productID:this.productId,
 				tenderID: this.sObjectId
 			});
 		},
 
+		/**
+		 * Loads the price condition fragment based on the specified condition type and context data.
+		 *
+		 * @param {string} conditionType - The type of the price condition fragment to load.
+		 * @param {object} contextData - The context data to pass to the price condition fragment.
+		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
+		 */
 		loadPriceConditionFragment: function(conditionType, contextData){
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
-			Fragment.load({
+			return Fragment.load({
 				id: this.getView().getId(),
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
+				return form;
 			}.bind(this));
 		},
 
@@ -503,12 +538,163 @@ sap.ui.define([
 			});
 			form.bindElement({
 				path: path,
-				groupId: "PricingForm" 
+				groupId: "PricingForm",
+				events: {
+					dataReceived: this.onPricingFormDataReceived.bind(this)
+				}
 			});
 		},
 
+		/**
+		 * Handles the event when pricing form data is received.
+		 *
+		 * @param {object} event - The event object containing the pricing form data.
+		 * @returns {void}
+		 */
+		onPricingFormDataReceived: function(event){
+			const priceCondition = event.getParameter('data');
+			this.setMainPriceCondition(priceCondition);
+			this.bindFOCMultiInputTokens(priceCondition);
+		},
+
+
+		bindFOCMultiInputTokens: function(priceCondition){
+			if(!priceCondition?.hasPriceCondition) return;
+			const multiInput = this.byId("idFOCMultiInput");
+			multiInput.bindAggregation("tokens", {
+				path: "/FreeGoodsOther",
+				groupId: "PricingForm",
+				filters: [
+					new Filter("PriceCondition_ID",FilterOperator.EQ, priceCondition.PriceConditionID)
+				],
+				template: new Token({
+					key: "{ProductPackId}",
+					text: "{ProductName}",
+					editable: false
+				})
+
+			});
+		},
+
+
 		onPriceConditionChange: function(event){
-			this.loadPriceCondition();
-		}
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			this.loadPriceCondition().then(this.onLoadPriceConditionSuccess.bind(this));
+		},
+
+		onLoadPriceConditionSuccess: function(form){
+			const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
+			this.setMainPriceCondition(priceCondition);
+			this.bindFOCMultiInputTokens(priceCondition);
+		},
+
+		setMainPriceCondition: function(priceCondition){
+			this.setHasMainPriceCondition(priceCondition?.hasPriceCondition);
+			this.setMainPriceConditionID(priceCondition?.PriceConditionID);
+		},
+
+		/**
+		 * Sets the value of the "hasMainPriceCondition" property in the "ui" model.
+		 *
+		 * @param {boolean} [hasPriceCondition=false] - The new value for the "hasMainPriceCondition" property.
+		 * Defaults to `false` if not provided.
+		 * @returns {boolean}
+		 */
+		setHasMainPriceCondition: function(hasPriceCondition = false){
+			this.getModel("ui").setProperty("/FocForm/hasMainPriceCondition", hasPriceCondition);
+			return hasPriceCondition;
+		},
+
+		setMainPriceConditionID: function(id){
+			this.getModel("ui").setProperty("/PricingForm/mainPriceConditionID", id);
+			return id;
+		},
+
+		getMainPriceConditionID: function(){
+			return this.getModel("ui").getProperty("/PricingForm/mainPriceConditionID");
+		},
+
+		/**
+		 * FocForm event handlers
+		 */
+		onButtonFocFormEditPress: function(event){
+			this.getModel("ui").setProperty('/FocForm/editMode', true);
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+		},	
+
+		onButtonFocFormSavePress: function(event){
+			// const hasErrorMessages =  this.getMessages([
+			// 	"idOfferPrice", 
+			// 	"PriceConditionPriceView",
+			// 	"PriceConditionDiscountView"
+			// ]).length > 0;
+			// this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
+			// this.defaultModel.submitChanges({
+			// 	error: this._onSubmitChangesFail.bind(this),
+			// 	success: this._onSubmitChangesFocFormSuccess.bind(this),
+			// 	groupId: "PricingForm"
+			// }); 
+		},
+		
+		onButtonFocFormCancelPress: function(event){
+			this.getModel("ui").setProperty('/FocForm/editMode', false);
+			// this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+		},
+
+		_onSubmitChangesFocFormSuccess: function(res){
+			// const hasErrorMessages =  this.getMessages(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"]).length > 0;
+			// this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			// this.invalidateEntityType([
+			// 	"PriceConditionPriceView",
+			// 	"PriceConditionDiscountView"
+			// ]);
+			// !hasErrorMessages && this.getModel("ui").setProperty(`/FocForm/editMode`, false);
+		},
+
+		onMultiInputProductsValueHelpRequest: async function(event){
+			const dialog = await this.getPriceConditionFocDialog();
+			const binding = this.byId("idFreeGoodsOtherTable").getBinding("items");
+			this.filterFreeGoodsOther(this.getMainPriceConditionID(), binding);
+			dialog.open();
+		},
+
+
+		/**
+		 * Retrieves the price condition FOC dialog.
+		 *
+		 * @returns {Promise} A promise that resolves to the FOC dialog.
+		 */
+		getPriceConditionFocDialog: function(){
+			const view = this.getView();
+			if (!this.dialogFocProducts) {
+				this.dialogFocProducts = Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC_OtherProducts",
+					controller: this
+				}).then(function (dialog) {
+					// connect dialog to the root view of this component (models, lifecycle)
+					view.addDependent(dialog);
+					return dialog;
+				});
+			}
+			return this.dialogFocProducts;	
+		},
+
+		onButtonApplyFocOtherProductsPress:function(event){
+
+		},
+
+		onButtonCancelFocOtherProductsPress: async function(event){
+			const dialog = await this.getPriceConditionFocDialog();
+			dialog.close(); 
+		},
+
+		onButtonAddFocOtherProductsPress: function(event){
+
+		},
+
+		onButtonDeleteOtherProductPress: function(event){
+
+		},
     });
 });

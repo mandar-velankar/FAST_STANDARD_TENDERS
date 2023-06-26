@@ -69,6 +69,10 @@ sap.ui.define(["sap/m/Text",
               filters: filters,
               templateShareable: true
           });
+          const changeFunction = StandardSingletonService[`onChange${this.valueHelp.title}`];
+          if (changeFunction) {
+            control.attachChange(changeFunction);
+          }
         } else {
           this.valueHelp.staticValues.forEach(item => {
             control.addItem(item.generateItem());

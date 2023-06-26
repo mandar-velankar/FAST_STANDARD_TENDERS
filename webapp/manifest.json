@@ -153,12 +153,12 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/AwardedDetail/{productId}/{layout}",
-					"name": "objectDetail",
+					"pattern": "detail/{countryCode}/{objectId}/{offerId}/AwardedProduct/{productId}/{layout}",
+					"name": "awardProductsDetail",
 					"target": [
 						"master",
 						"object",
-						"objectDetail"
+						"awardProductsDetail"
 					]
 				},
 				{
@@ -184,7 +184,7 @@
 					"viewLevel": 1,
 					"controlAggregation": "midColumnPages"
 				},
-				"objectDetail": {
+				"awardProductsDetail": {
 					"viewName": "awards/views/AwardedProductsDetail",
 					"controlAggregation": "endColumnPages"
 				},
