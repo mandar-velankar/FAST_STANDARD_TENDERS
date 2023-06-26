@@ -64,12 +64,9 @@
 								id="idFOCMultiInput"
 								valueHelpOnly="true" 
 								valueHelpRequest=".onMultiInputProductsValueHelpRequest" 
-								tokens="{/FreeGoodsOther}" 
 								enabled="{ui>/FocForm/editMode}"
 							>
-								<tokens>
-									<Token key="{ProductPackId}" text="{ProductName}" editable="false"></Token>
-								</tokens>
+								<!-- Tokens are bound in the Controller.bindFOCMultiInputTokens method -->
 							</MultiInput>
 						</form:fields>
 					</form:FormElement>	

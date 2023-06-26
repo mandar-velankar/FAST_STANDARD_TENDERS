@@ -8,8 +8,9 @@ sap.ui.define([
 	"sap/ui/core/message/Message",
 	"sap/ui/core/library",
 	"sap/ui/model/Context",
-	"sap/ui/core/Fragment"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment) {
+	"sap/ui/core/Fragment",
+	"sap/m/Token"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -552,31 +553,44 @@ sap.ui.define([
 		 */
 		onPricingFormDataReceived: function(event){
 			const priceCondition = event.getParameter('data');
-			const binding = this.byId("idFOCMultiInput").getBinding("tokens");
 			this.setMainPriceCondition(priceCondition);
-			this.filterFreeGoodsOther(priceCondition.PriceConditionID, binding);
+			this.bindFOCMultiInputTokens(priceCondition);
 		},
 
-		filterFreeGoodsOther: async function (priceConditionID, binding) {
-			if(!priceConditionID) return;
-			const filters = [
-				new Filter("PriceCondition_ID",FilterOperator.EQ, priceConditionID)	
-			]
-			binding.filter(filters);
-		},
 
-		onPriceConditionChange: function(event){
-			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			this.loadPriceCondition().then(form => {
-				const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
-				this.setMainPriceCondition(priceCondition);
+		bindFOCMultiInputTokens: function(priceCondition){
+			if(!priceCondition?.hasPriceCondition) return;
+			const multiInput = this.byId("idFOCMultiInput");
+			multiInput.bindAggregation("tokens", {
+				path: "/FreeGoodsOther",
+				groupId: "PricingForm",
+				filters: [
+					new Filter("PriceCondition_ID",FilterOperator.EQ, priceCondition.PriceConditionID)
+				],
+				template: new Token({
+					key: "{ProductPackId}",
+					text: "{ProductName}",
+					editable: false
+				})
+
 			});
 		},
 
+
+		onPriceConditionChange: function(event){
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			this.loadPriceCondition().then(this.onLoadPriceConditionSuccess.bind(this));
+		},
+
+		onLoadPriceConditionSuccess: function(form){
+			const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
+			this.setMainPriceCondition(priceCondition);
+			this.bindFOCMultiInputTokens(priceCondition);
+		},
+
 		setMainPriceCondition: function(priceCondition){
-			if(!priceCondition) return;
-			this.setHasMainPriceCondition(priceCondition.hasPriceCondition);
-			this.setMainPriceConditionID(priceCondition.PriceConditionID);
+			this.setHasMainPriceCondition(priceCondition?.hasPriceCondition);
+			this.setMainPriceConditionID(priceCondition?.PriceConditionID);
 		},
 
 		/**
