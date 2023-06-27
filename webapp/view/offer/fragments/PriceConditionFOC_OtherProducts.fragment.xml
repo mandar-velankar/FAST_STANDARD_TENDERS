@@ -49,6 +49,7 @@
             <ColumnListItem>
                 <cells>
                     <Input
+                        id="idOtherProducts"
                         showValueHelp="true" 
                         valueHelpOnly="true" 
                         valueHelpRequest=".onProductNameInputValueHelpRequest" 
