@@ -45,7 +45,7 @@
 											id="idListProductsInput"
 											mode="MultiSelect"
 											items="{
-												path: 'fastAppData>/ProductCollection'
+												path: 'ui>/OfferProductTable/productCollection'
 											}"
 											selectionChange="onSelectionChangeProductListInput"
 											includeItemInSelection="true"
@@ -76,8 +76,8 @@
 												<ColumnListItem>
 													<cells>
 														<VBox>
-															<Text text="{fastAppData>PRODUCT_NAME}" wrapping="false" />
-															<Text text="{fastAppData>SKUS}" wrapping="false" />
+															<Text text="{ui>PRODUCT_NAME}" wrapping="false" />
+															<Text text="{ui>PRODUCT_ID}" wrapping="false" />
 														</VBox>
 														
 													</cells>
