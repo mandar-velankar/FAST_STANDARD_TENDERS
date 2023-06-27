@@ -651,10 +651,35 @@ sap.ui.define([
 			// !hasErrorMessages && this.getModel("ui").setProperty(`/FocForm/editMode`, false);
 		},
 
-		onMultiInputProductsValueHelpRequest: async function(event){
-			const dialog = await this.getPriceConditionFocDialog();
-			const binding = this.byId("idFreeGoodsOtherTable").getBinding("items");
-			this.filterFreeGoodsOther(this.getMainPriceConditionID(), binding);
+		onMultiInputProductsValueHelpRequest:  function(event){
+			const focMultiInput = event.getSource();
+			this.getPriceConditionFocDialog().then(this.onPriceConditionFocDialogLoaded.bind(this,focMultiInput));
+		},
+
+		/**
+		 * Called when the price condition FOC dialog is loaded.
+		 * This method is resuing the binding template from the view.
+		 * More info see: https://answers.sap.com/questions/11405563/getting-the-item-template-of-a-mtable.html
+		 * 
+		 * @param {sap.m.MultiInput} multiInput - The multi-input control.
+		 * @param {sap.m.Dialog} dialog - The dialog control.
+		 * @returns {void}
+		 */
+		onPriceConditionFocDialogLoaded: function(multiInput, dialog){
+			const tokenBindingInfo = multiInput.getBindingInfo("tokens");
+			const freeGoodsOtherTable = this.byId("idFreeGoodsOtherTable");
+			// const itemsBindingInfo = freeGoodsOtherTable.getBindingInfo("items");
+			const itemsBinding = freeGoodsOtherTable.getBinding("items");
+			itemsBinding.filter(tokenBindingInfo.filters);
+
+			// Unbind and rebind items
+			// freeGoodsOtherTable.unbindItems();
+			// freeGoodsOtherTable.bindItems({
+			// 	path : itemsBindingInfo.path,
+			// 	template : itemsBindingInfo.template,
+			// 	filters : tokenBindingInfo.filters,
+			// 	groupId: "PricingForm"
+			// });
 			dialog.open();
 		},
 
@@ -690,11 +715,21 @@ sap.ui.define([
 		},
 
 		onButtonAddFocOtherProductsPress: function(event){
-
+			const table = this.byId("idFreeGoodsOtherTable");
+			const newContext = table.getBinding("items").create();
+			
 		},
 
-		onButtonDeleteOtherProductPress: function(event){
 
+
+		onButtonDeleteOtherProductPress: function(event){
+			debugger;
+			// const table = this.byId("idFreeGoodsOtherTable");
+			// const bindingPath = event.getSource().getParent().getBindingContext().getPath();
+			// const selectedItem = event.getSource().getParent();
+			// table.removeItem(selectedItem);
+			// selectedItem.destroy();
+			// this.defaultModel.resetChanges([bindingPath])
 		},
     });
 });

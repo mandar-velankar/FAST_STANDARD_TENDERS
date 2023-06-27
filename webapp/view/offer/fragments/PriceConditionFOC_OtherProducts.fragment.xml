@@ -10,7 +10,10 @@
 
         <Table 
             id="idFreeGoodsOtherTable"
-            items="{path:'/FreeGoodsOther'}"
+            items="{
+                path: '/FreeGoodsOther',
+                groupId: 'PricingForm'
+            }"
         >
 		<headerToolbar>
 			<OverflowToolbar>
