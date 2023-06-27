@@ -49,11 +49,10 @@
             <ColumnListItem>
                 <cells>
                     <Input
-                        id="idOtherProducts"
                         showValueHelp="true" 
                         valueHelpOnly="true" 
                         valueHelpRequest=".onProductNameInputValueHelpRequest" 
-                        value="{ProductName}" 
+                        value="{ProductPackName}" 
                     />
                     <Select 
                         forceSelection="false" 

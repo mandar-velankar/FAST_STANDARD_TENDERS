@@ -737,6 +737,7 @@ sap.ui.define([
 		onProductNameInputValueHelpRequest: function(event){
 			const view = this.getView();
 			const controller = this;
+			const context = event.getSource().getBindingContext();
 			// create value help dialog
 			if (!this.dialogSelectBrandProducts) {
 				this.dialogSelectBrandProducts = sap.ui.core.Fragment.load({
@@ -752,6 +753,7 @@ sap.ui.define([
 
 			// open value help dialog
 			this.dialogSelectBrandProducts.then(function (valueHelpDialog) {
+				valueHelpDialog.setBindingContext(context);
 				valueHelpDialog.open();
 			});
 		},
@@ -778,20 +780,12 @@ sap.ui.define([
 		},
 
 		handleProductBrandsValueHelpConfirm: function (event) {
-			// var oFastAppData = Services.getFastAppDataModel();
-			// var sPath = '/EditProduct/FreeGoodsOther/0';
-			// var oFreeGoodsOther = oFastAppData.getProperty(sPath);
-
-			const oSelectedItem = event.getParameter("selectedItem");
-			if (oSelectedItem) {
-				var oInputfield = this.byId('idOtherProducts');
-				oInputfield.setValue(oSelectedItem.getTitle());
-
-				// oFreeGoodsOther.ProductPackId = oSelectedItem.getBindingContext('fastAppData').getObject().PRODUCT_ID;
-				// oFreeGoodsOther.ProductName = oSelectedItem.getTitle();
-				// oFastAppData.setProperty(sPath, oFreeGoodsOther)
-			}
-			// event.getSource().getBinding("items").filter([]);
+			const context = event.getSource().getBindingContext();
+			const selectedItem = event.getParameter("selectedItem");
+			const productPackId = selectedItem.getBindingContext().getProperty("PRODUCT_ID");
+			const productPackName = selectedItem.getBindingContext().getProperty("PRODUCT_NAME");
+			context.getModel().setProperty("ProductPackId", productPackId, context);	
+			context.getModel().setProperty("ProductPackName", productPackName, context);	
 		},
     });
 });
