@@ -66,11 +66,12 @@ sap.ui.define([
 	
 			this.setModel(oModel, "ui");
 
-			await this.getCountryBrands(this.countryCode);
-			await this.getCountryBrandProducts(this.countryCode);
+			
 			this._bindForm("OfferForm");
 			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
+			await this.getCountryBrands(this.countryCode);
+			await this.getCountryBrandProducts(this.countryCode);
 		},
 		_onObjectMatched: async function (oEvent) {
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
@@ -190,6 +191,9 @@ sap.ui.define([
 
 		onOpenAddOfferProductDialog : function () {
 			const that = this;
+			//clear fields
+			this.getModel("ui").setProperty("/OfferProductTable/productCollection", null);
+
 			// create dialog lazily
 			if (!this.byId("idAddOfferProduct")) {
 				this.offerCreationDialog = Fragment.load({
@@ -261,6 +265,9 @@ sap.ui.define([
 
 			let that = this;
 
+			let oListInput = this.byId("idListProductsInput");
+			oListInput.removeSelections();
+
 			//selected brands
 			let aContexts = oEvent.getParameter("selectedContexts");
 			if (aContexts && aContexts.length) {
@@ -294,14 +301,25 @@ sap.ui.define([
 				//add the array of tokens to the multi input
 				oBrandList.setTokens(aBrandTokens);
 
-				// const aFilteredBrandProducts = this.filterBrandProducts(aBrands);
-				// this.soaState.setProductCollection(aFilteredBrandProducts);
+				const aFilteredBrandProducts = this.filterBrandProducts(aBrands);
+				this.getModel("ui").setProperty("/OfferProductTable/productCollection", aFilteredBrandProducts);
 
 			} else {
 
 				MessageToast.show("No new item was selected.");
 
 			}
+			//oEvent.getSource().getBinding("items").filter([]);
+		},
+
+		filterBrandProducts: function(aBrands){
+			let aBrandProducts = this.getModel("ui").getProperty("/OfferProductTable/countryBrandProducts");
+			const aFilteredBrandProducts = aBrandProducts.filter((elem) => aBrands.find(({ BRAND_ID }) => elem.BRAND_ID === BRAND_ID));
+			const uniqueProducts = [];
+
+			aFilteredBrandProducts.forEach(x => uniqueProducts.filter(a => a.PRODUCT_ID === x.PRODUCT_ID).length > 0 ? null : uniqueProducts.push(x));
+
+			return uniqueProducts;
 		},
 		
 		onOfferProductTableEditBtnPress: async function(event){
