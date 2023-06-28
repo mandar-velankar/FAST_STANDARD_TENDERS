@@ -716,22 +716,14 @@ sap.ui.define([
 
 		onButtonAddFocOtherProductsPress: function(event){
 			const table = this.byId("idFreeGoodsOtherTable");
-			const newContext = table.getBinding("items").create({},false,{groupId: "PricingForm"});
-			
+			table.getBinding("items").create({}, false, { groupId: "PricingForm" });
 		},
 
 
 
 		onButtonDeleteOtherProductPress: function(event){
-			debugger; // TODO: delete is not working correctly
-			const table = this.byId("idFreeGoodsOtherTable");
 			const context = event.getSource().getParent().getBindingContext();
-			const selectedItem = event.getSource().getParent();
-			table.removeItem(selectedItem);
-			// selectedItem.destroy();
-			this.defaultModel.resetChanges([context.getPath()])
-			// delete the created entity
-			// this.defaultModel.deleteCreatedEntry(context);
+			this.defaultModel.resetChanges([context.getPath()], false, true);
 		},
 
 		onProductNameInputValueHelpRequest: function(event){
