@@ -22,6 +22,10 @@ sap.ui.define([
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
 
+			const messagesModel = new JSONModel({
+				awardedProduct: [],
+			})
+
 			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 
@@ -35,6 +39,14 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
 
 			this.setModel(oViewModel, "detailDetailView");
+			this.setModel(messagesModel, "messages");
+
+			// set message model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
+
+			// activate automatic message generation for complete view
+			this.oMessageManager.registerObject(this.getView(), true);
 
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
@@ -166,14 +178,26 @@ sap.ui.define([
 
 		onButtonAwardProductDetailFormSavePress: function(event){
 			this.defaultModel.submitChanges({
-				error: () => {},
-				success: () => {},
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesAwardedProductFormSuccess.bind(this),
 				groupId: "AwardedProduct"
 			}); 
 		},
-		
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesAwardedProductFormSuccess: function (res) {
+			const messages = this.getMessages(["AwardedProductFormView"]);
+			this.setMessageSection(["AwardedProductFormView"], "awardedProduct");
+			const hasErrorMessages =  messages.length > 0;
+			!hasErrorMessages && this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
+		},
+
 		onButtonAwardProductDetailFormCancelPress: function(event){
 			this.getModel("ui").setProperty('/AwardedProductForm/editMode', false);
+			this.cancelPendingChanges(["AwardedProductFormView"], "awardedProduct")
 		},
 
 		handleClose: function() {
