@@ -569,7 +569,7 @@ sap.ui.define([
 				],
 				template: new Token({
 					key: "{ProductPackId}",
-					text: "{ProductName}",
+					text: "{ProductPackName}",
 					editable: false
 				})
 
@@ -705,25 +705,52 @@ sap.ui.define([
 			return this.dialogFocProducts;	
 		},
 
-		onButtonApplyFocOtherProductsPress:function(event){
+		onButtonApplyFocOtherProductsPress: async function(event){
+			const dialog = await this.getPriceConditionFocDialog();
+			const hasErrorMessages =  this.getMessages(["FreeGoodsOther"]).length > 0;
+			this.setMessageSection(["FreeGoodsOther"], "priceCondPrice");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
 
+			if(!hasErrorMessages){
+				dialog.close(); 
+			}
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
+			const multiInput = this.byId("idFOCMultiInput");
+		
 			const dialog = await this.getPriceConditionFocDialog();
+
+			if(this.defaultModel.hasPendingChanges()){
+				this.defaultModel.resetChanges(null, false, true);
+			}
+			
+			multiInput.getBinding("tokens").refresh()
 			dialog.close(); 
 		},
 
 		onButtonAddFocOtherProductsPress: function(event){
 			const table = this.byId("idFreeGoodsOtherTable");
-			table.getBinding("items").create({}, false, { groupId: "PricingForm" });
+			const context = table.getBinding("items").create({}, false, { groupId: "PricingForm" });
+			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
 		},
 
 
 
 		onButtonDeleteOtherProductPress: function(event){
-			const context = event.getSource().getParent().getBindingContext();
-			this.defaultModel.resetChanges([context.getPath()], false, true);
+			const selectedItem = event.getSource().getParent();
+			const context = selectedItem.getBindingContext();
+			if(context.isTransient()){
+				this.defaultModel.resetChanges([context.getPath()], undefined, true);
+			}else{
+				// const table = this.byId("idFreeGoodsOtherTable");
+				// table.removeItem(selectedItem);
+				this.defaultModel.remove(context.getPath());
+			}
 		},
 
 		onProductNameInputValueHelpRequest: function(event){
@@ -767,7 +794,7 @@ sap.ui.define([
 		},
 
 		getOfferFormView: async function (offerId) {
-			const path = his.defaultModel.createKey("/OfferFormView", {OfferID: offerId}); 
+			const path = this.defaultModel.createKey("/OfferFormView", {OfferID: offerId}); 
 			return new Promise((resolve, reject) => {
 				this.getModel().read(path, {
 					groupId: "OfferformInfo",
