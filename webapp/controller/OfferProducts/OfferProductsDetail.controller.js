@@ -716,20 +716,68 @@ sap.ui.define([
 
 		onButtonAddFocOtherProductsPress: function(event){
 			const table = this.byId("idFreeGoodsOtherTable");
-			const newContext = table.getBinding("items").create();
-			
+			table.getBinding("items").create({}, false, { groupId: "PricingForm" });
 		},
 
 
 
 		onButtonDeleteOtherProductPress: function(event){
-			debugger;
-			// const table = this.byId("idFreeGoodsOtherTable");
-			// const bindingPath = event.getSource().getParent().getBindingContext().getPath();
-			// const selectedItem = event.getSource().getParent();
-			// table.removeItem(selectedItem);
-			// selectedItem.destroy();
-			// this.defaultModel.resetChanges([bindingPath])
+			const context = event.getSource().getParent().getBindingContext();
+			this.defaultModel.resetChanges([context.getPath()], false, true);
+		},
+
+		onProductNameInputValueHelpRequest: function(event){
+			const view = this.getView();
+			const controller = this;
+			const context = event.getSource().getBindingContext();
+			// create value help dialog
+			if (!this.dialogSelectBrandProducts) {
+				this.dialogSelectBrandProducts = sap.ui.core.Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC_OtherProductsSelectBrandProducts",
+					controller: this
+				}).then(function (valueHelpDialog) {
+					view.addDependent(valueHelpDialog);
+					controller.filterSelectProductBrands(valueHelpDialog);
+					return valueHelpDialog;
+				});
+			}
+
+			// open value help dialog
+			this.dialogSelectBrandProducts.then(function (valueHelpDialog) {
+				valueHelpDialog.setBindingContext(context);
+				valueHelpDialog.open();
+			});
+		},
+
+		filterSelectProductBrands: function (valueHelpDialog) {
+			const binding = valueHelpDialog.getBinding("items");
+			const orFilters = [
+				new Filter("COUNTRY_CODE",FilterOperator.EQ, this.sCountryCode),
+				new Filter("INSTITUTE_ID",FilterOperator.EQ, 318232),
+				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, 100000187),
+				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
+			]
+			binding.filter(orFilters);
+		},
+
+		handleProductBrandsValueHelpSearch: function(event) {
+			const sValue = event.getParameter("value");
+			const andFilters = event.getSource().getBinding("items").getFilters("Control").splice(0,4);
+			const orFilters = [];
+			orFilters.push(new Filter("PRODUCT_NAME", sap.ui.model.FilterOperator.Contains, sValue));
+			orFilters.push(new Filter("SKUS", sap.ui.model.FilterOperator.Contains, sValue));
+			andFilters.push(new Filter(orFilters, false));
+			event.getSource().getBinding("items").filter(andFilters);
+		},
+
+		handleProductBrandsValueHelpConfirm: function (event) {
+			const context = event.getSource().getBindingContext();
+			const selectedItem = event.getParameter("selectedItem");
+			const productPackId = selectedItem.getBindingContext().getProperty("PRODUCT_ID");
+			const productPackName = selectedItem.getBindingContext().getProperty("PRODUCT_NAME");
+			context.getModel().setProperty("ProductPackId", productPackId, context);	
+			context.getModel().setProperty("ProductPackName", productPackName, context);	
 		},
     });
 });

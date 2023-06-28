@@ -74,6 +74,13 @@
 									<m:ToolbarSpacer />
 									<m:Button id="idAwardProductEditbtn" icon="sap-icon://edit" text="Edit" press=".onButtonAwardDetailFormEditPress" visible="{= !${ui>/AwardedProductForm/editMode} }"/>
 									<m:Button
+										icon="sap-icon://alert"
+										text="{= ${messages>/awardedProduct}.length }"
+										visible="{= ${messages>/awardedProduct}.length > 0 &amp;&amp; ${ui>/AwardedProductForm/editMode}}"
+										type="Emphasized"
+										press="onMessagePopoverPress($event, 'awardedProduct')"  
+									/>
+									<m:Button
 										id="idOfferDetailFormSaveBtn"
 										icon="sap-icon://save"
 										text="Save"
