@@ -1,0 +1,25 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core"
+>
+
+    <SelectDialog
+		id="idSelectDialog"
+		noDataText="No Products Found"
+		title="{i18n>PriceConditionFOC_OtherProductsSelectBrandProductsFragment.SelectProduct}"
+		search="handleProductBrandsValueHelpSearch"
+		liveChange="handleProductBrandsValueHelpSearch"
+		confirm="handleProductBrandsValueHelpConfirm"
+		items="{
+			path: '/InstituteDistributorBrandProduct',
+			sorter: {path: 'PRODUCT_NAME'}
+		}">
+		<StandardListItem
+			title="{PRODUCT_NAME}"
+			description="{SKUS}"
+			iconDensityAware="false"
+			iconInset="false"
+			type="Active" />
+	</SelectDialog>
+
+</core:FragmentDefinition>
