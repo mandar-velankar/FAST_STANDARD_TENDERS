@@ -190,34 +190,47 @@ sap.ui.define([
 		},
 
 		onOpenAddOfferProductDialog : function () {
+
 			const that = this;
 			//clear fields
 			this.getModel("ui").setProperty("/OfferProductTable/productCollection", null);
 
-			// create dialog lazily
-			if (!this.byId("idAddOfferProduct")) {
-				this.offerCreationDialog = Fragment.load({
-					id: that.getView().getId(),
-					name: "com.bayer.tender.statenderapp.view.offer.fragments.AddProduct",
-                    controller: that,
-				}).then(function (oDialog) {
-					that.getView().addDependent(oDialog);
-                    oDialog.open();
-				//	that._bindCreateOfferForm();
-                })
-			}else {
-				this.byId("idAddOfferProduct").open();
-			}
-		},
+		//if dialog exists destroy it first, so we always set dialog buttons in correct state
+		if (that._oDialog) {
+			that._oDialog.destroy();
+		}
 
+		that._oDialog = new sap.m.Dialog("addProductDialog", {
+			title: "Add Product",
+			stretch: true,
+			horizontalScrolling:false,
+			verticalScrolling:false,
+			buttons: [new sap.m.Button({
+					id: "applyOfferProductDialog",
+					text: "Apply",
+					enabled: true,
+					tap: [that.onApplyOfferProductDialog, that]}),
+					new sap.m.Button({
+						id: "cancelOfferProductDialog",
+						text: "Cancel",
+						enabled: true,
+						tap: [that.onCloseAddOfferProductDialog, that]})],
+			
+			//content with all fields that need to be filled
+			content: [sap.ui.xmlfragment("com.bayer.tender.statenderapp.view.offer.fragments.SelectBrandProductList", that)]
+				// End of content of dialog
+		});
+
+		that.getView().addDependent(that._oDialog);
+		that._oDialog.open();
+		},
 		
 		onCloseAddOfferProductDialog: function () {
-			// this.oMessageManager.removeAllMessages();
-			//this.cancelPendingChanges(["OfferFormView"], "offerProductsMsg");
-			this.byId("idAddOfferProduct").close();
-			this.byId("idAddOfferProduct").destroy();
-			//this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			// this.defaultModel.resetChanges();
+
+			let that = this;
+			that._oDialog.close();
+			that._oDialog.destroy();
+
 		},
 
 		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender
@@ -265,7 +278,7 @@ sap.ui.define([
 
 			let that = this;
 
-			let oListInput = this.byId("idListProductsInput");
+			let oListInput = sap.ui.getCore().byId("idListProductsInput");
 			oListInput.removeSelections();
 
 			//selected brands
@@ -277,7 +290,7 @@ sap.ui.define([
 				}).join(", "));
 
 				//get multi input box
-				const oBrandList = this.byId("idBrandList");
+				const oBrandList = sap.ui.getCore().byId("idBrandList");
 				let aBrandTokens = [];
 				let aBrands = [];
 
@@ -320,6 +333,25 @@ sap.ui.define([
 			aFilteredBrandProducts.forEach(x => uniqueProducts.filter(a => a.PRODUCT_ID === x.PRODUCT_ID).length > 0 ? null : uniqueProducts.push(x));
 
 			return uniqueProducts;
+		},
+
+		onSelectionChangeProductListInput: function (oEvent) {
+
+			const oList = oEvent.getSource();
+			const oLabel = sap.ui.getCore().byId("idFilterLabelInput");
+			const oInfoToolbar = sap.ui.getCore().byId("idInfoToolbarInput");
+
+			// With the 'getSelectedContexts' function you can access the context paths
+			// of all list items that have been selected, regardless of any current
+			// filter on the aggregation binding.
+			const aContexts = oList.getSelectedContexts(true);
+
+			// update UI
+			let bSelected = (aContexts && aContexts.length > 0);
+			let sText = (bSelected) ? aContexts.length + " selected" : null;
+			oInfoToolbar.setVisible(bSelected);
+			oLabel.setText(sText);
+
 		},
 		
 		onOfferProductTableEditBtnPress: async function(event){
