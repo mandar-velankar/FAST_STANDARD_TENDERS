@@ -750,15 +750,35 @@ sap.ui.define([
 			});
 		},
 
-		filterSelectProductBrands: function (valueHelpDialog) {
+		filterSelectProductBrands: async function (valueHelpDialog) {
 			const binding = valueHelpDialog.getBinding("items");
+			const offerFormViewPath = this.defaultModel.createKey("/OfferFormView", {OfferID: this.offerId});
+			let offerFormViewObject = this.defaultModel.getProperty(offerFormViewPath);
+			if(!offerFormViewObject){
+				offerFormViewObject	= await this.getOfferFormView(this.offerId);
+			}
 			const orFilters = [
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, this.sCountryCode),
-				new Filter("INSTITUTE_ID",FilterOperator.EQ, 318232),
-				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, 100000187),
+				new Filter("INSTITUTE_ID",FilterOperator.EQ, offerFormViewObject.InstituteID),
+				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offerFormViewObject.DistributorID),
 				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
 			]
 			binding.filter(orFilters);
+		},
+
+		getOfferFormView: async function (offerId) {
+			const path = his.defaultModel.createKey("/OfferFormView", {OfferID: offerId}); 
+			return new Promise((resolve, reject) => {
+				this.getModel().read(path, {
+					groupId: "OfferformInfo",
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
 		},
 
 		handleProductBrandsValueHelpSearch: function(event) {
