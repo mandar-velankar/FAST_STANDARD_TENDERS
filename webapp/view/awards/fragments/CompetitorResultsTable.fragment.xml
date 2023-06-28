@@ -1,0 +1,63 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        expandable="true"
+        headerText="Competitor Result"
+    >
+        <Table id="idCompetitorResultTable">
+            <headerToolbar>
+                <OverflowToolbar>
+                    <content>
+                        <ToolbarSpacer />
+                        <Button 
+                            icon="sap-icon://add" 
+                            press=".onButtonCompetitorReultsCreatePress">
+                        </Button>
+                    </content>
+                </OverflowToolbar>
+            </headerToolbar>
+            <columns>
+                <Column>
+                    <Label
+                        text="{i18n>CompetitorCompany}"
+                        wrapping="true"
+                    />
+                </Column>
+                <Column>
+                    <Label
+                        text="{i18n>CompetitorProduct}"
+                        wrapping="true"
+                    />
+                </Column>
+                <Column>
+                    <Label
+                        text="{i18n>CompetitorOutcome}"
+                        wrapping="true"
+                    />
+                </Column>
+                <Column>
+                    <Label
+                        text="{i18n>CompetitorPrice}"
+                        wrapping="true"
+                    />
+                </Column>
+            </columns>
+            <!-- <items>
+                <ColumnListItem
+                    
+                >
+                    <cells>
+                        <Text text="" />
+                        <Text text="" />
+                        <Text text="" />
+                        <Text text="" />
+                    </cells>
+                </ColumnListItem>
+            </items> -->
+        </Table>
+    </Panel>
+</core:FragmentDefinition>
