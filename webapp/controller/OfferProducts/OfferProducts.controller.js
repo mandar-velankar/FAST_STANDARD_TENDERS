@@ -70,8 +70,6 @@ sap.ui.define([
 			this._bindForm("OfferForm");
 			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
-			await this.getCountryBrands(this.countryCode);
-			await this.getCountryBrandProducts(this.countryCode);
 		},
 		_onObjectMatched: async function (oEvent) {
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
@@ -189,40 +187,52 @@ sap.ui.define([
 			}
 		},
 
-		onOpenAddOfferProductDialog : function () {
+		onOpenAddOfferProductDialog : async function () {
+
+			this.getView().setBusy(true);
+			
+			await this.createAddOfferProductDialog();
+			const selectedOffer = await this.stState.getService().getOffer(this.offerID);
+			await this.getCountryBrands(this.countryCode, selectedOffer.Division);
+			await this.getInstituteDistributorBrandProducts(this.countryCode, selectedOffer.InstituteID, selectedOffer.DistributorID, selectedOffer.SellingCompany, selectedOffer.Channel, selectedOffer.Division);
+
+			this.getView().setBusy(false);
+		},
+
+		createAddOfferProductDialog : async function(){
 
 			const that = this;
 			//clear fields
 			this.getModel("ui").setProperty("/OfferProductTable/productCollection", null);
 
-		//if dialog exists destroy it first, so we always set dialog buttons in correct state
-		if (that._oDialog) {
-			that._oDialog.destroy();
-		}
+			//if dialog exists destroy it first, so we always set dialog buttons in correct state
+			if (that._oDialog) {
+				that._oDialog.destroy();
+			}
 
-		that._oDialog = new sap.m.Dialog("addProductDialog", {
-			title: "Add Product",
-			stretch: true,
-			horizontalScrolling:false,
-			verticalScrolling:false,
-			buttons: [new sap.m.Button({
-					id: "applyOfferProductDialog",
-					text: "Apply",
-					enabled: true,
-					tap: [that.onApplyOfferProductDialog, that]}),
-					new sap.m.Button({
-						id: "cancelOfferProductDialog",
-						text: "Cancel",
+			that._oDialog = new sap.m.Dialog("addProductDialog", {
+				title: "Add Product",
+				stretch: true,
+				horizontalScrolling:false,
+				verticalScrolling:false,
+				buttons: [new sap.m.Button({
+						id: "applyOfferProductDialog",
+						text: "Apply",
 						enabled: true,
-						tap: [that.onCloseAddOfferProductDialog, that]})],
-			
-			//content with all fields that need to be filled
-			content: [sap.ui.xmlfragment("com.bayer.tender.statenderapp.view.offer.fragments.SelectBrandProductList", that)]
+						tap: [that.onApplyOfferProductDialog, that]}),
+						new sap.m.Button({
+							id: "cancelOfferProductDialog",
+							text: "Cancel",
+							enabled: true,
+							tap: [that.onCloseAddOfferProductDialog, that]})],
+				
+				//content with all fields that need to be filled
+				content: [sap.ui.xmlfragment("com.bayer.tender.statenderapp.view.offer.fragments.SelectBrandProductList", that)]
 				// End of content of dialog
-		});
+			});
 
-		that.getView().addDependent(that._oDialog);
-		that._oDialog.open();
+			that.getView().addDependent(that._oDialog);
+			that._oDialog.open();
 		},
 		
 		onCloseAddOfferProductDialog: function () {
@@ -322,17 +332,29 @@ sap.ui.define([
 				MessageToast.show("No new item was selected.");
 
 			}
-			//oEvent.getSource().getBinding("items").filter([]);
+			
 		},
 
 		filterBrandProducts: function(aBrands){
-			let aBrandProducts = this.getModel("ui").getProperty("/OfferProductTable/countryBrandProducts");
+
+			let aBrandProducts = this.getModel("ui").getProperty("/OfferProductTable/instituteDistributorBrandProduct");
 			const aFilteredBrandProducts = aBrandProducts.filter((elem) => aBrands.find(({ BRAND_ID }) => elem.BRAND_ID === BRAND_ID));
 			const uniqueProducts = [];
 
 			aFilteredBrandProducts.forEach(x => uniqueProducts.filter(a => a.PRODUCT_ID === x.PRODUCT_ID).length > 0 ? null : uniqueProducts.push(x));
 
 			return uniqueProducts;
+		},
+
+		onSearchProductsInput: function(oEvent){
+
+			const searchValue = oEvent.getParameter("newValue");
+			const binding = sap.ui.getCore().byId("idListProductsInput").getBinding("items");
+			const oFilter = [
+				new Filter("PRODUCT_NAME", FilterOperator.Contains, searchValue),
+				new Filter("SKUS", FilterOperator.Contains, searchValue)
+			]
+			binding.filter(new Filter(oFilter));
 		},
 
 		onSelectionChangeProductListInput: function (oEvent) {
@@ -359,8 +381,13 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', true);
 			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'MultiSelect');
 			this.byId("idOfferProductsTable").removeSelections();
-			const oSelectedOffer = await this.stState.getService().getOffer(this.offerID);
-			if(oSelectedOffer.OfferStatus === "Offer Created") oAddOfferProductButton.setEnabled(true);
+			if (this.offerID && this.offerID !== "NA"){
+				const oSelectedOffer = await this.stState.getService().getOffer(this.offerID);
+				if(oSelectedOffer.OfferStatus === "Offer Created") oAddOfferProductButton.setEnabled(true);
+			}
+			else{
+				oAddOfferProductButton.setEnabled(false);
+			}
 
 		},
 
@@ -581,11 +608,12 @@ sap.ui.define([
 			return true;
 		}, 
 		
-		getCountryBrands: async function (countryCode) {
+		getCountryBrands: async function (countryCode, division) {
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryBrands", {
 					filters: [
-						new Filter("COUNTRY_CODE", "EQ", countryCode)
+						new Filter("COUNTRY_CODE", "EQ", countryCode),
+						new Filter("DIVISION", "EQ", division)
 					],
 					success: function (res) {
 						resolve(res)
@@ -596,18 +624,23 @@ sap.ui.define([
 			})
 		},
 
-		getCountryBrandProducts: async function (countryCode) {
+		getInstituteDistributorBrandProducts: async function (countryCode, instituteId, distributorId, sellingCompany, channel, division) {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/CountryBrandProducts", {
+				this.getModel().read("/InstituteDistributorBrandProduct", {
 					filters: [
-						new Filter("COUNTRY_CODE", "EQ", countryCode)
+						new Filter("COUNTRY_CODE", "EQ", countryCode),
+						new Filter("INSTITUTE_ID", "EQ", instituteId),
+						new Filter("DISTRIBUTOR_ID", "EQ", distributorId),
+						new Filter("DIVISION", "EQ", division),
+						new Filter("LEGAL_ENTITY_CODE", "EQ", sellingCompany),
+						new Filter("CHANNEL", "EQ", channel),
 					],
 					success: function (res) {
 						resolve(res)
 					}
 				});
 			}).then(data => {
-				this.getModel("ui").setProperty("/OfferProductTable/countryBrandProducts", data.results);
+				this.getModel("ui").setProperty("/OfferProductTable/instituteDistributorBrandProduct", data.results);
 			})
 		},
 	});
