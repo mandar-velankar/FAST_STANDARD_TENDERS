@@ -710,8 +710,8 @@ sap.ui.define([
 			const hasErrorMessages =  this.getMessages(["FreeGoodsOther"]).length > 0;
 			this.setMessageSection(["FreeGoodsOther"], "priceCondPrice");
 			this.defaultModel.submitChanges({
-				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesSuccess.bind(this),
+				// error: this._onSubmitChangesFail.bind(this),
+				// success: this._onSubmitChangesSuccess.bind(this),
 				groupId: "PricingForm"
 			}); 
 
@@ -749,6 +749,7 @@ sap.ui.define([
 			}else{
 				// const table = this.byId("idFreeGoodsOtherTable");
 				// table.removeItem(selectedItem);
+				// selectedItem.destroy();
 				this.defaultModel.remove(context.getPath());
 			}
 		},
@@ -765,13 +766,13 @@ sap.ui.define([
 					controller: this
 				}).then(function (valueHelpDialog) {
 					view.addDependent(valueHelpDialog);
-					controller.filterSelectProductBrands(valueHelpDialog);
 					return valueHelpDialog;
 				});
 			}
 
 			// open value help dialog
 			this.dialogSelectBrandProducts.then(function (valueHelpDialog) {
+				controller.filterSelectProductBrands(valueHelpDialog);
 				valueHelpDialog.setBindingContext(context);
 				valueHelpDialog.open();
 			});
@@ -797,7 +798,6 @@ sap.ui.define([
 			const path = this.defaultModel.createKey("/OfferFormView", {OfferID: offerId}); 
 			return new Promise((resolve, reject) => {
 				this.getModel().read(path, {
-					groupId: "OfferformInfo",
 					success: function (res) {
 						resolve(res)
 					},
