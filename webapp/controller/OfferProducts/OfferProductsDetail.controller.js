@@ -94,6 +94,7 @@ sap.ui.define([
 				// this._bindView("/" + sObjectPath);
 				//this._bindForm("ProductForm");
 				this._filterPriceCondition();	
+				this.setHasFocPriceConditionClassification();
 			}.bind(this));
 		},
 
@@ -138,6 +139,7 @@ sap.ui.define([
 					mainPriceConditionID: null
 				},
 				FocForm:{
+					hasFocPriceCondition: false,
 					editMode: false,
 					hasMainPriceCondition: false
 				}
@@ -806,6 +808,44 @@ sap.ui.define([
 					}
 				});
 			});
+		},
+
+		/**
+		 * Retrieves the count of Price Condition Classifications based on the specified country code.
+		 *
+		 * @param {string} countryCode - The country code to filter the Price Condition Classifications.
+		 * @returns {Promise<number>} A Promise that resolves to the count of Price Condition Classifications.
+		 * @throws {Error} If an error occurs during the retrieval process.
+		 */
+		getFocPriceConditionClassificationCount: async function (countryCode) {
+			const path = "/PriceConditionClassification/$count"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("CountryCode",FilterOperator.EQ, countryCode),
+						new Filter("ConditionType",FilterOperator.EQ, 'FOC')	
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+		
+		/**
+		 * Sets the "hasFocPriceCondition" property in the UI model based on the count of FOC Price Condition Classifications.
+		 * 
+		 * @returns {Promise<boolean>} A Promise that resolves to a boolean indicating whether there are FOC Price Condition Classifications.
+		 * @throws {Error} If an error occurs during the retrieval process.
+		 */
+		setHasFocPriceConditionClassification: async function(){
+			const focPriceConditionClassificationCount = await this.getFocPriceConditionClassificationCount(this.sCountryCode);
+			const hasFocPriceCondition = Number(focPriceConditionClassificationCount) > 0;
+			this.getModel("ui").setProperty("/FocForm/hasFocPriceCondition", hasFocPriceCondition);
+			return hasFocPriceCondition;
 		},
 
 		handleProductBrandsValueHelpSearch: function(event) {

@@ -143,6 +143,7 @@
 				</Panel>
                  <Panel
                     expandable="true"
+                    visible="{ui>/FocForm/hasFocPriceCondition}"
                     headerText="{i18n>OfferProductsDetailView.FreeGoods}"
                 >
                     <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC" type="XML"/>
