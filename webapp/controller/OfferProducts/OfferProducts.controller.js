@@ -410,6 +410,10 @@ sap.ui.define([
 		},
 
 		_bindCreateOfferForm: async function () {
+			const tenderPath = this.getModel().createKey("/TenderFormView", {
+				TenderID: this.objectId
+			});
+			const tender = this.getModel().getObject(tenderPath);
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const form = this.byId("idNewOfferForm");
 			let path = "";
@@ -431,6 +435,7 @@ sap.ui.define([
 
 			const sElemBindingPath = form.getElementBinding().getPath();
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
+			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
@@ -484,6 +489,7 @@ sap.ui.define([
 				Currency: oBoundContext.getObject().Currency,
 				DistributorID: oBoundContext.getObject().DistributorID,
 				InternalBidDueDate: oBoundContext.getObject().InternalBidDueDate,
+				OfferDueDate: oBoundContext.getObject().OfferDueDate,
 				SellingCompany: oBoundContext.getObject().SellingCompany,
 				Division: oBoundContext.getObject().Division,
 				WholesaleOffer: oBoundContext.getObject().WholesaleOffer || "No"		
@@ -526,6 +532,7 @@ sap.ui.define([
 			const newOfferCtx = this.byId("idNewOfferForm").getElementBinding().getBoundContext();
 			const ctxPath = newOfferCtx.getPath().replace("/", "");
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
+			this.cancelPendingChanges(["PT_TMTNOFST"]);
 			this.setMessageSection([ctxPath], "offerProductsMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Offer has been successfully created");
