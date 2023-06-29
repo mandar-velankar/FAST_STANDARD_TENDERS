@@ -707,19 +707,24 @@ sap.ui.define([
 			return this.dialogFocProducts;	
 		},
 
-		onButtonApplyFocOtherProductsPress: async function(event){
+		onButtonApplyFocOtherProductsPress: async function(event){	
 			const dialog = await this.getPriceConditionFocDialog();
 			const hasErrorMessages =  this.getMessages(["FreeGoodsOther"]).length > 0;
 			this.setMessageSection(["FreeGoodsOther"], "priceCondPrice");
 			this.defaultModel.submitChanges({
 				// error: this._onSubmitChangesFail.bind(this),
-				// success: this._onSubmitChangesSuccess.bind(this),
+				success: this.onSubmitFocChangesSuccess.bind(this),
 				groupId: "PricingForm"
 			}); 
 
 			if(!hasErrorMessages){
 				dialog.close(); 
 			}
+		},
+
+		onSubmitFocChangesSuccess: function(res){
+			const focMultiInput = this.byId("idFOCMultiInput");
+			focMultiInput.getBinding("tokens").refresh();
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
