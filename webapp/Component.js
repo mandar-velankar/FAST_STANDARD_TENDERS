@@ -50,7 +50,8 @@ sap.ui.define([
 				"ProductFormDetail", 
 				"PricingForm",
 				"OverviewForm",
-				"AwardedProduct"
+				"AwardedProduct",
+				"FreeGoodsOther"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -84,6 +85,9 @@ sap.ui.define([
 					groupId: "PricingForm",  
 				},
 				"PriceConditionDiscountView": {
+					groupId: "PricingForm",  
+				},
+				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
 				"OfferProductsDetailView": {

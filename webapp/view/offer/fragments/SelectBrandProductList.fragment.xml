@@ -77,7 +77,7 @@
 													<cells>
 														<VBox>
 															<Text text="{ui>PRODUCT_NAME}" wrapping="false" />
-															<Text text="{ui>PRODUCT_ID}" wrapping="false" />
+															<Text text="{ui>SKUS}" wrapping="false" />
 														</VBox>
 														
 													</cells>
