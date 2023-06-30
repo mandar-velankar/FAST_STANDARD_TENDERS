@@ -624,23 +624,9 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 		},	
 
-		onButtonFocFormSavePress: function(event){
-			// const hasErrorMessages =  this.getMessages([
-			// 	"idOfferPrice", 
-			// 	"PriceConditionPriceView",
-			// 	"PriceConditionDiscountView"
-			// ]).length > 0;
-			// this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
-			// this.defaultModel.submitChanges({
-			// 	error: this._onSubmitChangesFail.bind(this),
-			// 	success: this._onSubmitChangesFocFormSuccess.bind(this),
-			// 	groupId: "PricingForm"
-			// }); 
-		},
 		
-		onButtonFocFormCancelPress: function(event){
+		onButtonFocFormAcceptPress: function(event){
 			this.getModel("ui").setProperty('/FocForm/editMode', false);
-			// this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 		},
 
 		_onSubmitChangesFocFormSuccess: function(res){
@@ -707,13 +693,13 @@ sap.ui.define([
 			return this.dialogFocProducts;	
 		},
 
-		onButtonApplyFocOtherProductsPress: async function(event){
+		onButtonApplyFocOtherProductsPress: async function(event){	
 			const dialog = await this.getPriceConditionFocDialog();
 			const hasErrorMessages =  this.getMessages(["FreeGoodsOther"]).length > 0;
 			this.setMessageSection(["FreeGoodsOther"], "priceCondPrice");
 			this.defaultModel.submitChanges({
 				// error: this._onSubmitChangesFail.bind(this),
-				// success: this._onSubmitChangesSuccess.bind(this),
+				success: this.onSubmitFocChangesSuccess.bind(this),
 				groupId: "PricingForm"
 			}); 
 
@@ -722,23 +708,30 @@ sap.ui.define([
 			}
 		},
 
+		onSubmitFocChangesSuccess: function(res){
+			const focMultiInput = this.byId("idFOCMultiInput");
+			focMultiInput.getBinding("tokens").refresh();
+		},
+
 		onButtonCancelFocOtherProductsPress: async function(event){
 			const multiInput = this.byId("idFOCMultiInput");
-		
 			const dialog = await this.getPriceConditionFocDialog();
-
 			if(this.defaultModel.hasPendingChanges()){
 				this.defaultModel.resetChanges(null, false, true);
 			}
-			
 			multiInput.getBinding("tokens").refresh()
 			dialog.close(); 
 		},
 
 		onButtonAddFocOtherProductsPress: function(event){
 			const table = this.byId("idFreeGoodsOtherTable");
-			const context = table.getBinding("items").create({}, false, { groupId: "PricingForm" });
+			const context = this.defaultModel.createEntry("/FreeGoodsOther", {
+				groupId: "PricingForm"
+			});
 			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
+			const newItem = table.getBindingInfo("items").template.clone();
+			newItem.setBindingContext(context)
+			table.insertItem(newItem);
 		},
 
 
@@ -749,9 +742,6 @@ sap.ui.define([
 			if(context.isTransient()){
 				this.defaultModel.resetChanges([context.getPath()], undefined, true);
 			}else{
-				// const table = this.byId("idFreeGoodsOtherTable");
-				// table.removeItem(selectedItem);
-				// selectedItem.destroy();
 				this.defaultModel.remove(context.getPath());
 			}
 		},
