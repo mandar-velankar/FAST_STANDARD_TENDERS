@@ -624,23 +624,9 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 		},	
 
-		onButtonFocFormSavePress: function(event){
-			// const hasErrorMessages =  this.getMessages([
-			// 	"idOfferPrice", 
-			// 	"PriceConditionPriceView",
-			// 	"PriceConditionDiscountView"
-			// ]).length > 0;
-			// this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
-			// this.defaultModel.submitChanges({
-			// 	error: this._onSubmitChangesFail.bind(this),
-			// 	success: this._onSubmitChangesFocFormSuccess.bind(this),
-			// 	groupId: "PricingForm"
-			// }); 
-		},
 		
-		onButtonFocFormCancelPress: function(event){
+		onButtonFocFormAcceptPress: function(event){
 			this.getModel("ui").setProperty('/FocForm/editMode', false);
-			// this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
 		},
 
 		_onSubmitChangesFocFormSuccess: function(res){

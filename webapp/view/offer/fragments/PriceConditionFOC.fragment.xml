@@ -10,14 +10,7 @@
 		<form:toolbar>
 			<Toolbar>
 				<Title text="{i18n>FOC}"/>
-				<ToolbarSpacer />
-				<Button
-					icon="sap-icon://alert"
-					text="{= ${messages>/priceCondFoc}.length }"
-					visible="{= ${messages>/priceCondFoc}.length > 0 &amp;&amp; ${ui>/FocForm/editMode}}"
-					type="Emphasized"
-					press="onMessagePopoverPress($event, 'priceCondFoc')" 
-				/>
+				<ToolbarSpacer />	
 				<Button
 					icon="sap-icon://edit"
 					text="Edit"
@@ -26,15 +19,9 @@
 					visible="{= !${ui>/FocForm/editMode} }"
 				/>
 				<Button
-					icon="sap-icon://save"
-					text="Save"
-					press=".onButtonFocFormSavePress"
-					visible="{= ${ui>/FocForm/editMode} }"
-				/>
-				<Button
-					icon="sap-icon://decline"
-					text="Cancel"
-					press=".onButtonFocFormCancelPress"
+					icon="sap-icon://accept"
+					text="{i18n>PriceConditionFOCFragment.Close}"
+					press=".onButtonFocFormAcceptPress"
 					visible="{= ${ui>/FocForm/editMode} }"
 				/>
 			</Toolbar>
