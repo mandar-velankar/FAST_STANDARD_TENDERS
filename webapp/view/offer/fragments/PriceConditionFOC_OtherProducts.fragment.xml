@@ -4,8 +4,21 @@
 
 	<Dialog title="{i18n>PriceConditionFOC_OtherProductsFragment.Products}" >
 		<buttons>
-			<Button text="Apply" press=".onButtonApplyFocOtherProductsPress" />
-			<Button text="Cancel" press=".onButtonCancelFocOtherProductsPress" />
+            <Button
+                icon="sap-icon://alert"
+                text="{= ${messages>/priceCondFoc}.length }"
+                visible="{= ${messages>/priceCondFoc}.length > 0 &amp;&amp; ${ui>/FocForm/editMode}}"
+                type="Emphasized"
+                press="onMessagePopoverPress($event, 'priceCondFoc')" 
+            />
+			<Button 
+                text="{i18n>PriceConditionFOC_OtherProductsFragment.Save}" 
+                press=".onButtonApplyFocOtherProductsPress" 
+            />
+			<Button 
+                text="{i18n>PriceConditionFOC_OtherProductsFragment.Cancel}" 
+                press=".onButtonCancelFocOtherProductsPress" 
+            />
 		</buttons>
 
         <Table 
