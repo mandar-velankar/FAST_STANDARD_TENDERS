@@ -147,11 +147,31 @@ sap.ui.define([
 	
 			this.setModel(oModel, "ui");
 
+			const priceConditionType = await this.getSavedPriceConditionType();
+			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+
 			this._bindForm("ProductForm");
 			this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
-
+		getSavedPriceConditionType: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/StandardTenderPriceConditionView", {
+					filters: [
+						new Filter("OfferID", "EQ", this.offerId),
+						new Filter("ProductCode", "EQ", this.productId),
+						new Filter("ProductCode", "EQ", this.productId)
+					],
+					success: function (res) {
+						const priceCondition = res?.results.find(el => el.hasPriceCondition == true)
+						resolve(priceCondition.ConditionType)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				})
+			})
+		},
 		/**
 		 * This method bind a given form to its entity from the ui configuration template.
 		 * FYI: the form ID in the View is a concatination of "id" + formName
