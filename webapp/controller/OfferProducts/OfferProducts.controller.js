@@ -52,6 +52,7 @@ sap.ui.define([
 				busy: false,
 				delay: 0,
 				editMode: false,
+				currency: "EUR",
 				minDate: new Date(),
 				OfferForm:{
 					editMode: false
