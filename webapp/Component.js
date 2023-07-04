@@ -51,7 +51,8 @@ sap.ui.define([
 				"PricingForm",
 				"OverviewForm",
 				"AwardedProduct",
-				"FreeGoodsOther"
+				"FreeGoodsOther",
+				"Approvals"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -98,6 +99,9 @@ sap.ui.define([
 				},
 				"AwardedProductFormView": {
 					groupId: "AwardedProduct"
+				},
+				"OfferProductOfferStatus": {
+					groupId: "Approvals"
 				}
 			});
 		},
