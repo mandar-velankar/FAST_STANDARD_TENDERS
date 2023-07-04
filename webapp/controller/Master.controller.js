@@ -237,6 +237,23 @@ sap.ui.define([
 		onUpdateFinished: function (oEvent) {
 			// update the master list object counter after new data is loaded
 			this._updateListItemCount(oEvent.getParameter("total"));
+			this.setSelectedOffer();
+		},
+
+		setSelectedOffer: function () {
+			const masterTable = this.byId("genericMasterTable");
+			this.offerID = this.getRouter().getHashChanger().getHash().split("/").splice(3, 1).join("/");
+			if (!this.offerID || this.offerID === "NA") return;
+			const selectedOffer = masterTable.getItems().find(el =>	{
+				const bindingCtxObj = el.getBindingContext().getObject();
+				const tenderId = bindingCtxObj.TenderID;
+				const offerId = bindingCtxObj.OfferID;
+
+				if (tenderId == this.tenderID && offerId == this.offerID) {
+					return el;
+				}
+			});
+			masterTable.setSelectedItem(selectedOffer);
 		},
 
 		// /**

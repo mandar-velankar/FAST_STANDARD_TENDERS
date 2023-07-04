@@ -99,8 +99,22 @@
 		</columns>
 	</Table>
 
-	<VBox class='sapUiMediumMargin' justifyContent="End" alignItems="End">
-		<Text id='idTotalAmountOfferProducts' text='{= ${OfferTotal} ? "Offer Total: " + ${OfferTotal} + " EUR" : "Offer Total: 0 EUR" }' />
-	</VBox>	
+	<HBox class='sapUiMediumMargin' justifyContent="End" alignItems="End">
+		<Text 
+			text="Offer Total: " 
+			class='sapUiTinyMarginEnd'
+		/>
+		<Text 
+			id='idTotalAmountOfferProducts' 
+			text="{
+				parts: ['OfferTotal', 'ui>/currency'],
+				type: 'sap.ui.model.type.Currency',
+				formatOptions: {
+					showMeasure: true,
+					preserveDecimals: false
+				}
+			}" 
+		/>
+	</HBox>	
 
 </mvc:View>

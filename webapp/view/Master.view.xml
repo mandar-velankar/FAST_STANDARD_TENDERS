@@ -91,6 +91,7 @@
 					growingThreshold="15"
 					growingScrollToLoad="false"
 					busyIndicatorDelay="0"
+					mode="SingleSelectMaster"
 				>
 					<columns>
 						<Column importance="{template>importance}" >
