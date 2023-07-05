@@ -2,8 +2,10 @@ sap.ui.define([
 	"../BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/m/library",
+	"sap/ui/model/Filter",
+	"sap/ui/model/FilterOperator",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail", {
@@ -47,6 +49,7 @@ sap.ui.define([
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			this.stState = this.getOwnerComponent().getModel("st");
 
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
@@ -115,10 +118,32 @@ sap.ui.define([
 			});
 			
 			this._bindView(awardedProductPath);
-			this.bindForm(awardedProductPath)
+			this.bindForm(awardedProductPath);
 			
-		},
+			const competitors = await this.getCompetitorResults(this.offerId, this.productId);
+			this.getModel("st").setProperty("/Competitors", competitors);
 
+		},
+		
+		getCompetitorResults: async function (offerId, productCode) {
+			const controller = this;
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CompetitorResultsTableView", {
+					filters: [
+						new Filter("OFFERID",FilterOperator.EQ, offerId),
+						new Filter("PRODUCTCODE",FilterOperator.EQ, productCode),
+						new Filter("LOTID",FilterOperator.EQ, "1")
+					],
+					success: function (res) {
+						const competitors = res?.results.map(el => controller.mappedCompetitorResultsObject(el))
+						resolve(competitors)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				})
+			})
+		},
 		getAwardedProductsTemplateConfig: async function () {
 			await this.templateState.read("DETAIL-AWARDEDRODUCTDETAIL", {
 				countryCode: this.countryCode,
@@ -223,6 +248,36 @@ sap.ui.define([
 				// reset to previous layout
 				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
+		},
+
+		/**
+		 * When we use ThreeTable It is not possible to directly use insertRow/insertItem addRow/addItem
+		 * To be able to add new row we can use JSONModel 
+		 * Push needed data into JSONModel and refresh binding of table
+		 */
+		onButtonCompetitorReultsCreatePress: function () {
+			const competitorResultsTable = this.byId("idCompetitorResultTable");
+			const context = this.defaultModel.createEntry("/CompetitorResultsTableView", {
+				groupId: "Competitors"
+			});
+			const newContextObject = context.getObject();
+			const newCompetitor = this.mappedCompetitorResultsObject(newContextObject);
+			const competitors = this.getModel("st").getProperty("/Competitors");
+			competitors.push(newCompetitor);
+			this.getModel("st").setProperty("/Competitors", competitors);
+			competitorResultsTable.getBinding("rows").refresh();
+		},
+
+		/**
+		 * mappedCompetitorResultsObject function removes not needed object fields from data  
+		 * Reason is to avoid showing duplicate data when we expand/collapse row on ui 
+		 */
+		mappedCompetitorResultsObject: function (competitorResult) {
+			const newItem = {};
+			for (let el in competitorResult) {
+				if (typeof competitorResult[el] !== "object") newItem[el] = competitorResult[el]
+			}
+			return newItem;
 		}
     });
 });

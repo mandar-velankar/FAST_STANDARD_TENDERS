@@ -355,8 +355,66 @@ sap.ui.define([
 				parameters: {
 					expand: "ApproverList,ApproverTypes"
 				},
+				groupId: "Approvals",
 				template: approversTemplate
 			})
+		},
+
+		onSendApprovalRequest: function(event){
+			this.setMessageSection(["OfferProductOfferStatus"], "approvalMsg");
+			this.setApprovalsPendingChanges(this.defaultModel,this.byId("idMandatoryTable"), true);
+
+			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesApprovalsSuccess.bind(this),
+				groupId: "Approvals"
+			}); 
+		},
+
+		onCancelApprovalRequest: function(event){
+			this.setMessageSection(["OfferProductOfferStatus"], "approvalMsg");
+			this.setApprovalsPendingChanges(this.defaultModel,this.byId("idMandatoryTable"), false);
+
+			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesApprovalsSuccess.bind(this),
+				groupId: "Approvals"
+			});
+		},
+
+		_onSubmitChangesApprovalsSuccess: async function(res){
+			await this._enableApprovalCancelButtons();
+		},
+
+		/**
+		 * This method changes/updates the odata model PendingChanges list which is used when triggering "submitChanges" method
+		 * see https://ui5.sap.com/#/api/sap.ui.model.odata.v2.ODataModel%23methods/getObject
+		 * 
+		 * Context: in the View we have the AwardCriteria table binded to AwardCriteriaTableView which is a CDS view with joins.
+		 * Since, at the moment, there are some limitations with custom event handler on view with joins, we are manipulation
+		 * the pending changes on the odata model to send out different backend calls. 
+		 */
+		setApprovalsPendingChanges: function(oModel, oTable, isSend){
+				
+			const aItemContexts = oTable.getBinding("items").getContexts();
+
+			aItemContexts?.forEach(ctx => {
+				const approvalObj = {
+					OfferId: ctx.getObject().OfferId,
+					ApproverType: ctx.getObject().ApproverType,
+				}
+
+				const sPath = oModel.createKey("/OfferProductOfferStatus", approvalObj);
+				const existingObj = oModel.getProperty(sPath);
+					
+				if(existingObj){
+					oModel.setProperty(sPath+"/send", isSend ? 'Yes' : 'No');
+					oModel.setProperty(sPath+"/ApprovalStatus", isSend ? "Processing" : "Cancelling");
+				}else {
+					oModel.createEntry("/OfferProductOfferStatus", {
+						properties: approvalObj,
+						groupId: "Approvals"
+					});
+				}
+			});
 		},
 	})
 });
