@@ -52,7 +52,8 @@ sap.ui.define([
 				"OverviewForm",
 				"AwardedProduct",
 				"FreeGoodsOther",
-				"Approvals"
+				"Approvals",
+				"Competitors"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -102,6 +103,9 @@ sap.ui.define([
 				},
 				"OfferProductOfferStatus": {
 					groupId: "Approvals"
+				},
+				"CompetitorResultsTableView": {
+					groupId: "Competitors"
 				}
 			});
 		},
