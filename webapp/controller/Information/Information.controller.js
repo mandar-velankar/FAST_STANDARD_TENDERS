@@ -416,5 +416,10 @@ sap.ui.define([
 				}
 			});
 		},
+
+		onSubmitQuotation: async function(){
+			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
+			this.onOverviewTenderFormSaveBtnPress();
+		}
 	})
 });
