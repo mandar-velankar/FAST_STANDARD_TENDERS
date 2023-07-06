@@ -123,6 +123,43 @@ sap.ui.define([
 			const competitors = await this.getCompetitorResults(this.offerId, this.productId);
 			this.getModel("st").setProperty("/Competitors", competitors);
 
+			this.filterCompetitorResultComboBoxes();
+		},
+
+		filterCompetitorResultComboBoxes: function () {
+			const competitorTable = this.byId("idCompetitorResultTable");
+			const masterCompetitorFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				}),
+				new Filter({
+					path: "ProductCode",
+					operator: FilterOperator.EQ,
+					value1: this.productId
+				})
+			];
+
+			const competitorOutcomeFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				})
+			];
+
+			competitorTable.getRows().forEach(row => {
+				row.getCells().forEach(cell => {
+					const bindingInfoPath = cell.getBindingInfo("items")?.path;
+					const bindingInfo =  bindingInfoPath === "/MasterCompetitors";
+					if (bindingInfo && bindingInfoPath) {
+						cell.getBinding("items").filter(masterCompetitorFilters);
+					}else if(!bindingInfo && bindingInfoPath) {
+						cell.getBinding("items").filter(competitorOutcomeFilters);
+					}
+				})		
+			})
 		},
 		
 		getCompetitorResults: async function (offerId, productCode) {
@@ -255,7 +292,7 @@ sap.ui.define([
 		 * To be able to add new row we can use JSONModel 
 		 * Push needed data into JSONModel and refresh binding of table
 		 */
-		onButtonCompetitorReultsCreatePress: function () {
+		onButtonCompetitorResultsCreatePress: function () {
 			const competitorResultsTable = this.byId("idCompetitorResultTable");
 			const context = this.defaultModel.createEntry("/CompetitorResultsTableView", {
 				groupId: "Competitors"
