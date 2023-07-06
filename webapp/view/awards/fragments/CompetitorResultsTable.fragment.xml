@@ -4,6 +4,7 @@
     xmlns:form="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
     xmlns:t="sap.ui.table"
+    xmlns:f="sap.ui.layout.form"
 >
     <Panel
         expandable="true"
@@ -24,7 +25,7 @@
                             <ToolbarSpacer />
                             <Button
                                 icon="sap-icon://add"
-                                press=".onButtonCompetitorReultsCreatePress"
+                                press=".onButtonCompetitorResultsCreatePress"
                             />
                         </content>
                     </OverflowToolbar>
@@ -36,11 +37,13 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <ComboBox id = "idCompany" selectedKey="{st>AWARDEDCOMPANY}">
+                            <VBox >
+                                <ComboBox selectedKey="{st>AWARDEDCOMPANY}" items = "{/MasterCompetitors}">
                                 <items>
-                                    <core:Item text = "" key = ""/>
+                                    <core:Item text = "{CompetitorCompany}" key = "{CompetitorCompany}"/>
                                 </items>
                             </ComboBox>
+                            </VBox>
                         </t:template>
                     </t:Column>
                     <t:Column>
@@ -49,11 +52,13 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <ComboBox >
-                                <items>
-                                    <core:Item text = "" key = ""/>
-                                </items>
-                            </ComboBox>
+                            <VBox>
+                                <ComboBox selectedKey="{st>AWARDEDPRODUCT}" items = "{/MasterCompetitors}">
+                                    <items>
+                                        <core:Item text = "{CompetitorProduct}" key = "{CompetitorProduct}"/>
+                                    </items>
+                                </ComboBox>
+                            </VBox>
                         </t:template>
                     </t:Column>
                     <t:Column>
@@ -62,9 +67,9 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <ComboBox >
+                            <ComboBox selectedKey="{st>OUTCOME}" items = "{/MasterCountryOutComes}">
                                 <items>
-                                    <core:Item text = "" key = ""/>
+                                    <core:Item text = "{Outcome}" key = "{Outcome}"/>
                                 </items>
                             </ComboBox>
                         </t:template>
@@ -75,7 +80,7 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <Input value="" />
+                            <Input value="{st>AWARDEDPRICE}" />
                         </t:template>
                     </t:Column>
                     <t:Column width="10rem">

@@ -85,7 +85,7 @@
 					text="{i18n>SubmitQuotation}"
 					icon="sap-icon://sys-enter"
 					press=".onSubmitQuotation"
-					enabled="false"
+					enabled="true"
 					visible="{= !${ui>/OverviewForm/editMode}}"
 				/>
 					
