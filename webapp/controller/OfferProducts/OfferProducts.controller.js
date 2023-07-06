@@ -207,10 +207,11 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
 
 			// if(!this.validateOffer()) return; //error
-			// this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+			//this.defaultModel.submitChanges({groupId: "AddProduct"}); //no error - save
 		},
 		onOfferProductTableCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
+			this.getModel("ui").setProperty('/OfferProductTable/enableDeleteProductButton', false);
 			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
 			this.byId("idOfferProductsTable").removeSelections();
 			//this.defaultModel.resetChanges();
@@ -438,13 +439,14 @@ sap.ui.define([
 			const that = this;
 			//clear fields
 			this.getModel("ui").setProperty("/OfferProductTable/productCollection", null);
+			this.getModel("ui").setProperty("/OfferProductTable/products",null);
 
 			//if dialog exists destroy it first, so we always set dialog buttons in correct state
-			if (that._oDialog) {
-				that._oDialog.destroy();
+			if (that.dialog) {
+				that.dialog.destroy();
 			}
 
-			that._oDialog = new sap.m.Dialog("addProductDialog", {
+			that.dialog = new sap.m.Dialog("addProductDialog", {
 				title: "Add Product",
 				stretch: true,
 				horizontalScrolling:false,
@@ -465,16 +467,49 @@ sap.ui.define([
 				// End of content of dialog
 			});
 
-			that.getView().addDependent(that._oDialog);
-			that._oDialog.open();
+			that.getView().addDependent(that.dialog);
+			that.dialog.open();
 		},
 		
 		onCloseAddOfferProductDialog: function () {
 
 			let that = this;
-			that._oDialog.close();
-			that._oDialog.destroy();
+			that.dialog.close();
+			that.dialog.destroy();
 
+		},
+
+		onApplyOfferProductDialog: function() {
+			
+			const table = this.byId("idOfferProductsTable");
+			let dialog = sap.ui.getCore().byId("addProductDialog");
+			const products = this.getModel("ui").getProperty("/OfferProductTable/products");
+			for(const product of products){
+				const context = this.defaultModel.createEntry("/OfferProductsTableView", {
+					groupId: "AddProduct",
+					properties: {ProductPackName:product.SKU.PRODUCTPACKNAME, RequestedVolume:product.RequestedVolume, UoM:product.UnitPerPack , NetPrice:0 ,TotalAmount:0, TenderID:product.TenderID}
+				});
+				const newItem = table.getBindingInfo("items").template.clone();
+				newItem.setBindingContext(context)
+				table.insertItem(newItem);
+			};
+
+			dialog.close();
+
+		},
+
+		onDeleteOfferProductBtnPress: function(event){
+			const table = this.byId("idOfferProductsTable");
+			const selectedItem = table.getSelectedItem();
+			if (!selectedItem) {
+				return; // No item is selected, exit the function
+			}
+			const context = selectedItem.getBindingContext();
+			if(context.isTransient()){
+				this.defaultModel.resetChanges([context.getPath()], undefined, true);
+			}else{
+				this.defaultModel.remove(context.getPath());
+			}
 		},
 
 		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender
@@ -482,8 +517,8 @@ sap.ui.define([
 
 			const that = this;
 
-			if (!this._valueHelpSelectBrandDialog) {
-				this._valueHelpSelectBrandDialog = new sap.m.SelectDialog(this.createId("idValueHelpSelectBrandDialog"), {
+			if (!this.valueHelpSelectBrandDialog) {
+				this.valueHelpSelectBrandDialog = new sap.m.SelectDialog(this.createId("idValueHelpSelectBrandDialog"), {
 					title: "Brand Name",
 					multiSelect: true,
 					rememberSelections: false,
@@ -495,38 +530,38 @@ sap.ui.define([
 							selected: "{ui>SELECTED}"
 						})
 					},
-					liveChange: function (oEvent) {
-						let sValue = oEvent.getParameter("value");
+					liveChange: function (event) {
+						let sValue = event.getParameter("value");
 						const oFilter = [
 							new Filter("BRAND_NAME", FilterOperator.Contains, sValue),
 							new Filter("BRAND_ID", FilterOperator.Contains, sValue)
 						]
-						oEvent.getSource().getBinding("items").filter(new Filter(oFilter));
+						event.getSource().getBinding("items").filter(new Filter(oFilter));
 					},
-					confirm: function (oEvent) {
-						that._handleCloseBrandNameList(oEvent);
+					confirm: function (event) {
+						that.handleCloseBrandNameList(event);
 					},
-					cancel: function (oEvent) {
-						that._handleCloseBrandNameList(oEvent);
+					cancel: function (event) {
+						that.handleCloseBrandNameList(event);
 					}
 					
 				});
 			}
 
-			this.getView().addDependent(this._valueHelpSelectBrandDialog);
-			this._valueHelpSelectBrandDialog.open();
+			this.getView().addDependent(this.valueHelpSelectBrandDialog);
+			this.valueHelpSelectBrandDialog.open();
 
 		},
 
-		_handleCloseBrandNameList: function (oEvent) { 
+		handleCloseBrandNameList: function (event) { 
 
 			let that = this;
 
-			let oListInput = sap.ui.getCore().byId("idListProductsInput");
-			oListInput.removeSelections();
+			let listInput = sap.ui.getCore().byId("idListProductsInput");
+			listInput.removeSelections();
 
 			//selected brands
-			let aContexts = oEvent.getParameter("selectedContexts");
+			let aContexts = event.getParameter("selectedContexts");
 			if (aContexts && aContexts.length) {
 
 				MessageToast.show("The following brands were selected: " + aContexts.map(function (oContext) {
@@ -534,9 +569,9 @@ sap.ui.define([
 				}).join(", "));
 
 				//get multi input box
-				const oBrandList = sap.ui.getCore().byId("idBrandList");
-				let aBrandTokens = [];
-				let aBrands = [];
+				const brandList = sap.ui.getCore().byId("idBrandList");
+				let brandTokens = [];
+				let brands = [];
 
 				//push the selected brands 
 				aContexts.map(function (oContext) {
@@ -545,20 +580,20 @@ sap.ui.define([
 						text: oContext.getObject().BRAND_NAME,
 						key: oContext.getObject().BRAND_ID
 					});
-					aBrandTokens.push(oToken);
+					brandTokens.push(oToken);
 
 					//Brands for filtering
 					const oBrand = {
 						BRAND_ID: oContext.getObject().BRAND_ID
 					}
-					aBrands.push(oBrand);
+					brands.push(oBrand);
 
 				});
 
 				//add the array of tokens to the multi input
-				oBrandList.setTokens(aBrandTokens);
+				brandList.setTokens(brandTokens);
 
-				const aFilteredBrandProducts = this.filterBrandProducts(aBrands);
+				const aFilteredBrandProducts = this.filterBrandProducts(brands);
 				this.getModel("ui").setProperty("/OfferProductTable/productCollection", aFilteredBrandProducts);
 
 			} else {
@@ -569,13 +604,13 @@ sap.ui.define([
 			
 		},
 
-		filterBrandProducts: function(aBrands){
+		filterBrandProducts: function(brands){
 
-			let aBrandProducts = this.getModel("ui").getProperty("/OfferProductTable/instituteDistributorBrandProduct");
-			const aFilteredBrandProducts = aBrandProducts.filter((elem) => aBrands.find(({ BRAND_ID }) => elem.BRAND_ID === BRAND_ID));
+			let brandProducts = this.getModel("ui").getProperty("/OfferProductTable/instituteDistributorBrandProduct");
+			const filteredBrandProducts = brandProducts.filter((elem) => brands.find(({ BRAND_ID }) => elem.BRAND_ID === BRAND_ID));
 			const uniqueProducts = [];
 
-			aFilteredBrandProducts.forEach(x => uniqueProducts.filter(a => a.PRODUCT_ID === x.PRODUCT_ID).length > 0 ? null : uniqueProducts.push(x));
+			filteredBrandProducts.forEach(x => uniqueProducts.filter(a => a.PRODUCT_ID === x.PRODUCT_ID).length > 0 ? null : uniqueProducts.push(x));
 
 			return uniqueProducts;
 		},
@@ -593,20 +628,20 @@ sap.ui.define([
 
 		onSelectionChangeProductListInput: function (oEvent) {
 
-			const oList = oEvent.getSource();
-			const oLabel = sap.ui.getCore().byId("idFilterLabelInput");
-			const oInfoToolbar = sap.ui.getCore().byId("idInfoToolbarInput");
+			const list = oEvent.getSource();
+			const label = sap.ui.getCore().byId("idFilterLabelInput");
+			const infoToolBar = sap.ui.getCore().byId("idInfoToolbarInput");
 
 			// With the 'getSelectedContexts' function you can access the context paths
 			// of all list items that have been selected, regardless of any current
 			// filter on the aggregation binding.
-			const aContexts = oList.getSelectedContexts(true);
+			const aContexts = list.getSelectedContexts(true);
 
 			// update UI
 			let bSelected = (aContexts && aContexts.length > 0);
 			let sText = (bSelected) ? aContexts.length + " selected" : null;
-			oInfoToolbar.setVisible(bSelected);
-			oLabel.setText(sText);
+			infoToolBar.setVisible(bSelected);
+			label.setText(sText);
 
 		},
 
@@ -614,29 +649,29 @@ sap.ui.define([
 		onPressAddProductToOutputList: async function (oEvent) {
 			//get input & output list for products
 			let that = this;
-			const oListInput = sap.ui.getCore().byId("idListProductsInput");
-			const oListOutput = sap.ui.getCore().byId("idListProductsOutput");
-			let sPathProducts = "/OfferProductTable/products";
-			let aProducts = this.getModel("ui").getProperty(sPathProducts);
+			const listInput = sap.ui.getCore().byId("idListProductsInput");
+			const listOutput = sap.ui.getCore().byId("idListProductsOutput");
+			let pathProducts = "/OfferProductTable/products";
+			let products = this.getModel("ui").getProperty(pathProducts);
 			let bExisting = false;
-			const oInfoToolbar = sap.ui.getCore().byId("idInfoToolbarInput");
+			const infoToolBar = sap.ui.getCore().byId("idInfoToolbarInput");
 
 
 			// With the 'getSelectedContexts' function you can access the context paths
 			// of all list items that have been selected, regardless of any current
 			// filter on the aggregation binding.
-			let aContexts = oListInput.getSelectedContexts(true);
+			let aContexts = listInput.getSelectedContexts(true);
 
 			//loop over the selected products from input list
 
 			for(const oContext of aContexts){
 				//first selected product
-				const oProduct = this.getModel("ui").getProperty(oContext.sPath);
+				const product = this.getModel("ui").getProperty(oContext.sPath);
 
 				//Are there already products added? if yes we should check if this is not a double
-				if (aProducts) {
+				if (products) {
                     
-					let iIndex = aProducts.findIndex(x => x.ProductCode === oProduct.PRODUCT_ID);
+					let iIndex = products.findIndex(x => x.ProductCode === product.PRODUCT_ID);
 
 					if (iIndex === -1) {
 						//not found
@@ -646,7 +681,7 @@ sap.ui.define([
 					}
 				} else {
 					//no products yet
-					aProducts = [];
+					products = [];
 					bExisting = false;
 				}
 
@@ -654,97 +689,88 @@ sap.ui.define([
 				if (bExisting) {
 
 					//product already exists
-					sap.m.MessageBox.error("Product(" + oProduct.PRODUCT_NAME + ") is already added.");
+					sap.m.MessageBox.error("Product(" + product.PRODUCT_NAME + ") is already added.");
 
 				} else {
 
 					//make an empty array to add the product
-					const oAddProduct = {};
+					const addProduct = {};
 
 					//filling the data available
-					oAddProduct.TenderID = ""; 
-					oAddProduct.OfferID = this.offerID;
-					oAddProduct.CountryCode = oProduct.COUNTRY_CODE;
-					oAddProduct.SubmittedOn = "";
-					oAddProduct.SubmittedBy = "";
-					oAddProduct.Active = 1;
-					oAddProduct.ProductCode = oProduct.PRODUCT_ID;
-					oAddProduct.Reference = "";
-					oAddProduct.Channel = "";
-					oAddProduct.AlternateOfferYN = "No";
-					oAddProduct.RequestedVolume = "";
-					oAddProduct.UnitPerPack = "Unit";
-					oAddProduct.SampleYN = "No";
-					oAddProduct.SampleQuantity = 0;
-					oAddProduct.DocumentsRequired = "No";
-					oAddProduct.FirstShipment = ""
-					oAddProduct.NoofLots = "";
-					oAddProduct.IntervalBetweenShipments = "";
-					oAddProduct.NoOfTier = 0;
-					oAddProduct.DiscOrOffer = "";
-					oAddProduct.PaymentTerms = oProduct.PAYMENT_TERMS;
-					oAddProduct.DistributorID = oProduct.DISTRIBUTOR_ID;
-					oAddProduct.SNo = 0;
-					oAddProduct.ActiveProduct = 1;
-					oAddProduct.Comment = "";
-					oAddProduct.INCOTerms = oProduct.INCO_TERMS;
-					oAddProduct.PricingPolicyCluster = "";
-					oAddProduct.MinInvoiceAmount = "";
-					oAddProduct.DeliveryConditions = "";
-					oAddProduct.SKUS = oProduct.SKUS;
-                    oAddProduct.LotID = 1;
+					addProduct.TenderID = this.objectId; 
+					addProduct.OfferID = this.offerID;
+					addProduct.CountryCode = product.COUNTRY_CODE;
+					addProduct.SubmittedOn = "";
+					addProduct.SubmittedBy = "";
+					addProduct.Active = 1;
+					addProduct.ProductCode = product.PRODUCT_ID;
+					addProduct.Reference = "";
+					addProduct.Channel = "";
+					addProduct.AlternateOfferYN = "No";
+					addProduct.RequestedVolume = 0;
+					addProduct.UnitPerPack = "Unit";
+					addProduct.SampleYN = "No";
+					addProduct.SampleQuantity = 0;
+					addProduct.DocumentsRequired = "No";
+					addProduct.FirstShipment = ""
+					addProduct.NoofLots = "";
+					addProduct.IntervalBetweenShipments = "";
+					addProduct.NoOfTier = 0;
+					addProduct.DiscOrOffer = "";
+					addProduct.PaymentTerms = product.PAYMENT_TERMS;
+					addProduct.DistributorID = product.DISTRIBUTOR_ID;
+					addProduct.SNo = 0;
+					addProduct.ActiveProduct = 1;
+					addProduct.Comment = "";
+					addProduct.INCOTerms = product.INCO_TERMS;
+					addProduct.PricingPolicyCluster = "";
+					addProduct.MinInvoiceAmount = "";
+					addProduct.DeliveryConditions = "";
+					addProduct.SKUS = product.SKUS;
+                    addProduct.LotID = 1;
 					
-					oAddProduct.SKU = {
-						PRODUCTPACKNAME: oProduct.PRODUCT_NAME,
-						MoleculeName: oProduct.MoleculeName
+					addProduct.SKU = {
+						PRODUCTPACKNAME: product.PRODUCT_NAME,
+						MoleculeName: product.MoleculeName
 					};
 
-					// To make this code work on the nodejs layer, we need to expand on SKUCountry in 'READ', 'InstituteDistributorBrandProduct'
-					oAddProduct.SKUCountry = {
-						GOV_CODE: undefined,
-						CODE1: undefined,
-						CODE2: undefined
-					};
-
-					if (aProducts && aProducts.length) {
-						oAddProduct.SORTER = aProducts.length; //added as last in the list
+					if (products && products.length) {
+						addProduct.SORTER = products.length; //added as last in the list
 					} else {
-						oAddProduct.SORTER = 0; //first product
+						addProduct.SORTER = 0; //first product
 					}
-					oAddProduct.DEFAULT_COMMISSION_RATE = oProduct.COMMISSION_RATE; //default comission rate
-					oAddProduct._sOperation = 'POST';
 
-					aProducts.push(oAddProduct);
+					products.push(addProduct);
 
 				}
 
 			};
 
 			//add to binding
-			this.getModel("ui").setProperty(sPathProducts, aProducts);
+			this.getModel("ui").setProperty(pathProducts, products);
 
 			//no selection anymore
-			oListInput.removeSelections();
-			oListOutput.removeSelections();
-			oInfoToolbar.setVisible(false);
+			listInput.removeSelections();
+			listOutput.removeSelections();
+			infoToolBar.setVisible(false);
 
 		},
 
 		//Remove product from output list
-		onPressRemoveProductFromOutputList: function (oEvent) {
+		onPressRemoveProductFromOutputList: function (event) {
 
-			const oList = sap.ui.getCore().byId("idListProductsOutput");
-			const oInfoToolbar = sap.ui.getCore().byId("idInfoToolbarOutput");
-			let sPathProducts = "/OfferProductTable/products";
-			const aProducts = this.getModel("ui").getProperty(sPathProducts);
+			const list = sap.ui.getCore().byId("idListProductsOutput");
+			const infoToolBar = sap.ui.getCore().byId("idInfoToolbarOutput");
+			let pathProducts = "/OfferProductTable/products";
+			const products = this.getModel("ui").getProperty(pathProducts);
 
-			const aProductsToRemove = [];
+			const productsToRemove = [];
 			let oProductToRemove = {};
 
 			// With the 'getSelectedContexts' function you can access the context paths
 			// of all list items that have been selected, regardless of any current
 			// filter on the aggregation binding.
-			let aContexts = oList.getSelectedContexts(true);
+			let aContexts = list.getSelectedContexts(true);
 
 			for(const oContext of aContexts){
 
@@ -752,21 +778,64 @@ sap.ui.define([
 				const oProduct = this.getModel("ui").getProperty(oContext.sPath);
 
 				//remove it from the products
-				aProducts.splice(aProducts.indexOf(oProduct), 1);
+				products.splice(products.indexOf(oProduct), 1);
 
 				//if s_operation is PUT, the product is already existing in back-end
 				//oProductToRemove = {};
 				oProductToRemove.ProductCode = oProduct.ProductCode;
-				aProductsToRemove.push(oProductToRemove);
+				productsToRemove.push(oProductToRemove);
 
 			};
 
 			//remove from binding model
-			this.getModel("ui").setProperty(sPathProducts, aProducts);
+			this.getModel("ui").setProperty(pathProducts, products);
 
 			//no selection anymore
 			//oList.removeSelections();
-			oInfoToolbar.setVisible(false);
+			infoToolBar.setVisible(false);
+		},
+
+		//move product up
+		moveUp: function () {
+			this.moveSelectedItem("Up");
+		},
+
+		//move product down
+		moveDown: function () {
+			this.moveSelectedItem("Down");
+		},
+
+		//move selected item
+		moveSelectedItem: function (sDirection) {
+
+			const table = sap.ui.getCore().byId("idListProductsOutput");
+			const selectedItem = table.getSelectedItem();
+			if (!selectedItem) {
+				return; // No item is selected, exit the function
+			}
+
+			const selectedIndex = table.indexOfItem(selectedItem);
+			const siblingItemIndex = sDirection === "Up" ? selectedIndex - 1 : selectedIndex + 1;
+	  
+			const siblingItem = table.getItems()[siblingItemIndex];
+			if (!siblingItem) {
+				return; // No sibling item found, do nothing
+			}
+
+			const siblingItemContext = siblingItem.getBindingContext("ui");
+			if (!siblingItemContext) {
+				return; // Sibling item context not found, do nothing
+			}
+
+			const siblingItemRank = siblingItemContext.getProperty("SORTER");
+			const selectedItemRank = selectedItem.getBindingContext("ui").getProperty("SORTER");
+
+			table.getModel("ui").setProperty("SORTER", siblingItemRank, selectedItem.getBindingContext("ui"));
+			table.getModel("ui").setProperty("SORTER", selectedItemRank, siblingItemContext);
+
+			table.getBinding("items").refresh(true);
+
+			table.getItems()[siblingItemIndex].setSelected(true);
 		},
 		
 		getCountryBrands: async function (countryCode, division) {
