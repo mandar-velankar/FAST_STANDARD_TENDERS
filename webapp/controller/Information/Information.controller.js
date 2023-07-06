@@ -58,11 +58,33 @@ sap.ui.define([
 			this.bindFields();
 			
 			await this.approvalButtonEnableCheck();
+			await this.assignTemplates();
 			
 		},
 
 		onCloseApprovalDialog: function(){
 			this.byId("idApprovalsPopup").close();
+		},
+
+		assignTemplates: async function(){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/WordTemplateCountry", {
+					filters: [
+						new Filter("countryCode", "EQ", this.countryCode)
+					],
+					success: function (res) {
+						let allWordCountryTemplates = res?.results;
+						resolve(allWordCountryTemplates);
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/WordTemplateCountry", data);
+			})
+		},
+
+		onDownloadWord:function(event){
+			const url = `/v2/sta_tender/WordAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
+			URLHelper.redirect(url,true);
 		},
 
 		/**
