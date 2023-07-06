@@ -73,7 +73,7 @@
 					<Title text="{path:'template>xmlView/tableByName/OfferProductsTable/title'}" level="H2"/>
 					<ToolbarSpacer />
 				<Button id="AddOfferProductBtnId" text="Add Product" icon="sap-icon://add" press=".onOpenAddOfferProductDialog" visible="{= ${ui>/OfferProductTable/editMode} }"/>
-				<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteProduct" visible="{= ${ui>/OfferProductTable/editMode} }" enabled="{= ${ui>/OfferProductTable/enableDeleteProductButton}}"/>
+				<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteOfferProductBtnPress" visible="{= ${ui>/OfferProductTable/editMode} }" enabled="{= ${ui>/OfferProductTable/enableDeleteProductButton}}"/>
 				<Button id="editOfferProductButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferProductTableEditBtnPress" visible="{= !${ui>/OfferProductTable/editMode} }"/>
 				<Button
 					id="idOfferProductTableSaveBtn"

@@ -42,6 +42,7 @@ sap.ui.define([
 			oModel.setDeferredGroups(oModel.getDeferredGroups().concat([
 				"NewTender",
 				"NewOffer",
+				"AddProduct",
 				"Basicinfo", 
 				"AwardCriteria", 
 				"OfferformInfo", 
@@ -61,6 +62,9 @@ sap.ui.define([
 				},
 				"TenderFormView": {
 					groupId: "Basicinfo",  
+				},
+				"PT_TMOFPR":{
+					groupId: "AddProduct",
 				},
 				"PT_TMAWRDCR": {
 					groupId: "AwardCriteria",  
