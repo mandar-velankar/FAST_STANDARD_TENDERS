@@ -205,16 +205,16 @@ sap.ui.define([
 
 		onOfferProductTableSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
-
-			// if(!this.validateOffer()) return; //error
-			//this.defaultModel.submitChanges({groupId: "AddProduct"}); //no error - save
+			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
+			this.defaultModel.submitChanges({groupId: "AddProduct"}); //no error - save
 		},
+
 		onOfferProductTableCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
 			this.getModel("ui").setProperty('/OfferProductTable/enableDeleteProductButton', false);
 			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
 			this.byId("idOfferProductsTable").removeSelections();
-			//this.defaultModel.resetChanges();
+			this.defaultModel.resetChanges();
 		},
 
 		onOfferFormEditBtnPress: function(event){
@@ -485,9 +485,36 @@ sap.ui.define([
 			let dialog = sap.ui.getCore().byId("addProductDialog");
 			const products = this.getModel("ui").getProperty("/OfferProductTable/products");
 			for(const product of products){
+
+				const duplicateItem = table.getItems().find((item) => {
+					return item.getBindingContext().getProperty("ProductPackName") === product.SKU.PRODUCTPACKNAME;
+				  });
+				
+				  if (duplicateItem) {
+					// Product already exists in the table, handle the duplication
+					continue;
+				  }
+
 				const context = this.defaultModel.createEntry("/OfferProductsTableView", {
 					groupId: "AddProduct",
-					properties: {ProductPackName:product.SKU.PRODUCTPACKNAME, RequestedVolume:product.RequestedVolume, UoM:product.UnitPerPack , NetPrice:0 ,TotalAmount:0, TenderID:product.TenderID}
+					properties: {
+									ProductPackName:product.SKU.PRODUCTPACKNAME, 
+									SORTER:product.SORTER,
+									CountryCode:product.CountryCode, 
+									DistributorID:product.DistributorID, 
+									ActiveProduct:1, 
+									RequestedVolume: 0, 
+									OfferID:product.OfferID, 
+									Active:1, 
+									ProductCode:product.ProductCode, 
+									TenderID:product.TenderID,
+									SampleQuantity:0,
+									NoofLots:0,
+									IntervalBetweenShipments:0,
+									NoOfTier:0,
+									DEFAULT_COMMISSION_RATE:0,
+									MinInvoiceAmount:0
+								}
 				});
 				const newItem = table.getBindingInfo("items").template.clone();
 				newItem.setBindingContext(context)
@@ -505,11 +532,8 @@ sap.ui.define([
 				return; // No item is selected, exit the function
 			}
 			const context = selectedItem.getBindingContext();
-			if(context.isTransient()){
-				this.defaultModel.resetChanges([context.getPath()], undefined, true);
-			}else{
-				this.defaultModel.remove(context.getPath());
-			}
+			const model = context.getModel();
+			model.remove(context.getPath());
 		},
 
 		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender

@@ -63,7 +63,7 @@ sap.ui.define([
 				"TenderFormView": {
 					groupId: "Basicinfo",  
 				},
-				"PT_TMOFPR":{
+				"OfferProductsTableView":{
 					groupId: "AddProduct",
 				},
 				"PT_TMAWRDCR": {
