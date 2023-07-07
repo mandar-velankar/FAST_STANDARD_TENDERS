@@ -69,7 +69,7 @@ sap.ui.define([
 
 			
 			this._bindForm("OfferForm");
-			if (this.offerID && this.offerID !== "NA") this._bindTable("OfferProductsTable");
+			this._bindTable("OfferProductsTable");
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
 		},
 		_onObjectMatched: async function (oEvent) {
@@ -119,7 +119,11 @@ sap.ui.define([
 			const entity = tableConfig.getEntity();
 			const table = this.byId(`id${tableName}`);
 			const cols = tableConfig.getColumns();
-			
+
+			if (this.offerID && this.offerID === "NA") {
+				table.unbindItems();
+				return;
+			}
 			table?.bindItems({
 				path: `/${entity}`,
 			  	filters: [
@@ -179,6 +183,8 @@ sap.ui.define([
 						productId: selectedProductCode
 					});
 				}.bind(this));
+				this.byId("idOfferProductsTable").removeSelections();
+				this.byId("idOfferProductsTable").getBinding("items").refresh();
 			}
 			else{
 				let bSelected = oEvent?.getParameter("selected");

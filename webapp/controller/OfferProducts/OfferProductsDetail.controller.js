@@ -164,7 +164,7 @@ sap.ui.define([
 					],
 					success: function (res) {
 						const priceCondition = res?.results.find(el => el.hasPriceCondition == true)
-						resolve(priceCondition.ConditionType)
+						resolve(priceCondition?.ConditionType)
 					},
 					error: function (err) {
 						reject(err)
@@ -215,7 +215,8 @@ sap.ui.define([
 				if (this.sObjectId) {
 					path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
 						TenderID: this.sObjectId,
-						OfferID: this.sOfferId
+						OfferID: this.sOfferId,
+						ProductCode: this.productId
 					});
 				}
 
