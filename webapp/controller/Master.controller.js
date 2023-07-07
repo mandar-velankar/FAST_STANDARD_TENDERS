@@ -627,6 +627,7 @@ sap.ui.define([
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
 			const sSelectedCountry = oStandModel.getProperty("/SelectedCountry");
 
+			/* this would not work if we add columns dynamic from the view 
 			const newTenderObj = {
 				TenderID: oBoundContext.getObject().TenderID,
 				Active: 1,
@@ -643,8 +644,19 @@ sap.ui.define([
 				PublicationDate: oBoundContext.getObject().PublicationDate,
 				BidDueDate: oBoundContext.getObject().BidDueDate,
 				AwardDate: oBoundContext.getObject().AwardDate,
-				NextPublicationDye: oBoundContext.getObject().NextPublicationDye
+				NextPublicationDye: oBoundContext.getObject().NextPublicationDye,
+				SubmittedBy: oBoundContext.getObject().SubmittedBy,
+				Custom: oBoundContext.getObject().Custom,
 			}
+			*/
+
+			const newTenderObj = oBoundContext.getObject();
+
+			//set defaults
+			newTenderObj.Active = 1;
+			newTenderObj.CountryCode = sSelectedCountry;
+			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
+
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
 				properties: newTenderObj,
 				groupId: "NewTender"

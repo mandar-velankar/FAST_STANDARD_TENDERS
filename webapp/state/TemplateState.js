@@ -38,7 +38,7 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
                 return this.updateConfig("detailDetailOfferProduct",await this.templateService.getFormConfig(keys || {}));
             },
             readDetailDetailAwardedProductConfig: async function (keys) {
-                return this.updateConfig("detailDetailAwardedProduct",await this.templateService.getFormConfig(keys || {}));
+                return this.updateConfig("detailDetailAwardedProduct",await this.templateService.getViewConfig(keys || {}));
             },
             updateConfig:function(type,templateResponse){
                 this.oData[`${type}Config`] = {
