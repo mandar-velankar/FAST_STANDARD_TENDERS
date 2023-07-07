@@ -119,47 +119,7 @@ sap.ui.define([
 			
 			this._bindView(awardedProductPath);
 			this.bindForm(awardedProductPath);
-			
-			const competitors = await this.getCompetitorResults(this.offerId, this.productId);
-			this.getModel("st").setProperty("/Competitors", competitors);
-
-			this.filterCompetitorResultComboBoxes();
-		},
-
-		filterCompetitorResultComboBoxes: function () {
-			const competitorTable = this.byId("idCompetitorResultTable");
-			const masterCompetitorFilters = [
-				new Filter({
-					path: "CountryCode",
-					operator: FilterOperator.EQ,
-					value1: this.countryCode
-				}),
-				new Filter({
-					path: "ProductCode",
-					operator: FilterOperator.EQ,
-					value1: this.productId
-				})
-			];
-
-			const competitorOutcomeFilters = [
-				new Filter({
-					path: "CountryCode",
-					operator: FilterOperator.EQ,
-					value1: this.countryCode
-				})
-			];
-
-			competitorTable.getRows().forEach(row => {
-				row.getCells().forEach(cell => {
-					const bindingInfoPath = cell.getBindingInfo("items")?.path;
-					const bindingInfo =  bindingInfoPath === "/MasterCompetitors";
-					if (bindingInfo && bindingInfoPath) {
-						cell.getBinding("items").filter(masterCompetitorFilters);
-					}else if(!bindingInfo && bindingInfoPath) {
-						cell.getBinding("items").filter(competitorOutcomeFilters);
-					}
-				})		
-			})
+			this.bindTable(this.offerId, this.productId);
 		},
 		
 		getCompetitorResults: async function (offerId, productCode) {
@@ -218,6 +178,23 @@ sap.ui.define([
 				path: awardedProductPath,
 				groupId: "AwardedProduct"
 			})
+		},
+
+		bindTable: function (offerId, productCode) {
+			const competitorResultTable = this.byId("idCompetitorResultTable");
+			const competitorForm = this.byId("idCompetitorResultsForm");
+			const template = competitorResultTable.getBindingInfo("items").template
+			competitorResultTable.bindItems({
+				path: "/CompetitorResultsTableView",
+				filters: [
+					new Filter("OFFERID",FilterOperator.EQ, offerId),
+					new Filter("PRODUCTCODE",FilterOperator.EQ, productCode),
+					new Filter("LOTID",FilterOperator.EQ, "1")
+				],
+				template: template
+			});
+			competitorForm.unbindElement();
+			competitorForm.setVisible(false);
 		},
 
 		_onMetadataLoaded: function () {
@@ -297,24 +274,75 @@ sap.ui.define([
 			const context = this.defaultModel.createEntry("/CompetitorResultsTableView", {
 				groupId: "Competitors"
 			});
-			const newContextObject = context.getObject();
-			const newCompetitor = this.mappedCompetitorResultsObject(newContextObject);
-			const competitors = this.getModel("st").getProperty("/Competitors");
-			competitors.push(newCompetitor);
-			this.getModel("st").setProperty("/Competitors", competitors);
-			competitorResultsTable.getBinding("rows").refresh();
+			context.getModel().setProperty("edit", false, context);
+			const newCompetitor = competitorResultsTable.getBindingInfo("items").template.clone();
+			newCompetitor.setBindingContext(context);
+			competitorResultsTable.insertItem(newCompetitor);
+			this.filterCompetitorResultComboBoxes(newCompetitor);
 		},
 
-		/**
-		 * mappedCompetitorResultsObject function removes not needed object fields from data  
-		 * Reason is to avoid showing duplicate data when we expand/collapse row on ui 
-		 */
-		mappedCompetitorResultsObject: function (competitorResult) {
-			const newItem = {};
-			for (let el in competitorResult) {
-				if (typeof competitorResult[el] !== "object") newItem[el] = competitorResult[el]
-			}
-			return newItem;
+		filterCompetitorResultComboBoxes: function (competitorRow) {
+			const masterCompetitorFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				}),
+				new Filter({
+					path: "ProductCode",
+					operator: FilterOperator.EQ,
+					value1: this.productId
+				})
+			];
+
+			const competitorOutcomeFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				})
+			];
+			competitorRow.getCells().forEach(cell => {
+				const bindingInfoPath = cell.getBindingInfo("items")?.path;
+				const bindingInfo =  bindingInfoPath === "/MasterCompetitors";
+				if (bindingInfo && bindingInfoPath) {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}else if(!bindingInfo && bindingInfoPath) {
+					cell.getBinding("items").filter(competitorOutcomeFilters);
+				}
+			})		
+		},
+
+		onButtonEditCompetitorPress: function (event) {
+			const competitorResultsTable = this.byId("idCompetitorResultTable");
+			const competitorForm = this.byId("idCompetitorResultsForm");
+			competitorForm.unbindElement();
+			const selectedCompetitor = event.getSource().getParent().getParent();	
+			const bindingPath = selectedCompetitor.getBindingContext().getPath();
+			this.getModel().setProperty(`${bindingPath}/edit`, true);
+			competitorResultsTable.setSelectedItem(selectedCompetitor);
+			this.bindCompetitorForm(bindingPath);
+			competitorForm.setVisible(true);
+		},
+
+		bindCompetitorForm: function (path) {
+			const competitorForm = this.byId("idCompetitorResultsForm");
+			competitorForm.bindElement({
+				path: path
+			})
+		},
+		onSelectCompetitor: function (event) {
+			const competitorForm = this.byId("idCompetitorResultsForm");
+			const selectedItemctx = event.getParameter("listItem").getBindingContext();
+			const path = selectedItemctx.getPath();
+			if (!selectedItemctx.getObject().edit) {
+				competitorForm.unbindElement();
+				competitorForm.setVisible(false);
+				return;
+			};
+			const visibility = competitorForm.getVisible();
+			if (!visibility) competitorForm.setVisible(true);
+			this.bindCompetitorForm(path);
 		}
     });
 });

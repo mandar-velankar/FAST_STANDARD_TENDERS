@@ -11,9 +11,9 @@
         headerText="Competitor Result"
     >
         <content>
-            <t:TreeTable
+            <!-- <t:TreeTable
                 id="idCompetitorResultTable"
-                rows = "{path: 'st>/Competitors'}"
+                rows="{path: 'st>/Competitors'}"
                 selectionMode="Single"
                 enableSelectAll="false"
                 ariaLabelledBy="title"
@@ -37,13 +37,18 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <VBox >
-                                <ComboBox selectedKey="{st>AWARDEDCOMPANY}" items = "{/MasterCompetitors}">
+                            <ComboBox
+                                enabled="{st>edit}"
+                                selectedKey="{st>AWARDEDCOMPANY}"
+                                items="{/MasterCompetitors}"
+                            >
                                 <items>
-                                    <core:Item text = "{CompetitorCompany}" key = "{CompetitorCompany}"/>
+                                    <core:Item
+                                        text="{CompetitorCompany}"
+                                        key="{CompetitorCompany}"
+                                    />
                                 </items>
                             </ComboBox>
-                            </VBox>
                         </t:template>
                     </t:Column>
                     <t:Column>
@@ -52,13 +57,18 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <VBox>
-                                <ComboBox selectedKey="{st>AWARDEDPRODUCT}" items = "{/MasterCompetitors}">
-                                    <items>
-                                        <core:Item text = "{CompetitorProduct}" key = "{CompetitorProduct}"/>
-                                    </items>
-                                </ComboBox>
-                            </VBox>
+                            <ComboBox
+                                enabled="{st>edit}"
+                                selectedKey="{st>AWARDEDPRODUCT}"
+                                items="{/MasterCompetitors}"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{CompetitorProduct}"
+                                        key="{CompetitorProduct}"
+                                    />
+                                </items>
+                            </ComboBox>
                         </t:template>
                     </t:Column>
                     <t:Column>
@@ -67,9 +77,16 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <ComboBox selectedKey="{st>OUTCOME}" items = "{/MasterCountryOutComes}">
+                            <ComboBox
+                                enabled="{st>edit}"
+                                selectedKey="{st>OUTCOME}"
+                                items="{/MasterCountryOutComes}"
+                            >
                                 <items>
-                                    <core:Item text = "{Outcome}" key = "{Outcome}"/>
+                                    <core:Item
+                                        text="{Outcome}"
+                                        key="{Outcome}"
+                                    />
                                 </items>
                             </ComboBox>
                         </t:template>
@@ -80,28 +97,209 @@
                             wrapping="true"
                         />
                         <t:template>
-                            <Input value="{st>AWARDEDPRICE}" />
+                            <Input value="{st>AWARDEDPRICE}" enabled="{st>edit}"/>
                         </t:template>
                     </t:Column>
                     <t:Column width="10rem">
                         <t:template>
                             <HBox>
                                 <Button
-                                    class = "sapUiSmallMarginBegin"
+                                    class="sapUiSmallMarginBegin"
                                     icon="sap-icon://edit"
                                     text="Edit"
                                     press=".onButtonEditCompetitorPress"
+                                    visible="{= !${st>edit}}"
                                 />
-                                <Button 
-                                    class = "sapUiSmallMarginBegin"
-                                    icon="sap-icon://delete" 
-                                    press=".onButtonDeleteCompetitorPress" 
+                                <Button
+                                    class="sapUiSmallMarginBegin"
+                                    icon="sap-icon://delete"
+                                    press=".onButtonDeleteCompetitorPress"
+                                    visible="{= !${st>edit}}"
+                                />
+                                <Button
+                                    icon="sap-icon://save"
+                                    text="Save"
+                                    press=".onButtonCompetitorSavePress"
+                                    visible="{st>edit}"
+                                />
+                                <Button
+                                    icon="sap-icon://decline"
+                                    text="Cancel"
+                                    press=".onButtonCompetitorCancelPress"
+                                    visible="{st>edit}"
                                 />
                             </HBox>
                         </t:template>
                     </t:Column>
                 </t:columns>
-            </t:TreeTable>
+            </t:TreeTable> -->
+            <Table
+                id="idCompetitorResultTable"
+                items="{path: '/CompetitorResultsTableView'}"
+                mode = "SingleSelectMaster"
+                selectionChange = ".onSelectCompetitor"
+            >
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://add"
+                            press=".onButtonCompetitorResultsCreatePress"
+                        />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorCompany}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorProduct}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorOutcome}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorPrice}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column width="15rem" />
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ComboBox
+                                enabled="{edit}"
+                                selectedKey="{AWARDEDCOMPANY}"
+                                items="{/MasterCompetitors}"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{CompetitorCompany}"
+                                        key="{CompetitorCompany}"
+                                    />
+                                </items>
+                            </ComboBox>
+                            <ComboBox
+                                enabled="{edit}"
+                                selectedKey="{AWARDEDPRODUCT}"
+                                items="{/MasterCompetitors}"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{CompetitorProduct}"
+                                        key="{CompetitorProduct}"
+                                    />
+                                </items>
+                            </ComboBox>
+                            <ComboBox
+                                enabled="{edit}"
+                                selectedKey="{OUTCOME}"
+                                items="{/MasterCountryOutComes}"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{Outcome}"
+                                        key="{Outcome}"
+                                    />
+                                </items>
+                            </ComboBox>
+                            <Input
+                                value="{AWARDEDPRICE}"
+                                enabled="{edit}"
+                            />
+                            <HBox>
+                                <Button
+                                    class="sapUiSmallMarginBegin"
+                                    icon="sap-icon://edit"
+                                    text="Edit"
+                                    press=".onButtonEditCompetitorPress"
+                                    visible="{= !${edit}}"
+                                />
+                                <Button
+                                    class="sapUiSmallMarginBegin"
+                                    icon="sap-icon://delete"
+                                    press=".onButtonDeleteCompetitorPress"
+                                    visible="{= !${edit}}"
+                                />
+                                <Button
+                                    class="sapUiSmallMarginBegin"
+                                    icon="sap-icon://save"
+                                    text="Save"
+                                    press=".onButtonCompetitorSavePress"
+                                    visible="{edit}"
+                                />
+                                <Button
+                                    class="sapUiSmallMarginBegin"
+                                    icon="sap-icon://decline"
+                                    text="Cancel"
+                                    press=".onButtonCompetitorCancelPress"
+                                    visible="{edit}"
+                                />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+            <form:Form
+                id="idCompetitorResultsForm"
+                editable="true"
+                visible="false"
+                formContainers="{path:'template>/detailDetailAwardedProductConfig/countryTemplate/template/tabByName/CompetitorResults/xmlView/formByName/CompetitorResultsForm/formContainers',templateShareable:true}"
+            >
+                <!-- <form:title>
+                    <core:Title text="{template>title}" />
+                </form:title> -->
+                <!-- <form:toolbar>
+                    <Toolbar>
+                        <Title text="Tender and Offer Details" />
+                    </Toolbar>
+                </form:toolbar> -->
+                <form:layout>
+                    <form:ResponsiveGridLayout
+                        labelSpanXL="{template>layout/labelSpanXL}"
+                        labelSpanL="{template>layout/labelSpanL}"
+                        labelSpanM="{template>layout/labelSpanM}"
+                        labelSpanS="{template>layout/labelSpanS}"
+                        adjustLabelSpan="{template>layout/adjustLabelSpan}"
+                        emptySpanXL="{template>layout/emptySpanXL}"
+                        emptySpanL="{template>layout/emptySpanL}"
+                        emptySpanM="{template>layout/emptySpanM}"
+                        emptySpanS="{template>layout/emptySpanS}"
+                        columnsXL="{template>layout/columnsXL}"
+                        columnsL="{template>layout/columnsL}"
+                        columnsM="{template>layout/columnsM}"
+                        singleContainerFullSize="{template>layout/singleContainerFullSize}"
+                    />
+                </form:layout>
+                <form:formContainers>
+                    <form:FormContainer
+                        formElements="{path:'template>formElements',templateShareable:true}"
+                    >
+                        <form:formElements>
+                            <form:FormElement
+                                visible="{template>visible}"
+                                label="{template>label}"
+                                fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
+                            >
+                                <!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+                            </form:FormElement>
+                        </form:formElements>
+                    </form:FormContainer>
+                </form:formContainers>
+            </form:Form>
         </content>
     </Panel>
 </core:FragmentDefinition>
