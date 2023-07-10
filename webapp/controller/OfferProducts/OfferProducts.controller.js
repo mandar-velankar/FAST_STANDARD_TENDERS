@@ -490,43 +490,46 @@ sap.ui.define([
 			const table = this.byId("idOfferProductsTable");
 			let dialog = sap.ui.getCore().byId("addProductDialog");
 			const products = this.getModel("ui").getProperty("/OfferProductTable/products");
-			for(const product of products){
+			if(products){
+				for(const product of products){
 
-				const duplicateItem = table.getItems().find((item) => {
-					return item.getBindingContext().getProperty("ProductPackName") === product.SKU.PRODUCTPACKNAME;
-				  });
-				
-				  if (duplicateItem) {
-					// Product already exists in the table, handle the duplication
-					continue;
-				  }
+					const duplicateItem = table.getItems().find((item) => {
+						return item.getBindingContext().getProperty("ProductPackName") === product.SKU.PRODUCTPACKNAME;
+					});
+					
+					if (duplicateItem) {
+						// Product already exists in the table, handle the duplication
+						continue;
+					}
 
-				const context = this.defaultModel.createEntry("/OfferProductsTableView", {
-					groupId: "AddProduct",
-					properties: {
-									ProductPackName:product.SKU.PRODUCTPACKNAME, 
-									SORTER:product.SORTER,
-									CountryCode:product.CountryCode, 
-									DistributorID:product.DistributorID, 
-									ActiveProduct:1, 
-									RequestedVolume: 0, 
-									OfferID:product.OfferID, 
-									Active:1, 
-									ProductCode:product.ProductCode, 
-									TenderID:product.TenderID,
-									SampleQuantity:0,
-									NoofLots:0,
-									IntervalBetweenShipments:0,
-									NoOfTier:0,
-									DEFAULT_COMMISSION_RATE:0,
-									MinInvoiceAmount:0,
-									UoM: 'Pack'
-								}
-				});
-				const newItem = table.getBindingInfo("items").template.clone();
-				newItem.setBindingContext(context)
-				table.insertItem(newItem);
-			};
+					const context = this.defaultModel.createEntry("/OfferProductsTableView", {
+						groupId: "AddProduct",
+						properties: {
+										ProductPackName:product.SKU.PRODUCTPACKNAME, 
+										SORTER:product.SORTER,
+										CountryCode:product.CountryCode, 
+										DistributorID:product.DistributorID, 
+										ActiveProduct:1, 
+										RequestedVolume: 0, 
+										OfferID:product.OfferID, 
+										Active:1, 
+										ProductCode:product.ProductCode, 
+										TenderID:product.TenderID,
+										SampleQuantity:0,
+										NoofLots:0,
+										IntervalBetweenShipments:0,
+										NoOfTier:0,
+										DEFAULT_COMMISSION_RATE:0,
+										MinInvoiceAmount:0,
+										UoM: 'Pack'
+									}
+					});
+					const newItem = table.getBindingInfo("items").template.clone();
+					newItem.setBindingContext(context)
+					table.insertItem(newItem);
+				};
+			}
+		
 
 			dialog.close();
 
