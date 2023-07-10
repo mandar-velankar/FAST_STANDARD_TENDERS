@@ -519,7 +519,8 @@ sap.ui.define([
 									IntervalBetweenShipments:0,
 									NoOfTier:0,
 									DEFAULT_COMMISSION_RATE:0,
-									MinInvoiceAmount:0
+									MinInvoiceAmount:0,
+									UoM: 'Pack'
 								}
 				});
 				const newItem = table.getBindingInfo("items").template.clone();
