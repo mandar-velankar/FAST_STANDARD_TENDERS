@@ -553,6 +553,7 @@ sap.ui.define([
 			const context = selectedItem.getBindingContext();
 			const model = context.getModel();
 			model.remove(context.getPath());
+			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
 		},
 
 		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender
