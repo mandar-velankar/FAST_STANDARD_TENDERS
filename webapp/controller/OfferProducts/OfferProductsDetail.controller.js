@@ -163,8 +163,9 @@ sap.ui.define([
 						new Filter("ProductCode", "EQ", this.productId)
 					],
 					success: function (res) {
-						const priceCondition = res?.results.find(el => el.hasPriceCondition == true)
-						resolve(priceCondition?.ConditionType)
+						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
+						priceCondition = priceCondition ? priceCondition : res?.results[0];
+						resolve(priceCondition?.ConditionType);
 					},
 					error: function (err) {
 						reject(err)
