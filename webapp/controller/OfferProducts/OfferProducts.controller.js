@@ -234,7 +234,7 @@ sap.ui.define([
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			//this.defaultModel.resetChanges();
+			this.defaultModel.resetChanges();
 		},
 
 		onOpenCreateOfferDialog : function () {
