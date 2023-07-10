@@ -55,7 +55,7 @@
 					enabled="{= ${ui>/enableApprovalButton} }"
 				/>
 
-				<MenuButton text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}" class = "sapUiSmallMarginTop">
+				<MenuButton id="idDownloadAttachmentButton" text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}" class = "sapUiSmallMarginTop">
 					<menu>
 						<Menu itemSelected="onMenuAction">
 							<MenuItem id="btnWordDownload" text="Word" icon="sap-icon://doc-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
