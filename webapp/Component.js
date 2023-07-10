@@ -73,10 +73,10 @@ sap.ui.define([
 					groupId: "AwardCriteria",
 				},
 				"OfferFormView": {
-					groupId: "OfferformInfo",  
+					groupId: "NewOffer",  
 				},
 				"OfferFormView": {
-					groupId: "NewOffer",  
+					groupId: "OfferformInfo",  
 				},
 				"PT_TMTNOFST": {
 					groupId: "NewOffer",  
