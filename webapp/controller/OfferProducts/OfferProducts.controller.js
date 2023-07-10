@@ -68,8 +68,8 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			
-			this._bindForm("OfferForm");
-			this._bindTable("OfferProductsTable");
+			this._bindForm("OfferForm", this.objectId, this.offerID);
+			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
 		},
 		_onObjectMatched: async function (oEvent) {
@@ -87,14 +87,14 @@ sap.ui.define([
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
-		_bindForm(formName){
+		_bindForm(formName, tenderId, offerId){
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
-			if (this.objectId && this.offerID && this.offerID !== "NA") {
+			if (tenderId && offerId && offerId !== "NA") {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-					TenderID: this.objectId,
-					OfferID: this.offerID
+					TenderID: tenderId,
+					OfferID: offerId
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
@@ -114,21 +114,21 @@ sap.ui.define([
 		 * FYI: the table ID in the View is a concatination of "id" + tableName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
-		_bindTable(tableName){
+		_bindTable(tableName, tenderId, offerId){
 			const tableConfig =  this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getTableByName(tableName);
 			const entity = tableConfig.getEntity();
 			const table = this.byId(`id${tableName}`);
 			const cols = tableConfig.getColumns();
 
-			if (this.offerID && this.offerID === "NA") {
+			if (offerId && offerId === "NA") {
 				table.unbindItems();
 				return;
 			}
 			table?.bindItems({
 				path: `/${entity}`,
 			  	filters: [
-					new Filter("TenderID", "EQ", this.objectId),
-					new Filter("OfferID", "EQ", this.offerID)
+					new Filter("TenderID", "EQ", tenderId),
+					new Filter("OfferID", "EQ", offerId)
 				],
 				//   model: '',
 			  	template: new ColumnListItem({
@@ -184,7 +184,7 @@ sap.ui.define([
 					});
 				}.bind(this));
 				this.byId("idOfferProductsTable").removeSelections();
-				this.byId("idOfferProductsTable").getBinding("items").refresh();
+				//this.byId("idOfferProductsTable").getBinding("items").refresh();
 			}
 			else{
 				let bSelected = oEvent?.getParameter("selected");
@@ -234,7 +234,7 @@ sap.ui.define([
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			//this.defaultModel.resetChanges();
+			this.defaultModel.resetChanges();
 		},
 
 		onOpenCreateOfferDialog : function () {
@@ -385,6 +385,15 @@ sap.ui.define([
 				this.onCloseOfferCreationDialog();
 				this._showDetail(newOfferCtx.getObject());
 				this.getModel("ui").setProperty('/OfferStatus', "Offer Created");
+
+				/**
+				 * this.getOwnerComponent().getModel().refresh(true) doing refersh with old filters 
+				 * This new added code filtering with new offerId and tenderId
+				 */
+				const tenderId = newOfferCtx.getObject().TenderID;
+				const offerId = newOfferCtx.getObject().OfferID;
+				this._bindForm("OfferForm", tenderId, offerId);
+				this._bindTable("OfferProductsTable", tenderId, offerId);
 				this.getOwnerComponent().getModel().refresh(true);
 			}
 		},
