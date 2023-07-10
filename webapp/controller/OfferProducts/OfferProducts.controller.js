@@ -184,7 +184,7 @@ sap.ui.define([
 					});
 				}.bind(this));
 				this.byId("idOfferProductsTable").removeSelections();
-				this.byId("idOfferProductsTable").getBinding("items").refresh();
+				//this.byId("idOfferProductsTable").getBinding("items").refresh();
 			}
 			else{
 				let bSelected = oEvent?.getParameter("selected");

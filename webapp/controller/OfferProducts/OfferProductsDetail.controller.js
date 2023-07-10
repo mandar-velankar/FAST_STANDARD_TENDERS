@@ -315,6 +315,8 @@ sap.ui.define([
 			/*todo - rework error messages for product detail form to new way of working
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");*/
 			!hasErrorMessages && this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
+
+			this._refreshOfferProductTable();
 		},
 
 		_onSubmitChangesFail: function(error){
@@ -377,6 +379,20 @@ sap.ui.define([
 				"PriceConditionDiscountView"
 			]);
 			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+
+			this._refreshOfferProductTable();
+		},
+
+		_refreshOfferProductTable: function(){
+			this.getOwnerComponent().getModel().read("/OfferProductsTableView", {
+				filters: [
+						new sap.ui.model.Filter("TenderID", sap.ui.model.FilterOperator.EQ, this.sObjectId),
+						new sap.ui.model.Filter("OfferID", sap.ui.model.FilterOperator.EQ, this.sOfferId),
+						new sap.ui.model.Filter("ProductCode", sap.ui.model.FilterOperator.EQ, this.productId),
+					]
+			});
+
+			this.defaultModel.refresh(true);
 		},
 
 		/**
