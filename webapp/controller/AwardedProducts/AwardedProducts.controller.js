@@ -82,6 +82,7 @@ sap.ui.define([
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.bindTable();
 		},
 
 		bindTable: function () {
@@ -107,9 +108,7 @@ sap.ui.define([
 			var deliveryPath = objContext.getPath(),
 			delivery = deliveryPath.split("/").slice(-1).pop();*/
 			const selectedProductCode = event.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
-			const selectedProductOutcome = event.getParameter("listItem")?.getBindingContext()?.getObject()?.Outcome;
 
-			StandardSingletonService.setOutcome(selectedProductOutcome);
 
 			let oNextUIState = "";
 
