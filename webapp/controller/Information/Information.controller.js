@@ -85,6 +85,7 @@ sap.ui.define([
 		onDownloadWord:function(event){
 			const url = `/v2/sta_tender/WordAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
 			URLHelper.redirect(url,true);
+			this.byId('idDownloadAttachmentButton')?.setText('Download'); // selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template. 
 		},
 
 		/**
