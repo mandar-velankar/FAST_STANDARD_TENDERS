@@ -443,6 +443,28 @@ sap.ui.define([
 		onSubmitQuotation: async function(){
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();
+			this.createNewAwardedProducts();
+		},
+		
+		createNewAwardedProducts: function () {
+			const offerProductInfoTable = this.byId("idProductInformationTable");
+			const itemContexts = offerProductInfoTable.getBinding("items").getContexts();
+			itemContexts.forEach(prod => {
+				const product = prod.getObject();
+				this.defaultModel.createEntry("/AwardedProducts", {
+					properties: {
+						TenderID: product.TENDER_ID,
+						OfferID: product.OFFER_ID,
+						CountryCode: product.COUNTRY_CODE,
+						LotID: product.LOTID,
+						ProductCode: product.PRODUCTID,
+						AwardedProduct: product.PRODUCTNAME
+					},
+					groupId: "AwardedProduct"
+				})
+			})
+			this.defaultModel.submitChanges({groupId: "AwardedProduct"})
+			
 		}
 	})
 });
