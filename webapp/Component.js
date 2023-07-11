@@ -105,6 +105,9 @@ sap.ui.define([
 				"AwardedProductFormView": {
 					groupId: "AwardedProduct"
 				},
+				"AwardedProducts": {
+					groupId: "AwardedProduct"
+				},
 				"OfferProductOfferStatus": {
 					groupId: "Approvals"
 				},
