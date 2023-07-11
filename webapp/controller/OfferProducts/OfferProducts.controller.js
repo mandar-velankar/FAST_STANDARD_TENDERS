@@ -468,7 +468,7 @@ sap.ui.define([
 				verticalScrolling:false,
 				buttons: [new sap.m.Button({
 						id: "applyOfferProductDialog",
-						text: "Apply",
+						text: "Save",
 						enabled: true,
 						tap: [that.onApplyOfferProductDialog, that]}),
 						new sap.m.Button({
@@ -537,6 +537,8 @@ sap.ui.define([
 					newItem.setBindingContext(context)
 					table.insertItem(newItem);
 				};
+
+				this.onOfferProductTableSaveBtnPress();
 			}
 		
 
