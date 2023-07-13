@@ -26,6 +26,7 @@ sap.ui.define([
 
 			const messagesModel = new JSONModel({
 				awardedProduct: [],
+				competitorResults: [],
 			})
 
 			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
@@ -106,6 +107,10 @@ sap.ui.define([
 				AwardedProductForm:{
 					editMode: false
 				},
+				CompetitorResults:{
+					editMode: false,
+					selectedItems: []
+				},
 				enableDeleteProductButton: false
 			});
 	
@@ -182,7 +187,6 @@ sap.ui.define([
 
 		bindTable: function (offerId, productCode) {
 			const competitorResultTable = this.byId("idCompetitorResultTable");
-			const competitorForm = this.byId("idCompetitorResultsForm");
 			const template = competitorResultTable.getBindingInfo("items").template
 			competitorResultTable.bindItems({
 				path: "/CompetitorResultsTableView",
@@ -193,8 +197,7 @@ sap.ui.define([
 				],
 				template: template
 			});
-			competitorForm.unbindElement();
-			competitorForm.setVisible(false);
+			this.unbindCompetitorResultForm();
 		},
 
 		_onMetadataLoaded: function () {
@@ -232,6 +235,7 @@ sap.ui.define([
 			this.setMessageSection(["AwardedProductFormView"], "awardedProduct");
 			const hasErrorMessages =  messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
+			this.defaultModel.refresh();
 		},
 
 		onButtonAwardProductDetailFormCancelPress: function(event){
@@ -272,9 +276,13 @@ sap.ui.define([
 		onButtonCompetitorResultsCreatePress: function () {
 			const competitorResultsTable = this.byId("idCompetitorResultTable");
 			const context = this.defaultModel.createEntry("/CompetitorResultsTableView", {
+				properties: {
+					OFFERID: this.offerId,
+					PRODUCTCODE: this.productId,
+					LOTID: 1
+				},
 				groupId: "Competitors"
 			});
-			context.getModel().setProperty("edit", false, context);
 			const newCompetitor = competitorResultsTable.getBindingInfo("items").template.clone();
 			newCompetitor.setBindingContext(context);
 			competitorResultsTable.insertItem(newCompetitor);
@@ -314,15 +322,11 @@ sap.ui.define([
 		},
 
 		onButtonEditCompetitorPress: function (event) {
-			const competitorResultsTable = this.byId("idCompetitorResultTable");
-			const competitorForm = this.byId("idCompetitorResultsForm");
-			competitorForm.unbindElement();
-			const selectedCompetitor = event.getSource().getParent().getParent();	
-			const bindingPath = selectedCompetitor.getBindingContext().getPath();
-			this.getModel().setProperty(`${bindingPath}/edit`, true);
-			competitorResultsTable.setSelectedItem(selectedCompetitor);
-			this.bindCompetitorForm(bindingPath);
-			competitorForm.setVisible(true);
+			const competitorResults = this.byId("idCompetitorResultTable").getItems();
+			this.getModel('ui').setProperty('/CompetitorResults/editMode', true);
+			for (let item in competitorResults) {
+				this.filterCompetitorResultComboBoxes(competitorResults[item]);
+			}
 		},
 
 		bindCompetitorForm: function (path) {
@@ -332,17 +336,57 @@ sap.ui.define([
 			})
 		},
 		onSelectCompetitor: function (event) {
+			const editMode = this.getModel('ui').getProperty('/CompetitorResults/editMode');
+			if (!editMode) return; 
 			const competitorForm = this.byId("idCompetitorResultsForm");
-			const selectedItemctx = event.getParameter("listItem").getBindingContext();
-			const path = selectedItemctx.getPath();
-			if (!selectedItemctx.getObject().edit) {
-				competitorForm.unbindElement();
-				competitorForm.setVisible(false);
-				return;
-			};
-			const visibility = competitorForm.getVisible();
-			if (!visibility) competitorForm.setVisible(true);
+			const competitor = event.getParameter("listItem");
+			const path = competitor.getBindingContext().getPath();
+			// this.getModel("ui").setProperty("/CompetitorResults/selectedItem",)
+			competitorForm.setVisible(true);
 			this.bindCompetitorForm(path);
+		},
+
+		onButtonCompetitorSavePress: function (event) {
+			this.defaultModel.submitChanges({
+				groupId: 'Competitors',
+				error: this.onSubmitChangesCompetitorFail.bind(this),
+				success: this.onSubmitChangesCompetitorsSuccess.bind(this),
+			});
+		},
+
+		onSubmitChangesCompetitorsSuccess: function (res) {
+			this.unbindCompetitorResultForm();
+			this.getModel('ui').setProperty('/CompetitorResults/editMode', false);
+		},
+
+		onSubmitChangesCompetitorFail: function (error) {
+
+		},
+
+		onButtonCompetitorCancelPress: function () {
+			this.unbindCompetitorResultForm();
+			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
+			this.getModel('ui').setProperty('/CompetitorResults/editMode', false);
+		},
+
+		onButtonDeleteCompetitorPress: function  (event) {
+			const competitorResultsTable = this.byId("idCompetitorResultTable");
+			const selectedCompetitor = event.getSource().getParent();
+			const selectedCompetitorCtx = selectedCompetitor.getBindingContext();
+			const selectedCompetitorPath = selectedCompetitorCtx.getPath();
+			if (selectedCompetitorCtx.isTransient()) {
+				competitorResultsTable.removeItem(selectedCompetitor);
+				this.unbindCompetitorResultForm();
+			}else {
+				this.defaultModel.remove(selectedCompetitorPath);
+				this.unbindCompetitorResultForm();
+			}
+		},
+
+		unbindCompetitorResultForm: function () {
+			const competitorForm = this.byId("idCompetitorResultsForm");
+			competitorForm.unbindElement();
+			competitorForm.setVisible(false);
 		}
     });
 });
