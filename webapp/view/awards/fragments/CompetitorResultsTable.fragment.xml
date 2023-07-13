@@ -136,15 +136,39 @@
             <Table
                 id="idCompetitorResultTable"
                 items="{path: '/CompetitorResultsTableView'}"
-                mode = "SingleSelectMaster"
-                selectionChange = ".onSelectCompetitor"
+                mode="{= ${ui>/CompetitorResults/editMode} ? 'SingleSelectMaster' : 'None'}"
+                selectionChange=".onSelectCompetitor"
             >
                 <headerToolbar>
                     <OverflowToolbar>
                         <ToolbarSpacer />
                         <Button
                             icon="sap-icon://add"
+                            text="Add"
                             press=".onButtonCompetitorResultsCreatePress"
+                            visible="{= ${ui>/CompetitorResults/editMode}}"
+                        />
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://edit"
+                            text="Edit"
+                            press=".onButtonEditCompetitorPress"
+                            visible="{= !${ui>/CompetitorResults/editMode}}"
+                        />
+                        
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://save"
+                            text="Save"
+                            press=".onButtonCompetitorSavePress"
+                            visible="{= ${ui>/CompetitorResults/editMode}}"
+                        />
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://decline"
+                            text="Cancel"
+                            press=".onButtonCompetitorCancelPress"
+                            visible="{= ${ui>/CompetitorResults/editMode}}"
                         />
                     </OverflowToolbar>
                 </headerToolbar>
@@ -173,13 +197,13 @@
                             wrapping="true"
                         />
                     </Column>
-                    <Column width="15rem" />
+                    <Column width="5rem"/>
                 </columns>
                 <items>
                     <ColumnListItem>
                         <cells>
                             <ComboBox
-                                enabled="{edit}"
+                                enabled="{ui>/CompetitorResults/editMode}"
                                 selectedKey="{AWARDEDCOMPANY}"
                                 items="{/MasterCompetitors}"
                             >
@@ -191,7 +215,7 @@
                                 </items>
                             </ComboBox>
                             <ComboBox
-                                enabled="{edit}"
+                                enabled="{ui>/CompetitorResults/editMode}"
                                 selectedKey="{AWARDEDPRODUCT}"
                                 items="{/MasterCompetitors}"
                             >
@@ -203,7 +227,7 @@
                                 </items>
                             </ComboBox>
                             <ComboBox
-                                enabled="{edit}"
+                                enabled="{ui>/CompetitorResults/editMode}"
                                 selectedKey="{OUTCOME}"
                                 items="{/MasterCountryOutComes}"
                             >
@@ -216,37 +240,14 @@
                             </ComboBox>
                             <Input
                                 value="{AWARDEDPRICE}"
-                                enabled="{edit}"
+                                enabled="{ui>/CompetitorResults/editMode}"
                             />
-                            <HBox>
-                                <Button
-                                    class="sapUiSmallMarginBegin"
-                                    icon="sap-icon://edit"
-                                    text="Edit"
-                                    press=".onButtonEditCompetitorPress"
-                                    visible="{= !${edit}}"
-                                />
-                                <Button
-                                    class="sapUiSmallMarginBegin"
-                                    icon="sap-icon://delete"
-                                    press=".onButtonDeleteCompetitorPress"
-                                    visible="{= !${edit}}"
-                                />
-                                <Button
-                                    class="sapUiSmallMarginBegin"
-                                    icon="sap-icon://save"
-                                    text="Save"
-                                    press=".onButtonCompetitorSavePress"
-                                    visible="{edit}"
-                                />
-                                <Button
-                                    class="sapUiSmallMarginBegin"
-                                    icon="sap-icon://decline"
-                                    text="Cancel"
-                                    press=".onButtonCompetitorCancelPress"
-                                    visible="{edit}"
-                                />
-                            </HBox>
+                             <Button
+                                class="sapUiSmallMarginBegin"
+                                icon="sap-icon://delete"
+                                press=".onButtonDeleteCompetitorPress"
+                                visible="{= ${ui>/CompetitorResults/editMode}}"
+                            />
                         </cells>
                     </ColumnListItem>
                 </items>

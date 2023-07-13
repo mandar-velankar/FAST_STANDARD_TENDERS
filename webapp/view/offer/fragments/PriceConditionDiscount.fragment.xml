@@ -60,12 +60,28 @@
 				<form:formElements>
 					<form:FormElement label="{i18n>CurrentBasePrice}" >
 						<form:fields>
-							<Input value="{CurrentBasePrice}" enabled="false"/>
+							<Input value="{
+										parts: ['CurrentBasePrice', 'ui>/currency'],
+										type: 'sap.ui.model.type.Currency',
+										formatOptions: {
+											showMeasure: false,
+											preserveDecimals: false
+										}	
+									}" 
+									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
-							<Input value="{BasePrice}" enabled="false"/>
+							<Input value="{
+										parts: ['BasePrice', 'ui>/currency'],
+										type: 'sap.ui.model.type.Currency',
+										formatOptions: {
+											showMeasure: false,
+											preserveDecimals: false
+										}	
+									}"   
+									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>Discount}" >
