@@ -105,7 +105,7 @@
 		<Text 
 			id='idTotalAmountOfferProducts' 
 			text="{
-				parts: ['OfferTotal', 'ui>/currency'],
+				parts: ['OfferTotal', 'Currency'],
 				type: 'sap.ui.model.type.Currency',
 				formatOptions: {
 					showMeasure: true,
