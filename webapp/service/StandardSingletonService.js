@@ -25,11 +25,13 @@ sap.ui.define([
         getOutcome: function () {
             return this.outcome;
         },
-        onChangeOutcome: function (event) {
-            const reasonItemBinding = this.getParent().getParent().getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
+        onChangeOutcome: function (event, StandardSingletonService) {
+            const source = event.getSource();
+            const reasonItemBinding = source.getParent().getParent().getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
+            this.setOutcome(source.getSelectedKey());
             reasonItemBinding.aApplicationFilters = []
             const orFilters = [
-				new Filter("Outcome",FilterOperator.EQ, this.getSelectedKey())
+				new Filter("Outcome",FilterOperator.EQ, source.getSelectedKey())
 			]
             reasonItemBinding.filter(orFilters);
         }
