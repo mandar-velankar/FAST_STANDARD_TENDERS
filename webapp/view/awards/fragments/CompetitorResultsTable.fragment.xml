@@ -11,133 +11,12 @@
         headerText="Competitor Result"
     >
         <content>
-            <!-- <t:TreeTable
-                id="idCompetitorResultTable"
-                rows="{path: 'st>/Competitors'}"
-                selectionMode="Single"
-                enableSelectAll="false"
-                ariaLabelledBy="title"
-                rowSelectionChange=".onRowSelectionChange"
-            >
-                <t:extension>
-                    <OverflowToolbar>
-                        <content>
-                            <ToolbarSpacer />
-                            <Button
-                                icon="sap-icon://add"
-                                press=".onButtonCompetitorResultsCreatePress"
-                            />
-                        </content>
-                    </OverflowToolbar>
-                </t:extension>
-                <t:columns>
-                    <t:Column>
-                        <Label
-                            text="{i18n>CompetitorCompany}"
-                            wrapping="true"
-                        />
-                        <t:template>
-                            <ComboBox
-                                enabled="{st>edit}"
-                                selectedKey="{st>AWARDEDCOMPANY}"
-                                items="{/MasterCompetitors}"
-                            >
-                                <items>
-                                    <core:Item
-                                        text="{CompetitorCompany}"
-                                        key="{CompetitorCompany}"
-                                    />
-                                </items>
-                            </ComboBox>
-                        </t:template>
-                    </t:Column>
-                    <t:Column>
-                        <Label
-                            text="{i18n>CompetitorProduct}"
-                            wrapping="true"
-                        />
-                        <t:template>
-                            <ComboBox
-                                enabled="{st>edit}"
-                                selectedKey="{st>AWARDEDPRODUCT}"
-                                items="{/MasterCompetitors}"
-                            >
-                                <items>
-                                    <core:Item
-                                        text="{CompetitorProduct}"
-                                        key="{CompetitorProduct}"
-                                    />
-                                </items>
-                            </ComboBox>
-                        </t:template>
-                    </t:Column>
-                    <t:Column>
-                        <Label
-                            text="{i18n>CompetitorOutcome}"
-                            wrapping="true"
-                        />
-                        <t:template>
-                            <ComboBox
-                                enabled="{st>edit}"
-                                selectedKey="{st>OUTCOME}"
-                                items="{/MasterCountryOutComes}"
-                            >
-                                <items>
-                                    <core:Item
-                                        text="{Outcome}"
-                                        key="{Outcome}"
-                                    />
-                                </items>
-                            </ComboBox>
-                        </t:template>
-                    </t:Column>
-                    <t:Column>
-                        <Label
-                            text="{i18n>CompetitorPrice}"
-                            wrapping="true"
-                        />
-                        <t:template>
-                            <Input value="{st>AWARDEDPRICE}" enabled="{st>edit}"/>
-                        </t:template>
-                    </t:Column>
-                    <t:Column width="10rem">
-                        <t:template>
-                            <HBox>
-                                <Button
-                                    class="sapUiSmallMarginBegin"
-                                    icon="sap-icon://edit"
-                                    text="Edit"
-                                    press=".onButtonEditCompetitorPress"
-                                    visible="{= !${st>edit}}"
-                                />
-                                <Button
-                                    class="sapUiSmallMarginBegin"
-                                    icon="sap-icon://delete"
-                                    press=".onButtonDeleteCompetitorPress"
-                                    visible="{= !${st>edit}}"
-                                />
-                                <Button
-                                    icon="sap-icon://save"
-                                    text="Save"
-                                    press=".onButtonCompetitorSavePress"
-                                    visible="{st>edit}"
-                                />
-                                <Button
-                                    icon="sap-icon://decline"
-                                    text="Cancel"
-                                    press=".onButtonCompetitorCancelPress"
-                                    visible="{st>edit}"
-                                />
-                            </HBox>
-                        </t:template>
-                    </t:Column>
-                </t:columns>
-            </t:TreeTable> -->
             <Table
                 id="idCompetitorResultTable"
                 items="{path: '/CompetitorResultsTableView'}"
-                mode="{= ${ui>/CompetitorResults/editMode} ? 'SingleSelectMaster' : 'None'}"
+                mode="SingleSelectMaster"
                 selectionChange=".onSelectCompetitor"
+                updateFinished=".onUpdateFinished"
             >
                 <headerToolbar>
                     <OverflowToolbar>
@@ -146,14 +25,14 @@
                             icon="sap-icon://add"
                             text="Add"
                             press=".onButtonCompetitorResultsCreatePress"
-                            visible="{= ${ui>/CompetitorResults/editMode}}"
+                            visible="{= ${ui>/CompetitorResultsForm/editMode}}"
                         />
                         <Button
                             class="sapUiSmallMarginBegin"
                             icon="sap-icon://edit"
                             text="Edit"
                             press=".onButtonEditCompetitorPress"
-                            visible="{= !${ui>/CompetitorResults/editMode}}"
+                            visible="{= !${ui>/CompetitorResultsForm/editMode}}"
                         />
                         
                         <Button
@@ -161,14 +40,14 @@
                             icon="sap-icon://save"
                             text="Save"
                             press=".onButtonCompetitorSavePress"
-                            visible="{= ${ui>/CompetitorResults/editMode}}"
+                            visible="{= ${ui>/CompetitorResultsForm/editMode}}"
                         />
                         <Button
                             class="sapUiSmallMarginBegin"
                             icon="sap-icon://decline"
                             text="Cancel"
                             press=".onButtonCompetitorCancelPress"
-                            visible="{= ${ui>/CompetitorResults/editMode}}"
+                            visible="{= ${ui>/CompetitorResultsForm/editMode}}"
                         />
                     </OverflowToolbar>
                 </headerToolbar>
@@ -203,7 +82,7 @@
                     <ColumnListItem>
                         <cells>
                             <ComboBox
-                                enabled="{ui>/CompetitorResults/editMode}"
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{AWARDEDCOMPANY}"
                                 items="{/MasterCompetitors}"
                             >
@@ -215,7 +94,7 @@
                                 </items>
                             </ComboBox>
                             <ComboBox
-                                enabled="{ui>/CompetitorResults/editMode}"
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{AWARDEDPRODUCT}"
                                 items="{/MasterCompetitors}"
                             >
@@ -227,7 +106,7 @@
                                 </items>
                             </ComboBox>
                             <ComboBox
-                                enabled="{ui>/CompetitorResults/editMode}"
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{OUTCOME}"
                                 items="{/MasterCountryOutComes}"
                             >
@@ -240,13 +119,13 @@
                             </ComboBox>
                             <Input
                                 value="{AWARDEDPRICE}"
-                                enabled="{ui>/CompetitorResults/editMode}"
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
                             />
                              <Button
                                 class="sapUiSmallMarginBegin"
                                 icon="sap-icon://delete"
                                 press=".onButtonDeleteCompetitorPress"
-                                visible="{= ${ui>/CompetitorResults/editMode}}"
+                                visible="{= ${ui>/CompetitorResultsForm/editMode}}"
                             />
                         </cells>
                     </ColumnListItem>
