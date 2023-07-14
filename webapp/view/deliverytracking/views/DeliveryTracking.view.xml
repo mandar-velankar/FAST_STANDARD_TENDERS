@@ -1,12 +1,52 @@
-<mvc:View controllerName="com.bayer.tender.statenderapp.controller.DeliveryTracking.DeliveryTracking" 
-	xmlns="sap.m"
-	xmlns:t="sap.ui.table"
-	xmlns:f="sap.f"
-	xmlns:form="sap.ui.layout.form"
-	xmlns:l="sap.ui.layout"
-	xmlns:core="sap.ui.core"
-	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:tnt="sap.tnt"
-	xmlns:u="sap.uxap">
-
+<mvc:View
+    controllerName="com.bayer.tender.statenderapp.controller.DeliveryTracking.DeliveryTracking"
+    xmlns="sap.m"
+    xmlns:t="sap.ui.table"
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:tnt="sap.tnt"
+    xmlns:u="sap.uxap"
+>
+    <Table>
+        <!-- <headerToolbar>
+            <OverflowToolbar>
+                <ToolbarSpacer />
+            </OverflowToolbar>
+        </headerToolbar> -->
+        <columns>
+            <Column>
+                <Label
+                    text="{i18n>DeliveryTrackingProduct}"
+                    wrapping="true"
+                />
+            </Column>
+            <Column>
+                <Label
+                    text="{i18n>DeliveryTrackingAwardedVolume}"
+                    wrapping="true"
+                />
+            </Column>
+            <Column>
+                <Label
+                    text="{i18n>DeliveryTrackingSumDeliveredAmount}"
+                    wrapping="true"
+                />
+            </Column>
+            <Column>
+                <Label
+                    text="{i18n>DeliveryTrackingDelivered}"
+                    wrapping="true"
+                />
+            </Column>
+        </columns>
+        <!-- <items>
+            <ColumnListItem>
+                <cells>
+                </cells>
+            </ColumnListItem>
+        </items> -->
+    </Table>
 </mvc:View>
