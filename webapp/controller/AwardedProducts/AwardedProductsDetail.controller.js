@@ -107,7 +107,7 @@ sap.ui.define([
 				AwardedProductForm:{
 					editMode: false
 				},
-				CompetitorResults:{
+				CompetitorResultsForm:{
 					editMode: false,
 					selectedItems: []
 				},
@@ -323,7 +323,7 @@ sap.ui.define([
 
 		onButtonEditCompetitorPress: function (event) {
 			const competitorResults = this.byId("idCompetitorResultTable").getItems();
-			this.getModel('ui').setProperty('/CompetitorResults/editMode', true);
+			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', true);
 			for (let item in competitorResults) {
 				this.filterCompetitorResultComboBoxes(competitorResults[item]);
 			}
@@ -336,12 +336,9 @@ sap.ui.define([
 			})
 		},
 		onSelectCompetitor: function (event) {
-			const editMode = this.getModel('ui').getProperty('/CompetitorResults/editMode');
-			if (!editMode) return; 
 			const competitorForm = this.byId("idCompetitorResultsForm");
 			const competitor = event.getParameter("listItem");
 			const path = competitor.getBindingContext().getPath();
-			// this.getModel("ui").setProperty("/CompetitorResults/selectedItem",)
 			competitorForm.setVisible(true);
 			this.bindCompetitorForm(path);
 		},
@@ -356,7 +353,7 @@ sap.ui.define([
 
 		onSubmitChangesCompetitorsSuccess: function (res) {
 			this.unbindCompetitorResultForm();
-			this.getModel('ui').setProperty('/CompetitorResults/editMode', false);
+			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
 		},
 
 		onSubmitChangesCompetitorFail: function (error) {
@@ -366,7 +363,7 @@ sap.ui.define([
 		onButtonCompetitorCancelPress: function () {
 			this.unbindCompetitorResultForm();
 			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
-			this.getModel('ui').setProperty('/CompetitorResults/editMode', false);
+			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
 		},
 
 		onButtonDeleteCompetitorPress: function  (event) {
@@ -374,8 +371,11 @@ sap.ui.define([
 			const selectedCompetitor = event.getSource().getParent();
 			const selectedCompetitorCtx = selectedCompetitor.getBindingContext();
 			const selectedCompetitorPath = selectedCompetitorCtx.getPath();
+			competitorResultsTable.setSelectedItem(selectedCompetitor);
 			if (selectedCompetitorCtx.isTransient()) {
-				competitorResultsTable.removeItem(selectedCompetitor);
+				this.defaultModel.resetChanges([selectedCompetitorPath])
+				this.setCompetitorBindingContext(competitorResultsTable);
+				// competitorResultsTable.removeItem(selectedCompetitor);
 				this.unbindCompetitorResultForm();
 			}else {
 				this.defaultModel.remove(selectedCompetitorPath);
@@ -387,6 +387,34 @@ sap.ui.define([
 			const competitorForm = this.byId("idCompetitorResultsForm");
 			competitorForm.unbindElement();
 			competitorForm.setVisible(false);
+		},
+
+		createNewPendingChanges: function (entity, groupID) {
+			if (!entity && !groupID) return;
+			const changes = [];
+			const targets= this.getTargets([entity]);
+			const pendingChanges = this.getModel().getPendingChanges();
+			for (let item in pendingChanges) { 
+				const itemIndex = targets.findIndex(el => el == `/${item}`);
+				if (itemIndex > -1) changes.push(pendingChanges[item]);
+			}
+			this.defaultModel.resetChanges([...targets]);
+
+			return changes.map(item => {
+				return this.defaultModel.createEntry(`/${entity}`, {
+					properties: item,
+					groupId: groupID
+				});
+			})
+		},
+
+		setCompetitorBindingContext: function (competitorResultsTable) {
+			const contexts = this.createNewPendingChanges("CompetitorResultsTableView", "Competitors");
+			contexts.forEach(context => {
+				const newCompetitor = competitorResultsTable.getBindingInfo("items").template.clone();
+				newCompetitor.setBindingContext(context);
+				competitorResultsTable.insertItem(newCompetitor);
+			})
 		}
     });
 });
