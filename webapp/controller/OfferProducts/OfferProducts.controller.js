@@ -321,6 +321,7 @@ sap.ui.define([
 			const oStandModel = oForm.getModel("ui");
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
 
+			/* this doesn't work if you want to have dynamic fields from the ui templates, we should always receive and work with all possible fields related to CDS view
 			const newOfferObj = {
 				TenderID: this.objectId,
 				Active: 1,
@@ -340,6 +341,29 @@ sap.ui.define([
 				Division: oBoundContext.getObject().Division,
 				WholesaleOffer: oBoundContext.getObject().WholesaleOffer || "No"		
 			}
+			*/
+
+			//make an object with all possible fields exposed in CDS view
+			const newOfferObj = oBoundContext.getObject();
+
+			//set default values if needed
+			newOfferObj.TenderID = this.objectId;
+			newOfferObj.Active = 1;
+			newOfferObj.OfferID = nextOfferID;
+			newOfferObj.CountryCode = this.countryCode;
+			newOfferObj.ActiveOffer = 1;
+			newOfferObj.TenderOfferNo = oStandModel.getProperty("/TenderOfferNo");
+			newOfferObj.RevisedOfferNo = 0;
+			newOfferObj.CreationDate = new Date().toISOString();
+            newOfferObj.SubmissionDate = new Date().toISOString();
+            newOfferObj.SubmittedOn = new Date().toISOString();
+			newOfferObj.Currency = oBoundContext.getObject().Currency;
+			newOfferObj.DistributorID = oBoundContext.getObject().DistributorID;
+			newOfferObj.InternalBidDueDate = oBoundContext.getObject().InternalBidDueDate;
+			newOfferObj.OfferDueDate = oBoundContext.getObject().OfferDueDate;
+			newOfferObj.SellingCompany = oBoundContext.getObject().SellingCompany;
+			newOfferObj.Division = oBoundContext.getObject().Division;
+			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";		
 
 			const statusObj = {
 					TenderID: this.objectId,
@@ -556,6 +580,7 @@ sap.ui.define([
 			const model = context.getModel();
 			model.remove(context.getPath());
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
+			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
 		},
 
 		//Select Brand: when you click on the F4 for Brands on adding a product to the offer of the tender

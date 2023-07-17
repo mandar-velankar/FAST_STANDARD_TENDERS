@@ -71,7 +71,7 @@ sap.ui.define(["sap/m/Text",
           });
           const changeFunction = StandardSingletonService[`onChange${this.valueHelp.title}`];
           if (changeFunction) {
-            control.attachChange(changeFunction);
+            control.attachChange(changeFunction, StandardSingletonService);
           }
         } else {
           this.valueHelp.staticValues.forEach(item => {
