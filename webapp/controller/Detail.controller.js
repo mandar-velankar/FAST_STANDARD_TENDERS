@@ -44,6 +44,7 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailDeliveries").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
@@ -91,7 +92,8 @@ sap.ui.define([
 		},
 		tabsFactory: function (tab,idx){
 			const xmlView = tab.getXMLView();
-			const viewName = `com.bayer.tender.statenderapp.view.${tab.title.toLowerCase()}.views.${xmlView.getName()}`;
+			const viewFolder = tab.title.toLowerCase().split(" ").join("");
+			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder}.views.${xmlView.getName()}`;
 			const viewData = {
 				objectId:this.sObjectId,
 				offerId:this.sOfferId,
@@ -343,12 +345,19 @@ sap.ui.define([
 					hash = hash + "/" + offerId + "/Awards";
 					this.getRouter().getHashChanger().replaceHash(hash);
 					break;
+				case "delivery tracking":
+					hash = hash + "/" + offerId + "/Deliveries";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
 				default:
 					break;
 			}
 		},
 		setSelectedTabKey: function () {
 			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(4,1).join("");
+			if (selectedTabKey == "Deliveries") {
+				this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
+			}
 			if (selectedTabKey == "Offer" || selectedTabKey == "Overview" || selectedTabKey == "Awards") {
 				this.getModel('st').setProperty("/selectedTab", selectedTabKey);
 			}
