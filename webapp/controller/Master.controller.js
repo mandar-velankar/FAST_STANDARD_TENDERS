@@ -656,6 +656,7 @@ sap.ui.define([
 			newTenderObj.Active = 1;
 			newTenderObj.CountryCode = sSelectedCountry;
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
+			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
 				properties: newTenderObj,
