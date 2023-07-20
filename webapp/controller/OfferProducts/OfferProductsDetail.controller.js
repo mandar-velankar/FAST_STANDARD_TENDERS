@@ -314,9 +314,11 @@ sap.ui.define([
 			const hasErrorMessages =  this.getView().getModel('message').getData().length > 0;
 			/*todo - rework error messages for product detail form to new way of working
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");*/
-			!hasErrorMessages && this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
-
-			this._refreshOfferProductTable();
+			if (!hasErrorMessages) {
+				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
+				this._refreshOfferProductTable();
+			}
+			
 		},
 
 		_onSubmitChangesFail: function(error){
