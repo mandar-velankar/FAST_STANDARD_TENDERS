@@ -142,6 +142,10 @@ sap.ui.define([
 					hasFocPriceCondition: false,
 					editMode: false,
 					hasMainPriceCondition: false
+				},
+				PriceWithFOCForm:{
+					editMode: false,
+					mainPriceConditionID: null
 				}
 			});
 	
