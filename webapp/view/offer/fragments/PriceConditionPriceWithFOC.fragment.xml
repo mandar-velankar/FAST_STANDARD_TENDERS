@@ -1,0 +1,162 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>
+	<!-- FORM WITH Pricing DATA -->
+	<form:Form
+		id="idPriceWithFOCForm"
+		editable="true"
+	>
+		<form:toolbar>
+			<Toolbar>
+				<Title text="{i18n>PriceConditionPriceWithFOCFragment.InPriceWithFOC}"/>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/priceCondPriceWithFoc}.length }"
+					visible="{= ${messages>/priceCondPriceWithFoc}.length > 0 &amp;&amp; ${ui>/PriceWithFOCForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'priceCondPriceWithFoc')" 
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onPriceWithFOCFormEditBtnPress"
+					visible="{= !${ui>/PriceWithFOCForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onPriceWithFOCFormSaveBtnPress"
+					visible="{= ${ui>/PriceWithFOCForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onPriceWithFOCFormCancelBtnPress"
+					visible="{= ${ui>/PriceWithFOCForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>CurrentBasePrice}" >
+						<form:fields>
+							<Input value="{
+										parts: ['CurrentBasePrice', 'Currency'],
+										type: 'sap.ui.model.type.Currency',
+										formatOptions: {
+											showMeasure: true,
+											preserveDecimals: false
+										}	
+									}"  
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>BasePrice}" >
+						<form:fields>
+							<Input value="{
+										parts: ['BasePrice', 'Currency'],
+										type: 'sap.ui.model.type.Currency',
+										formatOptions: {
+											showMeasure: true,
+											preserveDecimals: false
+										}	
+									}"  
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>Discount}" >
+						<form:fields>
+							<Input
+								value="{
+									path: 'Discount',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>OfferPrice}" >
+						<form:fields>
+							<Input 
+								id = "idOfferPrice"
+								value="{
+									parts: ['OfferPrice', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="{ui>/PriceWithFOCForm/editMode}"
+								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionPriceWithFOCFragment.NetOfferPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NetOfferPrice', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="{ui>/PriceWithFOCForm/editMode}"
+								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>Deductions}" >
+						<form:fields>
+							<Input
+								value="{
+									path: 'Deductions',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PriceWithFOCForm/editMode}"
+								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>NetPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NetPrice', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+
+</core:FragmentDefinition>
