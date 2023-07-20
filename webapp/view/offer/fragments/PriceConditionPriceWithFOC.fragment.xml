@@ -107,8 +107,24 @@
 										preserveDecimals: false
 									}	
 								}" 
-								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'Price')"
+								enabled="{ui>/PriceWithFOCForm/editMode}"
+								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionPriceWithFOCFragment.NetOfferPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NetOfferPrice', 'ui>/currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: false,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="{ui>/PriceWithFOCForm/editMode}"
+								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -119,8 +135,8 @@
 									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
-								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'Price')"
+								enabled="{ui>/PriceWithFOCForm/editMode}"
+								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
 							/>
 						</form:fields>
 					</form:FormElement>

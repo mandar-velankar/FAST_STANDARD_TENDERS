@@ -47,7 +47,8 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
-				priceCondFoc: []
+				priceCondFoc: [],
+				priceCondPriceWithFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -331,6 +332,29 @@ sap.ui.define([
 
 		onOfferDetailFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
+			this.defaultModel.resetChanges();
+		},
+
+		onPriceWithFOCFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', true);
+		},
+		onPriceWithFOCFormSaveBtnPress: function(event){
+
+			// clear all messages
+			this.oMessageManager.removeAllMessages();
+
+			// if(!this.validateProduct()) return;
+
+			// this.defaultModel.submitChanges({
+			// 	error: this._onSubmitChangesFail.bind(this),
+			// 	success: this._onSubmitChangesSuccessProductForm.bind(this),
+			// 	groupId: "ProductFormDetail"
+			// }); 
+
+		},
+
+		onPriceWithFOCFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', false);
 			this.defaultModel.resetChanges();
 		},
 
