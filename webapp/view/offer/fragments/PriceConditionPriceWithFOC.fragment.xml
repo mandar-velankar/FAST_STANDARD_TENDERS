@@ -108,7 +108,7 @@
 									}	
 								}" 
 								enabled="{ui>/PriceWithFOCForm/editMode}"
-								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -123,8 +123,7 @@
 										preserveDecimals: false
 									}	
 								}" 
-								enabled="{ui>/PriceWithFOCForm/editMode}"
-								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+								enabled="false"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -136,7 +135,7 @@
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PriceWithFOCForm/editMode}"
-								liveChange=".onPriceWithFOCFormLiveChange($event, 'Price')"
+								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
 							/>
 						</form:fields>
 					</form:FormElement>

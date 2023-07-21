@@ -518,6 +518,9 @@ sap.ui.define([
 				case "discount":
 					this.calculateDiscountConditionType({property, value, context});
 					break;
+				case "pricewithfoc":
+					this.calculatePriceWithFOCConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -558,6 +561,29 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
+
+
+		/**
+		 * Calculate price with FOC condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculatePriceWithFOCConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let netOfferPrice = priceObj.NetOfferPrice; // TODO: this part is not clear. check Vasu
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
+			let netPrice = netOfferPrice * (1 - deductions);
+			context.getModel().setProperty("Discount", discount, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
+			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+		},
+
 
 		/**
 		 * Load the price condition fragment based on the selected price condition type.
