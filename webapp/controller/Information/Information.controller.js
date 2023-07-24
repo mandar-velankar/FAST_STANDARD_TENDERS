@@ -444,6 +444,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();
 			this.createNewAwardedProducts();
+			this.defaultModel.refresh(true);
 		},
 		
 		createNewAwardedProducts: function () {
@@ -458,7 +459,12 @@ sap.ui.define([
 						CountryCode: product.COUNTRY_CODE,
 						LotID: product.LOTID,
 						ProductCode: product.PRODUCTID,
-						AwardedProduct: product.PRODUCTNAME
+						AwardedProduct: product.PRODUCTNAME,
+						AwardedCompany: "Bayer",
+						UoM: product.UNIT,
+						AwardedPrice: product.OFFER_PRICE,
+						AwardedQty: parseInt(product.REQUESTED_QUANTITY),
+						ErrorInSubmission: "No",
 					},
 					groupId: "AwardedProduct"
 				})
