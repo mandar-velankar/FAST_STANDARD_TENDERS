@@ -574,6 +574,7 @@ sap.ui.define([
 		 */
 		calculatePriceWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
+			priceObj.CurrentBasePrice = Math.trunc(priceObj.CurrentBasePrice*100) / 100; // Truncate number to two decimal places without rounding. For correct rounding
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let netOfferPrice = priceObj.NetOfferPrice; // TODO: this part is not clear. check Vasu
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
