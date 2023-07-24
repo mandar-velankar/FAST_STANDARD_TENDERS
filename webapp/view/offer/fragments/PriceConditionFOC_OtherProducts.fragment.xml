@@ -47,6 +47,9 @@
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FocType}"/>
                 </Column>
                 <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.AddedIncluded}"/>
+                </Column>
+                <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCQuantity}"/>
                 </Column>
                 <Column>
@@ -74,6 +77,12 @@
                         <core:Item key="ABS" text="Absolute" />
                         <core:Item key="PCT" text="Percentage" />
                         <core:Item key="STP" text="Step" />
+                    </Select>
+                    <Select 
+                        selectedKey="{ADD_INCLUDE}"
+                    >
+                        <core:Item key="Added" text="Added" />
+                        <core:Item key="Included" text="Included" />
                     </Select>
                     <HBox>
                         <Input 

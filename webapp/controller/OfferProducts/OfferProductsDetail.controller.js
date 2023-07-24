@@ -851,6 +851,7 @@ sap.ui.define([
 				groupId: "PricingForm"
 			});
 			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
+			context.getModel().setProperty("ADD_INCLUDE", "Added", context);
 			const newItem = table.getBindingInfo("items").template.clone();
 			newItem.setBindingContext(context)
 			table.insertItem(newItem);
