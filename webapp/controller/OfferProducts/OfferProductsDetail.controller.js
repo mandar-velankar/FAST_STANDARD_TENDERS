@@ -518,6 +518,9 @@ sap.ui.define([
 				case "discount":
 					this.calculateDiscountConditionType({property, value, context});
 					break;
+				case "pricewithfoc":
+					this.calculatePriceWithFOCConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -558,6 +561,56 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
+
+
+		/**
+		 * Calculate price with FOC condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculatePriceWithFOCConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let netOfferPrice = priceObj.NetOfferPrice; // TODO: this part is not clear. check Vasu
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
+			let netPrice = netOfferPrice * (1 - deductions);
+
+			context.getModel().setProperty("Discount", discount, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
+			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+			
+			this.validatePriceWithFOCForm(context, { offerPrice });
+		},
+
+		validatePriceWithFOCForm: function(context, { offerPrice }){
+			const priceObj = context.getObject();
+
+			// Error messages
+			const target = `${context.getPath()}/OfferPrice`;
+			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView"]);
+			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target)); 
+
+			// Rules
+			const isOfferPriceHigher = Number(offerPrice) > Number(priceObj.BasePrice);
+			if(isOfferPriceHigher && !errorMessage){
+				this.oMessageManager.addMessages(new Message({
+					message: "Offer Price should not be greater than Base Price.",
+					type: MessageType.Error,
+					target: target,
+					processor: this.getView().getModel()
+				}));
+				this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			}else if(!isOfferPriceHigher && errorMessage){
+				this.oMessageManager.removeMessages(errorMessage);
+				this.removeMessages(errorMessage, "priceCondPriceWithFoc");
+			}
+		},
+
 
 		/**
 		 * Load the price condition fragment based on the selected price condition type.
