@@ -579,9 +579,36 @@ sap.ui.define([
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
 			let netPrice = netOfferPrice * (1 - deductions);
+
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+			
+			this.validatePriceWithFOCForm(context, { offerPrice });
+		},
+
+		validatePriceWithFOCForm: function(context, { offerPrice }){
+			const priceObj = context.getObject();
+
+			// Error messages
+			const target = `${context.getPath()}/OfferPrice`;
+			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView"]);
+			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target)); 
+
+			// Rules
+			const isOfferPriceHigher = Number(offerPrice) > Number(priceObj.BasePrice);
+			if(isOfferPriceHigher && !errorMessage){
+				this.oMessageManager.addMessages(new Message({
+					message: "Offer Price should not be greater than Base Price.",
+					type: MessageType.Error,
+					target: target,
+					processor: this.getView().getModel()
+				}));
+				this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			}else if(!isOfferPriceHigher && errorMessage){
+				this.oMessageManager.removeMessages(errorMessage);
+				this.removeMessages(errorMessage, "priceCondPriceWithFoc");
+			}
 		},
 
 

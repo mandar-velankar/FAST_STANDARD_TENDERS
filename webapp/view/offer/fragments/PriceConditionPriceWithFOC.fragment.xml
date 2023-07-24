@@ -98,7 +98,6 @@
 					<form:FormElement label="{i18n>OfferPrice}" >
 						<form:fields>
 							<Input 
-								id = "idOfferPrice"
 								value="{
 									parts: ['OfferPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',

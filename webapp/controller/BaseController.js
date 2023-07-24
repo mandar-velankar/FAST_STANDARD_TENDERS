@@ -151,6 +151,20 @@ sap.ui.define([
 				if(entityIndex > -1) return el; 
 			});
 		},
+		
+		removeMessages: function(messages, sectionName){
+			const messagesArray = Array.isArray(messages) ? messages : [messages];
+			const messagesInSection = this.getModel("messages").getProperty(`/${sectionName}`);
+			const targetsToRemove = messagesArray.map(msg => {
+				const targets = msg.getTargets ? msg.getTargets() : [];
+				return targets;
+			}).flat();
+			const filteredMessages = messagesInSection.filter(msg => {
+				const hasTarget = msg.getTargets ? msg.getTargets().some(target => targetsToRemove.includes(target)) : false;
+				return !hasTarget;
+			});
+			this.getModel("messages").setProperty(`/${sectionName}`, filteredMessages);
+		},
 
 		/**
 		 * This method returns the targets from the MessageMaager message for a given entity
