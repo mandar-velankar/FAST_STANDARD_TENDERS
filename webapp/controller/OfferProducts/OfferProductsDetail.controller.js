@@ -574,6 +574,7 @@ sap.ui.define([
 		 */
 		calculatePriceWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
+			priceObj.CurrentBasePrice = Math.trunc(priceObj.CurrentBasePrice*100) / 100; // Truncate number to two decimal places without rounding. For correct rounding
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let netOfferPrice = priceObj.NetOfferPrice; // TODO: this part is not clear. check Vasu
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
@@ -850,6 +851,7 @@ sap.ui.define([
 				groupId: "PricingForm"
 			});
 			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
+			context.getModel().setProperty("ADD_INCLUDE", "Added", context);
 			const newItem = table.getBindingInfo("items").template.clone();
 			newItem.setBindingContext(context)
 			table.insertItem(newItem);
