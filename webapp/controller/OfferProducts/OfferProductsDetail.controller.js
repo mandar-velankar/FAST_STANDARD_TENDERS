@@ -596,10 +596,10 @@ sap.ui.define([
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
 		**/
 		calculateNetOfferPrice: function({offerPrice, priceObj}){
-			const freeGoodsOtherTable = this.byId("idFreeGoodsOtherTable");
+			const multiInput = this.byId('idFOCMultiInput');
 
 			const offerProduct = priceObj.ProductCode;
-			const foc = []; // TODO: get FOCs
+			const foc = multiInput.getBinding('tokens').getContexts().map(ctx => ctx.getObject());
 
 			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
 			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
