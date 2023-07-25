@@ -576,7 +576,7 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = Math.trunc(priceObj.CurrentBasePrice*100) / 100; // Truncate number to two decimal places without rounding. For correct rounding
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
-			let netOfferPrice = priceObj.NetOfferPrice; // TODO: this part is not clear. check Vasu
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
 			let netPrice = netOfferPrice * (1 - deductions);
@@ -586,6 +586,58 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
 			this.validatePriceWithFOCForm(context, { offerPrice });
+		},
+
+		/**
+		 * Calculate NetOfferPrice based on rules
+		 * Case1: No FOC in the pop up
+		 * Case2: One or more FOC products which are different from Offer Product
+		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		**/
+		calculateNetOfferPrice: function({offerPrice, priceObj}){
+			const freeGoodsOtherTable = this.byId("idFreeGoodsOtherTable");
+
+			const offerProduct = priceObj.ProductCode;
+			const foc = []; // TODO: get FOCs
+
+			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+			const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+			//Cases 1,2 and 3
+			if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return offerPrice;
+			// Cases 4
+			if(containsOfferProductAndIsIncluded) {
+				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+				switch(includedFOC.FreeGoodsOther_ABS_PCT){
+					case "ABS":
+						return (priceObj.RequestedVolume - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
+					case "PCT":
+						return priceObj.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
+					case "STP":
+						return  (priceObj.RequestedVolume - priceObj.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
+				}
+			}
+
+			// These functions need to be aligned with the backend implementations
+			// see sta-service.js -> PriceConditionPriceWithFOCView
+			function hasObjectWithProductCode(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct);
+			}
+
+			function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+			}
+
+			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
 		},
 
 		validatePriceWithFOCForm: function(context, { offerPrice }){
