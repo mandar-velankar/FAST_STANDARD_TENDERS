@@ -889,8 +889,13 @@ sap.ui.define([
 		},
 
 		onSubmitFocChangesSuccess: function(res){
+			// refresh the focMultiInput tokens
 			const focMultiInput = this.byId("idFOCMultiInput");
 			focMultiInput.getBinding("tokens").refresh();
+
+			// refresh priceWithFOCForm to get the newly calculated values
+			const priceWithFOCForm = this.byId("idPriceWithFOCForm");
+			priceWithFOCForm.getElementBinding().refresh(true);
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
