@@ -594,6 +594,8 @@ sap.ui.define([
 		 * Case2: One or more FOC products which are different from Offer Product
 		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		 * Warning: These functions need to be aligned with the backend implementations. 
+		 * see sta-service.js -> PriceConditionPriceWithFOCView
 		**/
 		calculateNetOfferPrice: function({offerPrice, priceObj}){
 			const multiInput = this.byId('idFOCMultiInput');
@@ -620,8 +622,6 @@ sap.ui.define([
 				}
 			}
 
-			// These functions need to be aligned with the backend implementations
-			// see sta-service.js -> PriceConditionPriceWithFOCView
 			function hasObjectWithProductCode(arr, offerProduct) {
 				return arr.some(obj => obj.ProductPackId === offerProduct);
 			}
