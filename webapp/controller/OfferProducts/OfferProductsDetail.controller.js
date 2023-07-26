@@ -339,23 +339,29 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', true);
 		},
 		onPriceWithFOCFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesPriceWithFOCSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
 
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
-
-			// if(!this.validateProduct()) return;
-
-			// this.defaultModel.submitChanges({
-			// 	error: this._onSubmitChangesFail.bind(this),
-			// 	success: this._onSubmitChangesSuccessProductForm.bind(this),
-			// 	groupId: "ProductFormDetail"
-			// }); 
-
+		_onSubmitChangesPriceWithFOCSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.invalidateEntityType([
+				"PriceConditionPriceWithFOCView"
+			]);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PriceWithFOCForm/editMode`, false);
+			this._refreshOfferProductTable();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', false);
-			this.defaultModel.resetChanges();
+			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
 		},
 
 		onPricingFormEditBtnPress: function(event){
