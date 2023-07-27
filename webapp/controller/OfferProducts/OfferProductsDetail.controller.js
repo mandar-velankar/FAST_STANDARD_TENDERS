@@ -142,7 +142,8 @@ sap.ui.define([
 				FocForm:{
 					hasFocPriceCondition: false,
 					editMode: false,
-					hasMainPriceCondition: false
+					hasMainPriceCondition: false,
+					UOM: "TEst"
 				},
 				PriceWithFOCForm:{
 					editMode: false,
@@ -205,7 +206,15 @@ sap.ui.define([
 			form.bindElement({
 				path: path,
 				groupId: "ProductFormDetail",
+				events: {
+					dataReceived: this.onProductFormDataReceived.bind(this)
+				}
 			});
+		},
+
+		onProductFormDataReceived: function(event){
+			const product = event.getParameter('data');
+			this.setUOM(product.UnitPerPack);
 		},
 
 		/**
@@ -790,6 +799,11 @@ sap.ui.define([
 		setMainPriceConditionID: function(id){
 			this.getModel("ui").setProperty("/PricingForm/mainPriceConditionID", id);
 			return id;
+		},
+
+		setUOM: function(uom){
+			this.getModel("ui").setProperty("/FocForm/UOM", uom);
+			return uom;
 		},
 
 		getMainPriceConditionID: function(){
