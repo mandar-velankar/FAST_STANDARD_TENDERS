@@ -60,7 +60,21 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
-			this.templateStateData = this.templateState.getData();					
-		}
+			this.templateStateData = this.templateState.getData();
+			this.bindTable();
+		},
+
+		bindTable: function () {
+			const deliveryProductsTable = this.byId("idDeliveryProducts");
+			const template = deliveryProductsTable.getBindingInfo("items").template
+
+			deliveryProductsTable.bindItems({
+				path: "/DeliveryProductTableView",
+				filters: [
+					new Filter("OfferID", "EQ", this.offerId)
+				],
+				template: template
+			})
+		},
     });
 });

@@ -339,23 +339,29 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', true);
 		},
 		onPriceWithFOCFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesPriceWithFOCSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
 
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
-
-			// if(!this.validateProduct()) return;
-
-			// this.defaultModel.submitChanges({
-			// 	error: this._onSubmitChangesFail.bind(this),
-			// 	success: this._onSubmitChangesSuccessProductForm.bind(this),
-			// 	groupId: "ProductFormDetail"
-			// }); 
-
+		_onSubmitChangesPriceWithFOCSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.invalidateEntityType([
+				"PriceConditionPriceWithFOCView"
+			]);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PriceWithFOCForm/editMode`, false);
+			this._refreshOfferProductTable();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', false);
-			this.defaultModel.resetChanges();
+			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
 		},
 
 		onPricingFormEditBtnPress: function(event){
@@ -594,12 +600,14 @@ sap.ui.define([
 		 * Case2: One or more FOC products which are different from Offer Product
 		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
 		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		 * Warning: These functions need to be aligned with the backend implementations. 
+		 * see sta-service.js -> PriceConditionPriceWithFOCView
 		**/
 		calculateNetOfferPrice: function({offerPrice, priceObj}){
-			const freeGoodsOtherTable = this.byId("idFreeGoodsOtherTable");
+			const multiInput = this.byId('idFOCMultiInput');
 
 			const offerProduct = priceObj.ProductCode;
-			const foc = []; // TODO: get FOCs
+			const foc = multiInput.getBinding('tokens').getContexts().map(ctx => ctx.getObject());
 
 			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
 			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
@@ -620,8 +628,6 @@ sap.ui.define([
 				}
 			}
 
-			// These functions need to be aligned with the backend implementations
-			// see sta-service.js -> PriceConditionPriceWithFOCView
 			function hasObjectWithProductCode(arr, offerProduct) {
 				return arr.some(obj => obj.ProductPackId === offerProduct);
 			}
@@ -883,8 +889,13 @@ sap.ui.define([
 		},
 
 		onSubmitFocChangesSuccess: function(res){
+			// refresh the focMultiInput tokens
 			const focMultiInput = this.byId("idFOCMultiInput");
 			focMultiInput.getBinding("tokens").refresh();
+
+			// refresh priceWithFOCForm to get the newly calculated values
+			const priceWithFOCForm = this.byId("idPriceWithFOCForm");
+			priceWithFOCForm.getElementBinding().refresh(true);
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
