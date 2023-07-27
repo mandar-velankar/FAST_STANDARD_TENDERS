@@ -614,9 +614,9 @@ sap.ui.define([
 		**/
 		calculateNetOfferPrice: function({offerPrice, priceObj}){
 			const multiInput = this.byId('idFOCMultiInput');
-
+			
 			const offerProduct = priceObj.ProductCode;
-			const foc = multiInput.getBinding('tokens').getContexts().map(ctx => ctx.getObject());
+			const foc = multiInput.getBinding('tokens')?.getContexts()?.map(ctx => ctx.getObject()) || [];
 
 			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
 			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
