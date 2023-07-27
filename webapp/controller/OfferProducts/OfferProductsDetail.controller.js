@@ -981,6 +981,7 @@ sap.ui.define([
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, this.sCountryCode),
 				new Filter("INSTITUTE_ID",FilterOperator.EQ, offerFormViewObject.InstituteID),
 				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offerFormViewObject.DistributorID),
+				new Filter("DIVISION",FilterOperator.EQ, offerFormViewObject.Division),
 				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
 			]
 			binding.filter(orFilters);
