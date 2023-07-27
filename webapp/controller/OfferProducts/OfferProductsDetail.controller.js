@@ -544,7 +544,7 @@ sap.ui.define([
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+			let netPrice = Math.trunc(parseFloat(offerPrice) * (1 - deductions) * 100) / 100;
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
