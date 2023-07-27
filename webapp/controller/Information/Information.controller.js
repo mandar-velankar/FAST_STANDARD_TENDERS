@@ -15,6 +15,7 @@ sap.ui.define([
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Information.Information", {
+		formatter: formatter,
 		onInit: function () {
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
@@ -203,7 +204,8 @@ sap.ui.define([
 				default:
 					break;
 			}
-			return `${totalAmount.toFixed(2)} ${currency}`;
+			totalAmount = formatter.formatCurrency(totalAmount);
+			return `${totalAmount} ${currency}`;
 		},
 		formatRequestedQty: function (quantity, unit) {
 			return parseInt(quantity) + " " + unit;
