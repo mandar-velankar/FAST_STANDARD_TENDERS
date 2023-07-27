@@ -151,14 +151,18 @@
 					<ColumnListItem>
 						<cells>
 							<Text text="{PRODUCTNAME}"/>	
-							<Text text="{
-								parts: [
-									{path: 'REQUESTED_QUANTITY'},
-									{path: 'UNIT'}
-								],
-								formatter: '.formatRequestedQty'
-							}"/>
-
+							<Text 
+								text ="{
+									path: 'REQUESTED_QUANTITY',
+									type: 'sap.ui.model.type.Integer',
+									formatOptions: { 
+										maxFractionDigits: 0,
+										minFractionDigits: 0, 
+										groupingEnabled: true, 
+										groupingSeparator: ','
+									}
+								} {UNIT}"							
+							/>
 							<ObjectStatus 
 								text="{
 									parts: [
