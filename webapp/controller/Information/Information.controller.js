@@ -196,19 +196,16 @@ sap.ui.define([
 			let totalAmount = "";
 			switch (unit) {
 				case "Unit":
-					totalAmount = parseInt(offer.REQUESTED_QUANTITY) * offer.REQ_PRICE_UNIT_OFFER_CURRENCY;
+					totalAmount = offer.REQUESTED_QUANTITY * offer.REQ_PRICE_UNIT_OFFER_CURRENCY;
 					break;
 				case "Pack":
-					totalAmount = parseInt(offer.REQUESTED_QUANTITY) * offer.REQ_PRICE_PACK_OFFER_CURRENCY;
+					totalAmount = offer.REQUESTED_QUANTITY * offer.REQ_PRICE_PACK_OFFER_CURRENCY;
 					break;
 				default:
 					break;
 			}
 			totalAmount = formatter.formatCurrency(totalAmount);
 			return `${totalAmount} ${currency}`;
-		},
-		formatRequestedQty: function (quantity, unit) {
-			return parseInt(quantity) + " " + unit;
 		},
 
 		formatApprovalStatus: function (approvalStatus) {
@@ -465,7 +462,7 @@ sap.ui.define([
 						AwardedCompany: "Bayer",
 						UoM: product.UNIT,
 						AwardedPrice: product.OFFER_PRICE,
-						AwardedQty: parseInt(product.REQUESTED_QUANTITY),
+						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
 					},
 					groupId: "AwardedProduct"

@@ -142,7 +142,8 @@ sap.ui.define([
 				FocForm:{
 					hasFocPriceCondition: false,
 					editMode: false,
-					hasMainPriceCondition: false
+					hasMainPriceCondition: false,
+					UOM: "TEst"
 				},
 				PriceWithFOCForm:{
 					editMode: false,
@@ -205,7 +206,15 @@ sap.ui.define([
 			form.bindElement({
 				path: path,
 				groupId: "ProductFormDetail",
+				events: {
+					dataReceived: this.onProductFormDataReceived.bind(this)
+				}
 			});
+		},
+
+		onProductFormDataReceived: function(event){
+			const product = event.getParameter('data');
+			this.setUOM(product.UnitPerPack);
 		},
 
 		/**
@@ -334,10 +343,7 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.defaultModel.resetChanges();
 		},
-
-		onPriceWithFOCFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', true);
-		},
+	
 		onPriceWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
@@ -355,12 +361,12 @@ sap.ui.define([
 			this.invalidateEntityType([
 				"PriceConditionPriceWithFOCView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PriceWithFOCForm/editMode`, false);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 			this._refreshOfferProductTable();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
-			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', false);
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
 		},
 
@@ -544,7 +550,7 @@ sap.ui.define([
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+			let netPrice = Math.trunc(parseFloat(offerPrice) * (1 - deductions) * 100) / 100;
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
@@ -605,9 +611,9 @@ sap.ui.define([
 		**/
 		calculateNetOfferPrice: function({offerPrice, priceObj}){
 			const multiInput = this.byId('idFOCMultiInput');
-
+			
 			const offerProduct = priceObj.ProductCode;
-			const foc = multiInput.getBinding('tokens').getContexts().map(ctx => ctx.getObject());
+			const foc = multiInput.getBinding('tokens')?.getContexts()?.map(ctx => ctx.getObject()) || [];
 
 			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
 			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
@@ -792,6 +798,11 @@ sap.ui.define([
 			return id;
 		},
 
+		setUOM: function(uom){
+			this.getModel("ui").setProperty("/FocForm/UOM", uom);
+			return uom;
+		},
+
 		getMainPriceConditionID: function(){
 			return this.getModel("ui").getProperty("/PricingForm/mainPriceConditionID");
 		},
@@ -894,8 +905,8 @@ sap.ui.define([
 			focMultiInput.getBinding("tokens").refresh();
 
 			// refresh priceWithFOCForm to get the newly calculated values
-			const priceWithFOCForm = this.byId("idPriceWithFOCForm");
-			priceWithFOCForm.getElementBinding().refresh(true);
+			const pricingForm = this.byId("idPricingForm");
+			pricingForm.getElementBinding().refresh(true);
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
@@ -967,6 +978,7 @@ sap.ui.define([
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, this.sCountryCode),
 				new Filter("INSTITUTE_ID",FilterOperator.EQ, offerFormViewObject.InstituteID),
 				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offerFormViewObject.DistributorID),
+				new Filter("DIVISION",FilterOperator.EQ, offerFormViewObject.Division),
 				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
 			]
 			binding.filter(orFilters);

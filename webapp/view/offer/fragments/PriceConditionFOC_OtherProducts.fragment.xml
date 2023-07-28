@@ -108,10 +108,9 @@
                         value="{path:'FreeGoodsOther_Step'}" 
                         enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
                     />
-                    <Text 
+                    <Text class="sapUiSmallMarginTop"
                         text="{= 
-                            ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
-                            ${FreeGoodsOther_ABS_PCT} === 'STP' ? ${UOM}: '%'
+                            ${FreeGoodsOther_ABS_PCT} === 'PCT' ? '%': ${ui>/FocForm/UOM}
                         }">
                     </Text> 
                     <Button 

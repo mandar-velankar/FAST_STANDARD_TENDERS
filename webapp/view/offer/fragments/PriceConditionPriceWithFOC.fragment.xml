@@ -5,7 +5,7 @@
 >
 	<!-- FORM WITH Pricing DATA -->
 	<form:Form
-		id="idPriceWithFOCForm"
+		id="idPricingForm"
 		editable="true"
 	>
 		<form:toolbar>
@@ -15,27 +15,27 @@
 				<Button
 					icon="sap-icon://alert"
 					text="{= ${messages>/priceCondPriceWithFoc}.length }"
-					visible="{= ${messages>/priceCondPriceWithFoc}.length > 0 &amp;&amp; ${ui>/PriceWithFOCForm/editMode}}"
+					visible="{= ${messages>/priceCondPriceWithFoc}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
 					type="Emphasized"
 					press="onMessagePopoverPress($event, 'priceCondPriceWithFoc')" 
 				/>
 				<Button
 					icon="sap-icon://edit"
 					text="Edit"
-					press=".onPriceWithFOCFormEditBtnPress"
-					visible="{= !${ui>/PriceWithFOCForm/editMode} }"
+					press=".onPricingFormEditBtnPress"
+					visible="{= !${ui>/PricingForm/editMode} }"
 				/>
 				<Button
 					icon="sap-icon://save"
 					text="Save"
 					press=".onPriceWithFOCFormSaveBtnPress"
-					visible="{= ${ui>/PriceWithFOCForm/editMode} }"
+					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 				<Button
 					icon="sap-icon://decline"
 					text="Cancel"
 					press=".onPriceWithFOCFormCancelBtnPress"
-					visible="{= ${ui>/PriceWithFOCForm/editMode} }"
+					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 			</Toolbar>
 		</form:toolbar>
@@ -106,7 +106,7 @@
 										preserveDecimals: false
 									}	
 								}" 
-								enabled="{ui>/PriceWithFOCForm/editMode}"
+								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
 							/>
 						</form:fields>
@@ -133,7 +133,7 @@
 									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
-								enabled="{ui>/PriceWithFOCForm/editMode}"
+								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
 							/>
 						</form:fields>
