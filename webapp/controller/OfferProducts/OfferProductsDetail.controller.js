@@ -343,10 +343,7 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.defaultModel.resetChanges();
 		},
-
-		onPriceWithFOCFormEditBtnPress: function(event){
-			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', true);
-		},
+	
 		onPriceWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
@@ -364,12 +361,12 @@ sap.ui.define([
 			this.invalidateEntityType([
 				"PriceConditionPriceWithFOCView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PriceWithFOCForm/editMode`, false);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 			this._refreshOfferProductTable();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
-			this.getModel("ui").setProperty('/PriceWithFOCForm/editMode', false);
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
 		},
 
@@ -908,8 +905,8 @@ sap.ui.define([
 			focMultiInput.getBinding("tokens").refresh();
 
 			// refresh priceWithFOCForm to get the newly calculated values
-			const priceWithFOCForm = this.byId("idPriceWithFOCForm");
-			priceWithFOCForm.getElementBinding().refresh(true);
+			const pricingForm = this.byId("idPricingForm");
+			pricingForm.getElementBinding().refresh(true);
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
