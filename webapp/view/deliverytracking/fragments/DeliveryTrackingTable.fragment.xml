@@ -1,0 +1,83 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        expandable="true"
+        headerText="Delivery Details"
+    >
+        <Table>
+            <headerToolbar>
+                <OverflowToolbar>
+                    <ToolbarSpacer />
+                    <Button
+                        icon="sap-icon://add"
+                    />
+                    <!-- <Button
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://edit"
+                        text="Edit"
+                        press=".onButtonEditCompetitorPress"
+                        visible="{= !${ui>/CompetitorResultsForm/editMode}}"
+                    />
+                        
+                    <Button
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://save"
+                        text="Save"
+                        press=".onButtonCompetitorSavePress"
+                        visible="{= ${ui>/CompetitorResultsForm/editMode}}"
+                    />
+                    <Button
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://decline"
+                        text="Cancel"
+                        press=".onButtonCompetitorCancelPress"
+                           visible="{= ${ui>/CompetitorResultsForm/editMode}}"
+                    /> -->
+                </OverflowToolbar>
+            </headerToolbar>
+            <columns>
+                <Column>
+                    <Label
+                        text="{i18n>DeliveryTrackingProductInst}"
+                        wrapping="true"
+                    />
+                </Column>
+                <Column>
+                    <Label
+                        text="{i18n>DeliveryTrackingProductReqDeliveryDate}"
+                        wrapping="true"
+                    />
+                </Column>
+                <Column>
+                    <Label
+                        text="{i18n>DeliveryTrackingProductRequestedQty}"
+                        wrapping="true"
+                    />
+                </Column>
+                <Column>
+                    <Label
+                        text="{i18n>DeliveryTrackingProductPaid}"
+                        wrapping="true"
+                    />
+                </Column>
+            </columns>
+            <!-- <items>
+                <ColumnListItem press="onDeliveryProductPress" detailPress="onDeliveryProductPress">
+                    <cells>
+                        <Text text="{AwardedProduct}"/>	
+                        <Text text="{AwardedQty}"/>
+                        <Text text="{SumOfDeliveredAmount}"/>	
+                        <Text text="{
+                            path: 'DeliveredPercentage',
+                            type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+                            }"/>				
+                    </cells>
+                </ColumnListItem>
+            </items> -->
+        </Table>
+    </Panel>
+</core:FragmentDefinition>
