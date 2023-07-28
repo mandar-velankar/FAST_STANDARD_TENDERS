@@ -47,6 +47,7 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetailDeliveries").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("deliveryTrackingProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
 			this.setModel(messagesModel, "messages");
 

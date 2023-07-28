@@ -161,6 +161,15 @@
 					]
 				},
 				{
+					"pattern": "detail/{countryCode}/{objectId}/{offerId}/Delivery/{productId}/{layout}",
+					"name": "deliveryTrackingProductDetail",
+					"target": [
+						"master",
+						"object",
+						"deliveryTrackingProductDetail"
+					]
+				},
+				{
 					"pattern": "detail/{countryCode}/{objectId}/{offerId}/AwardedProduct/{productId}/{layout}",
 					"name": "awardProductsDetail",
 					"target": [
@@ -210,6 +219,10 @@
 				},
 				"objectDetailDeliveries": {
 					"viewName": "deliverytracking/views/DeliveryTracking",
+					"controlAggregation": "endColumnPages"
+				},
+				"deliveryTrackingProductDetail": {
+					"viewName": "deliverytracking/views/DeliveryTrackingDetail",
 					"controlAggregation": "endColumnPages"
 				},
 				"offerProductDetail": {

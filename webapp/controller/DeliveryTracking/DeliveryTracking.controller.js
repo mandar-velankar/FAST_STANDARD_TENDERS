@@ -76,5 +76,22 @@ sap.ui.define([
 				template: template
 			})
 		},
+
+		onDeliveryProductPress: function(event){
+			const selectedProductCode = event.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
+
+			let oNextUIState = "";
+
+			this.oOwnerComponent.getHelper().then(function (oHelper) {
+				oNextUIState = oHelper.getNextUIState(2);
+				this.oRouter.navTo("deliveryTrackingProductDetail", {
+					layout: oNextUIState.layout,
+					objectId: this.tenderId,
+					offerId: this.offerId,
+					productId: selectedProductCode,
+					countryCode: this.countryCode
+				});
+			}.bind(this));
+		}
     });
 });
