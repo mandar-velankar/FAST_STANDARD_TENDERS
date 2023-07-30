@@ -62,6 +62,23 @@ sap.ui.define([
 
 		formatText: function (value) {
 			return parseInt(value);
+		},
+		toUpperCamelCase: function(str) {
+			return str.replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+		},
+
+		replaceString: function (originalString) {
+			let stringToReplace,replacementString;
+			switch(originalString.toLocaleLowerCase()){
+				case 'pricewithfoc'	:
+					stringToReplace	= originalString;
+					replacementString = "Price with FOC";
+					break;
+				default:
+					return originalString;
+			}
+			const regex = new RegExp(stringToReplace, 'gi');
+			return originalString.replace(regex, replacementString);
 		}
 	};
 });

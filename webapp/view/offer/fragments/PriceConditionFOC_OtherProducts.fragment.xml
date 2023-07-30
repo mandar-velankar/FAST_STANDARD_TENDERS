@@ -47,6 +47,9 @@
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FocType}"/>
                 </Column>
                 <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.AddedIncluded}"/>
+                </Column>
+                <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCQuantity}"/>
                 </Column>
                 <Column>
@@ -75,6 +78,12 @@
                         <core:Item key="PCT" text="Percentage" />
                         <core:Item key="STP" text="Step" />
                     </Select>
+                    <Select 
+                        selectedKey="{ADD_INCLUDE}"
+                    >
+                        <core:Item key="Added" text="Added" />
+                        <core:Item key="Included" text="Included" />
+                    </Select>
                     <HBox>
                         <Input 
                             type="Number" 
@@ -99,10 +108,9 @@
                         value="{path:'FreeGoodsOther_Step'}" 
                         enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
                     />
-                    <Text 
+                    <Text class="sapUiSmallMarginTop"
                         text="{= 
-                            ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
-                            ${FreeGoodsOther_ABS_PCT} === 'STP' ? ${UOM}: '%'
+                            ${FreeGoodsOther_ABS_PCT} === 'PCT' ? '%': ${ui>/FocForm/UOM}
                         }">
                     </Text> 
                     <Button 

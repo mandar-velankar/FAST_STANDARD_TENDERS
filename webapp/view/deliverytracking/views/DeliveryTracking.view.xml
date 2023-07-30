@@ -10,12 +10,14 @@
     xmlns:tnt="sap.tnt"
     xmlns:u="sap.uxap"
 >
-    <Table>
-        <!-- <headerToolbar>
-            <OverflowToolbar>
-                <ToolbarSpacer />
-            </OverflowToolbar>
-        </headerToolbar> -->
+    <Table
+        id="idDeliveryProducts" 
+        items = "{
+            path: '/DeliveryProductTableView'
+        }"
+        mode="SingleSelectMaster"
+        delete="onDeleteDeliveryProduct"
+        selectionChange=".onDeliveryProductPress">
         <columns>
             <Column>
                 <Label
@@ -42,11 +44,18 @@
                 />
             </Column>
         </columns>
-        <!-- <items>
-            <ColumnListItem>
+        <items>
+            <ColumnListItem press="onDeliveryProductPress" detailPress="onDeliveryProductPress">
                 <cells>
+                    <Text text="{AwardedProduct}"/>	
+                    <Text text="{AwardedQty}"/>
+                    <Text text="{SumOfDeliveredAmount}"/>	
+                    <Text text="{
+                        path: 'DeliveredPercentage',
+                        type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+                        }"/>				
                 </cells>
             </ColumnListItem>
-        </items> -->
+		</items>
     </Table>
 </mvc:View>

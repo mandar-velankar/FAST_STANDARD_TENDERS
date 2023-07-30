@@ -47,7 +47,8 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
-				priceCondFoc: []
+				priceCondFoc: [],
+				priceCondPriceWithFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -141,7 +142,12 @@ sap.ui.define([
 				FocForm:{
 					hasFocPriceCondition: false,
 					editMode: false,
-					hasMainPriceCondition: false
+					hasMainPriceCondition: false,
+					UOM: "TEst"
+				},
+				PriceWithFOCForm:{
+					editMode: false,
+					mainPriceConditionID: null
 				}
 			});
 	
@@ -200,7 +206,15 @@ sap.ui.define([
 			form.bindElement({
 				path: path,
 				groupId: "ProductFormDetail",
+				events: {
+					dataReceived: this.onProductFormDataReceived.bind(this)
+				}
 			});
+		},
+
+		onProductFormDataReceived: function(event){
+			const product = event.getParameter('data');
+			this.setUOM(product.UnitPerPack);
 		},
 
 		/**
@@ -314,9 +328,11 @@ sap.ui.define([
 			const hasErrorMessages =  this.getView().getModel('message').getData().length > 0;
 			/*todo - rework error messages for product detail form to new way of working
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");*/
-			!hasErrorMessages && this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
-
-			this._refreshOfferProductTable();
+			if (!hasErrorMessages) {
+				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
+				this._refreshOfferProductTable();
+			}
+			
 		},
 
 		_onSubmitChangesFail: function(error){
@@ -326,6 +342,32 @@ sap.ui.define([
 		onOfferDetailFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.defaultModel.resetChanges();
+		},
+	
+		onPriceWithFOCFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesPriceWithFOCSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesPriceWithFOCSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.invalidateEntityType([
+				"PriceConditionPriceWithFOCView"
+			]);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			this._refreshOfferProductTable();
+		},
+
+		onPriceWithFOCFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
 		},
 
 		onPricingFormEditBtnPress: function(event){
@@ -488,6 +530,9 @@ sap.ui.define([
 				case "discount":
 					this.calculateDiscountConditionType({property, value, context});
 					break;
+				case "pricewithfoc":
+					this.calculatePriceWithFOCConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -505,7 +550,7 @@ sap.ui.define([
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+			let netPrice = Math.trunc(parseFloat(offerPrice) * (1 - deductions) * 100) / 100;
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
@@ -528,6 +573,109 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
+
+
+		/**
+		 * Calculate price with FOC condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculatePriceWithFOCConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			priceObj.CurrentBasePrice = Math.trunc(priceObj.CurrentBasePrice*100) / 100; // Truncate number to two decimal places without rounding. For correct rounding
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
+			let netPrice = netOfferPrice * (1 - deductions);
+
+			context.getModel().setProperty("Discount", discount, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
+			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+			
+			this.validatePriceWithFOCForm(context, { offerPrice });
+		},
+
+		/**
+		 * Calculate NetOfferPrice based on rules
+		 * Case1: No FOC in the pop up
+		 * Case2: One or more FOC products which are different from Offer Product
+		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		 * Warning: These functions need to be aligned with the backend implementations. 
+		 * see sta-service.js -> PriceConditionPriceWithFOCView
+		**/
+		calculateNetOfferPrice: function({offerPrice, priceObj}){
+			const multiInput = this.byId('idFOCMultiInput');
+			
+			const offerProduct = priceObj.ProductCode;
+			const foc = multiInput.getBinding('tokens')?.getContexts()?.map(ctx => ctx.getObject()) || [];
+
+			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+			const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+			//Cases 1,2 and 3
+			if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return offerPrice;
+			// Cases 4
+			if(containsOfferProductAndIsIncluded) {
+				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+				switch(includedFOC.FreeGoodsOther_ABS_PCT){
+					case "ABS":
+						return (priceObj.RequestedVolume - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
+					case "PCT":
+						return priceObj.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
+					case "STP":
+						return  (priceObj.RequestedVolume - priceObj.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
+				}
+			}
+
+			function hasObjectWithProductCode(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct);
+			}
+
+			function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+			}
+
+			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+		},
+
+		validatePriceWithFOCForm: function(context, { offerPrice }){
+			const priceObj = context.getObject();
+
+			// Error messages
+			const target = `${context.getPath()}/OfferPrice`;
+			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView"]);
+			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target)); 
+
+			// Rules
+			const isOfferPriceHigher = Number(offerPrice) > Number(priceObj.BasePrice);
+			if(isOfferPriceHigher && !errorMessage){
+				this.oMessageManager.addMessages(new Message({
+					message: "Offer Price should not be greater than Base Price.",
+					type: MessageType.Error,
+					target: target,
+					processor: this.getView().getModel()
+				}));
+				this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			}else if(!isOfferPriceHigher && errorMessage){
+				this.oMessageManager.removeMessages(errorMessage);
+				this.removeMessages(errorMessage, "priceCondPriceWithFoc");
+			}
+		},
+
 
 		/**
 		 * Load the price condition fragment based on the selected price condition type.
@@ -650,6 +798,11 @@ sap.ui.define([
 			return id;
 		},
 
+		setUOM: function(uom){
+			this.getModel("ui").setProperty("/FocForm/UOM", uom);
+			return uom;
+		},
+
 		getMainPriceConditionID: function(){
 			return this.getModel("ui").getProperty("/PricingForm/mainPriceConditionID");
 		},
@@ -747,8 +900,13 @@ sap.ui.define([
 		},
 
 		onSubmitFocChangesSuccess: function(res){
+			// refresh the focMultiInput tokens
 			const focMultiInput = this.byId("idFOCMultiInput");
 			focMultiInput.getBinding("tokens").refresh();
+
+			// refresh priceWithFOCForm to get the newly calculated values
+			const pricingForm = this.byId("idPricingForm");
+			pricingForm.getElementBinding().refresh(true);
 		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
@@ -767,6 +925,7 @@ sap.ui.define([
 				groupId: "PricingForm"
 			});
 			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
+			context.getModel().setProperty("ADD_INCLUDE", "Added", context);
 			const newItem = table.getBindingInfo("items").template.clone();
 			newItem.setBindingContext(context)
 			table.insertItem(newItem);
@@ -819,6 +978,7 @@ sap.ui.define([
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, this.sCountryCode),
 				new Filter("INSTITUTE_ID",FilterOperator.EQ, offerFormViewObject.InstituteID),
 				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offerFormViewObject.DistributorID),
+				new Filter("DIVISION",FilterOperator.EQ, offerFormViewObject.Division),
 				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
 			]
 			binding.filter(orFilters);
