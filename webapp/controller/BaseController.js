@@ -3,10 +3,11 @@ sap.ui.define([
 	"sap/ui/core/routing/History",
 	"../model/formatter",
 	"../model/datatypes/CustomPercentageType",
+	"../model/datatypes/CustomNumberType",
 	"sap/ui/core/Fragment",
 	"sap/m/MessagePopover",
 	"sap/m/MessageItem"
-], function (Controller, History, formatter, CustomPercentageType, Fragment, MessagePopover, MessageItem) {
+], function (Controller, History, formatter, CustomPercentageType, CustomNumberType, Fragment, MessagePopover, MessageItem) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
@@ -14,7 +15,8 @@ sap.ui.define([
 		formatter: formatter,
 
 		customTypes: {
-			percentage: CustomPercentageType
+			percentage: CustomPercentageType,
+			number: CustomNumberType
 		},
 
 		/**
@@ -150,6 +152,20 @@ sap.ui.define([
 				let entityIndex = entities.findIndex(entity => el.target.toLowerCase().includes(entity.toLowerCase()));
 				if(entityIndex > -1) return el; 
 			});
+		},
+		
+		removeMessages: function(messages, sectionName){
+			const messagesArray = Array.isArray(messages) ? messages : [messages];
+			const messagesInSection = this.getModel("messages").getProperty(`/${sectionName}`);
+			const targetsToRemove = messagesArray.map(msg => {
+				const targets = msg.getTargets ? msg.getTargets() : [];
+				return targets;
+			}).flat();
+			const filteredMessages = messagesInSection.filter(msg => {
+				const hasTarget = msg.getTargets ? msg.getTargets().some(target => targetsToRemove.includes(target)) : false;
+				return !hasTarget;
+			});
+			this.getModel("messages").setProperty(`/${sectionName}`, filteredMessages);
 		},
 
 		/**

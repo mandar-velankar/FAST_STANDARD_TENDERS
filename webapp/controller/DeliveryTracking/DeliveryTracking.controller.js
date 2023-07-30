@@ -60,7 +60,38 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
-			this.templateStateData = this.templateState.getData();					
+			this.templateStateData = this.templateState.getData();
+			this.bindTable();
+		},
+
+		bindTable: function () {
+			const deliveryProductsTable = this.byId("idDeliveryProducts");
+			const template = deliveryProductsTable.getBindingInfo("items").template
+
+			deliveryProductsTable.bindItems({
+				path: "/DeliveryProductTableView",
+				filters: [
+					new Filter("OfferID", "EQ", this.offerId)
+				],
+				template: template
+			})
+		},
+
+		onDeliveryProductPress: function(event){
+			const selectedProductCode = event.getParameter("listItem")?.getBindingContext()?.getObject()?.ProductCode;
+
+			let oNextUIState = "";
+
+			this.oOwnerComponent.getHelper().then(function (oHelper) {
+				oNextUIState = oHelper.getNextUIState(2);
+				this.oRouter.navTo("deliveryTrackingProductDetail", {
+					layout: oNextUIState.layout,
+					objectId: this.tenderId,
+					offerId: this.offerId,
+					productId: selectedProductCode,
+					countryCode: this.countryCode
+				});
+			}.bind(this));
 		}
     });
 });

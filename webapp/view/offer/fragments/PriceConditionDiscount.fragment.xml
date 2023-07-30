@@ -61,10 +61,10 @@
 					<form:FormElement label="{i18n>CurrentBasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'ui>/currency'],
+										parts: ['CurrentBasePrice', 'Currency'],
 										type: 'sap.ui.model.type.Currency',
 										formatOptions: {
-											showMeasure: false,
+											showMeasure: true,
 											preserveDecimals: false
 										}	
 									}" 
@@ -74,10 +74,10 @@
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'ui>/currency'],
+										parts: ['BasePrice', 'Currency'],
 										type: 'sap.ui.model.type.Currency',
 										formatOptions: {
-											showMeasure: false,
+											showMeasure: true,
 											preserveDecimals: false
 										}	
 									}"   
@@ -101,10 +101,10 @@
 							<Input 
 								id = "idOfferPrice"
 								value="{
-									parts: ['OfferPrice', 'ui>/currency'],
+									parts: ['OfferPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
-										showMeasure: false,
+										showMeasure: true,
 										preserveDecimals: false
 									}	
 								}" 
@@ -129,10 +129,10 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'ui>/currency'],
+									parts: ['NetPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
-										showMeasure: false,
+										showMeasure: true,
 										preserveDecimals: false
 									}	
 								}" 

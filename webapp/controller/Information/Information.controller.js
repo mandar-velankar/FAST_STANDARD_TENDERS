@@ -15,6 +15,7 @@ sap.ui.define([
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Information.Information", {
+		formatter: formatter,
 		onInit: function () {
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
@@ -195,18 +196,16 @@ sap.ui.define([
 			let totalAmount = "";
 			switch (unit) {
 				case "Unit":
-					totalAmount = parseInt(offer.REQUESTED_QUANTITY) * offer.REQ_PRICE_UNIT_OFFER_CURRENCY;
+					totalAmount = offer.REQUESTED_QUANTITY * offer.REQ_PRICE_UNIT_OFFER_CURRENCY;
 					break;
 				case "Pack":
-					totalAmount = parseInt(offer.REQUESTED_QUANTITY) * offer.REQ_PRICE_PACK_OFFER_CURRENCY;
+					totalAmount = offer.REQUESTED_QUANTITY * offer.REQ_PRICE_PACK_OFFER_CURRENCY;
 					break;
 				default:
 					break;
 			}
-			return `${totalAmount.toFixed(2)} ${currency}`;
-		},
-		formatRequestedQty: function (quantity, unit) {
-			return parseInt(quantity) + " " + unit;
+			totalAmount = formatter.formatCurrency(totalAmount);
+			return `${totalAmount} ${currency}`;
 		},
 
 		formatApprovalStatus: function (approvalStatus) {
@@ -444,6 +443,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();
 			this.createNewAwardedProducts();
+			this.defaultModel.refresh(true);
 		},
 		
 		createNewAwardedProducts: function () {
@@ -458,7 +458,12 @@ sap.ui.define([
 						CountryCode: product.COUNTRY_CODE,
 						LotID: product.LOTID,
 						ProductCode: product.PRODUCTID,
-						AwardedProduct: product.PRODUCTNAME
+						AwardedProduct: product.PRODUCTNAME,
+						AwardedCompany: "Bayer",
+						UoM: product.UNIT,
+						AwardedPrice: product.OFFER_PRICE,
+						AwardedQty: product.REQUESTED_QUANTITY,
+						ErrorInSubmission: "No",
 					},
 					groupId: "AwardedProduct"
 				})
