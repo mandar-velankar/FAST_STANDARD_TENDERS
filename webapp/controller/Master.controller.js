@@ -104,6 +104,8 @@ sap.ui.define([
 
 		onCountriesReceived: async function (oEvent) {
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
+			const userFullName = oEvent?.getParameter("data")?.results[0]?.UserName || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserName")
+			this.getModel("st").setProperty("/UserFullName", userFullName);
 			// set filter which is needed later on
 			// if(sCountryCode){
 			// 	this.andFilters.push(new Filter({
@@ -584,8 +586,10 @@ sap.ui.define([
 			const sElemBindingPath = form.getElementBinding().getPath();
 			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
 			const nextTenderID = await this._getNextTenderID(sCountryCode);
+			const userFullName = this.getModel("st").getProperty("/UserFullName");
 
 			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
+			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 		},
