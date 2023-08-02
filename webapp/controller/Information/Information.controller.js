@@ -59,7 +59,8 @@ sap.ui.define([
 			this.bindFields();
 			
 			await this.approvalButtonEnableCheck();
-			await this.assignTemplates();
+			await this.assignWordTemplates();
+			await this.assignExcelTemplates();
 			
 		},
 
@@ -67,7 +68,7 @@ sap.ui.define([
 			this.byId("idApprovalsPopup").close();
 		},
 
-		assignTemplates: async function(){
+		assignWordTemplates: async function(){
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/WordTemplateCountry", {
 					filters: [
@@ -80,11 +81,33 @@ sap.ui.define([
 				});
 			}).then(data => {
 				this.getModel("ui").setProperty("/WordTemplateCountry", data);
-			})
+			});
+		},
+
+		assignExcelTemplates: async function(){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/ExcelTemplateCountry", {
+					filters: [
+						new Filter("countryCode", "EQ", this.countryCode)
+					],
+					success: function (res) {
+						let allExcelCountryTemplates = res?.results;
+						resolve(allExcelCountryTemplates);
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/ExcelTemplateCountry", data);
+			});
 		},
 
 		onDownloadWord:function(event){
 			const url = `/v2/sta_tender/WordAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
+			URLHelper.redirect(url,true);
+			this.byId('idDownloadAttachmentButton')?.setText('Download'); // selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template. 
+		},
+
+		onDownloadExcel:function(event){
+			const url = `/v2/sta_tender/ExcelAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
 			URLHelper.redirect(url,true);
 			this.byId('idDownloadAttachmentButton')?.setText('Download'); // selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template. 
 		},

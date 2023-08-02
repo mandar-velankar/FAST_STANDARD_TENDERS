@@ -69,10 +69,9 @@
 									<MenuItem text="Private Customer" />
 								</items>
 							</MenuItem>
-							<MenuItem id="btnExcelDownload" text="Excel" icon="sap-icon://excel-attachment">
+							<MenuItem id="btnExcelDownload" text="Excel" icon="sap-icon://excel-attachment" visible="{= ${ui>/ExcelTemplateCountry/length} > 0}" items="{ui>/ExcelTemplateCountry}">
 								<items>
-									<MenuItem text="Public Customer" />
-									<MenuItem text="Private Customer" />
+									<MenuItem text="{ui>name}" press=".onDownloadExcel"/>
 								</items>
 							</MenuItem>
 						</Menu>

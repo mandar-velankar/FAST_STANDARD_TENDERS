@@ -22,6 +22,7 @@
                         alignItems="Center"
                     >
                         <m:Title
+                            id = "idDeliveryTrackingProductName"
                             text="Delivered Product: {AwardedProduct}"
                             wrapping="true"
                             class="sapUiTinyMarginEnd"
