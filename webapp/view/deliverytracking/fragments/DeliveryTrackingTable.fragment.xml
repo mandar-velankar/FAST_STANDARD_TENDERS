@@ -8,37 +8,47 @@
         expandable="true"
         headerText="Delivery Details"
     >
-        <Table>
+        <content>
+        <Table
+            id="idDeliveryTrackingTable"
+            items="{path: '/DeliveryTrackingDetailView'}"
+            mode="SingleSelectMaster"
+            selectionChange=".onSelectDelivery"
+            updateFinished=".onUpdateFinished"
+        >
             <headerToolbar>
-                <OverflowToolbar>
-                    <ToolbarSpacer />
-                    <Button
-                        icon="sap-icon://add"
-                    />
-                    <!-- <Button
-                        class="sapUiSmallMarginBegin"
-                        icon="sap-icon://edit"
-                        text="Edit"
-                        press=".onButtonEditCompetitorPress"
-                        visible="{= !${ui>/CompetitorResultsForm/editMode}}"
-                    />
+                    <OverflowToolbar>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://add"
+                            text="Add"
+                            press=".onButtonDeliveryTrackingCreatePress"
+                            visible="{= ${ui>/DeliveryTrackingForm/editMode}}"
+                        />
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://edit"
+                            text="Edit"
+                            press=".onButtonEditDeliveryPress"
+                            visible="{= !${ui>/DeliveryTrackingForm/editMode}}"
+                        />
                         
-                    <Button
-                        class="sapUiSmallMarginBegin"
-                        icon="sap-icon://save"
-                        text="Save"
-                        press=".onButtonCompetitorSavePress"
-                        visible="{= ${ui>/CompetitorResultsForm/editMode}}"
-                    />
-                    <Button
-                        class="sapUiSmallMarginBegin"
-                        icon="sap-icon://decline"
-                        text="Cancel"
-                        press=".onButtonCompetitorCancelPress"
-                           visible="{= ${ui>/CompetitorResultsForm/editMode}}"
-                    /> -->
-                </OverflowToolbar>
-            </headerToolbar>
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://save"
+                            text="Save"
+                            press=".onButtonDeliverySavePress"
+                            visible="{= ${ui>/DeliveryTrackingForm/editMode}}"
+                        />
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://decline"
+                            text="Cancel"
+                            press=".onButtonDeliveryCancelPress"
+                            visible="{= ${ui>/DeliveryTrackingForm/editMode}}"
+                        />
+                    </OverflowToolbar>
+                </headerToolbar>
             <columns>
                 <Column>
                     <Label
@@ -65,19 +75,56 @@
                     />
                 </Column>
             </columns>
-            <!-- <items>
-                <ColumnListItem press="onDeliveryProductPress" detailPress="onDeliveryProductPress">
+            <items>
+                <ColumnListItem>
                     <cells>
-                        <Text text="{AwardedProduct}"/>	
-                        <Text text="{AwardedQty}"/>
-                        <Text text="{SumOfDeliveredAmount}"/>	
-                        <Text text="{
-                            path: 'DeliveredPercentage',
-                            type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
-                            }"/>				
+                        <ComboBox
+                            enabled="{ui>/DeliveryTrackingForm/editMode}"
+                            selectedKey="{InstituteName}"
+                        >
+                            <items>
+                                <core:Item
+                                    text="{InstituteName}"
+                                    key="{InstituteName}"
+                                />
+                            </items>
+                        </ComboBox>
+                        <DatePicker
+                            enabled="{ui>/DeliveryTrackingForm/editMode}"
+                            value="{
+                                'path':'RequestedDeliveryDate',
+                                'type':'sap.ui.model.type.Date',
+                                'formatOptions': {
+                                    pattern: 'dd-MM-yyyy',
+                                    UTC:true
+                                }
+                            }"
+                        />
+                         <Input
+                            value="{RequestedQuantity}"
+                            enabled="{ui>/DeliveryTrackingForm/editMode}"
+                        />
+                        <ComboBox
+                            enabled="{ui>/DeliveryTrackingForm/editMode}"
+                            selectedKey="{PaidOrFree}"
+                        >
+                            <items>
+                                <core:Item
+                                    text="{PaidOrFree}"
+                                    key="{PaidOrFree}"
+                                />
+                            </items>
+                        </ComboBox>                   
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://delete"
+                            press=".onButtonDeleteDeliveryPress"
+                            visible="{ui>/DeliveryTrackingForm/editMode}"
+                        />
                     </cells>
                 </ColumnListItem>
-            </items> -->
+            </items>
         </Table>
+        </content>
     </Panel>
 </core:FragmentDefinition>
