@@ -48,7 +48,8 @@ sap.ui.define([
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
 				priceCondFoc: [],
-				priceCondPriceWithFoc: []
+				priceCondPriceWithFoc: [],
+				priceCondDiscountWithFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -368,6 +369,32 @@ sap.ui.define([
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+		},
+
+		onDiscountWithFOCFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesDiscountWithFOCSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesDiscountWithFOCSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
+			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.invalidateEntityType([
+				"PriceConditionDiscountWithFOCView"
+			]);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			this._refreshOfferProductTable();
+		},
+
+		onDiscountWithFOCFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
 		},
 
 		onPricingFormEditBtnPress: function(event){
