@@ -97,6 +97,9 @@ sap.ui.define([
 				"PriceConditionPriceWithFOCView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionDiscountWithFOCView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
