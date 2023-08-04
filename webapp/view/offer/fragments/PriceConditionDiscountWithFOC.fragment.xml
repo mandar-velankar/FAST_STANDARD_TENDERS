@@ -91,7 +91,8 @@
 									path: 'Discount',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
-								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'DiscountWithFOC')"
+								enabled="{ui>/PricingForm/editMode}"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -106,8 +107,7 @@
 										preserveDecimals: false
 									}	
 								}" 
-								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
+								enabled="false"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -134,7 +134,7 @@
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
+								liveChange=".onPricingFormLiveChange($event, 'DiscountWithFOC')"
 							/>
 						</form:fields>
 					</form:FormElement>

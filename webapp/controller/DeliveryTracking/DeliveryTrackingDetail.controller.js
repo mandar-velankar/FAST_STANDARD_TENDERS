@@ -51,6 +51,7 @@ sap.ui.define([
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.getDeliveryTrackingTemplateConfig();
             this.onBeforeShow(this.tenderId, this.offerId, this.countryCode);
 		},
         onBeforeShow: async function (objectId, offerId, countryCode) {
@@ -77,6 +78,17 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
             this.bindTable();
 			this.bindText();
+		},
+
+		getDeliveryTrackingTemplateConfig: async function () {
+			await this.templateState.read("DETAIL-DELIVERYTRACKINGDETAIL", {
+				countryCode: this.countryCode,
+				appID: "StandardTenders",
+				page: "DETAIL-DELIVERYTRACKINGDETAIL",
+				keys: {
+					TenderID: this.tenderId,
+				},
+			});
 		},
 
 		handleClose: function() {
@@ -117,7 +129,7 @@ sap.ui.define([
 				],
 				template: template
 			})
-
+			this.unbindDeliveryTrackingForm();
 		},
 
 		bindText: function(){
@@ -159,7 +171,45 @@ sap.ui.define([
 		},
 
 		onButtonDeliveryCancelPress: function () {
+			this.unbindDeliveryTrackingForm();
+			this.byId("idDeliveryTrackingTable").removeSelections(true)
 			this.getModel('ui').setProperty('/DeliveryTrackingForm/editMode', false);
+		},
+
+		onButtonDeleteDeliveryPress: function  (event) {
+			const deliveryTrackingTable = this.byId("idDeliveryTrackingTable");
+			const selecteddelivery = event.getSource().getParent();
+			const selecteddeliveryCtx = selecteddelivery.getBindingContext();
+			const selecteddeliveryPath = selecteddeliveryCtx.getPath();
+			deliveryTrackingTable.setSelectedItem(selecteddelivery);
+			if (selecteddeliveryCtx.isTransient()) {
+				this.defaultModel.resetChanges([selecteddeliveryPath]);
+				this.unbindDeliveryTrackingForm();
+			}else {
+				this.defaultModel.remove(selecteddeliveryPath);
+				this.unbindDeliveryTrackingForm();
+			}
+		},
+
+		bindDeliveryTrackingForm: function (path) {
+			const competitorForm = this.byId("idDeliveryTrackingForm");
+			competitorForm.bindElement({
+				path: path
+			})
+		},
+		
+		onSelectDelivery: function (event) {
+			const deliveryTrackingForm = this.byId("idDeliveryTrackingForm");
+			const delivery = event.getParameter("listItem");
+			const path = delivery.getBindingContext().getPath();
+			deliveryTrackingForm.setVisible(true);
+			this.bindDeliveryTrackingForm(path);
+		},
+
+		unbindDeliveryTrackingForm: function () {
+			const deliveryTrackingForm = this.byId("idDeliveryTrackingForm");
+			deliveryTrackingForm.unbindElement();
+			deliveryTrackingForm.setVisible(false);
 		},
     });
 });
