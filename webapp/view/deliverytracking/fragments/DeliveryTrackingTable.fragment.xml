@@ -74,6 +74,7 @@
                         wrapping="true"
                     />
                 </Column>
+                <Column width="5rem"/>
             </columns>
             <items>
                 <ColumnListItem>
@@ -125,6 +126,55 @@
                 </ColumnListItem>
             </items>
         </Table>
+        <form:Form
+                id="idDeliveryTrackingForm"
+                editable="true"
+                visible="false"
+                formContainers="{path:'template>/detailDetailDeliveryTrackingConfig/countryTemplate/template/form/formContainers',templateShareable:true}"
+            >
+                <!-- <form:title>
+                    <core:Title text="{template>title}" />
+                </form:title> -->
+                <!-- <form:toolbar>
+                    <Toolbar>
+                        <Title text="Tender and Offer Details" />
+                    </Toolbar>
+                </form:toolbar> -->
+                <form:layout>
+                    <form:ResponsiveGridLayout
+                        labelSpanXL="{template>layout/labelSpanXL}"
+                        labelSpanL="{template>layout/labelSpanL}"
+                        labelSpanM="{template>layout/labelSpanM}"
+                        labelSpanS="{template>layout/labelSpanS}"
+                        adjustLabelSpan="{template>layout/adjustLabelSpan}"
+                        emptySpanXL="{template>layout/emptySpanXL}"
+                        emptySpanL="{template>layout/emptySpanL}"
+                        emptySpanM="{template>layout/emptySpanM}"
+                        emptySpanS="{template>layout/emptySpanS}"
+                        columnsXL="{template>layout/columnsXL}"
+                        columnsL="{template>layout/columnsL}"
+                        columnsM="{template>layout/columnsM}"
+                        singleContainerFullSize="{template>layout/singleContainerFullSize}"
+                    />
+                </form:layout>
+                <form:formContainers>
+                    <form:FormContainer
+                        formElements="{path:'template>formElements',templateShareable:true}"
+                    >
+                        <form:formElements>
+                            <form:FormElement
+                                visible="{template>visible}"
+                                label="{template>label}"
+                                fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
+                            >
+                                <!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+                            </form:FormElement>
+                        </form:formElements>
+                    </form:FormContainer>
+                </form:formContainers>
+            </form:Form>
         </content>
     </Panel>
 </core:FragmentDefinition>
