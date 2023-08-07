@@ -48,7 +48,8 @@ sap.ui.define([
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
 				priceCondFoc: [],
-				priceCondPriceWithFoc: []
+				priceCondPriceWithFoc: [],
+				priceCondDiscountWithFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -370,6 +371,32 @@ sap.ui.define([
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
 		},
 
+		onDiscountWithFOCFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesDiscountWithFOCSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesDiscountWithFOCSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
+			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.invalidateEntityType([
+				"PriceConditionDiscountWithFOCView"
+			]);
+			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			this._refreshOfferProductTable();
+		},
+
+		onDiscountWithFOCFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+		},
+
 		onPricingFormEditBtnPress: function(event){
 			const conditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			this.rebasePrice(conditonType);
@@ -533,6 +560,9 @@ sap.ui.define([
 				case "pricewithfoc":
 					this.calculatePriceWithFOCConditionType({property, value, context});
 					break;
+				case "discountwithfoc":
+					this.calculateDiscountWithFOCConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -594,6 +624,30 @@ sap.ui.define([
 			let netPrice = netOfferPrice * (1 - deductions);
 
 			context.getModel().setProperty("Discount", discount, context);
+			context.getModel().setProperty("NetPrice", netPrice, context);
+			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+			
+			this.validatePriceWithFOCForm(context, { offerPrice });
+		},
+		
+		/**
+		 * Calculate discount with FOC condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculateDiscountWithFOCConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			priceObj.CurrentBasePrice = Math.trunc(priceObj.CurrentBasePrice*100) / 100; // Truncate number to two decimal places without rounding. For correct rounding
+			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(2) : priceObj.Discount;
+			let offerPrice = priceObj.CurrentBasePrice * (1 - discount);
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let netPrice = netOfferPrice * (1 - deductions);
+
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			

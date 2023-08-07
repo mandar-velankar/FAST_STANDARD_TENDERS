@@ -54,7 +54,8 @@ sap.ui.define([
 				"AwardedProduct",
 				"FreeGoodsOther",
 				"Approvals",
-				"Competitors"
+				"Competitors",
+				"Deliveries"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -96,6 +97,9 @@ sap.ui.define([
 				"PriceConditionPriceWithFOCView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionDiscountWithFOCView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
@@ -116,6 +120,9 @@ sap.ui.define([
 				},
 				"CompetitorResultsTableView": {
 					groupId: "Competitors"
+				},
+				"DeliveryTrackingDetailView":{
+					groupId: "Deliveries"
 				}
 			});
 		},
