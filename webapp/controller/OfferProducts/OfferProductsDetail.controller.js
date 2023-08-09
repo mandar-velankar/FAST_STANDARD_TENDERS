@@ -47,9 +47,7 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
-				priceCondFoc: [],
-				priceCondPriceWithFoc: [],
-				priceCondDiscountWithFoc: []
+				priceCondFoc: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -348,7 +346,7 @@ sap.ui.define([
 		onPriceWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
-			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesPriceWithFOCSuccess.bind(this),
@@ -358,7 +356,7 @@ sap.ui.define([
 
 		_onSubmitChangesPriceWithFOCSuccess: function(res){
 			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
-			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
 			this.invalidateEntityType([
 				"PriceConditionPriceWithFOCView"
 			]);
@@ -368,13 +366,13 @@ sap.ui.define([
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
 		},
 
 		onDiscountWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
-			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesDiscountWithFOCSuccess.bind(this),
@@ -384,7 +382,7 @@ sap.ui.define([
 
 		_onSubmitChangesDiscountWithFOCSuccess: function(res){
 			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
-			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
 			this.invalidateEntityType([
 				"PriceConditionDiscountWithFOCView"
 			]);
@@ -394,7 +392,7 @@ sap.ui.define([
 
 		onDiscountWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondDiscountWithFoc");
+			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
 		},
 
 		onPricingFormEditBtnPress: function(event){
@@ -648,6 +646,7 @@ sap.ui.define([
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let netPrice = netOfferPrice * (1 - deductions);
 
+			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
@@ -723,10 +722,10 @@ sap.ui.define([
 					target: target,
 					processor: this.getView().getModel()
 				}));
-				this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPriceWithFoc");
+				this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
 			}else if(!isOfferPriceHigher && errorMessage){
 				this.oMessageManager.removeMessages(errorMessage);
-				this.removeMessages(errorMessage, "priceCondPriceWithFoc");
+				this.removeMessages(errorMessage, "priceCondPrice");
 			}
 		},
 
@@ -819,8 +818,26 @@ sap.ui.define([
 		},
 
 
+		/**
+		 * Event handler for changes in the price condition.
+		 *
+		 * @param {Event} event - The event object representing the change.
+		 * @returns {void}
+		 */
 		onPriceConditionChange: function(event){
-			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			// Cancels any pending changes for specified entity type.
+			// this is needed to make sure we delete old/not saved changes when changing the ConditionType
+			// Tip: when you add a new condition type make sure to add it here as well
+			this.cancelPendingChanges(
+				[
+					"idOfferPrice", 
+					"PriceConditionPriceView",
+					"PriceConditionDiscountView",
+					"PriceConditionDiscountWithFOCView",
+					"PriceConditionPriceWithFOCView"
+				], 
+				"priceCondPrice"
+			);
 			this.loadPriceCondition().then(this.onLoadPriceConditionSuccess.bind(this));
 		},
 
