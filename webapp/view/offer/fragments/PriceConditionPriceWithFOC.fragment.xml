@@ -14,10 +14,10 @@
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"
-					text="{= ${messages>/priceCondPriceWithFoc}.length }"
-					visible="{= ${messages>/priceCondPriceWithFoc}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
+					text="{= ${messages>/priceCondPrice}.length }"
+					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
 					type="Emphasized"
-					press="onMessagePopoverPress($event, 'priceCondPriceWithFoc')" 
+					press="onMessagePopoverPress($event, 'priceCondPrice')" 
 				/>
 				<Button
 					icon="sap-icon://edit"

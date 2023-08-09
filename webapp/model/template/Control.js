@@ -69,14 +69,15 @@ sap.ui.define(["sap/m/Text",
               filters: filters,
               templateShareable: true
           });
-          const changeFunction = StandardSingletonService[`onChange${this.valueHelp.title}`];
-          if (changeFunction) {
-            control.attachChange(changeFunction, StandardSingletonService);
-          }
         } else {
           this.valueHelp.staticValues.forEach(item => {
             control.addItem(item.generateItem());
           })
+        }
+
+        const changeFunction = StandardSingletonService[`onChange${this.valueHelp.title}`];
+        if (changeFunction) {
+          control.attachChange(changeFunction, StandardSingletonService);
         }
 
         if(this.properties.find(prop => prop.name === 'selectedKey')){
