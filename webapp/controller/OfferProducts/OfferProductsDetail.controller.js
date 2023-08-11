@@ -578,7 +578,7 @@ sap.ui.define([
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = Math.trunc(parseFloat(offerPrice) * (1 - deductions) * 100) / 100;
+			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
@@ -597,7 +597,7 @@ sap.ui.define([
 			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let offerPrice = parseFloat(priceObj.CurrentBasePrice) * (1 - discount);
-			let netPrice = parseFloat(offerPrice) * (1 - deductions);
+			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
@@ -616,7 +616,7 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
-			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
+			let netOfferPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
@@ -642,7 +642,7 @@ sap.ui.define([
 			priceObj.CurrentBasePrice = this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);; // Truncate number to two decimal places without rounding. For correct rounding
 			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(2) : priceObj.Discount;
 			let offerPrice = priceObj.CurrentBasePrice * (1 - discount);
-			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
+			let netOfferPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
 
