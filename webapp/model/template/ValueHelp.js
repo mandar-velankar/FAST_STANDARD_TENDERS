@@ -6,9 +6,11 @@ sap.ui.define([
   "sap/m/TableSelectDialog", 
   "sap/m/ColumnListItem",
   "sap/m/Column",
+  "sap/m/Token",
   "sap/m/Text", 
-  "sap/ui/model/Filter"
-], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Text, Filter) {
+  "sap/ui/model/Filter",
+  "sap/ui/model/FilterOperator"
+], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -36,17 +38,37 @@ sap.ui.define([
         };
       },
       handleCloseValueHelp: function (oEvent,originalInputField) {
-        const oParam = oEvent.getParameter("selectedItem")
-        const selectedItem = oParam.getBindingContext().getObject();
+        if(originalInputField instanceof sap.m.MultiInput){
+          let aContexts = oEvent.getParameter("selectedContexts");
+            if (aContexts && aContexts.length) {
+              let inputTokens = []; 
+              aContexts.map(function (oContext) {
+                const oToken = new Token({
+                  text: oContext.getObject().Name,
+                  key: oContext.getObject().ID
+                });
+                inputTokens.push(oToken);
+              });
+            
+            //originalInputField.setTokens(inputTokens);
+            const regions = inputTokens.map(inputToken => inputToken.getText()).join(",");
+            const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
+            originalInputField.getModel().setProperty(path, regions);
+            
+          }
+        }
+        else{
+          const oParam = oEvent.getParameter("selectedItem");
+          const selectedItem = oParam.getBindingContext().getObject();
+          if (this.selectedField && this.selectedField.length > 0) {
+            this.selectedField.forEach(field => {
+                const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
+                originalInputField.getModel().setProperty(path, selectedItem[field.Name]); 
 
-        if (this.selectedField && this.selectedField.length > 0) {
-          this.selectedField.forEach(field => {
-              const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
-              originalInputField.getModel().setProperty(path, selectedItem[field.Name]);
-
-              const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
-              originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]);
-          })
+                const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
+                originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]); 
+            })
+          }
         }
       },
       onHandleValueHelpRequest: async function (oEvent) {
@@ -58,7 +80,7 @@ sap.ui.define([
         // create value help dialog
         this.valueHelpTableSelectDialog = new TableSelectDialog({
           title: sTitle,
-          multiSelect: false,
+          multiSelect: oSource instanceof sap.m.MultiInput ? true : false,
           contentWidth: '250px',
           items: {
             path: sEntityPath,
@@ -87,7 +109,7 @@ sap.ui.define([
                 let path;
                 switch (control.type) {
                   case 'Text':
-                    path = 'text';
+                    path = properties?.text?.replace(/{|}/g, '');
                     break;
                   case 'Input':
                     path = 'value';
