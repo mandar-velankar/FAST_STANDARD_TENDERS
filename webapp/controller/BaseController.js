@@ -4,10 +4,11 @@ sap.ui.define([
 	"../model/formatter",
 	"../model/datatypes/CustomPercentageType",
 	"../model/datatypes/CustomNumberType",
+	"../model/datatypes/CustomDecimalType",
 	"sap/ui/core/Fragment",
 	"sap/m/MessagePopover",
 	"sap/m/MessageItem"
-], function (Controller, History, formatter, CustomPercentageType, CustomNumberType, Fragment, MessagePopover, MessageItem) {
+], function (Controller, History, formatter, CustomPercentageType, CustomNumberType, CustomDecimalType, Fragment, MessagePopover, MessageItem) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
@@ -16,7 +17,8 @@ sap.ui.define([
 
 		customTypes: {
 			percentage: CustomPercentageType,
-			number: CustomNumberType
+			number: CustomNumberType,
+			decimal: CustomDecimalType
 		},
 
 		/**
