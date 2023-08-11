@@ -386,7 +386,10 @@ sap.ui.define([
 			this.invalidateEntityType([
 				"PriceConditionDiscountWithFOCView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
+			} 
 			this._refreshOfferProductTable();
 		},
 
