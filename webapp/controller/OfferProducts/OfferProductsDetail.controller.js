@@ -981,7 +981,25 @@ sap.ui.define([
 			// refresh priceWithFOCForm to get the newly calculated values
 			const pricingForm = this.byId("idPricingForm");
 			pricingForm.getElementBinding().refresh(true);
+
+			const pricingFormBinding = pricingForm.getElementBinding();
+            // pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
 		},
+
+		onPricingFormDataReceivedAfterFOCSet: function(evt){
+            debugger;
+            const netPrice = evt.getParameter("data").NetPrice;
+            const path =this.getModel().createKey("/PT_TMBDPR", {
+				OfferID: this.sOfferId,
+				ProductCode: this.productId,
+				Active: 1,
+				ActiveTier: 0,
+				LotID: 1
+            });
+            const context = this.getModel().getContext(path);
+            this.getModel().setProperty("NetPrice", netPrice, context);
+			this.getModel().sumbitChanges({ groupId: "BidProduct" })
+        },
 
 		onButtonCancelFocOtherProductsPress: async function(event){
 			const multiInput = this.byId("idFOCMultiInput");
