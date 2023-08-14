@@ -86,6 +86,7 @@ sap.ui.define([
 			});
 
 			this.onBeforeShow(this.sObjectId, this.sOfferId);
+			this.getProductPrice(this.sOfferId, this.productId);
 
 			this.getModel().metadataLoaded().then(function () {
 				// var sObjectPath = this.getModel().createKey("PublicSalesOpportunities", {
@@ -461,7 +462,6 @@ sap.ui.define([
 						new sap.ui.model.Filter("ProductCode", sap.ui.model.FilterOperator.EQ, this.productId),
 					]
 			});
-
 			this.defaultModel.refresh(true);
 		},
 
@@ -983,7 +983,9 @@ sap.ui.define([
 			pricingForm.getElementBinding().refresh(true);
 
 			const pricingFormBinding = pricingForm.getElementBinding();
-            // pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+            pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+
+			// this._refreshOfferProductTable();
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: function(evt){
@@ -998,8 +1000,29 @@ sap.ui.define([
             });
             const context = this.getModel().getContext(path);
             this.getModel().setProperty("NetPrice", netPrice, context);
-			this.getModel().sumbitChanges({ groupId: "BidProduct" })
+			this.getModel().submitChanges({ groupId: "BidProduct" });
+
         },
+
+		getProductPrice: async function (offerId, productCode) {
+			const path = this.defaultModel.createKey("/PT_TMBDPR", {
+				OfferID: offerId,
+				ProductCode: productCode,
+				Active: 1,
+				ActiveTier: 0,
+				LotID: 1
+            }); 
+			return new Promise((resolve, reject) => {
+				this.getModel().read(path, {
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
 
 		onButtonCancelFocOtherProductsPress: async function(event){
 			const multiInput = this.byId("idFOCMultiInput");
