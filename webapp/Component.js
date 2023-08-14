@@ -55,8 +55,7 @@ sap.ui.define([
 				"FreeGoodsOther",
 				"Approvals",
 				"Competitors",
-				"Deliveries",
-				"BidProduct"
+				"Deliveries"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -124,9 +123,6 @@ sap.ui.define([
 				},
 				"DeliveryTrackingDetailView":{
 					groupId: "Deliveries"
-				},
-				"PT_TMBDPR": {
-					groupId: "BidProduct"
 				}
 			});
 		},

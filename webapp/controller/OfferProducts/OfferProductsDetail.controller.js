@@ -462,7 +462,7 @@ sap.ui.define([
 						new sap.ui.model.Filter("ProductCode", sap.ui.model.FilterOperator.EQ, this.productId),
 					]
 			});
-			this.defaultModel.refresh(true);
+			// this.defaultModel.refresh(true);
 		},
 
 		/**
@@ -985,11 +985,9 @@ sap.ui.define([
 			const pricingFormBinding = pricingForm.getElementBinding();
             pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
 
-			// this._refreshOfferProductTable();
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: function(evt){
-            debugger;
             const netPrice = evt.getParameter("data").NetPrice;
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
@@ -1000,8 +998,9 @@ sap.ui.define([
             });
             const context = this.getModel().getContext(path);
             this.getModel().setProperty("NetPrice", netPrice, context);
-			this.getModel().submitChanges({ groupId: "BidProduct" });
+			this.getModel().submitChanges();
 
+			this._refreshOfferProductTable();
         },
 
 		getProductPrice: async function (offerId, productCode) {
