@@ -392,7 +392,15 @@ sap.ui.define([
 				this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
 			} 
 			this._refreshOfferProductTable();
+			this.refreshPricingForm();
+			
 		},
+
+		refreshPricingForm: function(){
+			const pricingForm = this.byId("idPricingForm");
+			pricingForm.getElementBinding().refresh();
+		},
+
 
 		onDiscountWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
