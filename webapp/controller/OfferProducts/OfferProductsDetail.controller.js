@@ -470,6 +470,13 @@ sap.ui.define([
 						new sap.ui.model.Filter("ProductCode", sap.ui.model.FilterOperator.EQ, this.productId),
 					]
 			});
+
+			// refresh offer total
+			const path = this.getOwnerComponent().getModel().createKey("/OfferProductsTotalForOffer", {
+				OfferID: this.sOfferId
+			});
+			this.getOwnerComponent().getModel().read(path);
+
 			// this.defaultModel.refresh(true);
 		},
 
