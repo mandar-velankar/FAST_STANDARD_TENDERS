@@ -944,5 +944,23 @@ sap.ui.define([
 				this.getModel("ui").setProperty("/OfferProductTable/instituteDistributorBrandProduct", data.results);
 			})
 		},
+
+		onMenuCopyOfferItemSelected: function(evt){
+			const selectedItem = evt.getParameter("item");
+			const selectedItemText = this.formatter.toUpperCamelCase(selectedItem.getText()).toLowerCase();
+			switch(selectedItemText){
+				case "revisedoffer": return this.createRevisedOffer(evt);
+				case "continuedoffer": return this.createContinuedOffer(evt);
+			}
+		},
+
+		createRevisedOffer: function(evt){
+			debugger;
+		},
+
+		createContinuedOffer: function(evt){
+			debugger;
+		}
+
 	});
 });
