@@ -955,11 +955,34 @@ sap.ui.define([
 		},
 
 		createRevisedOffer: function(evt){
-			debugger;
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID,"type": "revisedoffer"},
+				success: this.onOfferCopySuccess,
+				error: this.onOfferCopyFail
+			});
+
+			// requestHandle.contextCreated().then(function(oContext) {
+			// 	// oView.setBindingContext(oContext);
+			// 	debugger
+		  	// });
 		},
 
 		createContinuedOffer: function(evt){
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID,"type": "continuedoffer"},
+				success: this.onOfferCopySuccess,
+				error: this.onOfferCopyFail
+			});
+		},
+
+		onOfferCopySuccess: function(data){
 			debugger;
+		},
+
+		onOfferCopyFail: function(error){
+			console.error("Offer copy failed:", error);
 		}
 
 	});
