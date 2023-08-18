@@ -3,11 +3,12 @@ sap.ui.define(["sap/m/Text",
                "../BaseObject", 
                "./ControlPoperty", 
                "sap/m/Input", 
+               "sap/m/MultiInput",
                "sap/m/DatePicker", 
                "./ValueHelp",
                "../../service/StandardSingletonService",
                "sap/ui/model/Filter"
-], function (Text, BaseObject, ControlProperty, Input, DatePicker, ValueHelp, StandardSingletonService, Filter) {
+], function (Text, BaseObject, ControlProperty, Input, MultiInput, DatePicker, ValueHelp, StandardSingletonService, Filter) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (parentId,data) {
@@ -47,7 +48,7 @@ sap.ui.define(["sap/m/Text",
       const props = this.getPropertiesAsObject();
       // new Text();
       const control = new ui5Control(props);
-      if (this.valueHelp && this.type === "Input") {
+      if (this.valueHelp && (this.type === "Input" || this.type === "MultiInput")) {
         control.attachValueHelpRequest(this.valueHelp.onHandleValueHelpRequest, this.valueHelp);
       } 
       
@@ -69,14 +70,15 @@ sap.ui.define(["sap/m/Text",
               filters: filters,
               templateShareable: true
           });
-          const changeFunction = StandardSingletonService[`onChange${this.valueHelp.title}`];
-          if (changeFunction) {
-            control.attachChange(changeFunction, StandardSingletonService);
-          }
         } else {
           this.valueHelp.staticValues.forEach(item => {
             control.addItem(item.generateItem());
           })
+        }
+
+        const changeFunction = StandardSingletonService[`onChange${this.valueHelp.title}`];
+        if (changeFunction) {
+          control.attachChange(changeFunction, StandardSingletonService);
         }
 
         if(this.properties.find(prop => prop.name === 'selectedKey')){

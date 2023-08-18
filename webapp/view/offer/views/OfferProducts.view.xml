@@ -22,7 +22,18 @@
 					<Title text="{template>title}"/>
 					<ToolbarSpacer />
 					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
-					<Button text="Copy Offer" icon="sap-icon://duplicate" press="onCopyOffer" visible="{= !${ui>/OfferForm/editMode} }" />
+					<MenuButton 
+						text="Copy Offer" 
+						visible="{= !${ui>/OfferForm/editMode} }" 
+						icon="sap-icon://duplicate"
+						class="sapUiSmallMarginTop">
+						<menu>
+							<Menu itemSelected="onMenuCopyOfferItemSelected">
+								<MenuItem text="Revised Offer" />
+								<MenuItem text="Continued Offer" />
+							</Menu>
+						</menu>
+					</MenuButton>
 					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" visible="{= !${ui>/OfferForm/editMode} }" type="Reject"/>
 					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferFormEditBtnPress" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<Button
