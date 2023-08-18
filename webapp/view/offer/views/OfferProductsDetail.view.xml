@@ -133,7 +133,7 @@
                         items = "{/PriceConditionClassification}"
                         selectedKey="{st>/SelectedPriceConditionType}"
                         change="onPriceConditionChange"
-                        enabled="{= !${ui>/PricingForm/editMode} &amp;&amp; !${ui>/FocForm/editMode} }"
+                        enabled="{ui>/PricingForm/editMode}"
                     >
                         <core:Item key="{ConditionType}" text="{
                             path: 'ConditionType',

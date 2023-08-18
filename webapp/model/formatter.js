@@ -74,11 +74,20 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "Price with FOC";
 					break;
+				case 'discountwithfoc'	:
+					stringToReplace	= originalString;
+					replacementString = "Discount with FOC";
+					break;
 				default:
 					return originalString;
 			}
 			const regex = new RegExp(stringToReplace, 'gi');
 			return originalString.replace(regex, replacementString);
+		},
+
+		truncToTwoDecimalPlaces: function(number) {
+			const factor = 100; // 10^2 for two decimal places
+			return Math.trunc(number * factor) / factor;
 		}
 	};
 });

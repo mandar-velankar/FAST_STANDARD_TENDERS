@@ -24,6 +24,8 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
                         return this.readDetailDetailOfferProductConfig(keys);
                     case 'DETAIL-AWARDEDRODUCTDETAIL':
                         return this.readDetailDetailAwardedProductConfig(keys);
+                    case 'DETAIL-DELIVERYTRACKINGDETAIL':
+                        return this.readDetailDetailDeliveryTrackingConfig(keys);
                     default:
                         break;
                 }
@@ -36,6 +38,9 @@ sap.ui.define(["sap/ui/model/json/JSONModel", "sap/ui/model/odata/v4/ODataModel"
             },
             readDetailDetailOfferProductConfig: async function (keys) {
                 return this.updateConfig("detailDetailOfferProduct",await this.templateService.getFormConfig(keys || {}));
+            },
+            readDetailDetailDeliveryTrackingConfig: async function (keys) {
+                return this.updateConfig("detailDetailDeliveryTracking",await this.templateService.getFormConfig(keys || {}));
             },
             readDetailDetailAwardedProductConfig: async function (keys) {
                 return this.updateConfig("detailDetailAwardedProduct",await this.templateService.getViewConfig(keys || {}));

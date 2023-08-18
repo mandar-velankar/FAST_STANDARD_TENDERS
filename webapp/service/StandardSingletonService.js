@@ -34,7 +34,24 @@ sap.ui.define([
 				new Filter("Outcome",FilterOperator.EQ, source.getSelectedKey())
 			]
             reasonItemBinding.filter(orFilters);
-        }
+        },
+
+        onChangeSample: function (event) {
+            const source = event.getSource();
+            const itemBinding = source.getParent().getParent().getAggregation("formElements")?.find(el => el.getAggregation("label") === "Sample Quantity")?.getAggregation("fields")[0];
+            if(itemBinding){
+                source.getSelectedKey() === 'No' || source.getSelectedKey() == '' ? itemBinding.setProperty("enabled", false) : itemBinding.setProperty("enabled", true);
+            }     
+        },
+
+        onChangeProductIncluded: function (event) {
+            const source = event.getSource();
+            const itemBinding = source.getParent().getParent().getAggregation("formElements")?.find(el => el.getAggregation("label") === "Decline Comment")?.getAggregation("fields")[0];
+            if(itemBinding){
+                source.getSelectedKey() === '1'? itemBinding.setProperty("enabled", false) : itemBinding.setProperty("enabled", true);
+            }
+        },
+
     });
 
     
