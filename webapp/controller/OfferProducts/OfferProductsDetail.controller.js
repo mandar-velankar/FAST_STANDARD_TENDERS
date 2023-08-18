@@ -143,7 +143,7 @@ sap.ui.define([
 					hasFocPriceCondition: false,
 					editMode: false,
 					hasMainPriceCondition: false,
-					UOM: "TEst"
+					UOM: ""
 				},
 				PriceWithFOCForm:{
 					editMode: false,
