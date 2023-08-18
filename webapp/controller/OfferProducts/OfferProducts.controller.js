@@ -944,5 +944,46 @@ sap.ui.define([
 				this.getModel("ui").setProperty("/OfferProductTable/instituteDistributorBrandProduct", data.results);
 			})
 		},
+
+		onMenuCopyOfferItemSelected: function(evt){
+			const selectedItem = evt.getParameter("item");
+			const selectedItemText = this.formatter.toUpperCamelCase(selectedItem.getText()).toLowerCase();
+			switch(selectedItemText){
+				case "revisedoffer": return this.createRevisedOffer(evt);
+				case "continuedoffer": return this.createContinuedOffer(evt);
+			}
+		},
+
+		createRevisedOffer: function(evt){
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID,"type": "revisedoffer"},
+				success: this.onOfferCopySuccess,
+				error: this.onOfferCopyFail
+			});
+
+			// requestHandle.contextCreated().then(function(oContext) {
+			// 	// oView.setBindingContext(oContext);
+			// 	debugger
+		  	// });
+		},
+
+		createContinuedOffer: function(evt){
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID,"type": "continuedoffer"},
+				success: this.onOfferCopySuccess,
+				error: this.onOfferCopyFail
+			});
+		},
+
+		onOfferCopySuccess: function(data){
+			debugger;
+		},
+
+		onOfferCopyFail: function(error){
+			console.error("Offer copy failed:", error);
+		}
+
 	});
 });
