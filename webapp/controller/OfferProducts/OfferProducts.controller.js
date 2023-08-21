@@ -958,8 +958,8 @@ sap.ui.define([
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
 				urlParameters: {"offerID": this.offerID,"type": "revisedoffer"},
-				success: this.onOfferCopySuccess,
-				error: this.onOfferCopyFail
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
 			});
 
 			// requestHandle.contextCreated().then(function(oContext) {
@@ -972,17 +972,58 @@ sap.ui.define([
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
 				urlParameters: {"offerID": this.offerID,"type": "continuedoffer"},
-				success: this.onOfferCopySuccess,
-				error: this.onOfferCopyFail
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
 			});
 		},
 
-		onOfferCopySuccess: function(data){
-			debugger;
+		onOfferCopySuccess: function(offerID){
+			MessageToast.show(offerID + " created");
+			this.refreshMasterTable().then(()=>{
+				this.navToOffer(offerID)
+			});
+		},
+
+		navToOffer: function (offerID) {
+			const bReplace = !Device.system.phone;
+			// set the layout property of FCL control to show two columns
+			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			
+			// const path =this.getModel().createKey("/PT_TMBDPR", {
+			// 	OfferID: this.sOfferId,
+			// 	ProductCode: this.productId,
+			// 	Active: 1,
+			// 	ActiveTier: 0,
+			// 	LotID: 1
+            // });
+            // const context = this.getModel().getContext(path);
+			// const item = context.getObject()
+			// this.getModel("st").setProperty("/SelectedTender", item);
+			this.getRouter().navTo("objectDetailOffer", {
+				countryCode: this.countryCode,
+				objectId: this.objectId, 
+				offerId: offerID,
+			});
+		},
+
+		refreshMasterTable: function () {
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read("/TenderMasterView", {
+					filters: [
+						new Filter("CountryCode", "EQ", this.countryCode)
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function(err){
+						reject(err)
+					}
+				});
+			});
 		},
 
 		onOfferCopyFail: function(error){
-			console.error("Offer copy failed:", error);
+			console.error("Copying the offer was not possible. Reason :", error);
 		}
 
 	});
