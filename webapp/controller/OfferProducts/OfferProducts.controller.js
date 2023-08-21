@@ -961,11 +961,6 @@ sap.ui.define([
 				success: this.onOfferCopySuccess.bind(this),
 				error: this.onOfferCopyFail.bind(this)
 			});
-
-			// requestHandle.contextCreated().then(function(oContext) {
-			// 	// oView.setBindingContext(oContext);
-			// 	debugger
-		  	// });
 		},
 
 		createContinuedOffer: function(evt){
@@ -980,25 +975,13 @@ sap.ui.define([
 		onOfferCopySuccess: function(offerID){
 			MessageToast.show(offerID + " created");
 			this.refreshMasterTable().then(()=>{
+				this.defaultModel.refresh(true);
 				this.navToOffer(offerID)
 			});
 		},
 
 		navToOffer: function (offerID) {
-			const bReplace = !Device.system.phone;
-			// set the layout property of FCL control to show two columns
-			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-			
-			// const path =this.getModel().createKey("/PT_TMBDPR", {
-			// 	OfferID: this.sOfferId,
-			// 	ProductCode: this.productId,
-			// 	Active: 1,
-			// 	ActiveTier: 0,
-			// 	LotID: 1
-            // });
-            // const context = this.getModel().getContext(path);
-			// const item = context.getObject()
-			// this.getModel("st").setProperty("/SelectedTender", item);
+
 			this.getRouter().navTo("objectDetailOffer", {
 				countryCode: this.countryCode,
 				objectId: this.objectId, 
