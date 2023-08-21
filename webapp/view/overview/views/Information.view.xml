@@ -33,6 +33,7 @@
 					text="Edit"
 					press=".onOverviewTenderFormEditBtnPress"
 					visible="{= !${ui>/OverviewForm/editMode} }"
+					enabled = "{= ${em>/Detail/OverviewTab/OverviewForm/editMode}}"
 				/>
 				<Button
 					icon="sap-icon://save"
@@ -55,7 +56,7 @@
 					enabled="{= ${ui>/enableApprovalButton} }"
 				/>
 
-				<MenuButton id="idDownloadAttachmentButton" text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}" class = "sapUiSmallMarginTop">
+				<MenuButton id="idDownloadAttachmentButton" text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode}}" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">
 					<menu>
 						<Menu itemSelected="onMenuAction">
 							<MenuItem id="btnWordDownload" text="Word" icon="sap-icon://doc-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
@@ -83,7 +84,7 @@
 					text="{i18n>SubmitQuotation}"
 					icon="sap-icon://sys-enter"
 					press=".onSubmitQuotation"
-					enabled="true"
+					enabled = "{= ${em>/Detail/OverviewTab/enableSetAsSubmited}}"
 					visible="{= !${ui>/OverviewForm/editMode}}"
 				/>
 					

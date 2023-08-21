@@ -15,7 +15,7 @@
 					icon="sap-icon://edit"
 					text="Edit"
 					press=".onButtonFocFormEditPress"
-					enabled="{ui>/FocForm/hasMainPriceCondition}"
+					enabled="{= ${ui>/FocForm/hasMainPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"
 					visible="{= !${ui>/FocForm/editMode} }"
 				/>
 				<Button
