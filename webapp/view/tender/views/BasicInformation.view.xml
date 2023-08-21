@@ -34,6 +34,7 @@
 						text="Edit"
 						press=".onTenderFormEditBtnPress"
 						visible="{= !${ui>/TenderForm/editMode} }"
+						enabled="{= ${em>/Detail/TenderTab/TenderForm/editMode}}"
 					/>
 					<Button
 						id="idTenderFormSaveBtn"
@@ -105,6 +106,7 @@
 							text="Edit"
 							press=".onAwardCriteriaEditBtnPress"
 							visible="{= !${ui>/AwardCriteria/editMode} }"
+							enabled="{= ${em>/Detail/TenderTab/TenderForm/editMode}}"
 						/>
 						<Button
 							id="idAwardCriteriaSaveBtn"
