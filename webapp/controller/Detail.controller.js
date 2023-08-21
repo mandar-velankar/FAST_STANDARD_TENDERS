@@ -9,8 +9,9 @@ sap.ui.define([
 	"sap/ui/core/mvc/View",
 	"sap/ui/core/mvc/ViewType",
 	"sap/ui/core/routing/HashChanger",
-	"sap/ui/model/Context"
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context) {
+	"sap/ui/model/Context",
+	"sap/ui/core/EventBus"
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context, EventBus) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -51,7 +52,12 @@ sap.ui.define([
 			this.setModel(oViewModel, "detailView");
 			this.setModel(messagesModel, "messages");
 
+			this.getOwnerComponent().getEventBus().subscribe("masterChannel", "statusChanged", this.handleStatusChange, this);
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
+		},
+
+		handleStatusChange: function(channel, event, data) {
+			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus);
 		},
 
 		/* =========================================================== */
@@ -89,6 +95,7 @@ sap.ui.define([
 				select:(event)=>this.onTabSelect(event),
 				selectedKey:"{st>/selectedTab}"
 			});
+			this.iconTabBar = iconTabBar;
 			this.byId("detailPage").setContent(iconTabBar)
 		},
 		tabsFactory: function (tab,idx){
@@ -100,10 +107,12 @@ sap.ui.define([
 				offerId:this.sOfferId,
 				countryCode:this.sCountryCode
 			};
+			const isVisible = this.getTabVisibility(tab.title);
 
 			const iconTabFilter = new IconTabFilter({
 				text: tab.title,
-				key: tab.title
+				key: tab.title,
+				visible: isVisible
 			}); 
 
 			const viewConfig = {
@@ -135,6 +144,9 @@ sap.ui.define([
 			this.views[viewName].setBindingContext(context,"template");
 			this.views[viewName].getController().onBeforeShow && this.views[viewName].getController().onBeforeShow(tab,data);	
 			tab.insertContent(this.views[viewName]);
+			const tabName = tab.getProperty("text");
+			const isVisible = this.getTabVisibility(tabName);
+			tab.setProperty("visible", isVisible);
 		},
 
 		
@@ -158,12 +170,16 @@ sap.ui.define([
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.stState = this.getOwnerComponent().getModel("st");
 			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
 
 			this.setSelectedTabKey();
 
 			this.getModel().metadataLoaded().then( async function() {
+				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId) || "";
+				this.offerStatus = OfferStatus === "" ? OfferStatus : OfferStatus.STATUS
 				!this.selectedOfferHasBinding() && this._bindView();
+				this.updateVisibilityOfTabs(this.iconTabBar, this.offerStatus);
 			}.bind(this));
 		},
 

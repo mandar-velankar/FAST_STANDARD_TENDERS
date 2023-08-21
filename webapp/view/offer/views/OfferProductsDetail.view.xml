@@ -64,7 +64,14 @@
                             <Toolbar>
                                 <Title text="{template>title}"/>
                                 <ToolbarSpacer />
-                                <Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferDetailFormEditBtnPress" visible="{= !${ui>/ProductForm/editMode} }"/>
+                                <Button 
+                                    id="editOfferButtonId" 
+                                    icon="sap-icon://edit" 
+                                    text="Edit" 
+                                    press=".onOfferDetailFormEditBtnPress" 
+                                    visible="{= !${ui>/ProductForm/editMode} }"
+                                    enabled="{= ${em>/OfferProductDetail/OfferProductInfo/editMode}}"    
+                                />
                                 <Button
                                     id="idOfferDetailFormSaveBtn"
                                     icon="sap-icon://save"
