@@ -991,6 +991,7 @@ sap.ui.define([
 
 		onOfferCopyFail: function(error){
 			console.error("Copying the offer was not possible. Reason :", error);
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
 		}
 
 	});
