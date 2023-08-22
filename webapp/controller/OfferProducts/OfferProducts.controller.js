@@ -968,11 +968,30 @@ sap.ui.define([
 			});
 		},
 
-		onOfferCopySuccess: function(offerID){
+		onOfferCopySuccess: async function(offerID){
 			this.navToOffer(offerID);
-			// this.refreshOfferTab(this.objectId, offerID);
-			this.defaultModel.refresh(true);
-			MessageToast.show(offerID + " created");
+			this.refreshMasterTable(offerID).then(()=>{
+				MessageToast.show(offerID + " created");
+			});	
+		},
+		
+		refreshMasterTable: async function (offerID) {
+			const path = this.getModel().createKey("/TenderMasterView", {
+				TenderID: this.objectId,
+				OfferID: offerID
+			});
+			const model = this.getModel();
+			return new Promise((resolve, reject) => {
+				this.getModel().read(path, {
+					success: function (res) {
+						model.refresh();
+						resolve(res);
+					},
+					error: function(err){
+						reject(err);
+					}
+				});
+			});
 		},
 
 		refreshOfferTab: function(tenderID, offerID){
