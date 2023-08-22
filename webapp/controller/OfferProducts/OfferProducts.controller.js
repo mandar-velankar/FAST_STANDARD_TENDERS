@@ -73,12 +73,8 @@ sap.ui.define([
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
 		},
 		_onObjectMatched: async function (oEvent) {
-			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
-			this.countryCode = oEvent.getParameter("arguments").countryCode;
-			this.tenderId = oEvent.getParameter("arguments").objectId;
-			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.offerID = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 		},
@@ -973,35 +969,23 @@ sap.ui.define([
 		},
 
 		onOfferCopySuccess: function(offerID){
+			this.navToOffer(offerID);
+			this.refreshOfferTab(this.objectId, offerID);
+			this.defaultModel.refresh(true);
 			MessageToast.show(offerID + " created");
-			this.refreshMasterTable().then(()=>{
-				this.defaultModel.refresh(true);
-				this.navToOffer(offerID)
-			});
+		},
+
+		refreshOfferTab: function(tenderID, offerID){
+			this._bindForm("OfferForm", tenderID, offerID);
+			this._bindTable("OfferProductsTable", tenderID, offerID);
+			this._bindText("TotalAmountOfferProducts");	
 		},
 
 		navToOffer: function (offerID) {
-
 			this.getRouter().navTo("objectDetailOffer", {
 				countryCode: this.countryCode,
 				objectId: this.objectId, 
 				offerId: offerID,
-			});
-		},
-
-		refreshMasterTable: function () {
-			return new Promise((resolve, reject) => {
-				this.defaultModel.read("/TenderMasterView", {
-					filters: [
-						new Filter("CountryCode", "EQ", this.countryCode)
-					],
-					success: function (res) {
-						resolve(res)
-					},
-					error: function(err){
-						reject(err)
-					}
-				});
 			});
 		},
 
