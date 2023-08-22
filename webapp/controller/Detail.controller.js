@@ -161,10 +161,9 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: async function (oEvent) {
-			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
-			this.sOfferId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.layout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
 			this.getModel("appView").setProperty("/layout", this.layout);
 			// this.getModel("appView").setProperty("/editable", false);

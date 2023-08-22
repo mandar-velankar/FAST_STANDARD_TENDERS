@@ -970,7 +970,7 @@ sap.ui.define([
 
 		onOfferCopySuccess: function(offerID){
 			this.navToOffer(offerID);
-			this.refreshOfferTab(this.objectId, offerID);
+			// this.refreshOfferTab(this.objectId, offerID);
 			this.defaultModel.refresh(true);
 			MessageToast.show(offerID + " created");
 		},
