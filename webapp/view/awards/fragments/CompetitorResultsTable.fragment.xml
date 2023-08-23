@@ -33,6 +33,7 @@
                             text="Edit"
                             press=".onButtonEditCompetitorPress"
                             visible="{= !${ui>/CompetitorResultsForm/editMode}}"
+                            enabled = "{= ${em>/AwardedProductDetail/CompetitorResult/editMode}}"
                         />
                         
                         <Button

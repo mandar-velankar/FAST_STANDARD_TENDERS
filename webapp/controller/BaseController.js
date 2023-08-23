@@ -7,8 +7,10 @@ sap.ui.define([
 	"../model/datatypes/CustomDecimalType",
 	"sap/ui/core/Fragment",
 	"sap/m/MessagePopover",
-	"sap/m/MessageItem"
-], function (Controller, History, formatter, CustomPercentageType, CustomNumberType, CustomDecimalType, Fragment, MessagePopover, MessageItem) {
+	"sap/m/MessageItem",
+	"sap/ui/model/json/JSONModel",
+	"../service/StandardSingletonService",
+], function (Controller, History, formatter, CustomPercentageType, CustomNumberType, CustomDecimalType, Fragment, MessagePopover, MessageItem, JSONModel, StandardSingletonService) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
@@ -184,7 +186,58 @@ sap.ui.define([
 		setMessageSection: function (entities, sectionName) {
 			const messages = this.getMessages(entities);
 			this.getModel("messages").setProperty(`/${sectionName}`, messages);
-		}
+		},
+
+		/**
+		 * Updates the visibility of tabs within an iconTabBar based on the given offer status.
+		 * The function utilizes an enablement model to determine the visibility of tabs and updates
+		 * the 'visible' property of each tab accordingly.
+		 *
+		 * @param {sap.m.IconTabBar} iconTabBar - The IconTabBar control whose tabs' visibility will be updated.
+		 * @param {string} offerStatus - The status that influences the visibility of tabs.
+		 */
+
+		updateVisibilityOfTabs: function (iconTabBar, offerStatus) {
+			this.updateEnablementModel(offerStatus);
+			if (!iconTabBar) return;
+			const tabs = iconTabBar.getAggregation("items");
+			tabs.forEach(tab => {
+				const tabName = tab.getProperty("text");
+				const isTabVisible = this.getTabVisibility(tabName);
+				tab.setProperty("visible", isTabVisible);
+			});
+		},
+
+		getTabVisibility: function (tabName) {
+			const enablementModel = this.getModel("em");
+			let isVisible = "";
+			switch (tabName) {
+				case "Tender":
+					isVisible = enablementModel.getProperty("/Detail/TenderTab/isVisible");
+					break;
+				case "Offer":
+					isVisible = enablementModel.getProperty("/Detail/OfferTab/isVisible");
+					break;
+				case "Overview":
+					isVisible = enablementModel.getProperty("/Detail/OverviewTab/isVisible");
+					break;
+				case "Awards":
+					isVisible = enablementModel.getProperty("/Detail/AwardTab/isVisible");
+					break;
+				case "Delivery Tracking":
+					isVisible = enablementModel.getProperty("/Detail/DeliveryTrackingTab/isVisible");
+					break;
+				default:
+					break;
+			}
+			return isVisible;
+		},
+
+		updateEnablementModel: async function (offerStatus) {
+			const obj = StandardSingletonService.getEnablementObject(offerStatus);
+			const enablementModel = new JSONModel(obj);
+			this.getOwnerComponent().setModel(enablementModel, 'em');
+		},
 	});
 
 });
