@@ -52,6 +52,101 @@ sap.ui.define([
             }
         },
 
+
+		/**
+		 * Generates an enablement object based on the given status.
+		 * The enablement object contains properties that control the visibility
+		 * and enablement of different tabs, buttons, and elements within an application.
+		 *
+		 * @param {string} status - The status that determines the enablement configuration.
+		 * @returns {Object} An object with properties indicating visibility and enablement settings.
+		 */
+
+        getEnablementObject: function (status) {
+
+			const isOverviewTabVisible = status === "" ? false : true;
+			const checkCopyOfferBtn = status === "Quotation Submitted" || status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
+			const isDeliveryTruckingVisible = status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
+
+			const isTenderOfferOverviewVisible = status === "Offer Created" || status === "Offer Approved" || status === "Offer Rejected" ? true : false;
+
+			const isEnabledDeleteOfferBtn = status === "Offer Created" ? true : false;
+
+			const isAwardDetailEnabled = (status === "Quotation Submitted" || status === "Results Recorded") ? true : false;
+			const checkOverviewDownloadBtn = (status === "Offer Created" || status === "Awaiting Approval" || status === "") ? false : true;
+			const checkOverviewSetAsSubmitBtn = (status === "Offer Approved") ? true : false;
+			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
+			const isCancelApprovalBtnEnabled = (status === "Awaiting Approval") ? true : false;
+
+			return {
+				Detail: {
+					TenderTab: {
+						isVisible: true,
+						AwardCriteria:{
+							editMode: isTenderOfferOverviewVisible
+						},
+						TenderForm:{
+							editMode: isTenderOfferOverviewVisible	
+						},
+					},
+					OfferTab: {
+						isVisible: true,
+						OfferForm:{
+							editMode: isTenderOfferOverviewVisible,
+							enableCreateOffer: true,
+							enableDeleteOffer: isEnabledDeleteOfferBtn,
+							enableCopyOffer: checkCopyOfferBtn
+						},
+						OfferProductTable:{
+							editMode: isTenderOfferOverviewVisible,
+						},
+					},
+					OverviewTab: {
+						isVisible: isOverviewTabVisible,
+						enableDownload: checkOverviewDownloadBtn,
+						enableSetAsSubmited: checkOverviewSetAsSubmitBtn,
+						OverviewForm: {
+							editMode: isTenderOfferOverviewVisible,
+						},
+						Approval: {
+							enableSendApprovalBtn: isSendApprovalBtnEnabled,
+							enableCancelApprovalBtn: isCancelApprovalBtnEnabled
+						}
+					},
+					AwardTab: {
+						isVisible: checkCopyOfferBtn,
+					},
+					DeliveryTrackingTab: {
+						isVisible: isDeliveryTruckingVisible,
+					}
+				},
+				OfferProductDetail: {
+					OfferProductInfo:{
+						editMode: isTenderOfferOverviewVisible
+					},
+					OfferPricingInfo:{
+						editMode: isTenderOfferOverviewVisible
+					},
+					OfferProductFOC:{
+						editMode: isTenderOfferOverviewVisible
+					},
+				},
+				AwardedProductDetail: {
+					AwardDetail: {
+						editMode: isAwardDetailEnabled
+					},
+					CompetitorResult: {
+						editMode: isAwardDetailEnabled
+					}
+				},
+				DeliveryTrackingDetail: {
+					DeliveryDetail: {
+						editMode: isDeliveryTruckingVisible
+					}
+				},
+			}
+		},
+
     });
 
     

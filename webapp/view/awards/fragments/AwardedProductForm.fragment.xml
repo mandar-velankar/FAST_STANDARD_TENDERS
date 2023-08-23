@@ -25,6 +25,7 @@
                         text="Edit"
                         press=".onButtonAwardDetailFormEditPress"
                         visible="{= !${ui>/AwardedProductForm/editMode} }"
+                        enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
                     />
                     <m:Button
                         icon="sap-icon://alert"

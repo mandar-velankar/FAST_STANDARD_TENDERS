@@ -3,13 +3,14 @@ sap.ui.define([
 	"../../model/formatter",
 	"sap/ui/model/json/JSONModel",
 	"sap/m/library",
+	"sap/m/Token",
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Filter",
 	"sap/m/MessageBox",
 	"sap/ui/core/message/Message",
 	"sap/ui/core/Fragment",
 	"sap/ui/core/library"
-], function (BaseController, formatter, JSONModel, mobileLibrary, ColumnListItem, Filter,MessageBox,Message,Fragment,library) {
+], function (BaseController, formatter, JSONModel, mobileLibrary, Token, ColumnListItem, Filter,MessageBox,Message,Fragment,library) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -91,7 +92,20 @@ sap.ui.define([
 			
 			form?.bindElement({
 				path: path,
-				groupId: "Basicinfo"
+				groupId: "Basicinfo",
+				events: {
+					dataReceived: () => {
+						sap.ui.getCore().byId("Custom_String_2").removeAllTokens();
+						let cs  =  form.getElementBinding().getBoundContext().getProperty("Custom_String_2");
+						if(cs){
+							for(const value of cs.split(",")){
+
+								sap.ui.getCore().byId("Custom_String_2").addToken(new Token({key: value, text:value}));
+
+							}
+						}
+					}
+				}
 			});
 		},
 
@@ -128,7 +142,8 @@ sap.ui.define([
 
 			const messages = this.getMessages(["TenderFormView"]);
 			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
-			
+			this.defaultModel.setProperty(this.byId(`idTenderForm`).getBindingContext().getPath() + "/Custom_String_2", sap.ui.getCore().byId("Custom_String_2").getTokens().reduce((prev,token,idx)=>
+			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesTenderFormSuccess.bind(this),

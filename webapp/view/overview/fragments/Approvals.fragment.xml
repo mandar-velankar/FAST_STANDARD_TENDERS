@@ -20,10 +20,12 @@
 					text="Send Approval Request"
 					visible="true"
 					press=".onSendApprovalRequest($event)" 
+					enabled="{= ${em>/Detail/OverviewTab/Approval/enableSendApprovalBtn}}"
             />
             <Button id="btnCancelApproval"
 					text="Cancel Approval Request" 
                     press=".onCancelApprovalRequest"
+					enabled="{= ${em>/Detail/OverviewTab/Approval/enableCancelApprovalBtn}}"
             />
             <Button text="Close" 
                     press=".onCloseApprovalDialog" 
