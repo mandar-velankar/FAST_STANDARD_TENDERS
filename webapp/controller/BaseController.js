@@ -149,12 +149,16 @@ sap.ui.define([
 		},
 		/**
 		 * This method returns the error messages from the MessageManager for a given entity
+		 * @param {Boolean} el.persistent - When all errors solved MessageManager will automatically remove messages which persistent field is equal to false 
 		 * @returns Array<Object<Message>>
 		 */
 		getMessages: function (entities) {
 			return this.getModel("message").getData().filter(el => {
 				let entityIndex = entities.findIndex(entity => el.target.toLowerCase().includes(entity.toLowerCase()));
-				if(entityIndex > -1) return el; 
+				if(entityIndex > -1) {
+					el.persistent = false;
+					return el; 
+				}
 			});
 		},
 		
