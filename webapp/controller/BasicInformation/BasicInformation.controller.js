@@ -94,6 +94,17 @@ sap.ui.define([
 				path: path,
 				groupId: "Basicinfo",
 				events: {
+					change: () => {
+						sap.ui.getCore().byId("Custom_String_2").removeAllTokens();
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_2");
+						if(cs){
+							for(const value of cs.split(",")){
+
+								sap.ui.getCore().byId("Custom_String_2").addToken(new Token({key: value, text:value}));
+
+							}
+						}
+					},
 					dataReceived: () => {
 						sap.ui.getCore().byId("Custom_String_2").removeAllTokens();
 						let cs  =  form.getElementBinding().getBoundContext().getProperty("Custom_String_2");
