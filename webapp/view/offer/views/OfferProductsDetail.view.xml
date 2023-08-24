@@ -73,6 +73,13 @@
                                     enabled="{= ${em>/OfferProductDetail/OfferProductInfo/editMode}}"    
                                 />
                                 <Button
+                                    icon="sap-icon://alert"
+                                    text="{= ${messages>/offerProductDetailMsg}.length }"
+                                    visible="{= ${messages>/offerProductDetailMsg}.length > 0 }"
+                                    type="Emphasized"
+                                    press="onMessagePopoverPress($event, 'offerProductDetailMsg')" 
+                                />
+                                <Button
                                     id="idOfferDetailFormSaveBtn"
                                     icon="sap-icon://save"
                                     text="Save"
