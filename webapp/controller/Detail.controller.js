@@ -175,10 +175,9 @@ sap.ui.define([
 			this.setSelectedTabKey();
 
 			this.getModel().metadataLoaded().then( async function() {
-				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId) || "";
-				this.offerStatus = OfferStatus === "" ? OfferStatus : OfferStatus.STATUS
+				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
 				!this.selectedOfferHasBinding() && this._bindView();
-				this.updateVisibilityOfTabs(this.iconTabBar, this.offerStatus);
+				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS);
 			}.bind(this));
 		},
 
