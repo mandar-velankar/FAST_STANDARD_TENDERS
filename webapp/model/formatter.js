@@ -43,7 +43,6 @@ sap.ui.define([
 		},
 
 		formatCurrency: function(value){
-			if(!value) return;
 			return currencyInstance.format(value);
 		},
 

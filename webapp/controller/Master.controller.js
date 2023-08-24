@@ -14,8 +14,9 @@ sap.ui.define([
 	"sap/m/ColumnListItem",
 	"sap/ui/core/Item",
 	"sap/m/MessageToast",
-	"../service/StandardSingletonService"
-], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService) {
+	"../service/StandardSingletonService",
+	"sap/ui/core/EventBus"
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
@@ -214,6 +215,7 @@ sap.ui.define([
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
+			const controller = this;
 			table && table.bindItems({
 				path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
 				filters: [oFilterCountry],
@@ -222,10 +224,36 @@ sap.ui.define([
 					type: "Active",
 					cells: cols.map(col => col.getControl().generateControl())
 				}),
+				events: {
+					dataReceived: function (res) {
+						controller.publishSelectedOfferStatus(res);
+					}
+				},
 				templateShareable: true
 			});
 			this.setFilter();
 		},
+
+		/**
+		 * 
+		 * @param {*} res - The response from dataReceived function
+		 * 
+		 * This function getting updated status of selected offer
+		 * and using publish function of EventBus in order to trigger handleStatusChange function in Detail controller every time when receive tenders
+		 */
+
+		publishSelectedOfferStatus: function (res) {
+			const hash = this.getRouter().getHashChanger().getHash();
+			const offerId = hash.split("/")[3];
+			const offers = res.getParameter("data")?.results;
+			const selectedOffer = offers.find(offer => offer.OfferID === offerId);
+			if (selectedOffer) {
+				this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
+					offerStatus: selectedOffer?.STATUS
+				});
+			}
+		},
+
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
@@ -604,6 +632,8 @@ sap.ui.define([
 			
 			const oNewTenderForm = this.byId("idNewTenderForm");
 			this.setNewTenderPendingChanges(oNewTenderForm);
+			this.getModel().setProperty(this.byId(`idNewTenderForm`).getBindingContext().getPath() + "/Custom_String_2", sap.ui.getCore().byId("Custom_String_2").getTokens().reduce((prev,token,idx)=>
+			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
