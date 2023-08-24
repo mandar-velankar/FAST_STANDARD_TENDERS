@@ -248,9 +248,8 @@ sap.ui.define([
 			const offers = res.getParameter("data")?.results;
 			const selectedOffer = offers.find(offer => offer.OfferID === offerId);
 			if (selectedOffer) {
-				const status = selectedOffer.STATUS || "";
 				this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
-					offerStatus: status
+					offerStatus: selectedOffer?.STATUS
 				});
 			}
 		},
