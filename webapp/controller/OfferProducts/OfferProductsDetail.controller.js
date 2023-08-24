@@ -47,7 +47,8 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
-				priceCondFoc: []
+				priceCondFoc: [],
+				offerProductDetailMsg: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -309,12 +310,7 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/ProductForm/editMode', true);
 		},
 		onOfferDetailFormSaveBtnPress: function(event){
-
-			// clear all messages
-			this.oMessageManager.removeAllMessages();
-
-			if(!this.validateProduct()) return;
-
+			// if(!this.validateProduct()) return;
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccessProductForm.bind(this),
@@ -324,10 +320,8 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccessProductForm: function(res){
-			
-			const hasErrorMessages =  this.getView().getModel('message').getData().length > 0;
-			/*todo - rework error messages for product detail form to new way of working
-			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");*/
+			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
+			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this._refreshOfferProductTable();
@@ -341,6 +335,7 @@ sap.ui.define([
 
 		onOfferDetailFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
+			this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 			this.defaultModel.resetChanges();
 		},
 	
@@ -999,7 +994,6 @@ sap.ui.define([
 
 			const pricingFormBinding = pricingForm.getElementBinding();
             pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
-
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: function(evt){
@@ -1016,6 +1010,8 @@ sap.ui.define([
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
+			// we need to detach the data received event otherwise we will get into a loop
+			evt.getSource().detachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
         },
 
 		getProductPrice: async function (offerId, productCode) {

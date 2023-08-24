@@ -39,22 +39,16 @@ sap.ui.define([
       },
       handleCloseValueHelp: function (oEvent,originalInputField) {
         if(originalInputField instanceof sap.m.MultiInput){
-          let aContexts = oEvent.getParameter("selectedContexts");
-            if (aContexts && aContexts.length) {
-              let inputTokens = []; 
-              aContexts.map(function (oContext) {
-                const oToken = new Token({
-                  text: oContext.getObject().Name,
-                  key: oContext.getObject().ID
-                });
-                inputTokens.push(oToken);
+          var aSelectedItems = oEvent.getParameter("selectedItems");
+
+          if (aSelectedItems && aSelectedItems.length > 0) {
+            aSelectedItems.forEach(function (oItem) {
+              const oToken = new Token({
+              text: oItem.getBindingContext().getObject().Name
+              //key: oItem.getBindingContext().getObject().ID
               });
-            
-            //originalInputField.setTokens(inputTokens);
-            const regions = inputTokens.map(inputToken => inputToken.getText()).join(",");
-            const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
-            originalInputField.getModel().setProperty(path, regions);
-            
+              originalInputField.addToken(oToken);
+            });
           }
         }
         else{

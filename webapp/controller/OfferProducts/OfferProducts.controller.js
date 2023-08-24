@@ -73,12 +73,8 @@ sap.ui.define([
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
 		},
 		_onObjectMatched: async function (oEvent) {
-			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
-			this.countryCode = oEvent.getParameter("arguments").countryCode;
-			this.tenderId = oEvent.getParameter("arguments").objectId;
-			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.offerID = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 		},
@@ -958,31 +954,63 @@ sap.ui.define([
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
 				urlParameters: {"offerID": this.offerID,"type": "revisedoffer"},
-				success: this.onOfferCopySuccess,
-				error: this.onOfferCopyFail
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
 			});
-
-			// requestHandle.contextCreated().then(function(oContext) {
-			// 	// oView.setBindingContext(oContext);
-			// 	debugger
-		  	// });
 		},
 
 		createContinuedOffer: function(evt){
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
 				urlParameters: {"offerID": this.offerID,"type": "continuedoffer"},
-				success: this.onOfferCopySuccess,
-				error: this.onOfferCopyFail
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
 			});
 		},
 
-		onOfferCopySuccess: function(data){
-			debugger;
+		onOfferCopySuccess: async function(offerID){
+			this.navToOffer(offerID);
+			this.refreshMasterTable(offerID).then(()=>{
+				MessageToast.show(offerID + " created");
+			});	
+		},
+		
+		refreshMasterTable: async function (offerID) {
+			const path = this.getModel().createKey("/TenderMasterView", {
+				TenderID: this.objectId,
+				OfferID: offerID
+			});
+			const model = this.getModel();
+			return new Promise((resolve, reject) => {
+				this.getModel().read(path, {
+					success: function (res) {
+						model.refresh();
+						resolve(res);
+					},
+					error: function(err){
+						reject(err);
+					}
+				});
+			});
+		},
+
+		refreshOfferTab: function(tenderID, offerID){
+			this._bindForm("OfferForm", tenderID, offerID);
+			this._bindTable("OfferProductsTable", tenderID, offerID);
+			this._bindText("TotalAmountOfferProducts");	
+		},
+
+		navToOffer: function (offerID) {
+			this.getRouter().navTo("objectDetailOffer", {
+				countryCode: this.countryCode,
+				objectId: this.objectId, 
+				offerId: offerID,
+			});
 		},
 
 		onOfferCopyFail: function(error){
-			console.error("Offer copy failed:", error);
+			console.error("Copying the offer was not possible. Reason :", error);
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
 		}
 
 	});
