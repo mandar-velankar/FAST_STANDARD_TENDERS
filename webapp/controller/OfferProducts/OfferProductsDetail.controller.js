@@ -994,7 +994,6 @@ sap.ui.define([
 
 			const pricingFormBinding = pricingForm.getElementBinding();
             pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
-
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: function(evt){
@@ -1011,6 +1010,8 @@ sap.ui.define([
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
+			// we need to detach the data received event otherwise we will get into a loop
+			evt.getSource().detachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
         },
 
 		getProductPrice: async function (offerId, productCode) {

@@ -632,6 +632,8 @@ sap.ui.define([
 			
 			const oNewTenderForm = this.byId("idNewTenderForm");
 			this.setNewTenderPendingChanges(oNewTenderForm);
+			this.getModel().setProperty(this.byId(`idNewTenderForm`).getBindingContext().getPath() + "/Custom_String_2", sap.ui.getCore().byId("Custom_String_2").getTokens().reduce((prev,token,idx)=>
+			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
