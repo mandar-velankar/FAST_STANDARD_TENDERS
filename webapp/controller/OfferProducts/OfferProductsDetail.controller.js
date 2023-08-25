@@ -356,8 +356,12 @@ sap.ui.define([
 			this.invalidateEntityType([
 				"PriceConditionPriceWithFOCView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			} 
 			this._refreshOfferProductTable();
+			this.refreshPricingForm();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
