@@ -367,7 +367,15 @@ sap.ui.define([
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
+
+
 
 		onDiscountWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
@@ -404,6 +412,12 @@ sap.ui.define([
 		onDiscountWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		onPricingFormEditBtnPress: function(event){
@@ -447,6 +461,12 @@ sap.ui.define([
 		onPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		_onSubmitChangesSuccess: function(res){
