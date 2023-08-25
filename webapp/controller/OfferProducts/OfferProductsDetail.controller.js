@@ -162,6 +162,7 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			const controller = this;
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/StandardTenderPriceConditionView", {
 					filters: [
@@ -172,6 +173,7 @@ sap.ui.define([
 					success: function (res) {
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
 						priceCondition = priceCondition ? priceCondition : res?.results[0];
+						controller.setMainPriceCondition(priceCondition);
 						resolve(priceCondition?.ConditionType);
 					},
 					error: function (err) {
