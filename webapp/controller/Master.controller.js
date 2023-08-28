@@ -628,11 +628,33 @@ sap.ui.define([
 			this.byId("idCreateTenderDialog").destroy();
 		},
 
+		/**
+		 * This function return the "Custom_String_2" defined as "Regions" field on the tender basic information tab
+		 * @param {*} form 
+		 * @returns 
+		 */
+		getRegionCustomString: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let regionsField = "";
+			formContainers.forEach(forContainer => {
+				if(forContainer.getAggregation("title") === 'Institute & Type'){
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Regions'){
+							regionsField = formElement.getAggregation("fields")[0];
+						}
+					});
+				};
+			});
+			return regionsField;
+		},
+
 		onCreateNewTender: async function () {
 			
 			const oNewTenderForm = this.byId("idNewTenderForm");
+			let regionsField = this.getRegionCustomString(oNewTenderForm);
 			this.setNewTenderPendingChanges(oNewTenderForm);
-			this.getModel().setProperty(this.byId(`idNewTenderForm`).getBindingContext().getPath() + "/Custom_String_2", sap.ui.getCore().byId("Custom_String_2").getTokens().reduce((prev,token,idx)=>
+			this.getModel().setProperty(oNewTenderForm?.getBindingContext()?.getPath() + "/Custom_String_2", regionsField?.getTokens()?.reduce((prev,token,idx)=>
 			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
