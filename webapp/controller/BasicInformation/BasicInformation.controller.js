@@ -130,7 +130,7 @@ sap.ui.define([
 		 */
 		getRegionCustomString: function (form){
 			const formContainers = form.getAggregation("formContainers");
-			let regionsField = "";
+			let regionsField;
 			formContainers.forEach(forContainer => {
 				if(forContainer.getAggregation("title") === 'Institute & Type'){
 					const formElements = forContainer.getAggregation("formElements");
