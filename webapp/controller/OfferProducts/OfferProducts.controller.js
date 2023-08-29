@@ -414,7 +414,7 @@ sap.ui.define([
 				const offerId = newOfferCtx.getObject().OfferID;
 				this._bindForm("OfferForm", tenderId, offerId);
 				this._bindTable("OfferProductsTable", tenderId, offerId);
-				this.getOwnerComponent().getModel().refresh(true);
+				//this.getOwnerComponent().getModel().refresh(true);
 			}
 		},
 

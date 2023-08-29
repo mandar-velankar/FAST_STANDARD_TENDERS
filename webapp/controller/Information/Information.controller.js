@@ -150,7 +150,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();			
 			this.bindFields();
 			await this.approvalButtonEnableCheck();
-			this.getOwnerComponent().getModel().refresh(true);			
+			//this.getOwnerComponent().getModel().refresh(true);			
 		},
 		bindForm: function (tabName) {
 			const overviewForm = this.byId("idOverviewForm");

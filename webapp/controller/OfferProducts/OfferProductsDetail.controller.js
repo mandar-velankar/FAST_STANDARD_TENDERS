@@ -162,6 +162,7 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			const controller = this;
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/StandardTenderPriceConditionView", {
 					filters: [
@@ -172,6 +173,7 @@ sap.ui.define([
 					success: function (res) {
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
 						priceCondition = priceCondition ? priceCondition : res?.results[0];
+						controller.setMainPriceCondition(priceCondition);
 						resolve(priceCondition?.ConditionType);
 					},
 					error: function (err) {
@@ -356,14 +358,26 @@ sap.ui.define([
 			this.invalidateEntityType([
 				"PriceConditionPriceWithFOCView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			} 
 			this._refreshOfferProductTable();
+			this.refreshPricingForm();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
+
+
 
 		onDiscountWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
@@ -400,6 +414,12 @@ sap.ui.define([
 		onDiscountWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		onPricingFormEditBtnPress: function(event){
@@ -443,6 +463,12 @@ sap.ui.define([
 		onPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		_onSubmitChangesSuccess: function(res){
