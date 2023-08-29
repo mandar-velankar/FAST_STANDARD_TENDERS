@@ -112,14 +112,25 @@ sap.ui.define([
                     path = '';
                     break;
                 }
-                return new Filter({
-                  path: path,
-                  operator: FilterOperator.Contains,
-                  value1: sValue,
-                  caseSensitive: false	
-                })
+                if (path === "InstituteID" && !isNaN(Number(sValue))) {
+                  return new Filter({
+                    path: path,
+                    operator: FilterOperator.EQ,
+                    value1: Number(sValue),
+                    caseSensitive: false	
+                  })
+                }
+                if (path !== "InstituteID" && isNaN(Number(sValue))) {
+                  return new Filter({
+                    path: path,
+                    operator: FilterOperator.Contains,
+                    value1: sValue,
+                    caseSensitive: false	
+                  })
+                }
               });
-              
+              // Removes undefined item from orFilters array
+              orFilters = orFilters.filter(item => item);
               // andFilters.push(new Filter(orFilters, false));
             }
             // if (andFilters.length > 0) {
