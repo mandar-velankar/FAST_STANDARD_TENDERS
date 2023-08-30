@@ -1014,7 +1014,24 @@ sap.ui.define([
 		onOfferCopyFail: function(error){
 			console.error("Copying the offer was not possible. Reason :", error);
 			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
-		}
+		},
 
+		onSoftDeleteOffer: function () {
+			this.defaultModel.callFunction("/softDeleteOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID},
+				success: this.onOfferDeleteSuccess.bind(this),
+				error: this.onOfferDeleteSuccess.bind(this)
+			})
+		},
+
+		onOfferDeleteSuccess: async function (offerID) {
+			this.navToMasterView();
+			MessageToast.show(offerID + " deleted");
+		},
+
+		navToMasterView: function () {
+			this.getRouter().navTo("master");
+		}
 	});
 });
