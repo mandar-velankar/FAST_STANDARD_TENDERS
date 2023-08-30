@@ -320,6 +320,7 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccessProductForm: function(res){
+			this.refreshPricingForm();
 			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
 			if (!hasErrorMessages) {
