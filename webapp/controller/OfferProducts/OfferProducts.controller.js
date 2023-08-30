@@ -568,13 +568,16 @@ sap.ui.define([
 
 		onDeleteOfferProductBtnPress: function(event){
 			const table = this.byId("idOfferProductsTable");
-			const selectedItem = table.getSelectedItem();
-			if (!selectedItem) {
+			const selectedItems = table.getSelectedItems();
+			if (!selectedItems) {
 				return; // No item is selected, exit the function
 			}
-			const context = selectedItem.getBindingContext();
-			const model = context.getModel();
-			model.remove(context.getPath());
+			selectedItems.forEach(selectedItem => {
+				const context = selectedItem.getBindingContext();
+				const model = context.getModel();
+				model.remove(context.getPath());
+			});
+			
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
 			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
 		},
