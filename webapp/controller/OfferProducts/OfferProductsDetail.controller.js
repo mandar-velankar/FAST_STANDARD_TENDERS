@@ -1188,14 +1188,16 @@ sap.ui.define([
 			return hasFocPriceCondition;
 		},
 
-		handleProductBrandsValueHelpSearch: function(event) {
+		handleProductBrandsValueHelpSearch: async function(event) {
 			const sValue = event.getParameter("value");
-			const andFilters = event.getSource().getBinding("items").getFilters("Control").splice(0,4);
+			const binding = event.getSource().getBinding("items");
+			await this.stState.getService().getOffer(this.sOfferId);
+			const andFilters = binding.getFilters("Control").splice(0,5);
 			const orFilters = [];
 			orFilters.push(new Filter("PRODUCT_NAME", sap.ui.model.FilterOperator.Contains, sValue));
 			orFilters.push(new Filter("SKUS", sap.ui.model.FilterOperator.Contains, sValue));
 			andFilters.push(new Filter(orFilters, false));
-			event.getSource().getBinding("items").filter(andFilters);
+			binding.filter(andFilters);
 		},
 
 		handleProductBrandsValueHelpConfirm: function (event) {
