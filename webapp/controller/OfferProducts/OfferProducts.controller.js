@@ -350,6 +350,7 @@ sap.ui.define([
 			newOfferObj.ActiveOffer = 1;
 			newOfferObj.TenderOfferNo = oStandModel.getProperty("/TenderOfferNo");
 			newOfferObj.RevisedOfferNo = 0;
+			newOfferObj.ContinuationOfferNo = 0;
 			newOfferObj.CreationDate = new Date().toISOString();
             newOfferObj.SubmissionDate = new Date().toISOString();
             newOfferObj.SubmittedOn = new Date().toISOString();
@@ -359,7 +360,7 @@ sap.ui.define([
 			newOfferObj.OfferDueDate = oBoundContext.getObject().OfferDueDate;
 			newOfferObj.SellingCompany = oBoundContext.getObject().SellingCompany;
 			newOfferObj.Division = oBoundContext.getObject().Division;
-			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";		
+			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 
 			const statusObj = {
 					TenderID: this.objectId,
