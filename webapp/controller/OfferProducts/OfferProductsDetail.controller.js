@@ -610,7 +610,7 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let offerPrice = parseFloat(priceObj.CurrentBasePrice) * (1 - discount);
+			let offerPrice = Number((parseFloat(priceObj.CurrentBasePrice) * (1 - discount)).toFixed(2));
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
