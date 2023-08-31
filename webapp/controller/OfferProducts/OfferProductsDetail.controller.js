@@ -322,6 +322,7 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccessProductForm: function(res){
+			this.refreshPricingForm();
 			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
 			if (!hasErrorMessages) {
@@ -635,7 +636,7 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let offerPrice = parseFloat(priceObj.CurrentBasePrice) * (1 - discount);
+			let offerPrice = Number((parseFloat(priceObj.CurrentBasePrice) * (1 - discount)).toFixed(2));
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
@@ -1187,14 +1188,16 @@ sap.ui.define([
 			return hasFocPriceCondition;
 		},
 
-		handleProductBrandsValueHelpSearch: function(event) {
+		handleProductBrandsValueHelpSearch: async function(event) {
 			const sValue = event.getParameter("value");
-			const andFilters = event.getSource().getBinding("items").getFilters("Control").splice(0,4);
+			const binding = event.getSource().getBinding("items");
+			await this.stState.getService().getOffer(this.sOfferId);
+			const andFilters = binding.getFilters("Control").splice(0,5);
 			const orFilters = [];
 			orFilters.push(new Filter("PRODUCT_NAME", sap.ui.model.FilterOperator.Contains, sValue));
 			orFilters.push(new Filter("SKUS", sap.ui.model.FilterOperator.Contains, sValue));
 			andFilters.push(new Filter(orFilters, false));
-			event.getSource().getBinding("items").filter(andFilters);
+			binding.filter(andFilters);
 		},
 
 		handleProductBrandsValueHelpConfirm: function (event) {
