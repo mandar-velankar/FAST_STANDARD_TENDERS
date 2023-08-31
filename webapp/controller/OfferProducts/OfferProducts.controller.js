@@ -350,6 +350,7 @@ sap.ui.define([
 			newOfferObj.ActiveOffer = 1;
 			newOfferObj.TenderOfferNo = oStandModel.getProperty("/TenderOfferNo");
 			newOfferObj.RevisedOfferNo = 0;
+			newOfferObj.ContinuationOfferNo = 0;
 			newOfferObj.CreationDate = new Date().toISOString();
             newOfferObj.SubmissionDate = new Date().toISOString();
             newOfferObj.SubmittedOn = new Date().toISOString();
@@ -359,7 +360,7 @@ sap.ui.define([
 			newOfferObj.OfferDueDate = oBoundContext.getObject().OfferDueDate;
 			newOfferObj.SellingCompany = oBoundContext.getObject().SellingCompany;
 			newOfferObj.Division = oBoundContext.getObject().Division;
-			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";		
+			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 
 			const statusObj = {
 					TenderID: this.objectId,
@@ -1014,7 +1015,29 @@ sap.ui.define([
 		onOfferCopyFail: function(error){
 			console.error("Copying the offer was not possible. Reason :", error);
 			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
-		}
+		},
 
+		onSoftDeleteOffer: function () {
+			this.defaultModel.callFunction("/softDeleteOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID},
+				success: this.onOfferDeleteSuccess.bind(this),
+				error: this.onOfferDeleteFail.bind(this)
+			})
+		},
+
+		onOfferDeleteSuccess: async function (offerID) {
+			this.navToMasterView();
+			MessageToast.show(offerID + " deleted");
+		},
+
+		onOfferDeleteFail: async function (error) {
+			console.error("Deletion of offer was not possible. Reason :", error);
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+		},
+
+		navToMasterView: function () {
+			this.getRouter().navTo("master");
+		}
 	});
 });
