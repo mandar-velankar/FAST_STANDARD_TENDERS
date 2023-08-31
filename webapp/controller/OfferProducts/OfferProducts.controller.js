@@ -1022,13 +1022,18 @@ sap.ui.define([
 				method:"POST", 
 				urlParameters: {"offerID": this.offerID},
 				success: this.onOfferDeleteSuccess.bind(this),
-				error: this.onOfferDeleteSuccess.bind(this)
+				error: this.onOfferDeleteFail.bind(this)
 			})
 		},
 
 		onOfferDeleteSuccess: async function (offerID) {
 			this.navToMasterView();
 			MessageToast.show(offerID + " deleted");
+		},
+
+		onOfferDeleteFail: async function (error) {
+			console.error("Deletion of offer was not possible. Reason :", error);
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
 		},
 
 		navToMasterView: function () {
