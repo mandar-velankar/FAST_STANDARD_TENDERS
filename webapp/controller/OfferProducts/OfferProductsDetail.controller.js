@@ -174,6 +174,7 @@ sap.ui.define([
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
 						priceCondition = priceCondition ? priceCondition : res?.results[0];
 						controller.setMainPriceCondition(priceCondition);
+						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
 					},
 					error: function (err) {
@@ -839,9 +840,10 @@ sap.ui.define([
 		},
 
 
-		bindFOCMultiInputTokens: function(priceCondition){
+		bindFOCMultiInputTokens: function(priceCondition){	
+			const multiInput = this.byId("idFOCMultiInput");	
+			multiInput.removeAllTokens();	
 			if(!priceCondition?.hasPriceCondition) return;
-			const multiInput = this.byId("idFOCMultiInput");
 			multiInput.bindAggregation("tokens", {
 				path: "/FreeGoodsOther",
 				groupId: "PricingForm",
