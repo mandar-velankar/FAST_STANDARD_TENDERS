@@ -1023,7 +1023,7 @@ sap.ui.define([
             pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
 		},
 
-		onPricingFormDataReceivedAfterFOCSet: function(evt){
+		onPricingFormDataReceivedAfterFOCSet: async function(evt){
             const netPrice = evt.getParameter("data").NetPrice;
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
@@ -1032,7 +1032,11 @@ sap.ui.define([
 				ActiveTier: 0,
 				LotID: 1
             });
-            const context = this.getModel().getContext(path);
+            let context = this.getModel().getContext(path);
+			if(!context.getObject()){
+				await this.getProductPrice(this.sOfferId, this.productId);	
+				context = this.getModel().getContext(path);
+			}
             this.getModel().setProperty("NetPrice", netPrice, context);
 			this.getModel().submitChanges();
 
