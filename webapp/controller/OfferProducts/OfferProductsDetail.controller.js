@@ -162,6 +162,7 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			const controller = this;
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/StandardTenderPriceConditionView", {
 					filters: [
@@ -172,6 +173,8 @@ sap.ui.define([
 					success: function (res) {
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
 						priceCondition = priceCondition ? priceCondition : res?.results[0];
+						controller.setMainPriceCondition(priceCondition);
+						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
 					},
 					error: function (err) {
@@ -357,14 +360,26 @@ sap.ui.define([
 			this.invalidateEntityType([
 				"PriceConditionPriceWithFOCView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			} 
 			this._refreshOfferProductTable();
+			this.refreshPricingForm();
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
+
+
 
 		onDiscountWithFOCFormSaveBtnPress: function(event){
 			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
@@ -401,6 +416,12 @@ sap.ui.define([
 		onDiscountWithFOCFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		onPricingFormEditBtnPress: function(event){
@@ -444,6 +465,12 @@ sap.ui.define([
 		onPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
 			this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		_onSubmitChangesSuccess: function(res){
@@ -655,7 +682,7 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);; // Truncate number to two decimal places without rounding. For correct rounding
 			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(2) : priceObj.Discount;
-			let offerPrice = priceObj.CurrentBasePrice * (1 - discount);
+			let offerPrice = Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
 			let netOfferPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
@@ -813,9 +840,10 @@ sap.ui.define([
 		},
 
 
-		bindFOCMultiInputTokens: function(priceCondition){
+		bindFOCMultiInputTokens: function(priceCondition){	
+			const multiInput = this.byId("idFOCMultiInput");	
+			multiInput.removeAllTokens();	
 			if(!priceCondition?.hasPriceCondition) return;
-			const multiInput = this.byId("idFOCMultiInput");
 			multiInput.bindAggregation("tokens", {
 				path: "/FreeGoodsOther",
 				groupId: "PricingForm",
@@ -997,7 +1025,7 @@ sap.ui.define([
             pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
 		},
 
-		onPricingFormDataReceivedAfterFOCSet: function(evt){
+		onPricingFormDataReceivedAfterFOCSet: async function(evt){
             const netPrice = evt.getParameter("data").NetPrice;
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
@@ -1006,7 +1034,11 @@ sap.ui.define([
 				ActiveTier: 0,
 				LotID: 1
             });
-            const context = this.getModel().getContext(path);
+            let context = this.getModel().getContext(path);
+			if(!context.getObject()){
+				await this.getProductPrice(this.sOfferId, this.productId);	
+				context = this.getModel().getContext(path);
+			}
             this.getModel().setProperty("NetPrice", netPrice, context);
 			this.getModel().submitChanges();
 
@@ -1162,14 +1194,16 @@ sap.ui.define([
 			return hasFocPriceCondition;
 		},
 
-		handleProductBrandsValueHelpSearch: function(event) {
+		handleProductBrandsValueHelpSearch: async function(event) {
 			const sValue = event.getParameter("value");
-			const andFilters = event.getSource().getBinding("items").getFilters("Control").splice(0,4);
+			const binding = event.getSource().getBinding("items");
+			await this.stState.getService().getOffer(this.sOfferId);
+			const andFilters = binding.getFilters("Control").splice(0,5);
 			const orFilters = [];
 			orFilters.push(new Filter("PRODUCT_NAME", sap.ui.model.FilterOperator.Contains, sValue));
 			orFilters.push(new Filter("SKUS", sap.ui.model.FilterOperator.Contains, sValue));
 			andFilters.push(new Filter(orFilters, false));
-			event.getSource().getBinding("items").filter(andFilters);
+			binding.filter(andFilters);
 		},
 
 		handleProductBrandsValueHelpConfirm: function (event) {
