@@ -54,6 +54,7 @@ sap.ui.define([
 				editMode: false,
 				currency: "EUR",
 				minDate: new Date(),
+				isCopiedOffer: false,
 				OfferForm:{
 					editMode: false
 				},
@@ -221,15 +222,19 @@ sap.ui.define([
 
 		onOfferFormEditBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
+			if(this.isCopiedOffer(this.offerID)){
+				this.getModel("ui").setProperty('/isCopiedOffer', true);
+			}
 		},
 		onOfferFormSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-
+			this.getModel("ui").setProperty('/isCopiedOffer', false);
 			if(!this.validateOffer()) return; //error
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
+			this.getModel("ui").setProperty('/isCopiedOffer', false);	
 			this.defaultModel.resetChanges();
 		},
 
@@ -1038,6 +1043,22 @@ sap.ui.define([
 
 		navToMasterView: function () {
 			this.getRouter().navTo("master");
+		},
+
+
+		/**
+		 * Checks if a given string contains the characters 'C' or 'R' after a hyphen.
+		 *
+		 * @param {string} str - The input string to be checked for 'C' or 'R'.
+		 * @returns {boolean} Returns true if 'C' or 'R' is found after a hyphen, otherwise returns false.
+		 *
+		 * @example
+		 * const isCopied = isCopiedOffer('GB-23-1001-2-C1');
+		 * console.log(isCopied); // Output: true
+		 */
+		isCopiedOffer: function(str) {
+			const match = str.match(/-[^-]*[CR]/);
+			return match !== null;
 		}
 	});
 });
