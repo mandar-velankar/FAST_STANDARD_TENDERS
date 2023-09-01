@@ -174,6 +174,7 @@ sap.ui.define([
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
 						priceCondition = priceCondition ? priceCondition : res?.results[0];
 						controller.setMainPriceCondition(priceCondition);
+						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
 					},
 					error: function (err) {
@@ -681,7 +682,7 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);; // Truncate number to two decimal places without rounding. For correct rounding
 			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(2) : priceObj.Discount;
-			let offerPrice = priceObj.CurrentBasePrice * (1 - discount);
+			let offerPrice = Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
 			let netOfferPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
@@ -839,9 +840,10 @@ sap.ui.define([
 		},
 
 
-		bindFOCMultiInputTokens: function(priceCondition){
+		bindFOCMultiInputTokens: function(priceCondition){	
+			const multiInput = this.byId("idFOCMultiInput");	
+			multiInput.removeAllTokens();	
 			if(!priceCondition?.hasPriceCondition) return;
-			const multiInput = this.byId("idFOCMultiInput");
 			multiInput.bindAggregation("tokens", {
 				path: "/FreeGoodsOther",
 				groupId: "PricingForm",
@@ -1023,7 +1025,7 @@ sap.ui.define([
             pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
 		},
 
-		onPricingFormDataReceivedAfterFOCSet: function(evt){
+		onPricingFormDataReceivedAfterFOCSet: async function(evt){
             const netPrice = evt.getParameter("data").NetPrice;
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
@@ -1032,7 +1034,11 @@ sap.ui.define([
 				ActiveTier: 0,
 				LotID: 1
             });
-            const context = this.getModel().getContext(path);
+            let context = this.getModel().getContext(path);
+			if(!context.getObject()){
+				await this.getProductPrice(this.sOfferId, this.productId);	
+				context = this.getModel().getContext(path);
+			}
             this.getModel().setProperty("NetPrice", netPrice, context);
 			this.getModel().submitChanges();
 
