@@ -89,35 +89,59 @@ sap.ui.define([
 				});
 				path = newEntryContext.getPath();
 			}
-			
+
 			form?.bindElement({
 				path: path,
 				groupId: "Basicinfo",
 				events: {
 					change: () => {
-						sap.ui.getCore().byId("Custom_String_2").removeAllTokens();
+						let regionsField = this.getRegionCustomString(form);
+						regionsField?.removeAllTokens();
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_2");
 						if(cs){
 							for(const value of cs.split(",")){
 
-								sap.ui.getCore().byId("Custom_String_2").addToken(new Token({key: value, text:value}));
+								regionsField?.addToken(new Token({key: value, text:value}));
 
 							}
 						}
 					},
+
 					dataReceived: () => {
-						sap.ui.getCore().byId("Custom_String_2").removeAllTokens();
-						let cs  =  form.getElementBinding().getBoundContext().getProperty("Custom_String_2");
+						let regionsField = this.getRegionCustomString(form);
+						regionsField?.removeAllTokens();
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_2");
 						if(cs){
 							for(const value of cs.split(",")){
 
-								sap.ui.getCore().byId("Custom_String_2").addToken(new Token({key: value, text:value}));
+								regionsField?.addToken(new Token({key: value, text:value}));
 
 							}
 						}
 					}
 				}
 			});
+		},
+
+		/**
+		 * This function return the "Custom_String_2" defined as "Regions" field on the tender basic information tab
+		 * @param {*} form 
+		 * @returns 
+		 */
+		getRegionCustomString: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let regionsField;
+			formContainers.forEach(forContainer => {
+				if(forContainer.getAggregation("title") === 'Institute & Type'){
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Regions'){
+							regionsField = formElement.getAggregation("fields")[0];
+						}
+					});
+				};
+			});
+			return regionsField;
 		},
 
 		/**
@@ -152,8 +176,10 @@ sap.ui.define([
 		onTenderFormSaveBtnPress: function(event){
 
 			const messages = this.getMessages(["TenderFormView"]);
+			const form = this.byId(`idTenderForm`);
+			let regionsField = this.getRegionCustomString(form);
 			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
-			this.defaultModel.setProperty(this.byId(`idTenderForm`).getBindingContext().getPath() + "/Custom_String_2", sap.ui.getCore().byId("Custom_String_2").getTokens().reduce((prev,token,idx)=>
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_2", regionsField?.getTokens()?.reduce((prev,token,idx)=>
 			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),

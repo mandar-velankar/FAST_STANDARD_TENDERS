@@ -36,7 +36,7 @@
 							</Menu>
 						</menu>
 					</MenuButton>
-					<Button text="Delete Offer" icon="sap-icon://delete" press="onDeleteProductOffer" visible="{= !${ui>/OfferForm/editMode} }" type="Reject" enabled="{= ${em>/Detail/OfferTab/OfferForm/enableDeleteOffer}}"/>
+					<Button text="Delete Offer" icon="sap-icon://delete" press="onSoftDeleteOffer" visible="{= !${ui>/OfferForm/editMode} }" type="Reject" enabled="{= ${em>/Detail/OfferTab/OfferForm/enableDeleteOffer}}"/>
 					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferFormEditBtnPress" visible="{= !${ui>/OfferForm/editMode} }" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
 					<Button
 						id="idOfferFormSaveBtn"

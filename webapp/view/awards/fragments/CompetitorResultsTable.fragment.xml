@@ -86,6 +86,7 @@
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{AWARDEDCOMPANY}"
                                 items="{/MasterCompetitors}"
+                                change=".onSetCompetitorResultsChanges($event, 'AwardedCompany')"
                             >
                                 <items>
                                     <core:Item
@@ -98,6 +99,7 @@
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{AWARDEDPRODUCT}"
                                 items="{/MasterCompetitors}"
+                                change=".onSetCompetitorResultsChanges($event, 'AwardedProduct')"
                             >
                                 <items>
                                     <core:Item
@@ -110,6 +112,7 @@
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{OUTCOME}"
                                 items="{/MasterCountryOutComes}"
+                                change=".onSetCompetitorResultsChanges($event, 'Outcome')"
                             >
                                 <items>
                                     <core:Item

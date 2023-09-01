@@ -415,6 +415,29 @@ sap.ui.define([
 				newCompetitor.setBindingContext(context);
 				competitorResultsTable.insertItem(newCompetitor);
 			})
+		},
+
+		onSetCompetitorResultsChanges: function (event, comboBox) {
+			const value = event.getParameter("value");
+			let path = event.getSource().getBindingContext().getPath();
+			const context = this.defaultModel.getContext(path);
+
+			switch (comboBox) {
+				case "AwardedCompany":
+					path = `${path}/AWARDEDCOMPANY`;
+					this.defaultModel.setProperty(path, value, context);
+					break;
+				case "AwardedProduct":
+					path = `${path}/AWARDEDPRODUCT`;
+					this.defaultModel.setProperty(path, value, context);
+					break;
+				case "Outcome":
+					path = `${path}/OUTCOME`;
+					this.defaultModel.setProperty(path, value, context);
+					break;
+				default:
+					break;
+			}
 		}
     });
 });
