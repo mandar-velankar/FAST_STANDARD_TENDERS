@@ -72,6 +72,18 @@
 						<!-- items binding see controller -->
 						<core:Item key="{Status}" text="{Status}"/>
 					</Select>
+
+					<Label
+						text="Product Scope"
+						labelFor="idSelectProductScope"
+					/>
+					<Select 
+						id="idSelectProductScope"
+						selectedKey="{st>/ProductScope}"
+						change='onProductScopesReceived'>
+						<core:Item key="{ProductScope}" text="{ProductScope}"/>
+					</Select>
+
 					<ToolbarSpacer/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
 					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>

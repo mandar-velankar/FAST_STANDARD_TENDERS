@@ -117,11 +117,19 @@ sap.ui.define([
 			// 	}));
 			// }
 
-			this._getTemplateConfig(sCountryCode);
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
+			this._bindProductScopeItems(sCountryCode);
 			// this.setFilter(oEvent);
 		},
+
+		onProductScopesReceived: async function (oEvent) {
+			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry");
+			const sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
+			
+			this._getTemplateConfig(sCountryCode,sProductScope);
+		},
+
 		_getNextTenderID: async function (sCountryCode) {
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryTenderNo", {
@@ -140,13 +148,15 @@ sap.ui.define([
 				return `${sCountryCode}-${year}-${data}`;
 			})
 		},
-		_getTemplateConfig: async function (sCountryCode) {
+		_getTemplateConfig: async function (sCountryCode,sProductScope) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
+			//this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			try {
 				await this.templateState.read("MASTER", {
 					countryCode: sCountryCode, 
+					productScope: sProductScope,
 					appID: "StandardTenders",
 					page: "MASTER"
 				});
@@ -210,10 +220,38 @@ sap.ui.define([
 			});
 		},
 
-		_bindTable: function (table, sCountryCode) {
+		_bindProductScopeItems: function (sCountryCode) {
+			const oSelectProductScopes = this.byId("idSelectProductScope");
+			const controller = this;
+
+			oSelectProductScopes?.bindItems({
+				path: "/DistinctProductScopeView",
+				filters: [
+					new Filter("CountryCode", FilterOperator.EQ, sCountryCode)
+				],
+				template: new sap.ui.core.Item({
+					key: "{ProductScope}",
+					text: "{ProductScope}"
+				}),
+				sorter: new Sorter({
+					path: 'ProductScope',
+					descending: false
+				}),
+				events: {
+					dataReceived: function (res) {
+						controller.onProductScopesReceived(res);
+					}
+				},
+				templateShareable: true
+			});
+		},
+
+		_bindTable: function (table, sCountryCode, sProductScope) {
 			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
+			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope);
+
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
 			table && table.bindItems({
