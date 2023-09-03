@@ -125,7 +125,8 @@ sap.ui.define([
 
 		onProductScopesReceived: async function (oEvent) {
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry");
-			const sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
+			let sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
+			sProductScope = sProductScope === 'Consumer Health' ? 'ConsumerHealth' : sProductScope;
 			
 			this._getTemplateConfig(sCountryCode,sProductScope);
 		},
@@ -250,7 +251,7 @@ sap.ui.define([
 			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
-			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope);
+			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
 
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
