@@ -32,7 +32,7 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 			
 		},
-		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
@@ -46,6 +46,7 @@ sap.ui.define([
 			this.objectId = objectId;
 			this.offerID = offerId;
 			this.countryCode = countryCode;
+			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
 
 			const oModel = new JSONModel({
@@ -174,6 +175,7 @@ sap.ui.define([
 					oNextUIState = oHelper.getNextUIState(2);
 					this.oRouter.navTo("offerProductDetail", {
 						countryCode: this.countryCode,
+						productScope: this.productScope,
 						layout: oNextUIState.layout,
 						objectId: this.objectId,
 						offerId: this.offerID,
