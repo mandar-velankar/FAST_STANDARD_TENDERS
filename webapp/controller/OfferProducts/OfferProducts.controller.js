@@ -964,7 +964,7 @@ sap.ui.define([
 		createRevisedOffer: function(evt){
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
-				urlParameters: {"offerID": this.offerID,"type": "revisedoffer"},
+				urlParameters: {"offerID": this.offerID,"type": "revisedoffer", "productScope": this.productScope},
 				success: this.onOfferCopySuccess.bind(this),
 				error: this.onOfferCopyFail.bind(this)
 			});
@@ -973,7 +973,7 @@ sap.ui.define([
 		createContinuedOffer: function(evt){
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
-				urlParameters: {"offerID": this.offerID,"type": "continuedoffer"},
+				urlParameters: {"offerID": this.offerID,"type": "continuedoffer", "productScope": this.productScope},
 				success: this.onOfferCopySuccess.bind(this),
 				error: this.onOfferCopyFail.bind(this)
 			});
@@ -1014,6 +1014,7 @@ sap.ui.define([
 		navToOffer: function (offerID) {
 			this.getRouter().navTo("objectDetailOffer", {
 				countryCode: this.countryCode,
+				productScope: this.productScope,
 				objectId: this.objectId, 
 				offerId: offerID,
 			});
