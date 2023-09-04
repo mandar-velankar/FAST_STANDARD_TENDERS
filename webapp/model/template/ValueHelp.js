@@ -39,16 +39,31 @@ sap.ui.define([
       },
       handleCloseValueHelp: function (oEvent,originalInputField) {
         if(originalInputField instanceof sap.m.MultiInput){
-          var aSelectedItems = oEvent.getParameter("selectedItems");
+          let aSelectedItems = oEvent.getParameter("selectedItems");
+          let originalInputFieldItems = originalInputField.getTokens();
 
-          if (aSelectedItems && aSelectedItems.length > 0) {
-            aSelectedItems.forEach(function (oItem) {
-              const oToken = new Token({
-              text: oItem.getBindingContext().getObject().Name
-              //key: oItem.getBindingContext().getObject().ID
-              });
-              originalInputField.addToken(oToken);
+          if (aSelectedItems && aSelectedItems.length > 0) {       
+            const selectedTexts = aSelectedItems.map(oItem => oItem.getBindingContext().getObject().Name);
+            
+            originalInputFieldItems.forEach(function (token) {
+              const tokenText = token.getText();
+              if (!selectedTexts.includes(tokenText)) {
+                originalInputField.removeToken(token);
+              }
             });
+           
+            aSelectedItems.forEach(function (oItem) {
+              const itemText = oItem.getBindingContext().getObject().Name;
+              const isTokenExists = originalInputFieldItems.some(token => token.getText() === itemText);
+              if (!isTokenExists) {
+                const oToken = new Token({
+                  text: itemText
+                });
+                originalInputField.addToken(oToken);
+              }
+            });
+          } else {            
+            originalInputField.removeAllTokens();
           }
         }
         else{
@@ -63,7 +78,7 @@ sap.ui.define([
                 originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]); 
             })
           }
-        }
+        }     
       },
       onHandleValueHelpRequest: async function (oEvent) {
         const oSource = oEvent.getSource();
@@ -140,7 +155,8 @@ sap.ui.define([
               this.getBinding("items").filter();
             }
           },
-          confirm: (oEvent)=>this.handleCloseValueHelp(oEvent,oSource)
+          confirm: (oEvent)=>this.handleCloseValueHelp(oEvent,oSource),
+          updateFinished: (oEvent)=>this.handleUpdateFinished(oEvent,oSource),   
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
@@ -150,7 +166,16 @@ sap.ui.define([
         
         this.valueHelpTableSelectDialog.setModel(oSource.getModel());
         this.valueHelpTableSelectDialog.setModel(oSource.getModel("st"), "st");
+        this.valueHelpTableSelectDialog.setRememberSelections(true);
         this.valueHelpTableSelectDialog.open();
+      },
+      
+      handleUpdateFinished: function(event, source){
+        const selectedItems = source.getTokens();
+        const valueHelpDialog = event.getSource();
+        selectedItems.forEach(selectedItem => {
+          valueHelpDialog.getItems()?.find(item => item.getBindingContext().getObject().Name === selectedItem.getProperty('text'))?.setSelected(true)
+        })
       },
 
       _setFilters: function (modelInfo) {
@@ -158,4 +183,4 @@ sap.ui.define([
       }
     });
     return ValueHelp;
-  });
+  }); 
