@@ -126,7 +126,7 @@ sap.ui.define([
 		onProductScopesReceived: async function (oEvent) {
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry");
 			let sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
-			sProductScope = sProductScope === 'Consumer Health' ? 'ConsumerHealth' : sProductScope;
+			sProductScope = sProductScope ? sProductScope.replace(/\s+/g, '') : 'NA';
 			
 			this._getTemplateConfig(sCountryCode,sProductScope);
 		},
@@ -153,7 +153,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
-			//this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
+			this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			try {
 				await this.templateState.read("MASTER", {
 					countryCode: sCountryCode, 
@@ -568,6 +568,7 @@ sap.ui.define([
 			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
+				productScope: this.getModel("st").getProperty("/SelectedProductScope"),
 				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
 				offerId: oItem?.OfferID || "NA",
 				layout: "TwoColumnsMidExpanded"
