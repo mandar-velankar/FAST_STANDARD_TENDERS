@@ -32,7 +32,7 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 			
 		},
-		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
@@ -46,6 +46,7 @@ sap.ui.define([
 			this.objectId = objectId;
 			this.offerID = offerId;
 			this.countryCode = countryCode;
+			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
 
 			const oModel = new JSONModel({
@@ -54,6 +55,7 @@ sap.ui.define([
 				editMode: false,
 				currency: "EUR",
 				minDate: new Date(),
+				isCopiedOffer: false,
 				OfferForm:{
 					editMode: false
 				},
@@ -173,6 +175,7 @@ sap.ui.define([
 					oNextUIState = oHelper.getNextUIState(2);
 					this.oRouter.navTo("offerProductDetail", {
 						countryCode: this.countryCode,
+						productScope: this.productScope,
 						layout: oNextUIState.layout,
 						objectId: this.objectId,
 						offerId: this.offerID,
@@ -221,15 +224,19 @@ sap.ui.define([
 
 		onOfferFormEditBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
+			if(this.isCopiedOffer(this.offerID)){
+				this.getModel("ui").setProperty('/isCopiedOffer', true);
+			}
 		},
 		onOfferFormSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-
+			this.getModel("ui").setProperty('/isCopiedOffer', false);
 			if(!this.validateOffer()) return; //error
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
+			this.getModel("ui").setProperty('/isCopiedOffer', false);	
 			this.defaultModel.resetChanges();
 		},
 
@@ -957,7 +964,7 @@ sap.ui.define([
 		createRevisedOffer: function(evt){
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
-				urlParameters: {"offerID": this.offerID,"type": "revisedoffer"},
+				urlParameters: {"offerID": this.offerID,"type": "revisedoffer", "productScope": this.productScope},
 				success: this.onOfferCopySuccess.bind(this),
 				error: this.onOfferCopyFail.bind(this)
 			});
@@ -966,7 +973,7 @@ sap.ui.define([
 		createContinuedOffer: function(evt){
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
-				urlParameters: {"offerID": this.offerID,"type": "continuedoffer"},
+				urlParameters: {"offerID": this.offerID,"type": "continuedoffer", "productScope": this.productScope},
 				success: this.onOfferCopySuccess.bind(this),
 				error: this.onOfferCopyFail.bind(this)
 			});
@@ -1007,6 +1014,7 @@ sap.ui.define([
 		navToOffer: function (offerID) {
 			this.getRouter().navTo("objectDetailOffer", {
 				countryCode: this.countryCode,
+				productScope: this.productScope,
 				objectId: this.objectId, 
 				offerId: offerID,
 			});
@@ -1038,6 +1046,22 @@ sap.ui.define([
 
 		navToMasterView: function () {
 			this.getRouter().navTo("master");
+		},
+
+
+		/**
+		 * Checks if a given string contains the characters 'C' or 'R' after a hyphen.
+		 *
+		 * @param {string} str - The input string to be checked for 'C' or 'R'.
+		 * @returns {boolean} Returns true if 'C' or 'R' is found after a hyphen, otherwise returns false.
+		 *
+		 * @example
+		 * const isCopied = isCopiedOffer('GB-23-1001-2-C1');
+		 * console.log(isCopied); // Output: true
+		 */
+		isCopiedOffer: function(str) {
+			const match = str.match(/-[^-]*[CR]/);
+			return match !== null;
 		}
 	});
 });

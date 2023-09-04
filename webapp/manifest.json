@@ -121,7 +121,7 @@
 					"target": "master"
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/:offerId:",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:",
 					"name": "object",
 					"target": [
 						"master",
@@ -129,7 +129,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Offer",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Offer",
 					"name": "objectDetailOffer",
 					"target": [
 						"master",
@@ -137,7 +137,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Overview",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Overview",
 					"name": "objectDetailOverview",
 					"target": [
 						"master",
@@ -145,7 +145,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Awards",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Awards",
 					"name": "objectDetailAwards",
 					"target": [
 						"master",
@@ -153,7 +153,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/:offerId:/Deliveries",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Deliveries",
 					"name": "objectDetailDeliveries",
 					"target": [
 						"master",
@@ -161,7 +161,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/{offerId}/Delivery/{productId}/{layout}",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/{offerId}/Delivery/{productId}/{layout}",
 					"name": "deliveryTrackingProductDetail",
 					"target": [
 						"master",
@@ -170,7 +170,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/{offerId}/AwardedProduct/{productId}/{layout}",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/{offerId}/AwardedProduct/{productId}/{layout}",
 					"name": "awardProductsDetail",
 					"target": [
 						"master",
@@ -179,7 +179,7 @@
 					]
 				},
 				{
-					"pattern": "detail/{countryCode}/{objectId}/{offerId}/OfferProductDetail/{productId}/{layout}",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/{offerId}/OfferProductDetail/{productId}/{layout}",
 					"name": "offerProductDetail",
 					"target": [
 						"master",
