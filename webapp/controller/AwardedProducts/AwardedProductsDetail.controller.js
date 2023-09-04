@@ -253,7 +253,8 @@ sap.ui.define([
 					layout: oNextUIState.layout,
 					objectId: this.tenderId,
 					offerId: this.offerId,
-					countryCode: this.countryCode
+					countryCode: this.countryCode,
+					productScope: this.sProductScope
 				});
 			}.bind(this));
 		},
