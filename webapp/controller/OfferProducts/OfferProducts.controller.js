@@ -454,8 +454,9 @@ sap.ui.define([
 
 		validateOffer: function () {
 			const offer = this.defaultModel.getProperty(this.byId('idOfferForm').getObjectBinding().getPath());
+			const isCopied = this.isCopiedOffer(offer.OfferID);
 
-			if (offer.InternalBidDueDate <= offer.NewOfferDueDate) {
+			if (!isCopied && offer.InternalBidDueDate <= offer.NewOfferDueDate) {
 				MessageBox.error("Internal due date can not be before offer due date");
 				this.getModel("ui").setProperty('/OfferForm/editMode', true);
 				return false;
