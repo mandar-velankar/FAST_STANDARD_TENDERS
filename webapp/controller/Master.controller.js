@@ -176,7 +176,7 @@ sap.ui.define([
 		_onTemplateConfigReceived: function (sCountryCode) {
 			const table = this.byId("genericMasterTable");
 			this._bindTable(table, sCountryCode);
-			this.tenderID = this.getRouter().getHashChanger().getHash().split("/").splice(2, 1).join("/");
+			this.tenderID = this.getRouter().getHashChanger().getHash().split("/").splice(3, 1).join("/");
 			if (this.tenderID) {
 				this.filterMasterTable(this.tenderID);
 			}
@@ -283,7 +283,7 @@ sap.ui.define([
 
 		publishSelectedOfferStatus: function (res) {
 			const hash = this.getRouter().getHashChanger().getHash();
-			const offerId = hash.split("/")[3];
+			const offerId = hash.split("/")[4];
 			const offers = res.getParameter("data")?.results;
 			const selectedOffer = offers.find(offer => offer.OfferID === offerId);
 			if (selectedOffer) {
@@ -311,7 +311,7 @@ sap.ui.define([
 
 		setSelectedOffer: function () {
 			const masterTable = this.byId("genericMasterTable");
-			this.offerID = this.getRouter().getHashChanger().getHash().split("/").splice(3, 1).join("/");
+			this.offerID = this.getRouter().getHashChanger().getHash().split("/").splice(4, 1).join("/");
 			if (!this.offerID || this.offerID === "NA") return;
 			const selectedOffer = masterTable.getItems().find(el =>	{
 				const bindingCtxObj = el.getBindingContext().getObject();
