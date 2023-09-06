@@ -67,7 +67,6 @@ sap.ui.define([
 		 */
 		 _onObjectMatched: function (oEvent) {
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
-			this.sProductScope = oEvent.getParameter("arguments").productScope;
 			this.tenderId = oEvent.getParameter("arguments").objectId;
 			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
@@ -150,7 +149,6 @@ sap.ui.define([
 		getAwardedProductsTemplateConfig: async function () {
 			await this.templateState.read("DETAIL-AWARDEDRODUCTDETAIL", {
 				countryCode: this.countryCode,
-				productScope: this.sProductScope,
 				appID: "StandardTenders",
 				page: "DETAIL-AWARDEDRODUCTDETAIL",
 				keys: {
@@ -252,6 +250,7 @@ sap.ui.define([
 				this.oRouter.navTo("objectDetailAwards", {
 					layout: oNextUIState.layout,
 					objectId: this.tenderId,
+					productScope: this.sProductScope,
 					offerId: this.offerId,
 					countryCode: this.countryCode,
 					productScope: this.sProductScope

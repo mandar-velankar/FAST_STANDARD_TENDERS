@@ -371,13 +371,35 @@ sap.ui.define([
 					break;
 			}
 		},
+
+		/**
+		 * This function is need to show correct selected tab after browser refresh button clicked
+		 */
 		setSelectedTabKey: function () {
-			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(4,1).join("");
+			// Get the selectedTabKey from the URL hash
+			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(5,1).join("");
+
+			// Check and set selected Tab when open detail page
 			if (selectedTabKey == "Deliveries") {
 				this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
 			}
 			if (selectedTabKey == "Offer" || selectedTabKey == "Overview" || selectedTabKey == "Awards") {
 				this.getModel('st').setProperty("/selectedTab", selectedTabKey);
+			}
+
+			// Check and set selected Tab when open detail detail page
+			switch (selectedTabKey) {
+				case "OfferProductDetail":
+					this.getModel('st').setProperty("/selectedTab", "Offer");
+					break;
+				case "AwardedProduct":
+					this.getModel('st').setProperty("/selectedTab", "Awards");
+					break;
+				case "Delivery":
+					this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
+					break;
+				default:
+					break;
 			}
 		}
 	});

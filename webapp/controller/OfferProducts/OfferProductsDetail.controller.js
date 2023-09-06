@@ -289,7 +289,7 @@ sap.ui.define([
             this.getOwnerComponent().oListSelector.clearMasterListSelection();
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(1);
-				this.oRouter.navTo("object", {
+				this.oRouter.navTo("objectDetailOffer", {
 					layout: oNextUIState.layout,
 					countryCode: this.sCountryCode,
 					productScope: this.sProductScope,
