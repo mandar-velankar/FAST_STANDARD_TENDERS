@@ -10,8 +10,9 @@ sap.ui.define([
 	"sap/m/MessageBox",
 	"sap/m/MessageToast",
 	"sap/m/Token",
-	"sap/ui/Device"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device) {
+	"sap/ui/Device",
+	"sap/ui/model/Sorter",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device, Sorter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -604,6 +605,7 @@ sap.ui.define([
 					rememberSelections: false,
 					items: {
 						path: "ui>/OfferProductTable/countryBrands",
+						sorter: new Sorter("BRAND_NAME", false),
 						template: new sap.m.StandardListItem({
 							title: "{ui>BRAND_NAME}",
 							description: "{ui>BRAND_ID}",
