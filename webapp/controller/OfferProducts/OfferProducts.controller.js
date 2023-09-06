@@ -438,6 +438,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
+				productScope: this.productScope,
 				objectId: oItem.TenderID,
 				offerId: oItem.OfferID
 			}, bReplace);
