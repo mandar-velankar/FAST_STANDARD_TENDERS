@@ -12,19 +12,19 @@ builder:
       - "/test/**"
       - "/localService/**"
   customTasks:
-  - name: ui5-tooling-transpile-task
-    afterTask: replaceVersion
-    configuration:
-      debug: false
-      removeConsoleStatements: true
-      transpileAsync: true
-      excludePatterns:
-      - "lib"
-      - "libs"
-      - "themes"
-      - "images"
-      - "css"
-      - "i18n"
+  #- name: ui5-tooling-transpile-task
+  #  afterTask: replaceVersion
+  #  configuration:
+  #    debug: false
+  #    removeConsoleStatements: true
+  #    transpileAsync: true
+  #    excludePatterns:
+  #    - "lib"
+  #    - "libs"
+  #    - "themes"
+  #    - "images"
+  #    - "css"
+  #    - "i18n"
   # - name: webide-extension-task-updateManifestJson
   #   afterTask: replaceVersion
   #   configuration:
