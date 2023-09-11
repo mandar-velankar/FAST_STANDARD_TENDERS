@@ -67,6 +67,7 @@ sap.ui.define([
 		 _onObjectMatched: async function (oEvent) {
 
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
+			this.sProductScope = oEvent.getParameter("arguments").productScope;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
@@ -79,6 +80,7 @@ sap.ui.define([
 
 			const detaildetailConfig = await this.templateState.read("DETAIL-OFFERPRODUCTDETAIL", {
 				countryCode: this.sCountryCode ,
+				productScope: this.sProductScope,
 				appID: "StandardTenders",
 				page: "DETAIL-OFFERPRODUCTDETAIL",
 				keys: {
@@ -287,9 +289,10 @@ sap.ui.define([
             this.getOwnerComponent().oListSelector.clearMasterListSelection();
 			this.oOwnerComponent.getHelper().then(function (oHelper) {
 				oNextUIState = oHelper.getNextUIState(1);
-				this.oRouter.navTo("object", {
+				this.oRouter.navTo("objectDetailOffer", {
 					layout: oNextUIState.layout,
 					countryCode: this.sCountryCode,
+					productScope: this.sProductScope,
 					objectId: this.sObjectId,
 					offerId: this.sOfferId
 				});

@@ -45,7 +45,7 @@ sap.ui.define([
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 		},
 
-		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode}) {
+		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode, productScope}) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
@@ -58,6 +58,7 @@ sap.ui.define([
 			this.tenderId = objectId;
 			this.offerId = offerId;
 			this.countryCode = countryCode;
+			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
 
 			const oModel = new JSONModel({
@@ -76,6 +77,7 @@ sap.ui.define([
 		_onObjectMatched: async function (oEvent) {
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
+			this.productScope = oEvent.getParameter("arguments").productScope;
 			this.tenderId = oEvent.getParameter("arguments").objectId;
 			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
@@ -121,6 +123,7 @@ sap.ui.define([
 					objectId: this.tenderId,
 					offerId: this.offerId,
 					productId: selectedProductCode,
+					productScope: this.productScope,
 					countryCode: this.countryCode
 				});
 			}.bind(this));

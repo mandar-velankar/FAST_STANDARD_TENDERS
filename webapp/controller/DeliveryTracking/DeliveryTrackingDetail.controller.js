@@ -47,6 +47,7 @@ sap.ui.define([
 			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.layout = oEvent.getParameter("arguments").layout;
 			this.productCode = oEvent.getParameter("arguments").productId;
+			this.sProductScope = oEvent.getParameter("arguments").productScope;
 			this.getModel("appView").setProperty("/layout", this.layout);
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
@@ -83,6 +84,7 @@ sap.ui.define([
 		getDeliveryTrackingTemplateConfig: async function () {
 			await this.templateState.read("DETAIL-DELIVERYTRACKINGDETAIL", {
 				countryCode: this.countryCode,
+				productScope: this.sProductScope,
 				appID: "StandardTenders",
 				page: "DETAIL-DELIVERYTRACKINGDETAIL",
 				keys: {
@@ -99,7 +101,8 @@ sap.ui.define([
 					layout: oNextUIState.layout,
 					objectId: this.tenderId,
 					offerId: this.offerId,
-					countryCode: this.countryCode
+					countryCode: this.countryCode,
+					productScope: this.sProductScope
 				});
 			}.bind(this));
 		},

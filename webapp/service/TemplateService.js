@@ -6,13 +6,13 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
             this.model = model;
             this.requestCache = {};
         },
-        getTableConfig: async function ({ countryCode, appID, page }) {
+        getTableConfig: async function ({ countryCode, appID, page, productScope }) {
             // const keys = await this.model.requestKeyPredicate('/CountryTemplate', {
             //     CountryCode: countryCode,
             //     Application: appID,
             //     Page: page
             // });
-            const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}')`;
+            const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}',ProductScope='${productScope}')`;
             if(this.requestCache[`TableConfig-CountryTemplate${keys}`]){
                 return Promise.resolve(this.requestCache[`TableConfig-CountryTemplate${keys}`]);
             }
@@ -75,13 +75,13 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
             this.requestCache[`TableConfig-CountryTemplate${keys}`] = await templateBinding.requestObject();
             return this.requestCache[`TableConfig-CountryTemplate${keys}`];
         },
-        getFormConfig: async function ({ countryCode, appID, page }) {
+        getFormConfig: async function ({ countryCode, appID, page, productScope }) {
             // const keys = await this.model.requestKeyPredicate('/CountryTemplate', {
             //     CountryCode: countryCode || 'BR',
             //     Application: appID || 'StandardTenders',
             //     Page: page || 'DETAIL'
             // });
-            const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}')`;
+            const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}',ProductScope='${productScope}')`;
             
             if(this.requestCache[`FormConfig-CountryTemplate${keys}`]){
                 return Promise.resolve(this.requestCache[`FormConfig-CountryTemplate${keys}`]);
@@ -134,13 +134,13 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
             this.requestCache[`FormConfig-CountryTemplate${keys}`] = await templateBinding.requestObject();
             return this.requestCache[`FormConfig-CountryTemplate${keys}`];
         },
-        getViewConfig: async function ({ countryCode, appID, page }) {
+        getViewConfig: async function ({ countryCode, appID, page, productScope }) {
             // const keys = await this.model.requestKeyPredicate('/CountryTemplate', {
             //     CountryCode: countryCode || 'BR',
             //     Application: appID || 'StandardTenders',
             //     Page: page || 'DETAIL'
             // });
-            const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}')`;
+            const keys = `(CountryCode='${countryCode}',Application='${appID}',Page='${page}',ProductScope='${productScope}')`;
             if(this.requestCache[`ViewConfig-CountryTemplate${keys}`]){
                 return Promise.resolve(this.requestCache[`ViewConfig-CountryTemplate${keys}`]);
             }

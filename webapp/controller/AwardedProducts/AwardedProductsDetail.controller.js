@@ -71,6 +71,7 @@ sap.ui.define([
 			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout;
+			this.sProductScope = oEvent.getParameter("arguments").productScope;
 
 			this.getModel("appView").setProperty("/layout", this.layout);
 
@@ -149,6 +150,7 @@ sap.ui.define([
 		getAwardedProductsTemplateConfig: async function () {
 			await this.templateState.read("DETAIL-AWARDEDRODUCTDETAIL", {
 				countryCode: this.countryCode,
+				productScope: this.sProductScope,
 				appID: "StandardTenders",
 				page: "DETAIL-AWARDEDRODUCTDETAIL",
 				keys: {
@@ -250,8 +252,10 @@ sap.ui.define([
 				this.oRouter.navTo("objectDetailAwards", {
 					layout: oNextUIState.layout,
 					objectId: this.tenderId,
+					productScope: this.sProductScope,
 					offerId: this.offerId,
-					countryCode: this.countryCode
+					countryCode: this.countryCode,
+					productScope: this.sProductScope
 				});
 			}.bind(this));
 		},
