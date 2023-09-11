@@ -105,7 +105,8 @@ sap.ui.define([
 			const viewData = {
 				objectId:this.sObjectId,
 				offerId:this.sOfferId,
-				countryCode:this.sCountryCode
+				countryCode:this.sCountryCode,
+				productScope: this.sProductScope
 			};
 			const isVisible = this.getTabVisibility(tab.title);
 
@@ -162,6 +163,7 @@ sap.ui.define([
 		 */
 		_onObjectMatched: async function (oEvent) {
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
+			this.sProductScope = oEvent.getParameter("arguments").productScope;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.layout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
@@ -243,6 +245,7 @@ sap.ui.define([
 		gettemplateConfig: async function () {
 			await this.templateState.read("DETAIL",{
 				countryCode: this.sCountryCode,
+				productScope: this.sProductScope,
 				appID: "StandardTenders",
 				page: "DETAIL",
 				keys: {
@@ -336,13 +339,13 @@ sap.ui.define([
 			}
 		},
 		onTabSelect: function (event) {
-			const selectedTabKey = event.getParameter("key").toLowerCase();
 			let hash = this.getRouter().getHashChanger().getHash();
 			const offerId = this.sOfferId || this.getModel("st").getProperty("/SelectedTender/OfferID") || "NA";
+			const selectedTabKey = event.getParameter("key").toLowerCase();
 			this.changeHash({selectedTabKey, hash, offerId});
 		},
 		changeHash: function ({selectedTabKey, hash, offerId}) {
-			hash = hash.split("/").splice(0, 3).join("/");
+			hash = hash.split("/").splice(0, 4).join("/");
 			switch (selectedTabKey) {
 				case "tender":
 					hash = hash + "/" + offerId;
@@ -368,13 +371,35 @@ sap.ui.define([
 					break;
 			}
 		},
+
+		/**
+		 * This function is need to show correct selected tab after browser refresh button clicked
+		 */
 		setSelectedTabKey: function () {
-			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(4,1).join("");
+			// Get the selectedTabKey from the URL hash
+			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(5,1).join("");
+
+			// Check and set selected Tab when open detail page
 			if (selectedTabKey == "Deliveries") {
 				this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
 			}
 			if (selectedTabKey == "Offer" || selectedTabKey == "Overview" || selectedTabKey == "Awards") {
 				this.getModel('st').setProperty("/selectedTab", selectedTabKey);
+			}
+
+			// Check and set selected Tab when open detail detail page
+			switch (selectedTabKey) {
+				case "OfferProductDetail":
+					this.getModel('st').setProperty("/selectedTab", "Offer");
+					break;
+				case "AwardedProduct":
+					this.getModel('st').setProperty("/selectedTab", "Awards");
+					break;
+				case "Delivery":
+					this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
+					break;
+				default:
+					break;
 			}
 		}
 	});

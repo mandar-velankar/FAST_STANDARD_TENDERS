@@ -117,11 +117,20 @@ sap.ui.define([
 			// 	}));
 			// }
 
-			this._getTemplateConfig(sCountryCode);
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
+			this._bindProductScopeItems(sCountryCode);
 			// this.setFilter(oEvent);
 		},
+
+		onProductScopesReceived: async function (oEvent) {
+			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry");
+			let sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
+			sProductScope = sProductScope ? sProductScope.replace(/\s+/g, '') : 'NA';
+			
+			this._getTemplateConfig(sCountryCode,sProductScope);
+		},
+
 		_getNextTenderID: async function (sCountryCode) {
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryTenderNo", {
@@ -140,13 +149,15 @@ sap.ui.define([
 				return `${sCountryCode}-${year}-${data}`;
 			})
 		},
-		_getTemplateConfig: async function (sCountryCode) {
+		_getTemplateConfig: async function (sCountryCode,sProductScope) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
+			this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			try {
 				await this.templateState.read("MASTER", {
 					countryCode: sCountryCode, 
+					productScope: sProductScope,
 					appID: "StandardTenders",
 					page: "MASTER"
 				});
@@ -165,7 +176,7 @@ sap.ui.define([
 		_onTemplateConfigReceived: function (sCountryCode) {
 			const table = this.byId("genericMasterTable");
 			this._bindTable(table, sCountryCode);
-			this.tenderID = this.getRouter().getHashChanger().getHash().split("/").splice(2, 1).join("/");
+			this.tenderID = this.getRouter().getHashChanger().getHash().split("/").splice(3, 1).join("/");
 			if (this.tenderID) {
 				this.filterMasterTable(this.tenderID);
 			}
@@ -210,10 +221,38 @@ sap.ui.define([
 			});
 		},
 
-		_bindTable: function (table, sCountryCode) {
+		_bindProductScopeItems: function (sCountryCode) {
+			const oSelectProductScopes = this.byId("idSelectProductScope");
+			const controller = this;
+
+			oSelectProductScopes?.bindItems({
+				path: "/DistinctProductScopeView",
+				filters: [
+					new Filter("CountryCode", FilterOperator.EQ, sCountryCode)
+				],
+				template: new sap.ui.core.Item({
+					key: "{ProductScope}",
+					text: "{ProductScope}"
+				}),
+				sorter: new Sorter({
+					path: 'ProductScope',
+					descending: false
+				}),
+				events: {
+					dataReceived: function (res) {
+						controller.onProductScopesReceived(res);
+					}
+				},
+				templateShareable: true
+			});
+		},
+
+		_bindTable: function (table, sCountryCode, sProductScope) {
 			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
+			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
+
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
 			table && table.bindItems({
@@ -244,7 +283,7 @@ sap.ui.define([
 
 		publishSelectedOfferStatus: function (res) {
 			const hash = this.getRouter().getHashChanger().getHash();
-			const offerId = hash.split("/")[3];
+			const offerId = hash.split("/")[4];
 			const offers = res.getParameter("data")?.results;
 			const selectedOffer = offers.find(offer => offer.OfferID === offerId);
 			if (selectedOffer) {
@@ -272,7 +311,7 @@ sap.ui.define([
 
 		setSelectedOffer: function () {
 			const masterTable = this.byId("genericMasterTable");
-			this.offerID = this.getRouter().getHashChanger().getHash().split("/").splice(3, 1).join("/");
+			this.offerID = this.getRouter().getHashChanger().getHash().split("/").splice(4, 1).join("/");
 			if (!this.offerID || this.offerID === "NA") return;
 			const selectedOffer = masterTable.getItems().find(el =>	{
 				const bindingCtxObj = el.getBindingContext().getObject();
@@ -529,6 +568,7 @@ sap.ui.define([
 			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
+				productScope: this.getModel("st").getProperty("/SelectedProductScope"),
 				objectId: oItem.TenderID, //getBindingContext().getProperty("TenderID")
 				offerId: oItem?.OfferID || "NA",
 				layout: "TwoColumnsMidExpanded"
