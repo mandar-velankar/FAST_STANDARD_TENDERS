@@ -401,7 +401,17 @@ sap.ui.define([
 				default:
 					break;
 			}
-		}
+		},
+
+		//Go to sharepoint folder
+		_onFolderButtonPress: async function (oEvent) {
+			const aAppConfig = await this.stState.getAppConfig(this.sCountryCode);
+			const sDownloadButtonUrl = aAppConfig?.find(config => config.Control === 'DocumentButton');
+			var url = sDownloadButtonUrl ? sDownloadButtonUrl.URL + '$CountryCode/$TenderId' : "https://bayergroup.sharepoint.com/:f:/r/sites/FASTSystem/Shared%20Documents/Documents_Library/Countries/$CountryCode/$TenderId";
+			url = url.replace("$CountryCode", this.sCountryCode);
+			url = url.replace("$TenderId", this.sObjectId);
+			window.open(url);
+		},
 	});
 
 });
