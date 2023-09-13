@@ -173,6 +173,7 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
+			this.defaultModel = this.getOwnerComponent().getModel();
 
 			this.setSelectedTabKey();
 
@@ -411,6 +412,49 @@ sap.ui.define([
 			url = url.replace("$CountryCode", this.sCountryCode);
 			url = url.replace("$TenderId", this.sObjectId);
 			window.open(url);
+		},
+
+		onDeleteTenderPress: async function(oEvent){
+
+			var that = this;
+
+			sap.m.MessageBox.warning("Are you sure you want to continue deleting this tender? All tender information will be lost", {
+				actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+				styleClass: "sapUiSizeCompact",
+				onClose: async function (sAction) {
+					if (sAction === "YES") {
+						await that.deleteTender();
+						that.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
+						// No item should be selected on master after detail page is closed
+						that.getOwnerComponent().oListSelector.clearMasterListSelection();
+						that.getView().unbindElement();
+						that.getRouter().navTo("master");
+						that.getModel('st').setProperty("/selectedTab", "");
+					} else {
+						//Do nothing and close the popup
+					}
+				}
+			});
+		},
+
+		deleteTender: function(event){
+			//this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
+			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/Active", 0);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesTenderFormSuccess.bind(this),
+				groupId: "Basicinfo"
+			}); 
+		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesTenderFormSuccess: function(res){
+			this.getOwnerComponent().getModel().read("/TenderMasterView");
+			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.filter();
+			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.refresh(true);
 		},
 	});
 
