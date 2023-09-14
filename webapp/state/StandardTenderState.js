@@ -50,6 +50,11 @@ sap.ui.define(
                 return this.getService().getOfferStatus(offerID);
             },
 
+            getAppConfig: async function (sCountry){
+                let aAppConfig = await this.getService().getAppConfig(sCountry);
+                return aAppConfig;
+            },
+
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':
