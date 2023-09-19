@@ -3,7 +3,7 @@ sap.ui.define([
   "./Control",
   "sap/m/ViewSettingsItem" 
 ], function (BaseObject, Control, ViewSettingsItem) {
-  const Column = BaseObject.extend("com.bayer.SXTENDER.templates.GenericTableComponent.models.Column", {
+  const Column = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Column", {
     constructor: function (tableId, data) {
       BaseObject.prototype.constructor.call(this);
       if (data) {
