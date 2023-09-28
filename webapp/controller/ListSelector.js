@@ -1,5 +1,5 @@
 ﻿sap.ui.define([
-	"sap/ui/base/Object",
+	"../BaseObject",
 	"sap/base/Log"
 ], function (BaseObject, Log) {
 	"use strict";
@@ -24,7 +24,7 @@
 				// Used to wait until the setBound masterList function is invoked
 				this._oWhenListHasBeenSet
 					.then(function (oList) {
-						oList.getBinding("items").attachEventOnce("dataReceived",
+						oList.getBinding("items")?.attachEventOnce("dataReceived",
 							function () {
 								if (this._oList.getItems().length) {
 									fnResolve({
