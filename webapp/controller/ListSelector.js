@@ -1,5 +1,5 @@
 ﻿sap.ui.define([
-	"../BaseObject",
+	"sap/ui/base/Object",
 	"sap/base/Log"
 ], function (BaseObject, Log) {
 	"use strict";
