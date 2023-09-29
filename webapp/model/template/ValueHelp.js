@@ -127,15 +127,15 @@ sap.ui.define([
                     path = '';
                     break;
                 }
-                if (path === "InstituteID" && !isNaN(Number(sValue))) {
+                if (path === "CustomerID" && !isNaN(Number(sValue))) {
                   return new Filter({
                     path: path,
-                    operator: FilterOperator.EQ,
-                    value1: Number(sValue),
+                    operator: FilterOperator.Contains,
+                    value1: sValue,
                     caseSensitive: false	
                   })
                 }
-                if (path !== "InstituteID" && isNaN(Number(sValue))) {
+                if (path !== "CustomerID" && isNaN(Number(sValue))) {
                   return new Filter({
                     path: path,
                     operator: FilterOperator.Contains,
