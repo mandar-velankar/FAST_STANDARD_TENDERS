@@ -123,7 +123,7 @@
 			<Table 
 				id="idProductInformationTable" 
 				mode="SingleSelectMaster"
-				items = "{/OfferProductValidation}"
+				items = "{path: '/OfferProductValidation', templateShareable: true}"
 			>
 			<headerToolbar>
 			<OverflowToolbar>
