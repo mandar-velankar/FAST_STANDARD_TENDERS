@@ -1,4 +1,4 @@
-sap.ui.define(["../BaseObject", "./Column"], function (BaseObject, Column) {
+sap.ui.define(["./Column","../BaseObject"], function (Column, BaseObject) {
   const Table = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Table", {
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
