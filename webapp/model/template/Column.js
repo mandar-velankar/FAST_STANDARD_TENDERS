@@ -12,7 +12,7 @@ sap.ui.define([
         this.importance = data.Importance;
         this.isValueHelpKey = data.IsValueHelpKey;
         this.isValueHelpText = data.IsValueHelpText;
-        this.control = new Control(tableId, data.Control);
+        this.control = Control?new Control(tableId, data.Control):new com.bayer.tender.statenderapp.model.template.Control(tableId, data.Control);
       }
     },
     getControl: function () {
