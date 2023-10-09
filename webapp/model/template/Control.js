@@ -19,7 +19,7 @@ sap.ui.define(["sap/m/Text",
         this.parentId = parentId;
         this.id = data.ID;
         this.type = data.Type;
-        this.properties = data.Properties.map(property => new ControlProperty(property));
+        this.properties = data.Properties.map(property => ControlProperty?new ControlProperty(property):new com.bayer.tender.statenderapp.model.template.ControlProperty(property));
         this.controlID = this.properties.find(property => property.name === "id")?.value;
         data.ValueHelp && (this.valueHelp = new com.bayer.tender.statenderapp.model.template.ValueHelp(data.ValueHelp));
       }
