@@ -5,8 +5,10 @@ sap.ui.define([
 	"./controller/ListSelector",
 	"./controller/ErrorHandler",
 	'sap/f/FlexibleColumnLayoutSemanticHelper',
-	'sap/f/library'
-], function (UIComponent, Device, models, ListSelector, ErrorHandler, FlexibleColumnLayoutSemanticHelper, fioriLibrary) {
+	'sap/f/library',
+	"sap/ui/model/json/JSONModel",
+	"./service/AccessService"
+], function (UIComponent, Device, models, ListSelector, ErrorHandler, FlexibleColumnLayoutSemanticHelper, fioriLibrary, JSONModel, AccessService) {
 	"use strict";
 
 	return UIComponent.extend("com.bayer.tender.statenderapp.Component", {
@@ -28,6 +30,11 @@ sap.ui.define([
 			// set the device model
 			this.setModel(models.createDeviceModel(), "device");
 
+			this.accessService = new AccessService(this.getModel("access"));
+			this.accessService.getAccess().then(result=>{
+				this.setModel(new JSONModel(result.data), "accessControl");
+				return result.data;
+			});
 			// call the base component's init function and create the App view
 			UIComponent.prototype.init.apply(this, arguments);
 
