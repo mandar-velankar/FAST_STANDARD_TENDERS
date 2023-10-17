@@ -64,10 +64,9 @@
 									<MenuItem text="{ui>name}" press=".onDownloadWord"/>
 								</items>
 							</MenuItem>
-							<MenuItem id="btnPDFDownload" text="PDF" icon="sap-icon://pdf-attachment">
+							<MenuItem id="btnPDFDownload" text="PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
 								<items>
-									<MenuItem text="Public Customer" />
-									<MenuItem text="Private Customer" />
+									<MenuItem text="{ui>name}" press=".onDownloadPdf"/>
 								</items>
 							</MenuItem>
 							<MenuItem id="btnExcelDownload" text="Excel" icon="sap-icon://excel-attachment" visible="{= ${ui>/ExcelTemplateCountry/length} > 0}" items="{ui>/ExcelTemplateCountry}">
