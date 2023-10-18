@@ -9,7 +9,12 @@ sap.ui.define(["./Column","../BaseObject"], function (Column, BaseObject) {
         this.tableId = data.TableID;
         this.entity = data.Entity;
         for (const col of data.Columns) {
-          this.columns.push(new Column(this.tableId,col));
+          if(Column){
+            this.columns.push(new Column(this.tableId,col));
+          }
+          else{
+            this.columns.push(new com.bayer.tender.statenderapp.model.template.Column(this.tableId,col));
+          }
         }
       }
     },
