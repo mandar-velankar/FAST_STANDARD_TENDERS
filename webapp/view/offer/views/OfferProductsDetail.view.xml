@@ -116,7 +116,7 @@
                             </form:layout>
                             <form:formContainers>
                                 <form:FormContainer
-                                    title="{template>title}"
+                                    title=""
                                     formElements="{path:'template>formElements',templateShareable:true}"
                                 >
                                     <form:formElements>
