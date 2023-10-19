@@ -988,6 +988,17 @@ sap.ui.define([
 			});
 		},
 
+		createAffiliateOffer: function () {
+			const form = this.byId("idAffiliateOfferForm");
+			const obj = form.getBindingContext().getObject();
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID, "type": "affiliateoffer", "instituteName": obj.InstituteName || "", "productScope": this.productScope},
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
+			});
+		},
+
 		onOpenAffiliateOfferPopup: function () {
 			const that = this;
 			if (!this.byId("idAffiliatedOfferDialog")) {
@@ -1047,19 +1058,17 @@ sap.ui.define([
 
 			const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
 			originalInputField.getModel().setProperty(path, selectedItem.InstituteName); 
-		  },
-
-		onCreateAffiliateOffer: function () {
-
 		},
 
 		onCloseAffiliateOfferCreationDialog: function () {
-
+			this.byId("idAffiliatedOfferDialog")?.close();
+			this.getModel().resetChanges();
 		},
 
 		onOfferCopySuccess: async function(offerID){
 			this.navToOffer(offerID);
 			this.refreshMasterTable(offerID).then(()=>{
+				this.onCloseAffiliateOfferCreationDialog();
 				MessageToast.show(offerID + " created");
 			});	
 		},
