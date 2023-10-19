@@ -59,7 +59,7 @@
             <Button
                 id="idCreateAffiliatedOfferBtn"
                 text="Create"
-                press=".onCreateAffiliateOffer"
+                press=".createAffiliateOffer"
             />
             <Button
                 id="cancelDialog"
