@@ -106,7 +106,7 @@
 					singleContainerFullSize="{template>layout/singleContainerFullSize}" />
 			</form:layout>
 			<form:formContainers>
-				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
+				<form:FormContainer title="" formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
 						<form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
