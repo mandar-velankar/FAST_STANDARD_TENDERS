@@ -12,7 +12,10 @@ sap.ui.define([
 	"sap/m/Token",
 	"sap/ui/Device",
 	"sap/ui/model/Sorter",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device, Sorter) {
+	"sap/m/TableSelectDialog", 
+	"sap/m/Text", 
+	"sap/m/Column"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device, Sorter, TableSelectDialog, Text, Column) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -963,6 +966,7 @@ sap.ui.define([
 			switch(selectedItemText){
 				case "revisedoffer": return this.createRevisedOffer(evt);
 				case "continuedoffer": return this.createContinuedOffer(evt);
+				case "affiliateoffer": return this.onOpenAffiliateOfferPopup(evt);
 			}
 		},
 
@@ -984,9 +988,87 @@ sap.ui.define([
 			});
 		},
 
+		createAffiliateOffer: function () {
+			const form = this.byId("idAffiliateOfferForm");
+			const obj = form.getBindingContext().getObject();
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID, "type": "affiliateoffer", "instituteName": obj.InstituteName || "", "productScope": this.productScope},
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
+			});
+		},
+
+		onOpenAffiliateOfferPopup: function () {
+			const that = this;
+			if (!this.byId("idAffiliatedOfferDialog")) {
+				this.offerCreationDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.AffiliatedOffer",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+                    oDialog.open();
+					that.bindQuotationInstitute();
+                })
+			}else {
+				this.byId("idAffiliatedOfferDialog").open();
+			}
+		},
+
+		bindQuotationInstitute: function () {
+			const form = this.byId("idAffiliateOfferForm");
+			const entry = this.getModel().createEntry("/OfferFormView");
+			const path = entry.getPath();
+			form.bindElement({
+				path: path
+			});
+		},
+
+		onOpenChildInstituteList: async function (event) {
+			const source = event.getSource();
+			const tender = await this.stState.getService().getTender(this.objectId);
+       	 	// create value help dialog
+			this.valueHelpTableSelectDialog = new TableSelectDialog({
+				title: "Child Institutes",
+				multiSelect: source instanceof sap.m.MultiInput ? true : false,
+				contentWidth: '250px',
+				items: {
+					path: "/ChildInstitutesView",
+					filters: [
+						new Filter("ParentInstituteID", "EQ", tender?.InstituteID),
+					],
+					template: new ColumnListItem({
+						type: "Active",
+						cells: [
+							new Text({text: "{InstituteName}" })
+						]
+					})	
+				},
+				confirm: (event)=>this.handleCloseValueHelp(event,source),
+			});
+			this.valueHelpTableSelectDialog.addColumn(new Column());
+			this.valueHelpTableSelectDialog.setModel(source.getModel());
+        	this.valueHelpTableSelectDialog.setModel(source.getModel("st"), "st");
+			this.valueHelpTableSelectDialog.open();
+		},
+		handleCloseValueHelp: function (oEvent,originalInputField) {
+			const oParam = oEvent.getParameter("selectedItem");
+			const selectedItem = oParam.getBindingContext().getObject();
+
+			const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
+			originalInputField.getModel().setProperty(path, selectedItem.InstituteName); 
+		},
+
+		onCloseAffiliateOfferCreationDialog: function () {
+			this.byId("idAffiliatedOfferDialog")?.close();
+			this.getModel().resetChanges();
+		},
+
 		onOfferCopySuccess: async function(offerID){
 			this.navToOffer(offerID);
 			this.refreshMasterTable(offerID).then(()=>{
+				this.onCloseAffiliateOfferCreationDialog();
 				MessageToast.show(offerID + " created");
 			});	
 		},

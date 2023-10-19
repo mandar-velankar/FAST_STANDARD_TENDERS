@@ -1,0 +1,71 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:up="sap.uxap"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.uxap"
+    xmlns:t="sap.ui.table"
+    xmlns:l="sap.ui.layout"
+    xmlns:mvc="sap.ui.core.mvc"
+>
+    <Dialog
+        id="idAffiliatedOfferDialog"
+        title="Create Affiliate Offer"
+        contentWidth="550px"
+        contentHeight="170px"
+    >
+        <content>
+            <form:Form editable="true" id = "idAffiliateOfferForm">
+                <form:layout>
+                    <form:ResponsiveGridLayout
+                        labelSpanXL="3"
+                        labelSpanL="3"
+                        labelSpanM="3"
+                        labelSpanS="2"
+                        adjustLabelSpan="false"
+                        emptySpanXL="4"
+                        emptySpanL="4"
+                        emptySpanM="4"
+                        emptySpanS="0"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1"
+                        singleContainerFullSize="false"
+                    />
+                </form:layout>
+                <form:formContainers>
+                    <form:FormContainer>
+                        <form:formElements>
+                            <form:FormElement label="Quotation Institute">
+                                <form:fields>
+                                    <Input
+                                        valueHelpOnly="true"
+                                        showValueHelp="true"
+                                        class="sapUiSmallMarginTop"
+                                        required="true"
+                                        valueHelpRequest=".onOpenChildInstituteList"
+                                        value="{InstituteName}"
+                                        id="idQuotationInstitutesInput"
+                                    />
+                                </form:fields>
+                            </form:FormElement>
+                        </form:formElements>
+                    </form:FormContainer>
+                </form:formContainers>
+            </form:Form>
+        </content>
+
+        <buttons>
+            <Button
+                id="idCreateAffiliatedOfferBtn"
+                text="Create"
+                press=".createAffiliateOffer"
+            />
+            <Button
+                id="cancelDialog"
+                text="Cancel"
+                press=".onCloseAffiliateOfferCreationDialog"
+            />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>
