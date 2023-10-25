@@ -179,6 +179,8 @@ sap.ui.define([
 
 			this.getModel().metadataLoaded().then( async function() {
 				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
+				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();
 				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS);
 			}.bind(this));
