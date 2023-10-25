@@ -33,7 +33,7 @@ sap.ui.define([
 
       _resolveBinding: function({defaultModel,defaultEntityPath,stateModel}, value){
         let model = defaultModel;
-        if(this.path.toLowerCase().includes("countrycode")){
+        if(this.path.toLowerCase().includes("countrycode") || this.path.toLowerCase().includes("parentinstituteid")){
           model = stateModel;
           return model.getProperty(`/${value}`);
         }
