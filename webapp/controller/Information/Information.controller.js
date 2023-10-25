@@ -364,7 +364,7 @@ sap.ui.define([
 			const offerValidation = this.getOwnerComponent().getModel().getProperty(`/OfferValidation('${this.offerId}')`);
 
 			if(offerValidation.IN_POLICY === false){
-				await this._showApprovalsPricingError();
+				// await this._showApprovalsPricingError();
 			} else {
 				await this._filterApprovalTypes();
 				await this._enableApprovalCancelButtons();

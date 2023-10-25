@@ -566,6 +566,7 @@ sap.ui.define([
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.filterMasterTable(oItem.TenderID);
 			this.getModel("st").setProperty("/SelectedTender", oItem);
+			this.getModel("st").setProperty("/SelectedInstituteID", oItem?.InstituteID);
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
 				productScope: this.getModel("st").getProperty("/SelectedProductScope"),
