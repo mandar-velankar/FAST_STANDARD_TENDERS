@@ -9,6 +9,8 @@ sap.ui.define([
             Object.prototype.constructor.call(this);
             this.countryCode = "";
             this.outcome = "";
+			this.selectedOfferQuotationInstituteID = "";
+			this.instituteID
         },
         setCountryCode: function(sCountryCode){
             this.countryCode = sCountryCode;
@@ -25,6 +27,23 @@ sap.ui.define([
         getOutcome: function () {
             return this.outcome;
         },
+
+		setSelectedOfferQuotationInstituteID: function (quotationInstituteID) {
+			this.selectedOfferQuotationInstituteID = quotationInstituteID;
+		},
+
+		getSelectedOfferQuotationInstituteID: function () {
+			return this.selectedOfferQuotationInstituteID;
+		},
+
+		getParentInstituteID: function () {
+			return this.instituteID;
+		},
+
+		setParentInstituteID: function (instituteID) {
+            this.instituteID = instituteID;
+        },
+
         onChangeOutcome: function (event, StandardSingletonService) {
             const source = event.getSource();
             const reasonItemBinding = source.getParent().getParent().getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
@@ -43,6 +62,23 @@ sap.ui.define([
                 source.getSelectedKey() === 'No' || source.getSelectedKey() == '' ? itemBinding.setProperty("enabled", false) : itemBinding.setProperty("enabled", true);
             }     
         },
+
+		onChangeQuotationInstitute: function (originalInputField, quotationInstituteID, StandardSingletonService) {
+            const paymentTermsBinding = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")[2].getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Term")?.getAggregation("fields")[0].getBinding("items");
+            const parentInstituteID = StandardSingletonService.getParentInstituteID();
+            const countryCode = StandardSingletonService.getCountryCode();
+            paymentTermsBinding.aApplicationFilters = []
+            const orFilters = [
+				new Filter("ParentInstituteID",FilterOperator.EQ, parentInstituteID),
+				new Filter("InstituteID",FilterOperator.EQ, quotationInstituteID),
+				new Filter("CountryCode",FilterOperator.EQ, countryCode),
+			]
+            paymentTermsBinding.filter(orFilters);
+		},
+
+		getQuotationInstituteID: function () {
+			return this.selectedOfferQuotationInstituteID;
+		},
 
         // onChangeProductIncluded: function (event) {
         //     const source = event.getSource();

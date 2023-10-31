@@ -1037,6 +1037,7 @@ sap.ui.define([
 					path: "/ChildInstitutesView",
 					filters: [
 						new Filter("ParentInstituteID", "EQ", tender?.InstituteID),
+						new Filter("CountryCode", "EQ", this.countryCode),
 					],
 					template: new ColumnListItem({
 						type: "Active",
