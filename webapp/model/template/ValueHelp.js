@@ -9,8 +9,9 @@ sap.ui.define([
   "sap/m/Token",
   "sap/m/Text", 
   "sap/ui/model/Filter",
-  "sap/ui/model/FilterOperator"
-], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator) {
+  "sap/ui/model/FilterOperator",
+  "../../service/StandardSingletonService",
+], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator, StandardSingletonService) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -76,6 +77,11 @@ sap.ui.define([
 
                 const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
                 originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]); 
+
+                const changeFunction = StandardSingletonService[`onChange${this.title}`];
+                if (changeFunction) {
+                  changeFunction(originalInputField, selectedItem[field.ID], StandardSingletonService);
+                }
             })
           }
         }     
