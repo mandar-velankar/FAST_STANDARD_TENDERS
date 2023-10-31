@@ -64,7 +64,7 @@
 									<MenuItem text="{ui>name}" press=".onDownloadWord"/>
 								</items>
 							</MenuItem>
-							<MenuItem id="btnPDFDownload" text="PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
+							<MenuItem id="btnPDFDownload" text="Email PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0 &amp;&amp; ${st>/SelectedCountry} === 'PK'}" items="{ui>/WordTemplateCountry}">
 								<items>
 									<MenuItem text="{ui>name}" press=".onDownloadPdf"/>
 								</items>
