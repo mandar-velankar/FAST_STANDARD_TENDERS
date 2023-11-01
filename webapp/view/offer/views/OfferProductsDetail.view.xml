@@ -13,11 +13,21 @@
         <f:title>
             <f:DynamicPageTitle>
                 <f:heading>
-                    <Title
-                        id = "idProductPackNameOfferProductDetail"
-                        text="{ProductPackName}"
-                        level="H2"
-                    />
+                    <VBox>
+                        <Title
+                            id = "idProductPackNameOfferProductDetail"
+                            text="{PRODUCTPACKNAME}"
+                            level="H2"
+                            class="sapUiTinyMarginBottom"
+                        />
+                        <MessageStrip
+                            visible="{= (${RegistrationValidUntil} &amp;&amp; ${ui>/today} > ${RegistrationValidUntil}) ? true : false}"
+                            text="Registration is expired"
+                            type="Warning"
+                            showIcon="true"
+                            showCloseButton="false"
+                        />
+                    </VBox>
                 </f:heading>
                 <f:navigationActions>
                     <OverflowToolbarButton
