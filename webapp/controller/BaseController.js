@@ -10,7 +10,29 @@ sap.ui.define([
 	"sap/m/MessageItem",
 	"sap/ui/model/json/JSONModel",
 	"../service/StandardSingletonService",
-], function (Controller, History, formatter, CustomPercentageType, CustomNumberType, CustomDecimalType, Fragment, MessagePopover, MessageItem, JSONModel, StandardSingletonService) {
+	"sap/m/MessageView",
+	"sap/m/Button",
+	"sap/m/Dialog",
+	"sap/m/Bar",
+	"sap/m/Text"
+], function (
+	Controller, 
+	History, 
+	formatter, 
+	CustomPercentageType, 
+	CustomNumberType, 
+	CustomDecimalType, 
+	Fragment, 
+	MessagePopover, 
+	MessageItem, 
+	JSONModel, 
+	StandardSingletonService,
+	MessageView, 
+	Button,
+	Dialog,
+	Bar,
+	Text
+	) {
 	"use strict";
 
 	return Controller.extend("com.bayer.tender.statenderapp.controller.BaseController", {
@@ -242,6 +264,71 @@ sap.ui.define([
 			const enablementModel = new JSONModel(obj);
 			this.getOwnerComponent().setModel(enablementModel, 'em');
 		},
+
+		showMessageCompositeView: function (sTitle, aMessages, sState) {
+
+			const that = this;
+			const oMessageTemplate = new MessageItem({
+				type: '{type}',
+				title: '{title}',
+				description: '{description}',
+				subtitle: '{subtitle}',
+				counter: '{counter}',
+				markupDescription: "{markupDescription}"
+			});
+
+			//Message view (where multiple errors can be bundeled)
+			const oMessageView = new MessageView({
+					showDetailsPageHeader: false,
+					showDetailsPageHeader: false,
+					itemSelect: function () {
+						oBackButton.setVisible(true);
+					},
+					items: {
+						path: "/",
+						template: oMessageTemplate
+					}
+				})
+			const oBackButton = new Button({
+					icon: sap.ui.core.IconPool.getIconURI("nav-back"),
+					visible: false,
+					press: function () {
+						oMessageView.navigateBack();
+						this.setVisible(false);
+					}
+				});
+
+			//add messages	
+			const oMessageModel = new JSONModel();
+			oMessageModel.setData(aMessages);
+			oMessageView.setModel(oMessageModel);
+
+			//show dialog
+			const oDialogMessages = new Dialog({
+				resizable: true,
+				content: oMessageView,
+				state: sState,
+				beginButton: new Button({
+					press: function () {
+						this.getParent().close();
+					},
+					text: "Close"
+				}),
+				customHeader: new Bar({
+					contentMiddle: [
+						new Text({
+							text: sTitle
+						})
+					],
+					contentLeft: [oBackButton]
+				}),
+				contentHeight: "300px",
+				contentWidth: "500px",
+				verticalScrolling: false
+			});
+
+			oDialogMessages.open();
+		}
 	});
 
 });

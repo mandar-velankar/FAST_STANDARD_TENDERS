@@ -109,12 +109,20 @@ sap.ui.define([
 		 * @param {string} sObjectPath path to the object to be bound to the view.
 		 * @private
 		 */
-		_bindView: function (sObjectPath) {
-			// Set busy indicator during view binding
-			var oViewModel = this.getModel(sObjectPath);
+		_bindView: function () {
+			const entity = this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getForm().getEntity();
+			let path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+				TenderID: this.sObjectId,
+				OfferID: this.sOfferId,
+				Active: '1',
+				ProductCode: this.productId,
+				LotID: '1'
+			});
+			
 
-			// If the view was not bound yet its not busy, only if the binding requests data it is set to busy again
-			oViewModel.setProperty("/busy", false);
+			this.getView().bindElement({
+				path: path
+			});
 		},
 
 		onBeforeShow:async function(sObjectId, sOfferId){
@@ -135,6 +143,7 @@ sap.ui.define([
 				delay: 0,
 				editMode: false,
 				currency: "EUR",
+				today: new Date(),
 				ProductForm:{
 					editMode: false
 				},
@@ -158,9 +167,9 @@ sap.ui.define([
 
 			const priceConditionType = await this.getSavedPriceConditionType();
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
-
+			this._bindView();
 			this._bindForm("ProductForm");
-			this._bindText("ProductPackNameOfferProductDetail");
+			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
@@ -317,6 +326,8 @@ sap.ui.define([
 		},
 		onOfferDetailFormSaveBtnPress: function(event){
 			// if(!this.validateProduct()) return;
+			const form = this.byId(`idProductForm`);
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccessProductForm.bind(this),
