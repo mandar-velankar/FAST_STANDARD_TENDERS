@@ -326,6 +326,8 @@ sap.ui.define([
 		},
 		onOfferDetailFormSaveBtnPress: function(event){
 			// if(!this.validateProduct()) return;
+			const form = this.byId(`idProductForm`);
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccessProductForm.bind(this),
