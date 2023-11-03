@@ -106,6 +106,22 @@ sap.ui.define([
 			this.byId('idDownloadAttachmentButton')?.setText('Download'); // selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template. 
 		},
 
+		onDownloadPdf:function(event){
+			const url = `/v2/sta_tender/WordAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
+			this.defaultModel.createEntry("/PdfEmail", {
+				properties: {
+					URL: url,
+					UserName: "",
+					Sent: false
+				}
+			})
+			return new Promise((resolve, reject) => {
+				this.defaultModel.submitChanges();
+				// selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template.
+				this.byId('idDownloadAttachmentButton')?.setText('Download');
+			}); 
+		},
+
 		onDownloadExcel:function(event){
 			const url = `/v2/sta_tender/ExcelAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
 			URLHelper.redirect(url,true);
@@ -348,7 +364,7 @@ sap.ui.define([
 			const offerValidation = this.getOwnerComponent().getModel().getProperty(`/OfferValidation('${this.offerId}')`);
 
 			if(offerValidation.IN_POLICY === false){
-				await this._showApprovalsPricingError();
+				// await this._showApprovalsPricingError();
 			} else {
 				await this._filterApprovalTypes();
 				await this._enableApprovalCancelButtons();

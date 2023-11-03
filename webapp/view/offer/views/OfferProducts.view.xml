@@ -33,6 +33,7 @@
 							<Menu itemSelected="onMenuCopyOfferItemSelected">
 								<MenuItem text="Revised Offer" />
 								<MenuItem text="Continued Offer" />
+								<MenuItem text="Affiliate Offer" visible="{= ${st>/SelectedCountry} === 'PK'}" />
 							</Menu>
 						</menu>
 					</MenuButton>
