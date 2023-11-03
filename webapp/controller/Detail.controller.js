@@ -442,6 +442,7 @@ sap.ui.define([
 		deleteTender: function(event){
 			//this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/Active", 0);
+			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/ExternalID", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesTenderFormSuccess.bind(this),

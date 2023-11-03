@@ -15,7 +15,23 @@ sap.ui.define([
 	"sap/m/TableSelectDialog", 
 	"sap/m/Text", 
 	"sap/m/Column"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, ColumnListItem, Fragment, MessageBox, MessageToast, Token, Device, Sorter, TableSelectDialog, Text, Column) {
+], function (
+		BaseController, 
+		JSONModel, 
+		formatter, 
+		mobileLibrary, 
+		Filter, 
+		FilterOperator,
+		ColumnListItem, 
+		Fragment, 
+		MessageBox, 
+		MessageToast, 
+		Token, 
+		Device, 
+		Sorter, 
+		TableSelectDialog, 
+		Text, 
+		Column) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -215,8 +231,34 @@ sap.ui.define([
 		onOfferProductTableSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
 			this.getModel("ui").setProperty('/OfferProductTable/tableSelectionMode', 'SingleSelectMaster');
-			this.defaultModel.submitChanges({groupId: "AddProduct"}); //no error - save
+			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesOfferProductSuccess.bind(this),
+				error: this._onSubmitChangesOfferProductFail.bind(this),
+				groupId: "AddProduct"
+			}); //no error - save
 		},
+
+		_onSubmitChangesOfferProductSuccess: function (res) {
+			const offerProductsTable = this.byId("idOfferProductsTable");
+			const items = offerProductsTable.getItems();
+			const today = new Date();
+			const messages = [];
+			items.forEach((item, index) => {
+				const obj = item.getBindingContext().getObject();
+				if (obj.RegistrationValidUntil && obj.RegistrationValidUntil < today) {
+					messages.push({
+						type: 'Warning',
+						title: `${obj.ProductPackName} registration is expired`,
+						description: `${obj.ProductPackName} registration is expired`,
+						subtitle: `${obj.ProductPackName} registration is expired`,
+						counter: index+1
+					})
+				}
+			});
+			this.showMessageCompositeView("Offer Products Created", messages, "Success");
+		},
+
+		_onSubmitChangesOfferProductFail: function (error) {},
 
 		onOfferProductTableCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferProductTable/editMode', false);
@@ -235,7 +277,9 @@ sap.ui.define([
 		onOfferFormSaveBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.getModel("ui").setProperty('/isCopiedOffer', false);
+			const form = this.byId(`idOfferForm`);
 			if(!this.validateOffer()) return; //error
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
 		onOfferFormCancelBtnPress: function(event){
@@ -372,6 +416,7 @@ sap.ui.define([
 			newOfferObj.SellingCompany = oBoundContext.getObject().SellingCompany;
 			newOfferObj.Division = oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
+			newOfferObj.DistributorComments = this.productScope;
 
 			const statusObj = {
 					TenderID: this.objectId,
