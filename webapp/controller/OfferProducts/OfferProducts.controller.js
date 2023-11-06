@@ -278,7 +278,7 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.getModel("ui").setProperty('/isCopiedOffer', false);
 			const form = this.byId(`idOfferForm`);
-			if(!this.validateOffer()) return; //error
+			//if(!this.validateOffer()) return; //error
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
 		},
