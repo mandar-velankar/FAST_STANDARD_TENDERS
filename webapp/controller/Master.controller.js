@@ -101,6 +101,8 @@ sap.ui.define([
 			this.oMessageManager.registerObject(this.getView(), true);
 
 			const oModel = this.getOwnerComponent().getModel();
+
+			this.stState = this.getOwnerComponent().getModel("st");
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -560,13 +562,19 @@ sap.ui.define([
 		 * @param {sap.m.ObjectListItem} oItem selected Item
 		 * @private
 		 */
-		_showDetail: function (oItem) {
+		_showDetail: async function (oItem) {
 			var bReplace = !Device.system.phone;
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.filterMasterTable(oItem.TenderID);
 			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getModel("st").setProperty("/SelectedInstituteID", oItem?.InstituteID);
+			StandardSingletonService.setParentInstituteID(oItem?.InstituteID);
+			if (oItem.OfferID) {
+				const offer = await this.stState.getService().getOffer(oItem.OfferID);
+				StandardSingletonService.setSelectedOfferQuotationInstituteID(offer?.QuotationInstituteID);
+			}
+			
 			this.getRouter().navTo("object", {
 				countryCode: oItem.CountryCode,
 				productScope: this.getModel("st").getProperty("/SelectedProductScope"),
@@ -754,6 +762,7 @@ sap.ui.define([
 			newTenderObj.CountryCode = sSelectedCountry;
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
+			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
 				properties: newTenderObj,

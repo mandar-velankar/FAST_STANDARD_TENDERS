@@ -10,8 +10,9 @@ sap.ui.define([
 	"sap/ui/core/mvc/ViewType",
 	"sap/ui/core/routing/HashChanger",
 	"sap/ui/model/Context",
-	"sap/ui/core/EventBus"
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context, EventBus) {
+	"sap/ui/core/EventBus",
+	"../service/StandardSingletonService",
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context, EventBus, StandardSingletonService) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -180,7 +181,10 @@ sap.ui.define([
 			this.getModel().metadataLoaded().then( async function() {
 				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
 				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
+				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
+				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();
 				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS);
 			}.bind(this));
@@ -442,6 +446,7 @@ sap.ui.define([
 		deleteTender: function(event){
 			//this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/Active", 0);
+			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/ExternalID", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesTenderFormSuccess.bind(this),

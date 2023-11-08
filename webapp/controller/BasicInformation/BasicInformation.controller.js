@@ -32,7 +32,7 @@ sap.ui.define([
 			
 
 		},
-		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode}){
+		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			
 			this.objectId = objectId;
 			this.selectedTab = iconTabfilter.getKey();
@@ -43,6 +43,7 @@ sap.ui.define([
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
+			this.productScope = productScope; 
 			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
@@ -181,6 +182,7 @@ sap.ui.define([
 			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_2", regionsField?.getTokens()?.reduce((prev,token,idx)=>
 			prev?`${prev},${token.getText()}`:token.getText(),""));
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesTenderFormSuccess.bind(this),
