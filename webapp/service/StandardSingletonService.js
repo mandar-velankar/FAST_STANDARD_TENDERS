@@ -44,6 +44,22 @@ sap.ui.define([
             this.instituteID = instituteID;
         },
 
+		getInstituteID: function () {
+			return this.instituteID;
+		},
+
+		setInstituteID: function (instituteID) {
+            this.instituteID = instituteID;
+        },
+
+		getBU: function () {
+			return this.BU;
+		},
+
+		setBU: function (BU) {
+            this.BU = BU;
+        },
+
         onChangeOutcome: function (event, StandardSingletonService) {
             const source = event.getSource();
             const reasonItemBinding = source.getParent().getParent().getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
