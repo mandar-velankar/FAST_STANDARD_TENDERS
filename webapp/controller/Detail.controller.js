@@ -178,6 +178,8 @@ sap.ui.define([
 			this.defaultModel = this.getOwnerComponent().getModel();
 			if(this.productId){
 				const selectedOfferProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
+				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+				StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
 				StandardSingletonService.setBU(selectedOfferProduct?.BU);
 			}
 
@@ -190,7 +192,6 @@ sap.ui.define([
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
-				StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();
 				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS);
 			}.bind(this));
