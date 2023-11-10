@@ -47,6 +47,31 @@ sap.ui.define([
 			}
 			return oOffer;
 		},
+		getOfferProduct: async function (offerID, productCode) {
+			const sOfferProductKey = this.model.createKey("/OfferProductsDetailView", {
+				OfferID: offerID,
+				ProductCode: productCode,
+				Active: 1,
+				LotID: 1
+			});
+			let oOfferProduct = this.model.getObject(sOfferProductKey);
+			if (!oOfferProduct) {
+				return new Promise((resolve, reject) => {
+					this.model.read("/OfferProductsDetailView", {
+						filters: [
+							new Filter("OfferID", "EQ", offerID),
+							new Filter("ProductCode", "EQ", productCode),
+							new Filter("Active", "EQ", 1),
+							new Filter("LotID", "EQ", 1),
+						],
+						success: function (res) {
+							resolve(res?.results[0])
+						}
+					});
+				})
+			}
+			return oOfferProduct;
+		},
 
 		getOfferProductValidation: async function (offerID){
 			return new Promise((resolve, reject) => {
