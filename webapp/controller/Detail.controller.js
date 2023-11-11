@@ -167,6 +167,7 @@ sap.ui.define([
 			this.sProductScope = oEvent.getParameter("arguments").productScope;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
+			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
 			this.getModel("appView").setProperty("/layout", this.layout);
 			// this.getModel("appView").setProperty("/editable", false);
@@ -175,6 +176,12 @@ sap.ui.define([
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
 			this.defaultModel = this.getOwnerComponent().getModel();
+			if(this.productId){
+				const selectedOfferProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
+				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+				StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
+				StandardSingletonService.setBU(selectedOfferProduct?.BU);
+			}
 
 			this.setSelectedTabKey();
 
