@@ -115,8 +115,8 @@ sap.ui.define([
 					URL: url,
 					TenderID: this.tenderId,
 					OfferID: this.offerId,
-					TenderInstitute: selectedTender?.InstituteID,
-					OfferInstitute: selectedOffer?.QuotationInstituteID,
+					TenderInstitute: String(selectedTender?.InstituteID),
+					OfferInstitute: String(selectedOffer?.QuotationInstituteID),
 					UserEmail: "",
 					UserName: "",
 					Sent: false
