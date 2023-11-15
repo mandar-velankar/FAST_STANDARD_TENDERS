@@ -113,6 +113,11 @@ sap.ui.define([
 			this.defaultModel.createEntry("/PdfEmail", {
 				properties: {
 					URL: url,
+					TenderID: this.tenderId,
+					OfferID: this.offerId,
+					TenderInstitute: String(selectedTender?.InstituteID),
+					OfferInstitute: String(selectedOffer?.QuotationInstituteID),
+					UserEmail: "",
 					UserName: "",
 					Sent: false
 				}
