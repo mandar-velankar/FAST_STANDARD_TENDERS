@@ -106,8 +106,10 @@ sap.ui.define([
 			this.byId('idDownloadAttachmentButton')?.setText('Download'); // selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template. 
 		},
 
-		onDownloadPdf:function(event){
+		onDownloadPdf: async function(event){
 			const url = `/v2/sta_tender/WordAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
+			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
+			const selectedTender = await this.stState.getService().getTender(this.tenderId);
 			this.defaultModel.createEntry("/PdfEmail", {
 				properties: {
 					URL: url,
