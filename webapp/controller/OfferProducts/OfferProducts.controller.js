@@ -1038,7 +1038,7 @@ sap.ui.define([
 			const obj = form.getBindingContext().getObject();
 			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
 				method:"POST", 
-				urlParameters: {"offerID": this.offerID, "type": "affiliateoffer", "instituteName": obj.InstituteName || "", "productScope": this.productScope},
+				urlParameters: {"offerID": this.offerID, "type": "affiliateoffer", "QuotationInstituteID": obj.QuotationInstituteID, "productScope": this.productScope},
 				success: this.onOfferCopySuccess.bind(this),
 				error: this.onOfferCopyFail.bind(this)
 			});
@@ -1102,8 +1102,9 @@ sap.ui.define([
 			const oParam = oEvent.getParameter("selectedItem");
 			const selectedItem = oParam.getBindingContext().getObject();
 
-			const path = originalInputField.getBindingContext().getPath() + "/" + originalInputField.getBinding("value").getPath();
-			originalInputField.getModel().setProperty(path, selectedItem.InstituteName); 
+			const path = originalInputField.getBindingContext().getPath();
+			originalInputField.getModel().setProperty(`${path}/QuotationInstituteID`, selectedItem.QuotationInstituteID); 
+			originalInputField.getModel().setProperty(`${path}/InstituteName`, selectedItem.InstituteName); 
 		},
 
 		onCloseAffiliateOfferCreationDialog: function () {
