@@ -106,11 +106,18 @@ sap.ui.define([
 			this.byId('idDownloadAttachmentButton')?.setText('Download'); // selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template. 
 		},
 
-		onDownloadPdf:function(event){
+		onDownloadPdf: async function(event){
 			const url = `/v2/sta_tender/WordAttachments(templateId=${event.getSource().getBindingContext("ui").getProperty("templateId")},offerId='${this.offerId}')/content`;
+			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
+			const selectedTender = await this.stState.getService().getTender(this.tenderId);
 			this.defaultModel.createEntry("/PdfEmail", {
 				properties: {
 					URL: url,
+					TenderID: this.tenderId,
+					OfferID: this.offerId,
+					TenderInstitute: String(selectedTender?.InstituteID),
+					OfferInstitute: String(selectedOffer?.QuotationInstituteID),
+					UserEmail: "",
 					UserName: "",
 					Sent: false
 				}
@@ -467,8 +474,23 @@ sap.ui.define([
 				const existingObj = oModel.getProperty(sPath);
 					
 				if(existingObj){
-					oModel.setProperty(sPath+"/send", isSend ? 'Yes' : 'No');
-					oModel.setProperty(sPath+"/ApprovalStatus", isSend ? "Processing" : "Cancelling");
+					if (isSend) {
+						if (existingObj.ApproverTypeSection == 1) {
+							oModel.setProperty(sPath+"/send", 'Yes');
+							oModel.setProperty(sPath+"/ApprovalStatus", "Processing");
+						}else {
+							oModel.setProperty(sPath+"/send", existingObj.send);
+							oModel.setProperty(sPath+"/ApprovalStatus", existingObj.send === "Yes" ? "Processing" : "Not Sent");
+						}
+					}else {
+						if (existingObj.ApproverTypeSection == 1) {
+							oModel.setProperty(sPath+"/send", 'No');
+							oModel.setProperty(sPath+"/ApprovalStatus", "Cancelling");
+						}else {
+							oModel.setProperty(sPath+"/send", existingObj.send);
+							oModel.setProperty(sPath+"/ApprovalStatus", existingObj.ApprovalStatus === "Processing" ? "Cancelling" : "Not Sent");
+						}
+					}
 				}else {
 					oModel.createEntry("/OfferProductOfferStatus", {
 						properties: approvalObj,
