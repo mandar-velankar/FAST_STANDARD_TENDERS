@@ -500,6 +500,16 @@ sap.ui.define([
 			});
 		},
 
+		onChangeApproverName: function (event) {
+			const source = event.getSource();
+			const context = source.getBindingContext();
+			const selectedItem = source.getSelectedItem().getBindingContext().getObject();
+			const path = context.getPath();
+
+			this.getModel().setProperty(`${path}/ApproverEmailID`, selectedItem.ApproverEmailID);
+			this.getModel().setProperty(`${path}/ApproverName`, selectedItem.ApproverName);
+		},
+
 		onSubmitQuotation: async function(){
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();

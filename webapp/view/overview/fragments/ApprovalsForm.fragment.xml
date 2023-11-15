@@ -99,7 +99,8 @@
 											<Select selectedKey="{ApproverEmailID}" 
 													items="{ path: 'ApproverList', templateShareable: false }" 
 													width="250px" 
-													enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling'}">
+													enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling'}"
+													change=".onChangeApproverName">
 												<core:Item text="{ApproverName}" key="{ApproverEmailID}"/>
 											</Select>
 											
