@@ -1,0 +1,201 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.Information.Information" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt"
+	xmlns:u="sap.uxap">
+
+	
+			<form:Form
+			id="idOverviewForm"
+			editable="true"
+			formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/Overview/xmlView/formByName/OverviewForm/formContainers',templateShareable:true}">
+			<form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="Tender and Offer Details" />
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/overviewTenderFormMsg}.length }"
+					visible="{= ${messages>/overviewTenderFormMsg}.length > 0 &amp;&amp; ${ui>/OverviewForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'overviewTenderFormMsg')"  
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onOverviewTenderFormEditBtnPress"
+					visible="{= !${ui>/OverviewForm/editMode} }"
+					enabled = "{= ${em>/Detail/OverviewTab/OverviewForm/editMode}}"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onOverviewTenderFormSaveBtnPress"
+					visible="{= ${ui>/OverviewForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onOverviewTenderFormCancelBtnPress"
+					visible="{= ${ui>/OverviewForm/editMode} }"
+				/>
+				<Button 
+					id="ApprovalButtonId" 
+					text="Approvals" 
+					icon="sap-icon://validate" 
+					press="onApprovalsPress" 
+					visible="{= !${ui>/OverviewForm/editMode}}"
+					enabled="{= ${ui>/enableApprovalButton} }"
+				/>
+
+				<MenuButton id="idDownloadAttachmentButton" text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode} &amp;&amp; (${st>/SelectedCountry} !== 'PK' || ${accessControl>/standardtenderAccess/OverviewDownload}) }" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">
+					<menu>
+						<Menu itemSelected="onMenuAction">
+							<MenuItem id="btnWordDownload" text="Word" icon="sap-icon://doc-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
+								<items>
+									<MenuItem text="{ui>name}" press=".onDownloadWord"/>
+								</items>
+							</MenuItem>
+							<MenuItem id="btnPDFDownload" text="Email PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0 &amp;&amp; ${st>/SelectedCountry} === 'PK'}" items="{ui>/WordTemplateCountry}">
+								<items>
+									<MenuItem text="{ui>name}" press=".onDownloadPdf"/>
+								</items>
+							</MenuItem>
+							<MenuItem id="btnExcelDownload" text="Excel" icon="sap-icon://excel-attachment" visible="{= ${ui>/ExcelTemplateCountry/length} > 0}" items="{ui>/ExcelTemplateCountry}">
+								<items>
+									<MenuItem text="{ui>name}" press=".onDownloadExcel"/>
+								</items>
+							</MenuItem>
+						</Menu>
+					</menu>
+				</MenuButton>
+
+				<Button
+					id="btnSubmitQuotation"
+					text="{i18n>SubmitQuotation}"
+					icon="sap-icon://sys-enter"
+					press=".onSubmitQuotation"
+					enabled = "{= ${em>/Detail/OverviewTab/enableSetAsSubmited}}"
+					visible="{= !${ui>/OverviewForm/editMode}}"
+				/>
+					
+				</Toolbar>
+			</form:toolbar>
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="{template>layout/labelSpanXL}"
+					labelSpanL="{template>layout/labelSpanL}"
+					labelSpanM="{template>layout/labelSpanM}"
+					labelSpanS="{template>layout/labelSpanS}"
+					adjustLabelSpan="{template>layout/adjustLabelSpan}"
+					emptySpanXL="{template>layout/emptySpanXL}"
+					emptySpanL="{template>layout/emptySpanL}"
+					emptySpanM="{template>layout/emptySpanM}"
+					emptySpanS="{template>layout/emptySpanS}"
+					columnsXL="{template>layout/columnsXL}"
+					columnsL="{template>layout/columnsL}"
+					columnsM="{template>layout/columnsM}"
+					singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="" formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+	
+
+			<Table 
+				id="idProductInformationTable" 
+				mode="SingleSelectMaster"
+				items = "{path: '/OfferProductValidation', templateShareable: true}"
+			>
+			<headerToolbar>
+			<OverflowToolbar>
+					<Title text="Product Information" />
+			</OverflowToolbar>
+			</headerToolbar>
+				<columns>
+					<Column>
+						<Label text="Product" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Qty" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Unit Price" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Pack Price" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Total Amount" wrapping="true"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{PRODUCTNAME}"/>	
+							<Text 
+								text ="{
+									path: 'REQUESTED_QUANTITY',
+									type: 'sap.ui.model.type.Integer',
+									formatOptions: { 
+										maxFractionDigits: 0,
+										minFractionDigits: 0, 
+										groupingEnabled: true, 
+										groupingSeparator: ','
+									}
+								} {UNIT}"							
+							/>
+							<ObjectStatus 
+								text="{
+									parts: [
+										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
+										{path: 'CURRENCY'}
+									],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
+								}"
+							/>	
+							<ObjectStatus 
+								text="{
+									parts: [
+										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
+										{path: 'CURRENCY'}
+									],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}	
+								}"
+							/>
+							<ObjectStatus 
+								text="{
+									path: '',
+									formatter: '.calculateTotalAmount'
+								}"
+							/>					
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+</mvc:View>

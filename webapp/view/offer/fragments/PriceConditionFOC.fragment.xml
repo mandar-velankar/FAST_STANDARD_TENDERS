@@ -1,0 +1,65 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>
+	<form:Form
+		id="idFOCForm"
+		editable="true"
+	>
+		<form:toolbar>
+			<Toolbar>
+				<Title text="{i18n>FOC}"/>
+				<ToolbarSpacer />	
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onButtonFocFormEditPress"
+					enabled="{= ${ui>/FocForm/hasMainPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"
+					visible="{= !${ui>/FocForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://accept"
+					text="{i18n>PriceConditionFOCFragment.Close}"
+					press=".onButtonFocFormAcceptPress"
+					visible="{= ${ui>/FocForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>PriceConditionFOCFragment.FreeGoodsForOtherProducts}">
+						<form:fields>            
+							<MultiInput 
+								id="idFOCMultiInput"
+								valueHelpOnly="true" 
+								valueHelpRequest=".onMultiInputProductsValueHelpRequest" 
+								enabled="{ui>/FocForm/editMode}"
+							>
+								<!-- Tokens are bound in the Controller.bindFOCMultiInputTokens method -->
+							</MultiInput>
+						</form:fields>
+					</form:FormElement>	
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+
+</core:FragmentDefinition>

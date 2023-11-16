@@ -3,8 +3,12 @@ sap.ui.define([
 	"sap/ui/Device",
 	"./model/models",
 	"./controller/ListSelector",
-	"./controller/ErrorHandler"
-], function (UIComponent, Device, models, ListSelector, ErrorHandler) {
+	"./controller/ErrorHandler",
+	'sap/f/FlexibleColumnLayoutSemanticHelper',
+	'sap/f/library',
+	"sap/ui/model/json/JSONModel",
+	"./service/AccessService"
+], function (UIComponent, Device, models, ListSelector, ErrorHandler, FlexibleColumnLayoutSemanticHelper, fioriLibrary, JSONModel, AccessService) {
 	"use strict";
 
 	return UIComponent.extend("com.bayer.tender.statenderapp.Component", {
@@ -26,11 +30,108 @@ sap.ui.define([
 			// set the device model
 			this.setModel(models.createDeviceModel(), "device");
 
+			this.accessService = new AccessService(this.getModel("access"));
+			this.accessService.getAccess().then(result=>{
+				this.setModel(new JSONModel(result.data), "accessControl");
+				return result.data;
+			});
 			// call the base component's init function and create the App view
 			UIComponent.prototype.init.apply(this, arguments);
 
+			//set all change groups application wide
+			this.setModelChangeGroups(this.getModel());
+
 			// create the views based on the url/hash
 			this.getRouter().initialize();
+		},
+
+		setModelChangeGroups: function(oModel){
+			oModel.setDeferredGroups(oModel.getDeferredGroups().concat([
+				"NewTender",
+				"NewOffer",
+				"AddProduct",
+				"Basicinfo", 
+				"AwardCriteria", 
+				"OfferformInfo", 
+				"OfferProducts", 
+				"TotalAmountOfferProducts", 
+				"ProductFormDetail", 
+				"PricingForm",
+				"OverviewForm",
+				"AwardedProduct",
+				"FreeGoodsOther",
+				"Approvals",
+				"Competitors",
+				"Deliveries"
+			]));
+			oModel.setChangeGroups({
+				"TenderFormView": {
+					groupId: "NewTender",  
+				},
+				"TenderFormView": {
+					groupId: "Basicinfo",  
+				},
+				"OfferProductsTableView":{
+					groupId: "AddProduct",
+				},
+				"PT_TMAWRDCR": {
+					groupId: "AwardCriteria",  
+				},
+				"AwardCriteriaTableView": {
+					groupId: "AwardCriteria",
+				},
+				"OfferFormView": {
+					groupId: "NewOffer",  
+				},
+				"OfferFormView": {
+					groupId: "OfferformInfo",  
+				},
+				"PT_TMTNOFST": {
+					groupId: "NewOffer",  
+				},
+				"OfferProductsTable": {
+					groupId: "OfferProducts",  
+				},
+				"TotalAmountProducts": {
+					groupId: "TotalAmountOfferProducts",
+				},
+				"PriceConditionPriceView": {
+					groupId: "PricingForm",  
+				},
+				"PriceConditionDiscountView": {
+					groupId: "PricingForm",  
+				},
+				"PriceConditionPriceWithFOCView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionDiscountWithFOCView": {
+					groupId: "PricingForm",
+				},
+				"FreeGoodsOther": {
+					groupId: "PricingForm",  
+				},
+				"OfferProductsDetailView": {
+					groupId: "ProductFormDetail"
+				},
+				"OfferValidation": {
+					groupId: "OverviewForm"
+				},
+				"AwardedProductFormView": {
+					groupId: "AwardedProduct"
+				},
+				"AwardedProducts": {
+					groupId: "AwardedProduct"
+				},
+				"OfferProductOfferStatus": {
+					groupId: "Approvals"
+				},
+				"CompetitorResultsTableView": {
+					groupId: "Competitors"
+				},
+				"DeliveryTrackingDetailView":{
+					groupId: "Deliveries"
+				}
+			});
 		},
 
 		/**
@@ -66,6 +167,31 @@ sap.ui.define([
 				}
 			}
 			return this._sContentDensityClass;
+		},
+
+		getHelper: function () {
+			return this._getFcl().then(function(oFCL) {
+				var oSettings = {
+					defaultTwoColumnLayoutType: fioriLibrary.LayoutType.TwoColumnsMidExpanded,
+					defaultThreeColumnLayoutType: fioriLibrary.LayoutType.ThreeColumnsMidExpanded,
+					initialColumnsCount: 2
+				};
+				return (FlexibleColumnLayoutSemanticHelper.getInstanceFor(oFCL, oSettings));
+			});
+		},
+
+		_getFcl: function () {
+			return new Promise(function(resolve, reject) {
+				var oFCL = this.getRootControl().byId('layout');
+				if (!oFCL) {
+					this.getRootControl().attachAfterInit(function(oEvent) {
+						resolve(oEvent.getSource().byId('layout'));
+					}, this);
+					return;
+				}
+				resolve(oFCL);
+
+			}.bind(this));
 		}
 
 	});

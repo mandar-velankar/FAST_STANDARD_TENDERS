@@ -1,0 +1,189 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:t="sap.ui.table"
+    xmlns:f="sap.ui.layout.form"
+>
+    <Panel
+        expandable="true"
+        headerText="Competitor Result"
+    >
+        <content>
+            <Table
+                id="idCompetitorResultTable"
+                items="{path: '/CompetitorResultsTableView'}"
+                mode="SingleSelectMaster"
+                selectionChange=".onSelectCompetitor"
+                updateFinished=".onUpdateFinished"
+            >
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://add"
+                            text="Add"
+                            press=".onButtonCompetitorResultsCreatePress"
+                            visible="{= ${ui>/CompetitorResultsForm/editMode}}"
+                        />
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://edit"
+                            text="Edit"
+                            press=".onButtonEditCompetitorPress"
+                            visible="{= !${ui>/CompetitorResultsForm/editMode}}"
+                            enabled = "{= ${em>/AwardedProductDetail/CompetitorResult/editMode}}"
+                        />
+                        
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://save"
+                            text="Save"
+                            press=".onButtonCompetitorSavePress"
+                            visible="{= ${ui>/CompetitorResultsForm/editMode}}"
+                        />
+                        <Button
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://decline"
+                            text="Cancel"
+                            press=".onButtonCompetitorCancelPress"
+                            visible="{= ${ui>/CompetitorResultsForm/editMode}}"
+                        />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorCompany}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorProduct}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorOutcome}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column>
+                        <Label
+                            text="{i18n>CompetitorPrice}"
+                            wrapping="true"
+                        />
+                    </Column>
+                    <Column width="5rem"/>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ComboBox
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
+                                selectedKey="{AWARDEDCOMPANY}"
+                                items="{/MasterCompetitors}"
+                                change=".onSetCompetitorResultsChanges($event, 'AwardedCompany')"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{CompetitorCompany}"
+                                        key="{CompetitorCompany}"
+                                    />
+                                </items>
+                            </ComboBox>
+                            <ComboBox
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
+                                selectedKey="{AWARDEDPRODUCT}"
+                                items="{/MasterCompetitors}"
+                                change=".onSetCompetitorResultsChanges($event, 'AwardedProduct')"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{CompetitorProduct}"
+                                        key="{CompetitorProduct}"
+                                    />
+                                </items>
+                            </ComboBox>
+                            <ComboBox
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
+                                selectedKey="{OUTCOME}"
+                                items="{/MasterCountryOutComes}"
+                                change=".onSetCompetitorResultsChanges($event, 'Outcome')"
+                            >
+                                <items>
+                                    <core:Item
+                                        text="{Outcome}"
+                                        key="{Outcome}"
+                                    />
+                                </items>
+                            </ComboBox>
+                            <Input
+                                value="{AWARDEDPRICE}"
+                                enabled="{ui>/CompetitorResultsForm/editMode}"
+                            />
+                             <Button
+                                class="sapUiSmallMarginBegin"
+                                icon="sap-icon://delete"
+                                press=".onButtonDeleteCompetitorPress"
+                                visible="{= ${ui>/CompetitorResultsForm/editMode}}"
+                            />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+            <form:Form
+                id="idCompetitorResultsForm"
+                editable="true"
+                visible="false"
+                formContainers="{path:'template>/detailDetailAwardedProductConfig/countryTemplate/template/tabByName/CompetitorResults/xmlView/formByName/CompetitorResultsForm/formContainers',templateShareable:true}"
+            >
+                <!-- <form:title>
+                    <core:Title text="{template>title}" />
+                </form:title> -->
+                <!-- <form:toolbar>
+                    <Toolbar>
+                        <Title text="Tender and Offer Details" />
+                    </Toolbar>
+                </form:toolbar> -->
+                <form:layout>
+                    <form:ResponsiveGridLayout
+                        labelSpanXL="{template>layout/labelSpanXL}"
+                        labelSpanL="{template>layout/labelSpanL}"
+                        labelSpanM="{template>layout/labelSpanM}"
+                        labelSpanS="{template>layout/labelSpanS}"
+                        adjustLabelSpan="{template>layout/adjustLabelSpan}"
+                        emptySpanXL="{template>layout/emptySpanXL}"
+                        emptySpanL="{template>layout/emptySpanL}"
+                        emptySpanM="{template>layout/emptySpanM}"
+                        emptySpanS="{template>layout/emptySpanS}"
+                        columnsXL="{template>layout/columnsXL}"
+                        columnsL="{template>layout/columnsL}"
+                        columnsM="{template>layout/columnsM}"
+                        singleContainerFullSize="{template>layout/singleContainerFullSize}"
+                    />
+                </form:layout>
+                <form:formContainers>
+                    <form:FormContainer
+                        formElements="{path:'template>formElements',templateShareable:true}"
+                    >
+                        <form:formElements>
+                            <form:FormElement
+                                visible="{template>visible}"
+                                label="{template>label}"
+                                fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
+                            >
+                                <!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+                            </form:FormElement>
+                        </form:formElements>
+                    </form:FormContainer>
+                </form:formContainers>
+            </form:Form>
+        </content>
+    </Panel>
+</core:FragmentDefinition>

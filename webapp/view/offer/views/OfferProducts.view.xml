@@ -1,0 +1,134 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProducts" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	
+	<VBox>
+		<form:Form
+			id="idOfferForm"
+			editable="true"
+			formContainers="{path:'template>xmlView/formByName/OfferForm/formContainers',templateShareable:true}">
+			<form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="{template>title}"/>
+					<ToolbarSpacer />
+					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
+					<MenuButton 
+						text="Copy Offer" 
+						visible="{= !${ui>/OfferForm/editMode} }" 
+						icon="sap-icon://duplicate"
+						class="sapUiSmallMarginTop"
+						enabled="{= ${em>/Detail/OfferTab/OfferForm/enableCopyOffer}}"
+						>
+						<menu>
+							<Menu itemSelected="onMenuCopyOfferItemSelected">
+								<MenuItem text="Revised Offer" />
+								<MenuItem text="Continued Offer" />
+								<MenuItem text="Affiliate Offer" visible="{= ${st>/SelectedCountry} === 'PK'}" />
+							</Menu>
+						</menu>
+					</MenuButton>
+					<Button text="Delete Offer" icon="sap-icon://delete" press="onSoftDeleteOffer" visible="{= !${ui>/OfferForm/editMode} }" type="Reject" enabled="{= ${em>/Detail/OfferTab/OfferForm/enableDeleteOffer}}"/>
+					<Button id="editOfferButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferFormEditBtnPress" visible="{= !${ui>/OfferForm/editMode} }" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
+					<Button
+						id="idOfferFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onOfferFormSaveBtnPress"
+						visible="{= ${ui>/OfferForm/editMode} }"
+						type="Accept"
+					/>
+					<Button
+						id="idOfferFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onOfferFormCancelBtnPress"
+						visible="{= ${ui>/OfferForm/editMode} }"
+						type="Reject"
+					/>
+				</Toolbar>
+			</form:toolbar>
+			<form:layout>
+				<form:ResponsiveGridLayout labelSpanL="12" labelSpanM="12"
+				emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" columnsXL="3" class="editableForm" backgroundDesign="Solid" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+	</VBox>
+
+	<Table id="idOfferProductsTable" 
+		columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
+		class="sapFDynamicPageAlignContent"
+		width="auto"
+		mode="{= ${ui>/OfferProductTable/tableSelectionMode}}"
+		selectionChange=".onOfferProductPress">
+		<headerToolbar>
+			<OverflowToolbar>
+				<content>
+					<Title text="{path:'template>xmlView/tableByName/OfferProductsTable/title'}" level="H2"/>
+					<ToolbarSpacer />
+				<Button id="AddOfferProductBtnId" text="Add Product" icon="sap-icon://add" press=".onOpenAddOfferProductDialog" visible="{= ${ui>/OfferProductTable/editMode} }"/>
+				<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteOfferProductBtnPress" visible="{= ${ui>/OfferProductTable/editMode} }" enabled="{= ${ui>/OfferProductTable/enableDeleteProductButton}}"/>
+				<Button id="editOfferProductButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferProductTableEditBtnPress" visible="{= !${ui>/OfferProductTable/editMode} }" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
+				<!--<Button
+					id="idOfferProductTableSaveBtn"
+					icon="sap-icon://save"
+					text="Save"
+					press=".onOfferProductTableSaveBtnPress"
+					visible="{= ${ui>/OfferProductTable/editMode} }"
+				/>-->
+				<Button
+					id="idOfferProductTableCloseBtn"
+					icon="sap-icon://accept"
+					text="Close"
+					press=".onOfferProductTableCancelBtnPress"
+					visible="{= ${ui>/OfferProductTable/editMode} }"
+				/>
+				</content>
+			</OverflowToolbar>
+		</headerToolbar>
+		<columns>
+			<Column>
+				<Text text="{template>title}" />
+			</Column>
+		</columns>
+	</Table>
+
+	<HBox class='sapUiMediumMargin' justifyContent="End" alignItems="End">
+		<Text 
+			text="Offer Total: " 
+			class='sapUiTinyMarginEnd'
+		/>
+		<Text 
+			id='idTotalAmountOfferProducts' 
+			text="{
+				parts: ['OfferTotal', 'Currency'],
+				type: 'sap.ui.model.type.Currency',
+				formatOptions: {
+					showMeasure: true,
+					preserveDecimals: false
+				}
+			}" 
+		/>
+	</HBox>	
+
+</mvc:View>

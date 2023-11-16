@@ -2,55 +2,68 @@ sap.ui.define([
 	"./BaseController",
 	"sap/ui/model/json/JSONModel",
 	"../model/formatter",
-	"sap/m/library"
-], function (BaseController, JSONModel, formatter, mobileLibrary) {
+	"sap/ui/core/ComponentContainer",
+	"sap/m/library",
+	"sap/m/IconTabFilter",
+	"sap/m/IconTabBar",
+	"sap/ui/core/mvc/View",
+	"sap/ui/core/mvc/ViewType",
+	"sap/ui/core/routing/HashChanger",
+	"sap/ui/model/Context",
+	"sap/ui/core/EventBus",
+	"../service/StandardSingletonService",
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context, EventBus, StandardSingletonService) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
 	var URLHelper = mobileLibrary.URLHelper;
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Detail", {
-
+		views:{},
 		formatter: formatter,
 
 		/* =========================================================== */
 		/* lifecycle methods                                           */
 		/* =========================================================== */
 
-		onInit : function () {
+		onInit: function () {
 			// Model used to manipulate control states. The chosen values make sure,
 			// detail page is busy indication immediately so there is no break in
 			// between the busy indication for loading the view's meta data
 			var oViewModel = new JSONModel({
-				busy : false,
-				delay : 0,
-				lineItemListTitle : this.getResourceBundle().getText("detailLineItemTableHeading")
+				busy: false,
+				delay: 0,
+				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
-
+			const messagesModel = new JSONModel({
+				basicInfoMsg: [],
+				offerProductsMsg: [],
+				awardCriteriaMsg: [],
+				overviewTenderFormMsg: [],
+				approvalMsg: []
+			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
-
+			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailOverview").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("objectDetailDeliveries").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
+			this.getRouter().getRoute("deliveryTrackingProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.setModel(oViewModel, "detailView");
+			this.setModel(messagesModel, "messages");
 
+			this.getOwnerComponent().getEventBus().subscribe("masterChannel", "statusChanged", this.handleStatusChange, this);
 			this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
+		},
+
+		handleStatusChange: function(channel, event, data) {
+			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus);
 		},
 
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
-
-		/**
-		 * Event handler when the share by E-Mail button has been clicked
-		 * @public
-		 */
-		onSendEmailPress : function () {
-			var oViewModel = this.getModel("detailView");
-
-			URLHelper.triggerEmail(
-				null,
-				oViewModel.getProperty("/shareSendEmailSubject"),
-				oViewModel.getProperty("/shareSendEmailMessage")
-			);
-		},
 
 
 		/**
@@ -58,7 +71,7 @@ sap.ui.define([
 		 * @param {object} oEvent an event containing the total number of items in the list
 		 * @private
 		 */
-		onListUpdateFinished : function (oEvent) {
+		onListUpdateFinished: function (oEvent) {
 			var sTitle,
 				iTotalItems = oEvent.getParameter("total"),
 				oViewModel = this.getModel("detailView");
@@ -74,7 +87,71 @@ sap.ui.define([
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
 		},
+		createIconTab: function(){
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			
+			const iconTabBar = new IconTabBar({
+				items:this.templateStateData.detailConfig.countryTemplate.template.tabs.map((tab,idx)=>this.tabsFactory(tab,idx)),
+				select:(event)=>this.onTabSelect(event),
+				selectedKey:"{st>/selectedTab}"
+			});
+			this.iconTabBar = iconTabBar;
+			this.byId("detailPage").setContent(iconTabBar)
+		},
+		tabsFactory: function (tab,idx){
+			const xmlView = tab.getXMLView();
+			const viewFolder = tab.title.toLowerCase().split(" ").join("");
+			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder}.views.${xmlView.getName()}`;
+			const viewData = {
+				objectId:this.sObjectId,
+				offerId:this.sOfferId,
+				countryCode:this.sCountryCode,
+				productScope: this.sProductScope
+			};
+			const isVisible = this.getTabVisibility(tab.title);
 
+			const iconTabFilter = new IconTabFilter({
+				text: tab.title,
+				key: tab.title,
+				visible: isVisible
+			}); 
+
+			const viewConfig = {
+				viewName, 
+				tab: iconTabFilter, 
+				context:new Context(this.getModel("template"), `/detailConfig/countryTemplate/template/tabs/${idx}`),
+				data: viewData 
+			};
+
+			if(!this.views[viewName]){	
+				xmlView && this.getOwnerComponent().runAsOwner(()=>{
+					View.create({
+						viewName: viewName,
+						viewId: `id${xmlView.getName()}`,
+						type: sap.ui.core.mvc.ViewType.XML
+					}).then(view => {
+						this.views[viewName] = view;
+						this.getView().addDependent(this.views[viewName]);
+						this.updateTabView(viewConfig);
+					});
+				});
+			}else{			
+				this.updateTabView(viewConfig)	
+			}
+			return iconTabFilter;
+
+		},
+		updateTabView:function({viewName,tab,context,data}){
+			this.views[viewName].setBindingContext(context,"template");
+			this.views[viewName].getController().onBeforeShow && this.views[viewName].getController().onBeforeShow(tab,data);	
+			tab.insertContent(this.views[viewName]);
+			const tabName = tab.getProperty("text");
+			const isVisible = this.getTabVisibility(tabName);
+			tab.setProperty("visible", isVisible);
+		},
+
+		
 		/* =========================================================== */
 		/* begin: internal methods                                     */
 		/* =========================================================== */
@@ -85,15 +162,45 @@ sap.ui.define([
 		 * @param {sap.ui.base.Event} oEvent pattern match event in route 'object'
 		 * @private
 		 */
-		_onObjectMatched : function (oEvent) {
-			var sObjectId =  oEvent.getParameter("arguments").objectId;
-			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-			this.getModel().metadataLoaded().then( function() {
-				var sObjectPath = this.getModel().createKey("PT_TMTEND", {
-					TenderID :  sObjectId
-				});
-				this._bindView("/" + sObjectPath);
+		_onObjectMatched: async function (oEvent) {
+			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
+			this.sProductScope = oEvent.getParameter("arguments").productScope;
+			this.sObjectId = oEvent.getParameter("arguments").objectId;
+			this.sOfferId = oEvent.getParameter("arguments").offerId;
+			this.productId = oEvent.getParameter("arguments").productId;
+			this.layout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
+			this.getModel("appView").setProperty("/layout", this.layout);
+			// this.getModel("appView").setProperty("/editable", false);
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			this.stState = this.getOwnerComponent().getModel("st");
+			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
+			this.defaultModel = this.getOwnerComponent().getModel();
+			if(this.productId){
+				const selectedOfferProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
+				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+				StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
+				StandardSingletonService.setBU(selectedOfferProduct?.BU);
+			}
+
+			this.setSelectedTabKey();
+
+			this.getModel().metadataLoaded().then( async function() {
+				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
+				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
+				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
+				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
+				!this.selectedOfferHasBinding() && this._bindView();
+				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS);
 			}.bind(this));
+		},
+
+		selectedOfferHasBinding: function(){
+			const selectedOffer = this.getView().getBindingContext()?.getObject();
+			if (selectedOffer && !selectedOffer.OfferID) selectedOffer.OfferID = "NA";
+			return selectedOffer?.OfferID === this.sOfferId;
 		},
 
 		/**
@@ -103,65 +210,103 @@ sap.ui.define([
 		 * @param {string} sObjectPath path to the object to be bound to the view.
 		 * @private
 		 */
-		_bindView : function (sObjectPath) {
+		_bindView: async function () {
+
+			let sObjectPath = "";
+
+			this.gettemplateConfig();
+
+			// get awarded criteria of the selected tender 
+			// this is needed at a later stage to check on existing Award Criteria
+			this.getOwnerComponent().getModel().read("/PT_TMAWRDCR", {
+				filters: [new sap.ui.model.Filter("TENDERID", sap.ui.model.FilterOperator.EQ, this.sObjectId)]
+			});
+
+			if(this.sOfferId && this.sOfferId !== "NA") {
+				sObjectPath = this.getModel().createKey("TenderMasterView", {
+					TenderID :  this.sObjectId,
+					OfferID : this.sOfferId
+				});
+			}else {
+				sObjectPath = this.getModel().createKey("TenderFormView", {
+					TenderID :  this.sObjectId
+				});
+			}
+
 			// Set busy indicator during view binding
 			var oViewModel = this.getModel("detailView");
 
 			// If the view was not bound yet its not busy, only if the binding requests data it is set to busy again
 			oViewModel.setProperty("/busy", false);
+			this.getModel("appView").setProperty("/editmode", false);
 
 			this.getView().bindElement({
-				path : sObjectPath,
-				events: {
-					change : this._onBindingChange.bind(this),
-					dataRequested : function () {
-						oViewModel.setProperty("/busy", true);
-					},
-					dataReceived: function () {
-						oViewModel.setProperty("/busy", false);
-					}
-				}
+				path: "/" + sObjectPath,
+				/*parameters: {
+					expand: "Institute,Offer"
+				},*/
+				// events: {
+				// 	change: this._onBindingChange.bind(this),
+				// 	dataRequested: function () {
+				// 		oViewModel.setProperty("/busy", true);
+				// 	},
+				// 	dataReceived: function () {
+				// 		oViewModel.setProperty("/busy", false);
+				// 	}
+				// }
 			});
 		},
-
-		_onBindingChange : function () {
-			var oView = this.getView(),
-				oElementBinding = oView.getElementBinding();
-
-			// No data for the binding
-			if (!oElementBinding.getBoundContext()) {
-				this.getRouter().getTargets().display("detailObjectNotFound");
-				// if object could not be found, the selection in the master list
-				// does not make sense anymore.
-				this.getOwnerComponent().oListSelector.clearMasterListSelection();
-				return;
-			}
-
-			var sPath = oElementBinding.getPath(),
-				oResourceBundle = this.getResourceBundle(),
-				oObject = oView.getModel().getObject(sPath),
-				sObjectId = oObject.TenderID,
-				sObjectName = oObject.TenderName,
-				oViewModel = this.getModel("detailView");
-
-			this.getOwnerComponent().oListSelector.selectAListItem(sPath);
-
-			oViewModel.setProperty("/shareSendEmailSubject",
-				oResourceBundle.getText("shareSendEmailObjectSubject", [sObjectId]));
-			oViewModel.setProperty("/shareSendEmailMessage",
-				oResourceBundle.getText("shareSendEmailObjectMessage", [sObjectName, sObjectId, location.href]));
+		gettemplateConfig: async function () {
+			await this.templateState.read("DETAIL",{
+				countryCode: this.sCountryCode,
+				productScope: this.sProductScope,
+				appID: "StandardTenders",
+				page: "DETAIL",
+				keys: {
+					TenderID: this.sObjectId,
+					OfferID: this.sOfferId
+				}
+			});
+			this.createIconTab();
 		},
+		// _onBindingChange: function () {
+		// 	var oView = this.getView(),
+		// 		oElementBinding = oView.getElementBinding();
 
-		_onMetadataLoaded : function () {
+		// 	// No data for the binding
+		// 	if (!oElementBinding.getBoundContext()) {
+		// 		this.getRouter().getTargets().display("detailObjectNotFound");
+		// 		// if object could not be found, the selection in the master list
+		// 		// does not make sense anymore.
+		// 		this.getOwnerComponent().oListSelector.clearMasterListSelection();
+		// 		return;
+		// 	}
+
+		// 	var sPath = oElementBinding.getPath(),
+		// 		oResourceBundle = this.getResourceBundle(),
+		// 		oObject = oView.getModel().getObject(sPath),
+		// 		sObjectId = oObject.TenderID,
+		// 		sObjectName = oObject.TenderName,
+		// 		oViewModel = this.getModel("detailView");
+
+		// 	this.getOwnerComponent().oListSelector.selectAListItem(sPath);
+
+		// 	oViewModel.setProperty("/shareSendEmailSubject",
+		// 		oResourceBundle.getText("shareSendEmailObjectSubject", [sObjectId]));
+		// 	oViewModel.setProperty("/shareSendEmailMessage",
+		// 		oResourceBundle.getText("shareSendEmailObjectMessage", [sObjectName, sObjectId, location.href]));
+		// },
+
+		_onMetadataLoaded: function () {
 			// Store original busy indicator delay for the detail view
-			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay(),
-				oViewModel = this.getModel("detailView"),
-				oLineItemTable = this.byId("lineItemsList"),
-				iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
+			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
+			var oViewModel = this.getModel("detailView");
+			var oLineItemTable = this.byId("lineItemsList");
+			//iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
 
 			// Make sure busy indicator is displayed immediately when
 			// detail view is displayed for the first time
-			oViewModel.setProperty("/delay", 0);
+			/*oViewModel.setProperty("/delay", 0);
 			oViewModel.setProperty("/lineItemTableDelay", 0);
 
 			oLineItemTable.attachEventOnce("updateFinished", function() {
@@ -172,17 +317,24 @@ sap.ui.define([
 			// Binding the view will set it to not busy - so the view is always busy if it is not bound
 			oViewModel.setProperty("/busy", true);
 			// Restore original busy indicator delay for the detail view
-			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);
+			oViewModel.setProperty("/delay", iOriginalViewBusyDelay);*/
 		},
 
+		onEdit: function () {
+			const editmode = this.getModel("appView").getProperty("/editmode");
+			this.getModel("appView").setProperty("/editmode", !editmode);
+		},
 		/**
 		 * Set the full screen mode to false and navigate to master page
 		 */
 		onCloseDetailPress: function () {
+			this.cancelAllPendingChanges();
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
 			// No item should be selected on master after detail page is closed
 			this.getOwnerComponent().oListSelector.clearMasterListSelection();
+			this.getView().unbindElement();
 			this.getRouter().navTo("master");
+			this.getModel('st').setProperty("/selectedTab", "");
 		},
 
 		/**
@@ -197,9 +349,127 @@ sap.ui.define([
 				this.getModel("appView").setProperty("/layout", "MidColumnFullScreen");
 			} else {
 				// reset to previous layout
-				this.getModel("appView").setProperty("/layout",  this.getModel("appView").getProperty("/previousLayout"));
+				this.getModel("appView").setProperty("/layout", this.getModel("appView").getProperty("/previousLayout"));
 			}
-		}
+		},
+		onTabSelect: function (event) {
+			let hash = this.getRouter().getHashChanger().getHash();
+			const offerId = this.sOfferId || this.getModel("st").getProperty("/SelectedTender/OfferID") || "NA";
+			const selectedTabKey = event.getParameter("key").toLowerCase();
+			this.changeHash({selectedTabKey, hash, offerId});
+		},
+		changeHash: function ({selectedTabKey, hash, offerId}) {
+			hash = hash.split("/").splice(0, 4).join("/");
+			switch (selectedTabKey) {
+				case "tender":
+					hash = hash + "/" + offerId;
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "offer":
+					hash = hash + "/" + offerId + "/Offer";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "overview":
+					hash = hash + "/" + offerId + "/Overview";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "awards":
+					hash = hash + "/" + offerId + "/Awards";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				case "delivery tracking":
+					hash = hash + "/" + offerId + "/Deliveries";
+					this.getRouter().getHashChanger().replaceHash(hash);
+					break;
+				default:
+					break;
+			}
+		},
+
+		/**
+		 * This function is need to show correct selected tab after browser refresh button clicked
+		 */
+		setSelectedTabKey: function () {
+			// Get the selectedTabKey from the URL hash
+			const selectedTabKey = this.getRouter().getHashChanger().getHash().split("/").splice(5,1).join("");
+
+			// Check and set selected Tab when open detail page
+			if (selectedTabKey == "Deliveries") {
+				this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
+			}
+			if (selectedTabKey == "Offer" || selectedTabKey == "Overview" || selectedTabKey == "Awards") {
+				this.getModel('st').setProperty("/selectedTab", selectedTabKey);
+			}
+
+			// Check and set selected Tab when open detail detail page
+			switch (selectedTabKey) {
+				case "OfferProductDetail":
+					this.getModel('st').setProperty("/selectedTab", "Offer");
+					break;
+				case "AwardedProduct":
+					this.getModel('st').setProperty("/selectedTab", "Awards");
+					break;
+				case "Delivery":
+					this.getModel('st').setProperty("/selectedTab", "Delivery Tracking");
+					break;
+				default:
+					break;
+			}
+		},
+
+		//Go to sharepoint folder
+		_onFolderButtonPress: async function (oEvent) {
+			const aAppConfig = await this.stState.getAppConfig(this.sCountryCode);
+			const sDownloadButtonUrl = aAppConfig?.find(config => config.Control === 'DocumentButton');
+			var url = sDownloadButtonUrl ? sDownloadButtonUrl.URL + '$CountryCode/$TenderId' : "https://bayergroup.sharepoint.com/:f:/r/sites/FASTSystem/Shared%20Documents/Documents_Library/Countries/$CountryCode/$TenderId";
+			url = url.replace("$CountryCode", this.sCountryCode);
+			url = url.replace("$TenderId", this.sObjectId);
+			window.open(url);
+		},
+
+		onDeleteTenderPress: async function(oEvent){
+
+			var that = this;
+
+			sap.m.MessageBox.warning("Are you sure you want to continue deleting this tender? All tender information will be lost", {
+				actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+				styleClass: "sapUiSizeCompact",
+				onClose: async function (sAction) {
+					if (sAction === "YES") {
+						await that.deleteTender();
+						that.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
+						// No item should be selected on master after detail page is closed
+						that.getOwnerComponent().oListSelector.clearMasterListSelection();
+						that.getView().unbindElement();
+						that.getRouter().navTo("master");
+						that.getModel('st').setProperty("/selectedTab", "");
+					} else {
+						//Do nothing and close the popup
+					}
+				}
+			});
+		},
+
+		deleteTender: function(event){
+			//this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
+			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/Active", 0);
+			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/ExternalID", this.sProductScope); //for mandatory field check in sta-service
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesTenderFormSuccess.bind(this),
+				groupId: "Basicinfo"
+			}); 
+		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesTenderFormSuccess: function(res){
+			this.getOwnerComponent().getModel().read("/TenderMasterView");
+			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.filter();
+			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.refresh(true);
+		},
 	});
 
 });

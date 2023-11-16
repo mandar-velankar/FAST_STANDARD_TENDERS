@@ -1,0 +1,181 @@
+<mvc:View
+    controllerName="com.bayer.tender.statenderapp.controller.OfferProducts.OfferProductsDetail"
+    xmlns="sap.m"
+    xmlns:t="sap.ui.table"
+    xmlns:f="sap.f"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:tnt="sap.tnt"
+>
+    <f:DynamicPage id="idProductPage">
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <VBox>
+                        <Title
+                            id = "idProductPackNameOfferProductDetail"
+                            text="{PRODUCTPACKNAME}"
+                            level="H2"
+                            class="sapUiTinyMarginBottom"
+                        />
+                        <MessageStrip
+                            visible="{= (${RegistrationValidUntil} &amp;&amp; ${ui>/today} > ${RegistrationValidUntil}) ? true : false}"
+                            text="Registration is expired"
+                            type="Warning"
+                            showIcon="true"
+                            showCloseButton="false"
+                        />
+                    </VBox>
+                </f:heading>
+                <f:navigationActions>
+                    <OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://full-screen"
+                        press=".handleFullScreen"
+                        tooltip="Enter Full Screen Mode"
+                        visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+                    />
+                    <OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://exit-full-screen"
+                        press=".handleFullScreen"
+                        tooltip="Exit Full Screen Mode"
+                        visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+                    />
+                    <OverflowToolbarButton
+                        type="Transparent"
+                        icon="sap-icon://decline"
+                        press=".handleClose"
+                        tooltip="Close column"
+                        visible="{= ${detailDetailView>/actionButtonsInfo/endColumn/closeColumn} !== null }"
+                    />
+                </f:navigationActions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <f:content>
+            <VBox>
+                <Panel
+                    expandable="true"
+                    headerText="Product Info"
+                >
+                    <VBox>
+                        <form:Form
+                            id="idProductForm"
+                            editable="true"
+                            formContainers="{path:'template>/detailDetailOfferProductConfig/countryTemplate/template/form/formContainers',templateShareable:true}"
+                        >
+                            <form:title>
+                                <core:Title text="{template>title}" />
+                            </form:title>
+                            <form:toolbar>
+                            <Toolbar>
+                                <Title text="{template>title}"/>
+                                <ToolbarSpacer />
+                                <Button 
+                                    id="editOfferButtonId" 
+                                    icon="sap-icon://edit" 
+                                    text="Edit" 
+                                    press=".onOfferDetailFormEditBtnPress" 
+                                    visible="{= !${ui>/ProductForm/editMode} }"
+                                    enabled="{= ${em>/OfferProductDetail/OfferProductInfo/editMode}}"    
+                                />
+                                <Button
+                                    icon="sap-icon://alert"
+                                    text="{= ${messages>/offerProductDetailMsg}.length }"
+                                    visible="{= ${messages>/offerProductDetailMsg}.length > 0 }"
+                                    type="Emphasized"
+                                    press="onMessagePopoverPress($event, 'offerProductDetailMsg')" 
+                                />
+                                <Button
+                                    id="idOfferDetailFormSaveBtn"
+                                    icon="sap-icon://save"
+                                    text="Save"
+                                    press=".onOfferDetailFormSaveBtnPress"
+                                    visible="{= ${ui>/ProductForm/editMode} }"
+                                />
+                                <Button
+                                    id="idOfferDetailFormCancelBtn"
+                                    icon="sap-icon://decline"
+                                    text="Cancel"
+                                    press=".onOfferDetailFormCancelBtnPress"
+                                    visible="{= ${ui>/ProductForm/editMode} }"
+                                />
+                            </Toolbar>
+                        </form:toolbar>
+                            <form:layout>
+                                <form:ResponsiveGridLayout
+                                    labelSpanXL="{template>layout/labelSpanXL}"
+                                    labelSpanL="{template>layout/labelSpanL}"
+                                    labelSpanM="{template>layout/labelSpanM}"
+                                    labelSpanS="{template>layout/labelSpanS}"
+                                    adjustLabelSpan="{template>layout/adjustLabelSpan}"
+                                    emptySpanXL="{template>layout/emptySpanXL}"
+                                    emptySpanL="{template>layout/emptySpanL}"
+                                    emptySpanM="{template>layout/emptySpanM}"
+                                    emptySpanS="{template>layout/emptySpanS}"
+                                    columnsXL="{template>layout/columnsXL}"
+                                    columnsL="{template>layout/columnsL}"
+                                    columnsM="{template>layout/columnsM}"
+                                    singleContainerFullSize="{template>layout/singleContainerFullSize}"
+                                />
+                                <!-- <form:ResponsiveGridLayout labelSpanL="12" labelSpanM="12"
+				emptySpanL="0" emptySpanM="0" columnsL="3" columnsM="3" columnsXL="3" class="editableForm" backgroundDesign="Solid" /> -->
+                            </form:layout>
+                            <form:formContainers>
+                                <form:FormContainer
+                                    title=""
+                                    formElements="{path:'template>formElements',templateShareable:true}"
+                                >
+                                    <form:formElements>
+                                        <form:FormElement
+                                            label="{template>label}"
+                                            fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
+                                        >
+                                            <!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+                                        </form:FormElement>
+                                    </form:formElements>
+                                </form:FormContainer>
+                            </form:formContainers>
+                        </form:Form>
+                    </VBox>
+                </Panel>
+                <Panel
+                    expandable="true"
+                    headerText="{i18n>OfferProductsDetailView.PricingInfo}"
+                >
+                    <Label 
+                        text="Set price by:" 
+                        class="sapUiSmallMarginBegin sapUiTinyMarginTop sapUiTinyMarginEnd"
+                    />
+                    <Select
+                        id = "idSelectedPriceContition"
+                        items = "{/PriceConditionClassification}"
+                        selectedKey="{st>/SelectedPriceConditionType}"
+                        change="onPriceConditionChange"
+                        enabled="{ui>/PricingForm/editMode}"
+                    >
+                        <core:Item key="{ConditionType}" text="{
+                            path: 'ConditionType',
+                            formatter: '.formatter.replaceString'
+                        }"/>
+                    </Select>
+                    <VBox id="idPriceConditionVbox" class="sapUiNoMargin">
+                        <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
+                    </VBox>
+				</Panel>
+                 <Panel
+                    expandable="true"
+                    visible="{ui>/FocForm/hasFocPriceCondition}"
+                    headerText="{i18n>OfferProductsDetailView.FreeGoods}"
+                >
+                    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC" type="XML"/>
+				</Panel>
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

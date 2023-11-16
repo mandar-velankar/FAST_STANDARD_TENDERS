@@ -1,0 +1,178 @@
+<mvc:View controllerName="com.bayer.tender.statenderapp.controller.BasicInformation.BasicInformation" 
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	
+	<VBox>
+		<form:Form
+			id="idTenderForm"
+			editable="true"
+			formContainers="{path:'template>xmlView/formByName/TenderForm/formContainers',templateShareable:true}">
+			<form:title>
+				<core:Title text="{template>title}" />
+			</form:title>
+			<form:toolbar>
+				<Toolbar>
+					<Title text="{template>title}"/>
+					<ToolbarSpacer/>
+					<Button
+						icon="sap-icon://alert"
+						text="{= ${messages>/basicInfoMsg}.length }"
+						visible="{= ${messages>/basicInfoMsg}.length > 0 &amp;&amp; ${ui>/TenderForm/editMode}}"
+						type="Emphasized"
+						press="onMessagePopoverPress($event, 'basicInfoMsg')" 
+					/>
+					<Button
+						id="idTenderFormEditBtn"
+						icon="sap-icon://edit"
+						text="Edit"
+						press=".onTenderFormEditBtnPress"
+						visible="{= !${ui>/TenderForm/editMode} }"
+						enabled="{= ${em>/Detail/TenderTab/TenderForm/editMode}}"
+					/>
+					<Button
+						id="idTenderFormSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onTenderFormSaveBtnPress"
+						visible="{= ${ui>/TenderForm/editMode} }"
+					/>
+					<Button
+						id="idTenderFormCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onTenderFormCancelBtnPress"
+						visible="{= ${ui>/TenderForm/editMode} }"
+					/>
+				</Toolbar>
+			</form:toolbar>
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="{template>layout/labelSpanXL}"
+					labelSpanL="{template>layout/labelSpanL}"
+					labelSpanM="{template>layout/labelSpanM}"
+					labelSpanS="{template>layout/labelSpanS}"
+					adjustLabelSpan="{template>layout/adjustLabelSpan}"
+					emptySpanXL="{template>layout/emptySpanXL}"
+					emptySpanL="{template>layout/emptySpanL}"
+					emptySpanM="{template>layout/emptySpanM}"
+					emptySpanS="{template>layout/emptySpanS}"
+					columnsXL="{template>layout/columnsXL}"
+					columnsL="{template>layout/columnsL}"
+					columnsM="{template>layout/columnsM}"
+					singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
+					<form:formElements>
+						<form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							<!-- <form:fields>
+								<Input value="{template>control/type}"/>
+							</form:fields> -->
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+	</VBox>
+	<VBox class='sapUiMediumMarginTop'>
+		<Table id="idAwardCriteria" 
+			columns="{path:'template>xmlView/tableByName/AwardCriteria/columns'}"
+			class="sapFDynamicPageAlignContent"
+			width="auto"
+			mode="SingleSelectMaster"
+		>
+			<headerToolbar>
+				<OverflowToolbar>
+					<content>
+						<Title text="{path:'template>xmlView/tableByName/AwardCriteria/title'}" level="H2"/>
+						<ToolbarSpacer />
+						<Button
+							icon="sap-icon://alert"
+							text="{= ${messages>/awardCriteriaMsg}.length }"
+							visible="{= ${messages>/awardCriteriaMsg}.length > 0 &amp;&amp; ${ui>/AwardCriteria/editMode}}"
+							type="Emphasized"
+							press="onMessagePopoverPress($event, 'awardCriteriaMsg')"  
+						/>
+						<Button
+							id="idAwardCriteriaEditBtn"
+							icon="sap-icon://edit"
+							text="Edit"
+							press=".onAwardCriteriaEditBtnPress"
+							visible="{= !${ui>/AwardCriteria/editMode} }"
+							enabled="{= ${em>/Detail/TenderTab/TenderForm/editMode}}"
+						/>
+						<Button
+							id="idAwardCriteriaSaveBtn"
+							icon="sap-icon://save"
+							text="Save"
+							press=".onAwardCriteriaSaveBtnPress"
+							visible="{= ${ui>/AwardCriteria/editMode} }"
+						/>
+						<Button
+							id="idAwardCriteriaCancelBtn"
+							icon="sap-icon://decline"
+							text="Cancel"
+							press=".onAwardCriteriaCancelBtnPress"
+							visible="{= ${ui>/AwardCriteria/editMode} }"
+						/>
+					</content>
+				</OverflowToolbar>
+			</headerToolbar>
+			<columns>
+				<Column>
+					<Text text="{template>title}" />
+				</Column>
+			</columns>
+		</Table>
+	</VBox>	
+	<!-- <VBox>
+		<form:Form
+			id="idTenderFormTest"
+			editable="true">
+			<form:title>
+				<core:Title text="Test only fields custom" />
+			</form:title>
+			<form:layout>
+				<form:ResponsiveGridLayout
+					labelSpanXL="3"
+					labelSpanL="3"
+					labelSpanM="3"
+					labelSpanS="12"
+					adjustLabelSpan="false"
+					emptySpanXL="4"
+					emptySpanL="4"
+					emptySpanM="4"
+					emptySpanS="0"
+					columnsXL="1"
+					columnsL="1"
+					columnsM="1"
+					singleContainerFullSize="false" />
+			</form:layout>
+			<form:formContainers>
+				<form:FormContainer title="Custom form container title" >
+					<form:formElements>
+						<form:FormElement visible="{template>xmlView/formByName/TenderForm/formContainers/0/elementByName/ID/visible}" label="Custom Label ID" >
+							<form:fields>
+								<Input value="{TenderID}"/>
+							</form:fields>
+						</form:FormElement>
+						<form:FormElement visible="{template>xmlView/formByName/TenderForm/formContainers/0/elementByName/TenderReference/visible}" label="Custom Label Tender Reference" >
+							<form:fields>
+								<Input value="{TenderName}"/>
+							</form:fields>
+						</form:FormElement>
+					</form:formElements>
+				</form:FormContainer>
+			</form:formContainers>
+		</form:Form>
+	</VBox> -->
+	
+
+</mvc:View>

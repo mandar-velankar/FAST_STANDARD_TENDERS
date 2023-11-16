@@ -1,0 +1,139 @@
+<!-- Fragment for handeling approvals -->
+<core:FragmentDefinition xmlns="sap.m" xmlns:l="sap.ui.layout" xmlns:form="sap.ui.layout.form" xmlns:core="sap.ui.core">
+					
+		<VBox fitContainer="true">
+						
+				<items>						
+						<!-- Table with mandatory approvals -->
+						<Table id="idMandatoryTable" 
+							   items = "{path: '/OfferProductOfferStatus', parameters: {'expand': 'ApproverList,ApproverTypes'}}" 
+							   alternateRowColors="true">
+								
+								<!-- table header with title & buttons -->
+								<headerToolbar>
+										<OverflowToolbar>
+											<content>
+												<Title text="Mandatory/Optional approvals" level="H2"/>
+												<ToolbarSpacer />
+												<Button icon="sap-icon://refresh" text="{i18n>Refresh}" type="Default" press="onRefreshApprovalsPress"/>
+											</content>
+										</OverflowToolbar>
+								</headerToolbar>
+								
+								<!-- columns -->
+								<columns>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="10rem">
+										<Label text="{i18n>Approver}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="5rem">
+										<Label text="{i18n>Hierarchy}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="7rem">
+										<Label text="{i18n>Content}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="7rem">
+										<Label text="{i18n>Status}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="7rem">
+										<Label text="{i18n>Send}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="20rem">
+										<Label text="{i18n>Name}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true" width="9rem">
+										<Label text="{i18n>RequiredAction}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true">
+										<Label text="{i18n>SendersComment}"/>
+									</Column>
+									<Column minScreenWidth="Tablet" demandPopin="true">
+										<Label text="{i18n>ApproverComment}"/>
+									</Column>
+								</columns>
+								
+								<!-- rows -->
+								<items>
+									
+									<ColumnListItem type="Inactive">
+										
+										<cells>
+											
+											<!-- Approver Type -->
+											<Label text="{ApproverType}"/>
+
+											<!-- Hierarchy -->
+											<Input value="{ 
+														parts:[
+																{path:'ApproverTypes'}
+															  ],
+														formatter: '.formatHierarchy'
+													}" required="true"/>
+
+											<!-- Content -->
+											<Label text="{ApprovalContent}"/>
+										
+											<!-- Status -->
+											<ObjectStatus
+												class="sapUiSmallMarginBottom"
+												text="{ApprovalStatus}"
+												state="{ parts:[{path:'ApprovalStatus'}],
+														 formatter: '.formatApprovalStatus'}"
+											/>
+											
+											<Select selectedKey="{send}"
+													enabled="{ 
+														parts:[
+																{path:'ApprovalStatus'},
+																{path:'ApproverTypeSection'}
+															  ],
+														formatter: '.formatSendingEnabled'
+													}"
+											        >
+												<items>
+													<core:Item text="No" key="No"/>
+													<core:Item text="Yes" key="Yes"/>
+												</items>
+											</Select>
+											
+											<!-- Name -->
+											<Select selectedKey="{ApproverEmailID}" 
+													items="{ path: 'ApproverList', templateShareable: false }" 
+													width="250px" 
+													enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling'}">
+												<core:Item text="{ApproverName}" key="{ApproverEmailID}"/>
+											</Select>
+											
+											<!-- Content -->
+											<Select id="idReqAction" selectedKey="{REQUIRED_ACTION}" enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling' &amp;&amp; ${ApproverTypeSection} !== 1 ? true : false}">
+												<items>
+													<core:Item text="Notification" key="Notification"/>
+													<core:Item text="Approval" key="Approval"/>
+												</items>
+											</Select>
+											
+											<!-- Sender's Comment  -->
+											<TextArea value="{SenderComment}" 
+														showExceededText="true" 
+														maxLength="500" 
+														width="100%" 
+														valueState="{= ${SenderComment}.length > 500 ? 'Warning' : 'None' }" 
+														valueLiveUpdate="false" liveChange="handleLiveChange" 
+														enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling'}"/>
+											
+											<!-- Approver's Comment  -->
+											<TextArea value="{ApproverComment}" 
+														showExceededText="true" 
+														maxLength="500" 
+														width="100%" 
+														valueState="{= ${ApproverComment}.length > 500 ? 'Warning' : 'None' }" 
+														valueLiveUpdate="false" 
+														liveChange="handleLiveChange" 
+														enabled="false"/>
+											
+										</cells>
+									</ColumnListItem>
+								</items>
+						</Table>
+				</items>
+		</VBox>
+</core:FragmentDefinition>

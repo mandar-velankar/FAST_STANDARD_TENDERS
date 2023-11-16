@@ -9,7 +9,7 @@
 		"description": "{{appDescription}}",
 
 		"applicationVersion": {
-		"version": "1.0.0"
+		"version": "0.0.2"
 		},
 		"resources": "resources.json",
 		"dataSources": {
@@ -20,6 +20,22 @@
 					"odataVersion": "2.0",
 					"localUri": "localService/metadata.xml"
 				}
+			},
+			"tempService": {
+				"uri": "/UITemplates/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0",
+					"localUri": "localService/metadata.xml"
+				}
+			},
+			"accessService": {
+				"uri": "/v2/access/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+        		}
 			}
 		}
 	},
@@ -62,7 +78,11 @@
 			"compact": true,
 			"cozy": true
 		},
-
+		"componentUsages": {
+		},
+		"resourceRoots":{
+			"com.bayer.tender.uilib": "./libraries/uilib/src/com/bayer/tender/uilib"
+		},
 		"models": {
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
@@ -72,6 +92,24 @@
 			},
 			"": {
 				"dataSource": "mainService",
+				"preload": true,
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "TwoWay",
+					"defaultUpdateMethod": "Put"
+				}
+			},
+			"st": {
+				"dataSource": "mainService",
+				"preload": true,
+				"type": "com.bayer.tender.statenderapp.state.StandardTenderState"
+			},
+			"template": {
+				"dataSource": "tempService",
+				"type": "com.bayer.tender.statenderapp.state.TemplateState"
+			},
+			"access": {
+				"dataSource": "accessService",
 				"preload": true
 			}
 		},
@@ -96,11 +134,70 @@
 					"target": "master"
 				},
 				{
-					"pattern": "PT_TMTEND/{objectId}",
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:",
 					"name": "object",
 					"target": [
 						"master",
 						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Offer",
+					"name": "objectDetailOffer",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Overview",
+					"name": "objectDetailOverview",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Awards",
+					"name": "objectDetailAwards",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:/Deliveries",
+					"name": "objectDetailDeliveries",
+					"target": [
+						"master",
+						"object"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/{offerId}/Delivery/{productId}/{layout}",
+					"name": "deliveryTrackingProductDetail",
+					"target": [
+						"master",
+						"object",
+						"deliveryTrackingProductDetail"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/{offerId}/AwardedProduct/{productId}/{layout}",
+					"name": "awardProductsDetail",
+					"target": [
+						"master",
+						"object",
+						"awardProductsDetail"
+					]
+				},
+				{
+					"pattern": "detail/{countryCode}/{productScope}/{objectId}/{offerId}/OfferProductDetail/{productId}/{layout}",
+					"name": "offerProductDetail",
+					"target": [
+						"master",
+						"object",
+						"offerProductDetail"
 					]
 				}
 			],
@@ -117,6 +214,34 @@
 					"viewLevel": 1,
 					"controlAggregation": "midColumnPages"
 				},
+				"awardProductsDetail": {
+					"viewName": "awards/views/AwardedProductsDetail",
+					"controlAggregation": "endColumnPages"
+				},
+				"objectDetailOffer": {
+					"viewName": "offer/views/OfferProducts",
+					"controlAggregation": "endColumnPages"
+				},
+				"objectDetailOverview": {
+					"viewName": "overview/views/Information",
+					"controlAggregation": "endColumnPages"
+				},
+				"objectDetailAwards": {
+					"viewName": "awards/views/AwardedProducts",
+					"controlAggregation": "endColumnPages"
+				},
+				"objectDetailDeliveries": {
+					"viewName": "deliverytracking/views/DeliveryTracking",
+					"controlAggregation": "endColumnPages"
+				},
+				"deliveryTrackingProductDetail": {
+					"viewName": "deliverytracking/views/DeliveryTrackingDetail",
+					"controlAggregation": "endColumnPages"
+				},
+				"offerProductDetail": {
+					"viewName": "offer/views/OfferProductsDetail",
+					"controlAggregation": "endColumnPages"
+				},
 				"detailObjectNotFound": {
 					"viewName": "DetailObjectNotFound",
 					"viewId": "detailObjectNotFound",
@@ -128,5 +253,9 @@
 				}
 			}
 		}
-	}
+	},
+    "sap.cloud": {
+        "public": true,
+        "service": "com-bayer-tender-statenderapp"
+    }
 }

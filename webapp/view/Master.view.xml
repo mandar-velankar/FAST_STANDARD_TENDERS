@@ -1,99 +1,225 @@
 <mvc:View
 	controllerName="com.bayer.tender.statenderapp.controller.Master"
 	xmlns="sap.m"
-	xmlns:semantic="sap.f.semantic"
-	xmlns:mvc="sap.ui.core.mvc">
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
 
-	<semantic:SemanticPage
+	<f:DynamicPage
 		id="masterPage"
 		preserveHeaderStateOnScroll="true"
 		toggleHeaderOnTitleClick="false">
-		<semantic:titleHeading>
-			<Title
-				id="masterPageTitle"
-				text="{masterView>/title}"
-				level="H2"/>
-		</semantic:titleHeading>
-		<semantic:content>
-			<!-- For client side filtering add this to the items attribute: parameters: {operationMode: 'Client'}}" -->
-			<List
-				id="list"
-				width="auto"
-				class="sapFDynamicPageAlignContent"
-				items="{
-					path: '/PT_TMTEND',
-					sorter: {
-						path: 'TenderName',
-						descending: false
-					},
-					groupHeaderFactory: '.createGroupHeader'
-				}"
-				busyIndicatorDelay="{masterView>/delay}"
-				noDataText="{masterView>/noDataText}"
-				mode="{= ${device>/system/phone} ? 'None' : 'SingleSelectMaster'}"
-				growing="true"
-				growingScrollToLoad="true"
-				updateFinished=".onUpdateFinished"
-				selectionChange=".onSelectionChange">
-				<infoToolbar>
-					<Toolbar
-						active="true"
-						id="filterBar"
-						visible="{masterView>/isFilterBarVisible}"
-						press=".onOpenViewSettings">
-						<Title
-							id="filterBarLabel"
-							text="{masterView>/filterBarLabel}"
-							level="H3"/>
-					</Toolbar>
-				</infoToolbar>
-				<headerToolbar>
-					<OverflowToolbar>
-						<SearchField
-							id="searchField"
-							showRefreshButton="true"
-							tooltip="{i18n>masterSearchTooltip}"
-							search=".onSearch"
-							width="auto">
-							<layoutData>
-								<OverflowToolbarLayoutData
-									minWidth="150px"
-									maxWidth="240px"
-									shrinkable="true"
-									priority="NeverOverflow"/>
-							</layoutData>
-						</SearchField>
-						<ToolbarSpacer/>
-						<Button
-							id="sortButton"
-							press=".onOpenViewSettings"
-							icon="sap-icon://sort"
-							type="Transparent"/>
-						<Button
-							id="filterButton"
-							press=".onOpenViewSettings"
-							icon="sap-icon://filter"
-							type="Transparent"/>
-						<Button
-							id="groupButton"
-							press=".onOpenViewSettings"
-							icon="sap-icon://group-2"
-							type="Transparent"/>
-					</OverflowToolbar>
-				</headerToolbar>
-				<items>
-					<ObjectListItem
-						type="Navigation"
-						press=".onSelectionChange"
-						title="{TenderName}"
-						number="{
-							path: 'TenderNo',
-							formatter: '.formatter.currencyValue'
+		
+		<!-- DynamicPage Title -->
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text="Tenders"/>
+				</f:heading>
+			</f:DynamicPageTitle>
+		</f:title>
+
+
+		<f:content>
+			<VBox>
+				<OverflowToolbar class="sapFDynamicPageAlignContent">
+					<Label
+						text="Country"
+						labelFor="idSlctCountry"
+					/>
+					<Select 
+						id="idSlctCountry" 
+						selectedKey="{st>/SelectedCountry}"
+						items="{ 
+							path: '/UserCountries', 
+							parameters: {
+								expand: 'Country'
+							},
+							sorter: { 
+								path: 'Country/CountryName' 
+							},
+							 events: {
+								dataReceived: '.onCountriesReceived'
+							}
 						}"
-						numberUnit="{BidDueDate}">
-					</ObjectListItem>
-				</items>
-			</List>
-		</semantic:content>
-	</semantic:SemanticPage>
+						change=".onCountriesReceived"
+					>
+						<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
+					</Select>
+					<Label
+						text="Brand"
+						labelFor="idSlctBrand"
+					/>
+					<Select 
+						id="idSlctBrand" 
+						change=".setFilter"
+					>
+						<!-- items binding see controller -->
+						<core:Item key="{BRANDID}" text="{BRANDNAME}"/>
+					</Select>
+					<Label
+						text="Status"
+						labelFor="idSlctStatus"
+					/>
+					<Select 
+						id="idSlctStatus" 
+						change=".setFilter" 
+					>
+						<!-- items binding see controller -->
+						<core:Item key="{Status}" text="{Status}"/>
+					</Select>
+
+					<Label
+						text="Product Scope"
+						labelFor="idSelectProductScope"
+					/>
+					<Select 
+						id="idSelectProductScope"
+						selectedKey="{st>/ProductScope}"
+						change='onProductScopesReceived'>
+						<core:Item key="{ProductScope}" text="{ProductScope}"/>
+					</Select>
+
+					<ToolbarSpacer/>
+					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
+					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
+				</OverflowToolbar>
+				<Table id="genericMasterTable" 
+					columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
+					itemPress=".onSelectionChange"
+					class="sapFDynamicPageAlignContent"
+					width="auto"
+					updateFinished=".onUpdateFinished"
+					alternateRowColors="true"
+					contextualWidth="Auto" 
+					autoPopinMode="true"
+					hiddenInPopin="None"
+					growing="true"
+					growingThreshold="15"
+					growingScrollToLoad="false"
+					busyIndicatorDelay="0"
+					mode="SingleSelectMaster"
+				>
+					<columns>
+						<Column importance="{template>importance}" >
+							<Text text="{template>title}" />
+						</Column>
+					</columns>
+				</Table>
+			</VBox>
+		<!-- <VBox id="GenericTableComponentPlaceHolder" fitContainer="true"> -->
+			<!-- </VBox> -->
+			<!-- <VBox fitContainer="true">
+				<OverflowToolbar class="sapFDynamicPageAlignContent">
+					<ToolbarSpacer/>
+					
+					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
+					<Button icon="sap-icon://filter" text="" press=".onOpenViewSettings"/>
+					<Button icon="sap-icon://add" text="Create New" press=".onAdd"/>
+				</OverflowToolbar>
+				<Table
+					id="list"
+					inset="false"
+					items="{
+						path: '/PT_TMTEND',
+						parameters: {
+							expand: 'Offer,Offer/OfferStatus,Institute'
+						}
+					}"
+					class="sapFDynamicPageAlignContent"
+					width="auto"
+					updateFinished=".onUpdateFinished"
+					alternateRowColors="true"
+					contextualWidth="Auto" 
+					popinLayout="Block"
+					growing="true"
+					growingThreshold="15"
+					growingScrollToLoad="false">
+					<columns>
+						<Column width="6%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<header>
+								<ObjectIdentifier title="{i18n>Country}" />
+							</header>
+						</Column>
+						<Column width="10%" demandPopin="true" popinDisplay="Inline" >
+							<header>
+								<ObjectIdentifier title="{i18n>TenderID}" />
+							</header>
+						</Column>
+						<Column width="12%" minScreenWidth="920px" demandPopin="true" popinDisplay="Inline" visible="{= ${appView>/layout} === 'TwoColumnsMidExpanded' }">
+							<header>
+								<ObjectIdentifier title="{i18n>TenderName}" />
+							</header>
+						</Column>
+						<Column width="12%" minScreenWidth="920px" demandPopin="true" popinDisplay="Inline">
+							<header>
+								<ObjectIdentifier title="{i18n>Institute}" />
+							</header>
+						</Column>
+						<Column visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<header>
+								<ObjectIdentifier title="{i18n>OfferID}" />
+							</header>
+						</Column>
+						<Column width="8%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<header>
+								<ObjectIdentifier title="{i18n>Value}" />
+							</header>
+						</Column>
+						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' }">
+							<header>
+								<ObjectIdentifier title="{i18n>OfferStatus}" />
+							</header>
+						</Column>
+						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' }">
+							<ObjectIdentifier title="{i18n>pubcndte}" />
+						</Column>
+						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<ObjectIdentifier title="{i18n>BidDueDate}" />
+						</Column>
+						<Column width="12%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<ObjectIdentifier title="{i18n>ClosingDate}" />
+						</Column>
+						<Column width="4%" visible="{= ${appView>/layout} !== 'TwoColumnsMidExpanded' &amp;&amp; ${appView>/layout} !== 'ThreeColumnsMidExpanded'}">
+							<ObjectIdentifier title="" />
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem type="Navigation" press=".onSelectionChange">
+							<cells>
+								<Text text="{CountryCode}"/>
+								<ObjectIdentifier text="{TenderID}"/>
+								<Text text="{TenderName}"/>
+								<Text text="{InstituteID}"/>
+								<Text text="{Offer/OfferID}"/>
+								<Text text="{/CountryCode}"/>
+								<Text text="{/CountryCode}"/>
+								<Text text="{
+									path: 'PublicationDate',
+									type: 'sap.ui.model.type.Date',
+									formatOptions: {
+										pattern: 'yyyy-MM-dd'
+									}
+								}"/>
+								<Text text="{
+									path: 'BidDueDate',
+									type: 'sap.ui.model.type.Date',
+									formatOptions: {
+										pattern: 'yyyy-MM-dd'
+									}
+								}"/>
+								<Text text="{/CountryCode}"/>
+								<Button text="{i18n>Deliveries}"/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
+			</VBox> -->
+		</f:content>
+	</f:DynamicPage>
 </mvc:View>

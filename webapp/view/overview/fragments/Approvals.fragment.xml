@@ -1,0 +1,36 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:up="sap.uxap" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:u="sap.uxap"
+	xmlns:t="sap.ui.table" 
+	xmlns:l="sap.ui.layout"
+	xmlns:mvc="sap.ui.core.mvc">
+
+<Dialog id = "idApprovalsPopup" title="Mandatory / Optional Approvals" contentWidth="800px" contentHeight="400px">
+
+		<content>
+			<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.ApprovalsForm" type="XML"/>
+        </content>
+
+        <buttons>
+			<Button
+					id="btnSendApproval"
+					text="Send Approval Request"
+					visible="true"
+					press=".onSendApprovalRequest($event)" 
+					enabled="{= ${em>/Detail/OverviewTab/Approval/enableSendApprovalBtn}}"
+            />
+            <Button id="btnCancelApproval"
+					text="Cancel Approval Request" 
+                    press=".onCancelApprovalRequest"
+					enabled="{= ${em>/Detail/OverviewTab/Approval/enableCancelApprovalBtn}}"
+            />
+            <Button text="Close" 
+                    press=".onCloseApprovalDialog" 
+            />
+        </buttons>
+</Dialog>
+
+</core:FragmentDefinition>

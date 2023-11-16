@@ -1,0 +1,124 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+
+	<Dialog title="{i18n>PriceConditionFOC_OtherProductsFragment.Products}" >
+		<buttons>
+            <Button
+                icon="sap-icon://alert"
+                text="{= ${messages>/priceCondFoc}.length }"
+                visible="{= ${messages>/priceCondFoc}.length > 0 &amp;&amp; ${ui>/FocForm/editMode}}"
+                type="Emphasized"
+                press="onMessagePopoverPress($event, 'priceCondFoc')" 
+            />
+			<Button 
+                text="{i18n>PriceConditionFOC_OtherProductsFragment.Save}" 
+                press=".onButtonApplyFocOtherProductsPress" 
+            />
+			<Button 
+                text="{i18n>PriceConditionFOC_OtherProductsFragment.Cancel}" 
+                press=".onButtonCancelFocOtherProductsPress" 
+            />
+		</buttons>
+
+        <Table 
+            id="idFreeGoodsOtherTable"
+            items="{
+                path: '/FreeGoodsOther',
+                groupId: 'PricingForm'
+            }"
+        >
+		<headerToolbar>
+			<OverflowToolbar>
+				<content>
+					<ToolbarSpacer />
+                    <Button 
+                        icon="sap-icon://add" 
+                        press=".onButtonAddFocOtherProductsPress">
+                    </Button>
+				</content>
+			</OverflowToolbar>
+		</headerToolbar>
+             <columns>
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.Product}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FocType}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.AddedIncluded}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCQuantity}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCStep}"/>
+                </Column>    
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.UoM}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.Action}"/>
+                </Column>               
+            </columns>
+            <ColumnListItem>
+                <cells>
+                    <Input
+                        showValueHelp="true" 
+                        valueHelpOnly="true" 
+                        valueHelpRequest=".onProductNameInputValueHelpRequest" 
+                        value="{ProductPackName}" 
+                    />
+                    <Select 
+                        forceSelection="false" 
+                        selectedKey="{FreeGoodsOther_ABS_PCT}"
+                    >
+                        <core:Item key="ABS" text="Absolute" />
+                        <core:Item key="PCT" text="Percentage" />
+                        <core:Item key="STP" text="Step" />
+                    </Select>
+                    <Select 
+                        selectedKey="{ADD_INCLUDE}"
+                    >
+                        <core:Item key="Added" text="Added" />
+                        <core:Item key="Included" text="Included" />
+                    </Select>
+                    <HBox>
+                        <Input 
+                            type="Number" 
+                            value="{path:'FreeGoodsOther'}" 
+                            visible="{= 
+                                ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
+                                ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false 
+                            }"
+                        />
+                        <Input  
+                            value="{
+                                path:'FreeGoodsOther',
+                                type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+                            }" 
+                            visible="{= 
+                                ${FreeGoodsOther_ABS_PCT} === 'PCT' ? true : false 
+                            }"
+                        /> 
+                    </HBox>
+                    <Input 
+                        type="Number" 
+                        value="{path:'FreeGoodsOther_Step'}" 
+                        enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
+                    />
+                    <Text class="sapUiSmallMarginTop"
+                        text="{= 
+                            ${FreeGoodsOther_ABS_PCT} === 'PCT' ? '%': ${ui>/FocForm/UOM}
+                        }">
+                    </Text> 
+                    <Button 
+                        icon="sap-icon://delete" 
+                        press=".onButtonDeleteOtherProductPress"
+                    />
+                </cells>
+            </ColumnListItem>
+        </Table>
+   	</Dialog>	
+</core:FragmentDefinition>
