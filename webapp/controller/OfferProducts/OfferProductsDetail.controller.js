@@ -327,6 +327,10 @@ sap.ui.define([
 		onOfferDetailFormSaveBtnPress: function(event){
 			// if(!this.validateProduct()) return;
 			const form = this.byId(`idProductForm`);
+			if(this.sCountryCode == 'PK'){
+				let pKDistributor = this.getPKDistributor(form);
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_1", pKDistributor);
+			}
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
@@ -349,6 +353,25 @@ sap.ui.define([
 
 		_onSubmitChangesFail: function(error){
 			// not implemented
+		},
+
+		/**
+		 * This function return the "Custom_String_1" defined as "Distributor" field on the offer product detail page
+		 * @param {*} form 
+		 * @returns 
+		 */
+		getPKDistributor: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let pKDistributorID;
+			formContainers.forEach(forContainer => {
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Distributor'){
+							pKDistributorID = formElement.getFields()[0]?.getSelectedKey();
+						}
+					});			
+			});
+			return pKDistributorID;
 		},
 
 		onOfferDetailFormCancelBtnPress: function(event){
