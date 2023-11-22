@@ -333,6 +333,7 @@ sap.ui.define([
 			const sElemBindingPath = form.getElementBinding().getPath();
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
+			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
