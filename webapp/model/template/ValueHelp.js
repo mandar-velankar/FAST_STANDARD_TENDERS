@@ -42,9 +42,12 @@ sap.ui.define([
         if(originalInputField instanceof sap.m.MultiInput){
           let aSelectedItems = oEvent.getParameter("selectedItems");
           let originalInputFieldItems = originalInputField.getTokens();
+          let selectedTexts = [];
 
-          if (aSelectedItems && aSelectedItems.length > 0) {       
-            const selectedTexts = aSelectedItems.map(oItem => oItem.getBindingContext().getObject().Name);
+          if (aSelectedItems && aSelectedItems.length > 0) {      
+            this.selectedField.forEach(field => {
+              selectedTexts = aSelectedItems.map(oItem => oItem.getBindingContext().getObject()[field.Name]);
+            });
             
             originalInputFieldItems.forEach(function (token) {
               const tokenText = token.getText();
@@ -52,17 +55,18 @@ sap.ui.define([
                 originalInputField.removeToken(token);
               }
             });
-           
-            aSelectedItems.forEach(function (oItem) {
-              const itemText = oItem.getBindingContext().getObject().Name;
-              const isTokenExists = originalInputFieldItems.some(token => token.getText() === itemText);
-              if (!isTokenExists) {
-                const oToken = new Token({
-                  text: itemText
-                });
-                originalInputField.addToken(oToken);
-              }
-            });
+            this.selectedField.forEach(field => {
+              aSelectedItems.forEach(function (oItem) {
+                const itemText = oItem.getBindingContext().getObject()[field.Name];
+                const isTokenExists = originalInputFieldItems.some(token => token.getText() === itemText);
+                if (!isTokenExists) {
+                  const oToken = new Token({
+                    text: itemText
+                  });
+                  originalInputField.addToken(oToken);
+                }
+              });
+            })
           } else {            
             originalInputField.removeAllTokens();
           }
