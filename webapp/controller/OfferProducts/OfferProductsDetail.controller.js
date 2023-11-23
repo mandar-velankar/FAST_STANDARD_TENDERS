@@ -1124,7 +1124,7 @@ sap.ui.define([
 			context.getModel().setProperty("ProductPackId", this.productId, context);
 			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
 			context.getModel().setProperty("FreeGoodsOther_ABS_PCT", "STP", context);
-			context.getModel().setProperty("ADD_INCLUDE", "Added", context);
+			context.getModel().setProperty("ADD_INCLUDE", "Included", context);
 			const newItem = table.getBindingInfo("items").template.clone();
 			newItem.setBindingContext(context)
 			table.insertItem(newItem);
