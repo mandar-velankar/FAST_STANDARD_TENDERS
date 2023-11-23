@@ -1115,11 +1115,15 @@ sap.ui.define([
 		},
 
 		onButtonAddFocOtherProductsPress: function(event){
+			const productPackName = event.getSource().getBindingContext().getProperty("PRODUCTPACKNAME");
 			const table = this.byId("idFreeGoodsOtherTable");
 			const context = this.defaultModel.createEntry("/FreeGoodsOther", {
 				groupId: "PricingForm"
 			});
+			context.getModel().setProperty("ProductPackName", productPackName, context);
+			context.getModel().setProperty("ProductPackId", this.productId, context);
 			context.getModel().setProperty("PriceCondition_ID", this.getMainPriceConditionID(), context);
+			context.getModel().setProperty("FreeGoodsOther_ABS_PCT", "STP", context);
 			context.getModel().setProperty("ADD_INCLUDE", "Added", context);
 			const newItem = table.getBindingInfo("items").template.clone();
 			newItem.setBindingContext(context)
