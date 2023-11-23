@@ -71,18 +71,17 @@
                         value="{ProductPackName}" 
                     />
                     <Select 
-                        forceSelection="false" 
                         selectedKey="{FreeGoodsOther_ABS_PCT}"
                     >
+                        <core:Item key="STP" text="Step" />
                         <core:Item key="ABS" text="Absolute" />
                         <core:Item key="PCT" text="Percentage" />
-                        <core:Item key="STP" text="Step" />
                     </Select>
                     <Select 
                         selectedKey="{ADD_INCLUDE}"
                     >
-                        <core:Item key="Added" text="Added" />
                         <core:Item key="Included" text="Included" />
+                        <core:Item key="Added" text="Added" />
                     </Select>
                     <HBox>
                         <Input 
