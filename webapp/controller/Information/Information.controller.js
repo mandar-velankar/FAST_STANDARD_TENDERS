@@ -155,7 +155,7 @@ sap.ui.define([
 			})
 		},
 
-		bindFields: async function () {
+		bindFields: function () {
 			if (this.offerId && this.offerId !== "NA") {
 				this.bindTable();
 				this.bindForm(this.selectedTab);
@@ -174,7 +174,8 @@ sap.ui.define([
 			await this.approvalButtonEnableCheck();
 			//this.getOwnerComponent().getModel().refresh(true);			
 		},
-		bindForm: function (tabName) {
+		bindForm: async function (tabName) {
+			await this.getOfferValidation(this.offerId);
 			const overviewForm = this.byId("idOverviewForm");
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName("OverviewForm").getEntity();
 			const path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
