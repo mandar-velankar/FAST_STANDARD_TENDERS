@@ -157,7 +157,6 @@ sap.ui.define([
 
 		bindFields: async function () {
 			if (this.offerId && this.offerId !== "NA") {
-				await this.getOfferValidation(this.offerId);
 				this.bindTable();
 				this.bindForm(this.selectedTab);
 			}
