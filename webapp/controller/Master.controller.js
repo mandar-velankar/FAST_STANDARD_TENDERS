@@ -762,6 +762,7 @@ sap.ui.define([
 			newTenderObj.CountryCode = sSelectedCountry;
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
+			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
 			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
