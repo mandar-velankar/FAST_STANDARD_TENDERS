@@ -175,7 +175,6 @@ sap.ui.define([
 			//this.getOwnerComponent().getModel().refresh(true);			
 		},
 		bindForm: async function (tabName) {
-			await this.getOfferValidation(this.offerId);
 			const overviewForm = this.byId("idOverviewForm");
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName("OverviewForm").getEntity();
 			const path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
@@ -183,6 +182,8 @@ sap.ui.define([
 				groupId: "OverviewForm"
 			});
 			const context = new Context(this.getModel(), path);
+			overviewForm.setBindingContext(context);
+			await this.getOfferValidation(this.offerId);
 			overviewForm.setBindingContext(context);
 			
 		},
