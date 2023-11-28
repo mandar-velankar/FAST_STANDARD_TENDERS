@@ -855,13 +855,26 @@ sap.ui.define([
 				"ProductCode": productID,
 				"ConditionType": conditionType
 			});
-			form.bindElement({
-				path: path,
-				groupId: "PricingForm",
-				events: {
-					dataReceived: this.onPricingFormDataReceived.bind(this)
-				}
-			});
+
+			if (this.sCountryCode === "TW" && conditionType === "TaiwanPrice") {
+				form.getAggregation("items").forEach(item => {
+					item.bindElement({
+						path: path,
+						groupId: "PricingForm",
+						events: {
+							dataReceived: this.onPricingFormDataReceived.bind(this)
+						}
+					});
+				})
+			}else {
+				form.bindElement({
+					path: path,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
+			}
 		},
 
 		/**
