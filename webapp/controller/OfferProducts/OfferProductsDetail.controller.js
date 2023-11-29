@@ -855,13 +855,26 @@ sap.ui.define([
 				"ProductCode": productID,
 				"ConditionType": conditionType
 			});
-			form.bindElement({
-				path: path,
-				groupId: "PricingForm",
-				events: {
-					dataReceived: this.onPricingFormDataReceived.bind(this)
-				}
-			});
+
+			if (this.sCountryCode === "TW" && conditionType === "TaiwanPrice") {
+				form.getAggregation("items").forEach(item => {
+					item.bindElement({
+						path: path,
+						groupId: "PricingForm",
+						events: {
+							dataReceived: this.onPricingFormDataReceived.bind(this)
+						}
+					});
+				})
+			}else {
+				form.bindElement({
+					path: path,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
+			}
 		},
 
 		/**
@@ -1081,7 +1094,9 @@ sap.ui.define([
 
 			this._refreshOfferProductTable();
 			// we need to detach the data received event otherwise we will get into a loop
-			evt.getSource().detachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+			if (evt.getSource()) {
+				evt.getSource().detachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+			}
         },
 
 		getProductPrice: async function (offerId, productCode) {
