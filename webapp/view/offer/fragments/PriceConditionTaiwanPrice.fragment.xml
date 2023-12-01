@@ -6,7 +6,7 @@
  
    <VBox >
 	     <form:Form
-		id="idPricingForm"
+		id="idTaiwanPricingForm"
 		editable="true"
 	>
     <form:toolbar>
@@ -30,13 +30,13 @@
 				<Button
 					icon="sap-icon://save"
 					text="Save"
-					press=".onPriceWithFOCFormSaveBtnPress"
+					press=".onTaiwanPriceFormSaveBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 				<Button
 					icon="sap-icon://decline"
 					text="Cancel"
-					press=".onPriceWithFOCFormCancelBtnPress"
+					press=".onTaiwanPriceFormCancelBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 			</Toolbar>
@@ -110,7 +110,7 @@
 							<Input
 								value="{AnticipatedYearlyVolumeMainCustomer}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
+								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanPrice')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -119,7 +119,7 @@
 							<Input 
 								value="{AnticipatedYearlyVolumeBranch}"
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
+								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanPrice')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -130,7 +130,7 @@
    
 	<!-- FORM WITH Pricing DATA -->
 	<form:Form
-		id="idTaiwanPricingForm"
+		id="idPricingForm"
 		editable="true"
 	>
 		<form:layout>
@@ -214,7 +214,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['Level2Discount2', 'Currency'],
+									parts: ['NetPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -229,8 +229,12 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Deductions',
-									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+									parts: ['AnnualDiscountForBranch', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}
 								}" 
 								enabled="false"
 							/>
@@ -240,7 +244,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
+									parts: ['Level3Discount1', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -254,7 +258,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetOfferPrice', 'Currency'],
+									parts: ['Price3', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -269,7 +273,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
+									parts: ['NegotiationPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -283,7 +287,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
+									parts: ['TotalYearlyValueMainCustomer', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -297,7 +301,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
+									parts: ['TotalYearlyValueBranch', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -311,7 +315,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
+									parts: ['TotalDiscountNHI', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -325,7 +329,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
+									parts: ['TotalDiscountInvoice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -418,7 +422,12 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'AnnualDiscountForBranch'
+									parts: ['AnnualDiscountForBranch', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										preserveDecimals: false
+									}
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
