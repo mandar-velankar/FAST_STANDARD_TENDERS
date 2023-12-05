@@ -81,28 +81,12 @@
 				<form:formElements>
 					<form:FormElement label="Main Customer">
 						<form:fields>
-							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											preserveDecimals: false
-										}	
-									}"  
-									enabled="false"/>
+							<Input value="{Last12MonthsVolumeMainCustomer}" enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="Branch">
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											preserveDecimals: false
-										}	
-									}"  
-									enabled="false"/>
+							<Input value="{Last12MonthsVolumeBranch}" enabled="false"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="Main Customer">
