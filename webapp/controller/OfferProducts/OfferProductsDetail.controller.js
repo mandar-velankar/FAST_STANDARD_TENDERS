@@ -720,7 +720,7 @@ sap.ui.define([
 			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
 			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj})); 
-			let level3Discount1 = parseFloat(priceObj.Level3Discount1) / branchVolume;
+			let level3Discount1 = annualDiscount / branchVolume;
 			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
 			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
 			let grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
@@ -902,7 +902,7 @@ sap.ui.define([
 			let focVolume = 0;
 			
 			//Cases 1,2 and 3
-			if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return invoicePrice;
+			if(foc.length === 0 || !containsOfferProduct) return (invoicePrice * (1 - deductions - level2Discount2));
 
 			// Cases 2
 			if(containsOfferProductAndIsIncluded) {
@@ -913,7 +913,7 @@ sap.ui.define([
 					case "PCT":
 						focVolume = includedFOC.FreeGoodsOther * branchVolume;
 					case "STP":
-						focVolume = (branchVolume / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+						focVolume = parseInt(branchVolume / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
 				}
 			}
 
