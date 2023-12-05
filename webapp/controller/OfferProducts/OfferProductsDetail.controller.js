@@ -183,7 +183,7 @@ sap.ui.define([
 					],
 					success: function (res) {
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
-						priceCondition = priceCondition ? priceCondition : res?.results[0];
+						priceCondition = priceCondition ? priceCondition : res?.results.find(el => el.isMain == true);
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -372,6 +372,42 @@ sap.ui.define([
 					});			
 			});
 			return pKDistributorID;
+		},
+
+		onTaiwanPriceFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionTaiwanPriceView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionTaiwanPriceView"], "priceCondPrice");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesTaiwanPriceSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesTaiwanPriceSuccess: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionTaiwanPriceView"]).length > 0;
+			this.setMessageSection(["PriceConditionTaiwanPriceView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionTaiwanPriceView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionTaiwanPriceView"], "priceCondPrice");
+			} 
+			this._refreshOfferProductTable();
+			this.refreshPricingForm();
+		},
+
+		onTaiwanPriceFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionTaiwanPriceView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
 		},
 
 		onOfferDetailFormCancelBtnPress: function(event){
@@ -639,6 +675,9 @@ sap.ui.define([
 				case "discountwithfoc":
 					this.calculateDiscountWithFOCConditionType({property, value, context});
 					break;
+				case "taiwanprice":
+					this.calculateTaiwanPriceConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -659,6 +698,57 @@ sap.ui.define([
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
+		},
+
+		/**
+		 * Calculate price condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculateTaiwanPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
+			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.OfferPrice);
+			let mainCustomerVolume = property?.toLowerCase().includes("anticipatedyearlyvolumemaincustomer") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeMainCustomer);
+			let branchVolume = property?.toLowerCase().includes("anticipatedyearlyvolumebranch") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeBranch);
+			let deductions = property?.toLowerCase().includes("deductions") ? value : parseFloat(priceObj.Deductions);
+			let level2Discount2 = property?.toLowerCase().includes("level2discount2") ? value : parseFloat(priceObj.Level2Discount2);
+			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
+			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
+			let netPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj})); 
+			let level3Discount1 = annualDiscount / branchVolume;
+			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
+			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
+			let grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
+			let totalDiscount = (basePrice - price3) / basePrice;
+			let priceImpact = (invoicePrice - price3) / invoicePrice;
+
+			
+			context.getModel().setProperty("NetPrice", netPrice, context);
+			context.getModel().setProperty("Level3Discount1", level3Discount1, context);
+			context.getModel().setProperty("Price3", price3, context);
+			context.getModel().setProperty("NegotiationPrice", price3, context);
+			context.getModel().setProperty("TotalYearlyValueMainCustomer", estSaleValue, context);
+			context.getModel().setProperty("TotalYearlyValueBranch", grpEstSaleValue, context);
+			context.getModel().setProperty("TotalDiscountNHI", totalDiscount, context);
+			context.getModel().setProperty("TotalDiscountInvoice", priceImpact, context);
+		},
+
+		onAnticipatedYearlyVolumeLiveChange: function(event, conditonType){
+			const value = event.getParameter("newValue");
+			if(!value) return;
+			const property = event.getSource().getBindingPath("value");
+			const context = event.getSource().getBindingContext();
+			this.calculatePricingFormFields({
+				conditonType,
+				value: value,
+				property,
+				context
+			});
 		},
 
 		/**
@@ -781,6 +871,83 @@ sap.ui.define([
 				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 			}
 
+		},
+
+		/**
+		 * Calculate NetOfferPrice based on rules
+		 * Case1: No FOC in the pop up
+		 * Case2: One or more FOC products which are different from Offer Product
+		 * Case3: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Added'
+		 * Case4: One or more FOC products in which one is same as Offer Product but Its dropdown is selected as 'Included'
+		 * Warning: These functions need to be aligned with the backend implementations. 
+		 * see sta-service.js -> PriceConditionPriceWithFOCView
+		**/
+		calculateNetOfferTaiwanPrice: function({invoicePrice,deductions,level2Discount2,branchVolume, priceObj}){
+			const multiInput = this.byId('idFOCMultiInput');
+			
+			const offerProduct = priceObj.ProductCode;
+			const foc = multiInput.getBinding('tokens')?.getContexts()?.map(ctx => ctx.getObject()) || [];
+
+			const containsOfferProduct = hasObjectWithProductCode(foc, offerProduct); 
+			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
+			const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
+
+			deductions = deductions ? deductions : priceObj.Deductions;
+			level2Discount2 = level2Discount2 ? level2Discount2 : priceObj.Level2Discount2;
+			branchVolume = branchVolume ? branchVolume : priceObj.AnticipatedYearlyVolumeBranch;
+			invoicePrice = invoicePrice? invoicePrice : priceObj.OfferPrice;
+
+			let paidVolume = 0;
+			let totalVolume = 0;
+			let focVolume = 0;
+			
+			//Cases 1,2 and 3
+			if(foc.length === 0 || !containsOfferProduct) return (invoicePrice * (1 - deductions - level2Discount2));
+
+			// Cases 2
+			if(containsOfferProductAndIsIncluded) {
+				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
+				switch(includedFOC.FreeGoodsOther_ABS_PCT){
+					case "ABS":
+						focVolume = includedFOC.FreeGoodsOther;
+					case "PCT":
+						focVolume = includedFOC.FreeGoodsOther * branchVolume;
+					case "STP":
+						focVolume = parseInt(branchVolume / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+				}
+			}
+
+			if(containsOfferProductAndIsAdded){
+				paidVolume = branchVolume;
+				totalVolume = branchVolume + focVolume;
+			}
+
+			if(containsOfferProductAndIsIncluded){
+				paidVolume = branchVolume - focVolume;
+				totalVolume = branchVolume;
+			}
+
+			let revenues = invoicePrice * (1 - deductions - level2Discount2) * paidVolume;
+
+			let netOfferPrice = revenues / totalVolume;
+
+			function hasObjectWithProductCode(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct);
+			}
+
+			function hasObjectWithProductCodeAndIsAdded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
+			}
+
+			function hasObjectWithProductCodeAndIsIncluded(arr, offerProduct) {
+				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			return netOfferPrice;
 		},
 
 		validatePriceWithFOCForm: function(context, { offerPrice }){
