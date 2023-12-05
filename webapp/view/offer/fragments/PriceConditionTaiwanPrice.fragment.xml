@@ -315,12 +315,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalDiscountNHI', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									path: 'TotalDiscountNHI',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"/>
 						</form:fields>
@@ -329,12 +325,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalDiscountInvoice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									path: 'TotalDiscountInvoice',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"/>
 						</form:fields>
@@ -512,12 +504,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalDiscountNHI', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									path: 'TotalDiscountNHI',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false" width="300px"/>
 						</form:fields>
@@ -526,12 +514,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalDiscountInvoice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									path: 'TotalDiscountInvoice',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false" width="300px"/>
 						</form:fields>
