@@ -45,7 +45,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.productScope = productScope; 
-			
+			this.selectedTender = await this.stState.getService().getTender(this.objectId);
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 
@@ -200,7 +200,14 @@ sap.ui.define([
 			});
 		},
 
-		onTenderFormEditBtnPress: function(event){
+		onTenderFormEditBtnPress: async function(event){
+			if (this.countryCode === "TW") {
+				const parentInstituteID = await this.getParentInstituteID(this.countryCode, this.selectedTender.InstituteID);
+				const path = this.getModel().createKey("/TenderFormView", {
+					TenderID: this.objectId
+				});
+				this.getModel().setProperty(`${path}/ParentInstituteID`, parentInstituteID);
+			}
 			this.getModel("ui").setProperty('/TenderForm/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
@@ -344,6 +351,22 @@ sap.ui.define([
 			})
 		},
 
+		getParentInstituteID: async function (countryCode, instituteID) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/InstitutesView", {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("InstituteID", "EQ", instituteID),
+					],
+					success: function (res) {
+						resolve(res.results[0].ParentInstituteID)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
 		// onMessagePopoverPress : function (oEvent) {
 		// 	const oSourceControl = oEvent.getSource();
 		// 	this._getMessagePopover().then(function(oMessagePopover){
