@@ -10,8 +10,9 @@ sap.ui.define([
   "sap/m/Text", 
   "sap/ui/model/Filter",
   "sap/ui/model/FilterOperator",
+  "sap/m/Label",
   "../../service/StandardSingletonService",
-], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator, StandardSingletonService) {
+], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator, Label, StandardSingletonService) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -170,7 +171,11 @@ sap.ui.define([
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
-          let newColumn = new Column();
+          
+          let newColumn = oSource instanceof sap.m.MultiInput ? new Column({ 
+            header: new Label({ text: ""})
+          }) : new Column();
+
           this.valueHelpTableSelectDialog.addColumn(newColumn);
         })
         
