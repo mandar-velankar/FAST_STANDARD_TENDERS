@@ -109,6 +109,7 @@ sap.ui.define([
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			const userFullName = oEvent?.getParameter("data")?.results[0]?.UserName || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserName")
 			this.getModel("st").setProperty("/UserFullName", userFullName);
+			this.countryCode = sCountryCode;
 			// set filter which is needed later on
 			// if(sCountryCode){
 			// 	this.andFilters.push(new Filter({
@@ -698,12 +699,46 @@ sap.ui.define([
 			return regionsField;
 		},
 
+		/**
+		 * This function return the "Custom_String_2" defined as "Institute In Branch" field on the tender basic information tab
+		 * @param {*} form 
+		 * @returns 
+		 */
+		getInstituteInBranchCustomString: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let instituteInBranch;
+			formContainers.forEach(forContainer => {
+				if(forContainer.getAggregation("title") === 'Institute & Type'){
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Institute In Branch'){
+							instituteInBranch = formElement.getAggregation("fields")[0];
+						}
+					});
+				};
+			});
+			return instituteInBranch;
+		},
+
+		getMultiInputCustomField: function (countryCode, form) {
+			if (countryCode === "TW") {
+				return {
+					customFieldName: "Custom_String_3",
+					control: this.getInstituteInBranchCustomString(form)
+				}
+			}
+			return {
+				customFieldName: "Custom_String_2",
+				control: this.getRegionCustomString(form)
+			}
+		},
+
 		onCreateNewTender: async function () {
 			
 			const oNewTenderForm = this.byId("idNewTenderForm");
-			let regionsField = this.getRegionCustomString(oNewTenderForm);
+			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, oNewTenderForm);
 			this.setNewTenderPendingChanges(oNewTenderForm);
-			this.getModel().setProperty(oNewTenderForm?.getBindingContext()?.getPath() + "/Custom_String_2", regionsField?.getTokens()?.reduce((prev,token,idx)=>
+			this.getModel().setProperty(oNewTenderForm?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
 			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
@@ -764,6 +799,7 @@ sap.ui.define([
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
 			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
+			delete newTenderObj.ParentInstituteID; //specific for Taiwan
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
 				properties: newTenderObj,

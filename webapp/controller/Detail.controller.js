@@ -364,6 +364,7 @@ sap.ui.define([
 				case "tender":
 					hash = hash + "/" + offerId;
 					this.getRouter().getHashChanger().replaceHash(hash);
+					this.views['com.bayer.tender.statenderapp.view.tender.views.BasicInformation'].getController()._bindForm('TenderForm')
 					break;
 				case "offer":
 					hash = hash + "/" + offerId + "/Offer";
