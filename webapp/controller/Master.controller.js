@@ -15,10 +15,11 @@ sap.ui.define([
 	"sap/ui/core/Item",
 	"sap/m/MessageToast",
 	"../service/StandardSingletonService",
-	"sap/ui/core/EventBus"
-], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus) {
+	"sap/ui/core/EventBus",
+	"sap/m/library",
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus, mobileLibrary) {
 	"use strict";
-
+	var URLHelper = mobileLibrary.URLHelper;
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
 
 		formatter: formatter,
@@ -920,6 +921,11 @@ sap.ui.define([
 				this._oList.getBinding("items")?.resume();
 			}
 
+		},
+
+		onDownloadZuelligExtractCSV: function () {
+			const url = "/v2/sta_tender/CSVAttachment(Zuellig=true)/content";
+			URLHelper.redirect(url, true);
 		}
 	});
 
