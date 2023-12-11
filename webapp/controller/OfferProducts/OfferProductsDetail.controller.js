@@ -980,12 +980,14 @@ sap.ui.define([
 		 *
 		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
 		 */
-		loadPriceCondition: function(){
+		loadPriceCondition: async function(){
+			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			return this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
 				productID:this.productId,
-				tenderID: this.sObjectId
+				tenderID: this.sObjectId,
+				instituteID: selectedTender?.InstituteID
 			});
 		},
 
@@ -1004,10 +1006,31 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
+				if (this.sCountryCode === "TW" && conditionType === "TaiwanPrice") {
+					this.bindCurrentSectionFields(form, contextData);
+				}
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
 				return form;
 			}.bind(this));
+		},
+
+		bindCurrentSectionFields: function(form, {offerID,productID,tenderID,instituteID}){
+			let entityName = "/PriceConditionCurrentSectionTaiwanView";
+			const path = this.getModel().createKey(entityName, {
+				"OfferID": offerID,
+				"TenderID": tenderID,
+				"ProductCode": productID,
+				"INSTITUTE_ID": instituteID	
+			});     
+	
+			form.getAggregation("items")[1].getAggregation("formContainers")[0].getAggregation("formElements").forEach(formElement => {
+				const field = formElement.getAggregation("fields")[0];
+				field.bindElement({
+					path: path,
+					groupId: "PricingForm"
+				});
+			});
 		},
 
 		onPriceConditionLoadSuccess: function(conditionType, form, contextData){
