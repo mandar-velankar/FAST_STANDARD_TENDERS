@@ -79,14 +79,14 @@ sap.ui.define([
             }     
         },
 
-		onChangeQuotationInstitute: function (originalInputField, quotationInstituteID, StandardSingletonService) {
+		onChangeQuotationInstitute: function (originalInputField, selectedItem, StandardSingletonService) {
             const paymentTermsBinding = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")[2].getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Term")?.getAggregation("fields")[0].getBinding("items");
             const parentInstituteID = StandardSingletonService.getParentInstituteID();
             const countryCode = StandardSingletonService.getCountryCode();
             paymentTermsBinding.aApplicationFilters = []
             const orFilters = [
 				new Filter("ParentInstituteID",FilterOperator.EQ, parentInstituteID),
-				new Filter("InstituteID",FilterOperator.EQ, quotationInstituteID),
+				new Filter("InstituteID",FilterOperator.EQ, selectedItem.QuotationInstituteID),
 				new Filter("CountryCode",FilterOperator.EQ, countryCode),
 			]
             paymentTermsBinding.filter(orFilters);
@@ -94,6 +94,18 @@ sap.ui.define([
 
 		getQuotationInstituteID: function () {
 			return this.selectedOfferQuotationInstituteID;
+		},
+
+		onChangeUKInstituteType: function (originalInputField, selectedItem, StandardSingletonService) {
+			const regionsField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+			.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+			.find(el => el.getAggregation("label") === "Regions");
+
+			if (selectedItem.ChannelName === "Region(s)") {
+				regionsField.setVisible(true);
+			}else {
+				regionsField.setVisible(false);
+			}
 		},
 
         // onChangeProductIncluded: function (event) {
