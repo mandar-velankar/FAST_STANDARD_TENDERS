@@ -97,6 +97,11 @@ sap.ui.define([
 				groupId: "Basicinfo",
 				events: {
 					change: () => {
+						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						if (this.countryCode === "GB") {
+							this.setRegionsFieldVisible(form, instituteType);
+						}
+
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 						multiInputCustomField.control?.removeAllTokens();
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
@@ -110,6 +115,11 @@ sap.ui.define([
 					},
 
 					dataReceived: () => {
+						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						if (this.countryCode === "GB") {
+							this.setRegionsFieldVisible(form, instituteType);
+						}
+
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 						multiInputCustomField.control?.removeAllTokens();
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
@@ -172,6 +182,18 @@ sap.ui.define([
 			return {
 				customFieldName: "Custom_String_2",
 				control: this.getRegionCustomString(form)
+			}
+		},
+
+		setRegionsFieldVisible: function (form, instituteType) {
+			const regionsField = form.getAggregation("formContainers")
+			.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+			.find(el => el.getAggregation("label") === "Regions");
+
+			if (instituteType === "Region(s)") {
+				regionsField.setVisible(true);
+			}else {
+				regionsField.setVisible(false);
 			}
 		},
 		/**
