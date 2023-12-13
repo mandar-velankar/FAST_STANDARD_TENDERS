@@ -15,10 +15,11 @@ sap.ui.define([
 	"sap/ui/core/Item",
 	"sap/m/MessageToast",
 	"../service/StandardSingletonService",
-	"sap/ui/core/EventBus"
-], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus) {
+	"sap/ui/core/EventBus",
+	"sap/m/library",
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus, mobileLibrary) {
 	"use strict";
-
+	var URLHelper = mobileLibrary.URLHelper;
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.Master", {
 
 		formatter: formatter,
@@ -108,7 +109,9 @@ sap.ui.define([
 		onCountriesReceived: async function (oEvent) {
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			const userFullName = oEvent?.getParameter("data")?.results[0]?.UserName || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserName")
+			const userID = oEvent?.getParameter("data")?.results[0]?.CWID || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CWID")
 			this.getModel("st").setProperty("/UserFullName", userFullName);
+			this.getModel("st").setProperty("/UserID", userID);
 			this.countryCode = sCountryCode;
 			// set filter which is needed later on
 			// if(sCountryCode){
@@ -799,6 +802,7 @@ sap.ui.define([
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
 			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
+			newTenderObj.SubmittedOn = new Date().toISOString();
 			delete newTenderObj.ParentInstituteID; //specific for Taiwan
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/TenderFormView", {
@@ -920,6 +924,11 @@ sap.ui.define([
 				this._oList.getBinding("items")?.resume();
 			}
 
+		},
+
+		onDownloadZuelligExtractCSV: function () {
+			const url = "/v2/sta_tender/CSVAttachment(Zuellig=true)/content";
+			URLHelper.redirect(url, true);
 		}
 	});
 
