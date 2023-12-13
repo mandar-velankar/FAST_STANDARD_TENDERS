@@ -406,6 +406,7 @@ sap.ui.define([
 
 			//make an object with all possible fields exposed in CDS view
 			const newOfferObj = oBoundContext.getObject();
+			const userId = this.getModel("st").getProperty("/UserID");
 
 			//set default values if needed
 			newOfferObj.TenderID = this.objectId;
@@ -419,6 +420,7 @@ sap.ui.define([
 			newOfferObj.CreationDate = new Date().toISOString();
             newOfferObj.SubmissionDate = new Date().toISOString();
             newOfferObj.SubmittedOn = new Date().toISOString();
+            newOfferObj.SubmittedBy = userId;
 			newOfferObj.Currency = oBoundContext.getObject().Currency;
 			newOfferObj.DistributorID = oBoundContext.getObject().DistributorID;
 			newOfferObj.InternalBidDueDate = oBoundContext.getObject().InternalBidDueDate;
@@ -589,6 +591,7 @@ sap.ui.define([
 			const table = this.byId("idOfferProductsTable");
 			let dialog = sap.ui.getCore().byId("addProductDialog");
 			const products = this.getModel("ui").getProperty("/OfferProductTable/products");
+			const userId = this.getModel("st").getProperty("/UserID");
 			if(products){
 				for(const product of products){
 
@@ -620,7 +623,9 @@ sap.ui.define([
 										NoOfTier:0,
 										DEFAULT_COMMISSION_RATE:0,
 										MinInvoiceAmount:0,
-										UoM: 'Pack'
+										UoM: 'Pack',
+										SubmittedOn: new Date().toISOString(),
+										SubmittedBy: userId
 									}
 					});
 					const newItem = table.getBindingInfo("items").template.clone();
