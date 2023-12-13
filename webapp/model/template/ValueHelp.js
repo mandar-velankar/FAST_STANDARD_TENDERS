@@ -82,12 +82,11 @@ sap.ui.define([
 
                 const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
                 originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]); 
-
-                const changeFunction = StandardSingletonService[`onChange${this.title}`];
-                if (changeFunction) {
-                  changeFunction(originalInputField, selectedItem[field.ID], StandardSingletonService);
-                }
             })
+            const changeFunction = StandardSingletonService[`onChange${this.title}`];
+            if (changeFunction) {
+              changeFunction(originalInputField, selectedItem, StandardSingletonService);
+            }
           }
         }     
       },

@@ -34,7 +34,7 @@
 			<form:formContainers>
 				<form:FormContainer title="{template>title}" formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						    <form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						    <form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
