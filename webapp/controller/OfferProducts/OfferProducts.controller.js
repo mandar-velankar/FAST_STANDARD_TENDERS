@@ -255,6 +255,15 @@ sap.ui.define([
 					})
 				}
 			});
+			if (messages.length === 0) {
+				messages.push({
+					type: 'Success',
+					title: 'Products added successfully',
+					description: 'Products added successfully',
+					subtitle: 'Products added successfully',
+					counter: 1
+				});
+			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
 		},
 
