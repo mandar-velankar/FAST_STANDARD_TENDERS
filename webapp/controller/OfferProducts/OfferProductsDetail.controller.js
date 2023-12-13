@@ -1018,8 +1018,6 @@ sap.ui.define([
 		bindCurrentSectionFields: function(form, {offerID,productID,tenderID,instituteID}){
 			let entityName = "/PriceConditionCurrentSectionTaiwanView";
 			const path = this.getModel().createKey(entityName, {
-				"OfferID": offerID,
-				"TenderID": tenderID,
 				"ProductCode": productID,
 				"INSTITUTE_ID": instituteID	
 			});     
