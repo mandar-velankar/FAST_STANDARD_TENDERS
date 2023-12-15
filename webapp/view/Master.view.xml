@@ -88,7 +88,7 @@
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
 					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
 					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
-					<Button icon="sap-icon://download" text="Download CSV" press=".onDownloadZuelligExtractCSV"/>
+					<Button icon="sap-icon://download" text="Download CSV" press=".onDownloadZuelligExtractCSV" visible="{= ${accessControl>/standardtenderAccess/ZuelligExtract}}"/>
 				</OverflowToolbar>
 				<Table id="genericMasterTable" 
 					columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
