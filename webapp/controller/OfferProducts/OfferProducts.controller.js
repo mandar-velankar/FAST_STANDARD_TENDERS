@@ -343,6 +343,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
+			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
