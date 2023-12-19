@@ -96,15 +96,36 @@ sap.ui.define([
 			return this.selectedOfferQuotationInstituteID;
 		},
 
-		onChangeUKInstituteType: function (originalInputField, selectedItem, StandardSingletonService) {
-			const regionsField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
-			.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-			.find(el => el.getAggregation("label") === "Regions");
+		onChangeInstituteType: function (originalInputField, selectedItem, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
 
-			if (selectedItem.ChannelName === "Region(s)") {
-				regionsField.setVisible(true);
-			}else {
-				regionsField.setVisible(false);
+			originalInputField.getModel().setProperty(`${path}/InstituteID`, undefined);
+			originalInputField.getModel().setProperty(`${path}/InstituteName`, undefined);
+
+			switch (countryCode) {
+				case "GB":
+					const regionsField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+
+					if (selectedItem.ChannelName === "Region(s)") {
+						regionsField.setVisible(true);
+					}else {
+						regionsField.setVisible(false);
+					}
+
+					originalInputField.getModel().setProperty(`${path}/State`, undefined);
+					regionsField.getFields()[0].removeAllTokens()
+					break;
+				case "TW": 
+					originalInputField.getModel().setProperty(`${path}/External_InstituteId`, undefined);
+					originalInputField.getModel().setProperty(`${path}/Address`, undefined);
+					break
+				default:
+					break;
 			}
 		},
 
