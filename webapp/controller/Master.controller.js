@@ -673,6 +673,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
+			this.getModel().setProperty(`${sElemBindingPath}/Classification`, this.countryCode === 'TW' ? 'Tender': '');
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
