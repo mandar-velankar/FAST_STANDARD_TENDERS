@@ -125,6 +125,8 @@
 				type: 'sap.ui.model.type.Currency',
 				formatOptions: {
 					showMeasure: true,
+					minFractionDigits: 2,
+					maxFractionDigits: 2,
 					preserveDecimals: false
 				}
 			}" 
