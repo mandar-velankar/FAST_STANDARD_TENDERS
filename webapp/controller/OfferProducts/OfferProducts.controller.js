@@ -536,7 +536,8 @@ sap.ui.define([
 			
 			await this.createAddOfferProductDialog();
 			const selectedOffer = await this.stState.getService().getOffer(this.offerID);
-			await this.getCountryBrands(this.countryCode, selectedOffer.Division);
+			const userInfo = await this.getUserInfo(this.getModel("st").getProperty("/UserID"));
+			await this.getCountryBrands(this.countryCode, selectedOffer.Division, userInfo);
 			await this.getInstituteDistributorBrandProducts(this.countryCode, selectedOffer.InstituteID, selectedOffer.DistributorID, selectedOffer.SellingCompany, selectedOffer.Channel, selectedOffer.Division);
 
 			this.getView().setBusy(false);
@@ -985,7 +986,7 @@ sap.ui.define([
 			table.getItems()[siblingItemIndex].setSelected(true);
 		},
 		
-		getCountryBrands: async function (countryCode, division) {
+		getCountryBrands: async function (countryCode, division, userInfo) {
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryBrands", {
 					filters: [
@@ -997,7 +998,23 @@ sap.ui.define([
 					}
 				});
 			}).then(data => {
+				if(userInfo && userInfo.results[0].BU !== null){
+					data.results = data.results.filter(item => item.BU === userInfo.results[0].BU);
+				}
 				this.getModel("ui").setProperty("/OfferProductTable/countryBrands", data.results);
+			})
+		},
+
+		getUserInfo: async function(cwid){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/Users", {
+					filters: [
+						new Filter("UserID", "EQ", cwid)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
 			})
 		},
 
