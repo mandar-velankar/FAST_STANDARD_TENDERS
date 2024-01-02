@@ -719,7 +719,7 @@ sap.ui.define([
 			let level2Discount2 = property?.toLowerCase().includes("level2discount2") ? value : parseFloat(priceObj.Level2Discount2);
 			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
 			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj})); 
+			let netPrice = (this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj})).toFixed(1); 
 			let level3Discount1 = annualDiscount / branchVolume;
 			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
 			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
