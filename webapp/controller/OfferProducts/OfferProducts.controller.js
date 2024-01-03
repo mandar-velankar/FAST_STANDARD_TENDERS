@@ -486,7 +486,7 @@ sap.ui.define([
 				this._bindTable("OfferProductsTable", tenderId, offerId);
 				//this.getOwnerComponent().getModel().refresh(true);
 			}
-			this.getModel().refresh();
+			if (!hasErrorMessages) this.getModel().refresh();
 		},
 
 		/**
