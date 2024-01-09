@@ -175,6 +175,12 @@
                 >
                     <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC" type="XML"/>
 				</Panel>
+                <Panel
+                    expandable="true"
+                    headerText="{i18n>OfferProductsDetailView.OfferHistory}"
+                >
+                    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.OfferHistory" type="XML"/>
+				</Panel>
             </VBox>
         </f:content>
     </f:DynamicPage>
