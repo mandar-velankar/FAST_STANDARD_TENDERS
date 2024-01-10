@@ -262,6 +262,18 @@ sap.ui.define([
 		onTenderFormCancelBtnPress: function(event){
 			this.cancelPendingChanges(["TenderFormView"], "basicInfoMsg");	
 			this.getModel("ui").setProperty('/TenderForm/editMode', false);
+
+			if (this.countryCode === "TW") {
+				const tenderForm = this.byId("idTenderForm");
+				const instInBranchField = tenderForm.getAggregation("formContainers")
+						.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+						.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0];
+				const obj = tenderForm.getBindingContext().getObject();
+				instInBranchField.removeAllTokens();
+				for(const value of obj.Custom_String_3.split(",")){
+					instInBranchField.addToken(new Token({key: value, text:value}));
+				}
+			}
 		},
 		
 		onAwardCriteriaEditBtnPress: function(event){
