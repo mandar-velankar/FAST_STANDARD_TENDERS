@@ -1108,6 +1108,7 @@ sap.ui.define([
 			// Cancels any pending changes for specified entity type.
 			// this is needed to make sure we delete old/not saved changes when changing the ConditionType
 			// Tip: when you add a new condition type make sure to add it here as well
+			this.byId("idFOCMultiInput").unbindAggregation("tokens")
 			this.cancelPendingChanges(
 				[
 					"idOfferPrice", 
