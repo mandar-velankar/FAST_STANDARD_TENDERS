@@ -6,6 +6,7 @@ sap.ui.define([
     "use strict";
 
     const oPercentFormat = NumberFormat.getPercentInstance({
+        minFractionDigits: 2,
         maxFractionDigits: 2
     });
 
