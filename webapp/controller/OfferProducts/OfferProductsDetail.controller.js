@@ -327,10 +327,18 @@ sap.ui.define([
 		onOfferDetailFormSaveBtnPress: function(event){
 			// if(!this.validateProduct()) return;
 			const form = this.byId(`idProductForm`);
-			if(this.sCountryCode == 'PK'){
-				let pKDistributor = this.getPKDistributor(form);
-				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_1", pKDistributor);
+			switch (this.sCountryCode) {
+				case 'PK':
+					let pKDistributor = this.getPKDistributor(form);
+					this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_1", pKDistributor);
+					break;
+				case 'AU':
+					const object = form?.getBindingContext().getObject();
+					this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_Integer_1", object?.PACKFACTOR);
+				default:
+					break;
 			}
+
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
@@ -719,7 +727,7 @@ sap.ui.define([
 			let level2Discount2 = property?.toLowerCase().includes("level2discount2") ? value : parseFloat(priceObj.Level2Discount2);
 			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
 			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
-			let netPrice = (this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj})).toFixed(1); 
+			let netPrice = (this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj})); 
 			let level3Discount1 = annualDiscount / branchVolume;
 			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
 			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
@@ -731,7 +739,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("Level3Discount1", level3Discount1, context);
 			context.getModel().setProperty("Price3", price3, context);
-			context.getModel().setProperty("NegotiationPrice", price3, context);
+			// context.getModel().setProperty("NegotiationPrice", negotiationPrice, context);
 			context.getModel().setProperty("TotalYearlyValueMainCustomer", estSaleValue, context);
 			context.getModel().setProperty("TotalYearlyValueBranch", grpEstSaleValue, context);
 			context.getModel().setProperty("TotalDiscountNHI", totalDiscount, context);
@@ -1108,6 +1116,7 @@ sap.ui.define([
 			// Cancels any pending changes for specified entity type.
 			// this is needed to make sure we delete old/not saved changes when changing the ConditionType
 			// Tip: when you add a new condition type make sure to add it here as well
+			this.byId("idFOCMultiInput").unbindAggregation("tokens")
 			this.cancelPendingChanges(
 				[
 					"idOfferPrice", 

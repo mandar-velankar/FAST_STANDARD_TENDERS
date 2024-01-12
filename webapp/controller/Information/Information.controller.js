@@ -243,10 +243,10 @@ sap.ui.define([
 			let totalAmount = "";
 			switch (unit) {
 				case "Unit":
-					totalAmount = offer.REQUESTED_QUANTITY * offer.REQ_PRICE_UNIT_OFFER_CURRENCY;
+					totalAmount = offer.REQUESTED_QUANTITY * offer.NET_PRICE_UNIT_OFFER_CURRENCY;
 					break;
 				case "Pack":
-					totalAmount = offer.REQUESTED_QUANTITY * offer.REQ_PRICE_PACK_OFFER_CURRENCY;
+					totalAmount = offer.REQUESTED_QUANTITY * offer.NET_PRICE_PACK_OFFER_CURRENCY;
 					break;
 				default:
 					break;

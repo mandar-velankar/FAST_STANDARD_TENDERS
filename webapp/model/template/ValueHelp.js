@@ -113,7 +113,10 @@ sap.ui.define([
             template: new ColumnListItem({
                 type: "Active",
                 cells: columns.map(col => col.getControl().generateControl())
-            })	
+            }),
+            events: {
+              dataReceived: this.onDataReceived.bind(this, oSource)
+            }	
           },
           liveChange: function (oEvent) {
             let orFilters = [];
@@ -190,6 +193,24 @@ sap.ui.define([
         selectedItems.forEach(selectedItem => {
           valueHelpDialog.getItems()?.find(item => item.getBindingContext().getObject().Name === selectedItem.getProperty('text'))?.setSelected(true)
         })
+      },
+
+      onDataReceived: function (oSource, event) {
+        if (oSource instanceof sap.m.MultiInput) {
+          const tokens = oSource.getTokens();
+
+          if (tokens.length == 0) return;
+
+          this.valueHelpTableSelectDialog.getItems().forEach(item => {
+            const itemName = item.getCells()[0].getProperty('text');
+
+            const selectedToken = tokens.find(t => t.getProperty('text') === itemName);
+
+            if (selectedToken) {
+              item.setSelected(true);
+            }
+          });
+        }
       },
 
       _setFilters: function (modelInfo) {

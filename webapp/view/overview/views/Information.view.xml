@@ -143,6 +143,12 @@
 						<Label text="Pack Price" wrapping="true"/>
 					</Column>
 					<Column>
+						<Label text="Net Price per Unit" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="Net Price per Pack" wrapping="true"/>
+					</Column>
+					<Column>
 						<Label text="Total Amount" wrapping="true"/>
 					</Column>
 				</columns>
@@ -191,6 +197,30 @@
 										preserveDecimals: false
 									}	
 								}"
+							/>
+							<Text 
+								text = "{
+									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}
+								}"					
+							/>
+							<Text 
+								text = "{
+									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}
+								}"						
 							/>
 							<ObjectStatus 
 								text="{
