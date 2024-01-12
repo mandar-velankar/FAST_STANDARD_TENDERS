@@ -327,10 +327,18 @@ sap.ui.define([
 		onOfferDetailFormSaveBtnPress: function(event){
 			// if(!this.validateProduct()) return;
 			const form = this.byId(`idProductForm`);
-			if(this.sCountryCode == 'PK'){
-				let pKDistributor = this.getPKDistributor(form);
-				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_1", pKDistributor);
+			switch (this.sCountryCode) {
+				case 'PK':
+					let pKDistributor = this.getPKDistributor(form);
+					this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_1", pKDistributor);
+					break;
+				case 'AU':
+					const object = form?.getBindingContext().getObject();
+					this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_Integer_1", object?.PACKFACTOR);
+				default:
+					break;
 			}
+
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
