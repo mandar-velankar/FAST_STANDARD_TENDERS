@@ -170,7 +170,7 @@ sap.ui.define([
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 			this._bindView();
 			this._bindForm("ProductForm");
-			this._bindTable(sObjectId, countryCode, productCode);
+			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -234,14 +234,14 @@ sap.ui.define([
 			this.setUOM(product.UnitPerPack);
 		},
 
-		_bindTable: async function (tenderId, countryCode, productCode) {
+		_bindTable: async function (tenderId, offerId,  countryCode, productCode) {
 			const table = this.byId('idOfferHistoryTable');
 			const tender = await this.stState.getService().getTender(tenderId);
 			const cols = this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
 			table && table.bindItems({
 				path: `/${this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
-				filters: controller.getOfferHistoryFilters(tender, countryCode, productCode),
+				filters: controller.getOfferHistoryFilters(tender, offerId, countryCode, productCode),
 				template: new ColumnListItem({
 					type: "Active",
 					cells: cols.map(col => col.getControl().generateControl())
@@ -251,7 +251,7 @@ sap.ui.define([
 		},
 
 
-		getOfferHistoryFilters ({InstituteID}, countryCode, productCode) {
+		getOfferHistoryFilters: function ({InstituteID}, offerId, countryCode, productCode) {
 			const instituteCheckBox = this.byId('currentInstituteCheckId');
 			const wonCheckBox = this.byId('wonCheckId');
 			const lostCheckBox = this.byId('lostCheckId');
@@ -263,17 +263,17 @@ sap.ui.define([
 			];
 
 
-			// if (instituteCheckBox.getSelected()) {
-			// 	oFilters.push(new Filter("INSTITUTE_ID", FilterOperator.EQ, InstituteID));
-			// }
+			if (instituteCheckBox.getSelected()) {
+				oFilters.push(new Filter("INSTITUTE_ID", FilterOperator.EQ, InstituteID));
+			}
 
-			// if (wonCheckBox.getSelected()) {
-			// 	oFilters.push(new Filter("OUTCOME", FilterOperator.EQ, 'Won'));
-			// }
+			if (wonCheckBox.getSelected()) {
+				oFilters.push(new Filter("OUTCOME", FilterOperator.EQ, 'Won'));
+			}
 
-			// if (lostCheckBox.getSelected()) {
-			// 	oFilters.push(new Filter("OUTCOME", FilterOperator.EQ, 'Lost'));
-			// }
+			if (lostCheckBox.getSelected()) {
+				oFilters.push(new Filter("OUTCOME", FilterOperator.EQ, 'Lost'));
+			}
 			
 			return oFilters;
 		},
@@ -1513,5 +1513,17 @@ sap.ui.define([
 			context.getModel().setProperty("ProductPackId", productPackId, context);	
 			context.getModel().setProperty("ProductPackName", productPackName, context);	
 		},
+
+		onHistoryFilterCheck: function (event) {
+			const offerHistoryTable = this.byId("idOfferHistoryTable");
+			const tenderPath = this.getModel().createKey("/TenderMasterView", {
+				TenderID: this.objectId,
+				OfferID: this.offerId
+			});
+			const tender = this.getModel().getObject(tenderPath);
+			offerHistoryTable.getBinding("items").aApplicationFilters = [];
+			const filters = this.getOfferHistoryFilters(tender, this.offerId, this.sCountryCode, this.productId);
+			offerHistoryTable.getBinding("items").filter(filters);
+		}
     });
 });
