@@ -9,8 +9,9 @@ sap.ui.define([
 	"sap/ui/core/library",
 	"sap/ui/model/Context",
 	"sap/ui/core/Fragment",
-	"sap/m/Token"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token) {
+	"sap/m/Token",
+	"sap/m/ColumnListItem",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -88,7 +89,7 @@ sap.ui.define([
 				},
 			});
 
-			this.onBeforeShow(this.sObjectId, this.sOfferId);
+			this.onBeforeShow(this.sObjectId, this.sOfferId, this.sCountryCode, this.productId);
 			this.getProductPrice(this.sOfferId, this.productId);
 
 			this.getModel().metadataLoaded().then(function () {
@@ -125,7 +126,7 @@ sap.ui.define([
 			});
 		},
 
-		onBeforeShow:async function(sObjectId, sOfferId){
+		onBeforeShow:async function(sObjectId, sOfferId, countryCode, productCode){
 			// get state data
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
@@ -169,6 +170,7 @@ sap.ui.define([
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 			this._bindView();
 			this._bindForm("ProductForm");
+			this._bindTable(sObjectId, countryCode, productCode);
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -230,6 +232,50 @@ sap.ui.define([
 		onProductFormDataReceived: function(event){
 			const product = event.getParameter('data');
 			this.setUOM(product.UnitPerPack);
+		},
+
+		_bindTable: async function (tenderId, countryCode, productCode) {
+			const table = this.byId('idOfferHistoryTable');
+			const tender = await this.stState.getService().getTender(tenderId);
+			const cols = this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getTable().getColumns();
+			const controller = this;
+			table && table.bindItems({
+				path: `/${this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
+				filters: controller.getOfferHistoryFilters(tender, countryCode, productCode),
+				template: new ColumnListItem({
+					type: "Active",
+					cells: cols.map(col => col.getControl().generateControl())
+				}),
+				templateShareable: true
+			});
+		},
+
+
+		getOfferHistoryFilters ({InstituteID}, countryCode, productCode) {
+			const instituteCheckBox = this.byId('currentInstituteCheckId');
+			const wonCheckBox = this.byId('wonCheckId');
+			const lostCheckBox = this.byId('lostCheckId');
+
+			//default filters
+			const oFilters = [
+				new Filter("CountryCode", FilterOperator.EQ, countryCode),
+				new Filter("ProductCode", FilterOperator.EQ, productCode),
+			];
+
+
+			// if (instituteCheckBox.getSelected()) {
+			// 	oFilters.push(new Filter("INSTITUTE_ID", FilterOperator.EQ, InstituteID));
+			// }
+
+			// if (wonCheckBox.getSelected()) {
+			// 	oFilters.push(new Filter("OUTCOME", FilterOperator.EQ, 'Won'));
+			// }
+
+			// if (lostCheckBox.getSelected()) {
+			// 	oFilters.push(new Filter("OUTCOME", FilterOperator.EQ, 'Lost'));
+			// }
+			
+			return oFilters;
 		},
 
 		/**
