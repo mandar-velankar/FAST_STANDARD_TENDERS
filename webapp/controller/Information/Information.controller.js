@@ -162,10 +162,9 @@ sap.ui.define([
 			}
 		},
 		_onObjectMatched: async function (oEvent) {
-			const selectedTender = this.getModel("st").getProperty("/SelectedTender");
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
 			this.tenderId = oEvent.getParameter("arguments").objectId;
-			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
@@ -463,12 +462,13 @@ sap.ui.define([
 		 */
 		setApprovalsPendingChanges: function(oModel, oTable, isSend){
 				
-			const aItemContexts = oTable.getBinding("items").getContexts();
+			// const aItemContexts = oTable.getBinding("items").getContexts();
+			const aItems = oTable.getItems().filter(el => el.getBindingContext().getPath().includes('/OfferProductOfferStatus'));
 
-			aItemContexts?.forEach(ctx => {
+			aItems?.forEach(item => {
 				const approvalObj = {
-					OfferId: ctx.getObject().OfferId,
-					ApproverType: ctx.getObject().ApproverType,
+					OfferId: item.getBindingContext().getObject().OfferId,
+					ApproverType: item.getBindingContext().getObject().ApproverType,
 				}
 
 				const sPath = oModel.createKey("/OfferProductOfferStatus", approvalObj);
