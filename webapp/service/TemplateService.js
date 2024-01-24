@@ -126,7 +126,18 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                                             }
                                         }
                                     }
-                                }  
+                                },
+                                "Table": {
+                                    $expand: {
+                                        "Columns": {
+                                            $expand: {
+                                                "Control": {
+                                                    $expand: "Properties"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },  
                             }
                         }
                     }
