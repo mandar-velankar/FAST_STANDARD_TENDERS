@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/base/Object",
     "sap/ui/model/Filter",
-	"sap/ui/model/FilterOperator"
-], function(Object, Filter, FilterOperator) {
+	"sap/ui/model/FilterOperator",
+	"sap/m/Token",
+], function(Object, Filter, FilterOperator, Token) {
     "use strict";
     var StandardSingleton = Object.extend("namespace.service.StandardSingleton", {
         constructor: function () {
@@ -79,14 +80,14 @@ sap.ui.define([
             }     
         },
 
-		onChangeQuotationInstitute: function (originalInputField, quotationInstituteID, StandardSingletonService) {
+		onChangeQuotationInstitute: function (originalInputField, selectedItem, StandardSingletonService) {
             const paymentTermsBinding = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")[2].getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Term")?.getAggregation("fields")[0].getBinding("items");
             const parentInstituteID = StandardSingletonService.getParentInstituteID();
             const countryCode = StandardSingletonService.getCountryCode();
             paymentTermsBinding.aApplicationFilters = []
             const orFilters = [
 				new Filter("ParentInstituteID",FilterOperator.EQ, parentInstituteID),
-				new Filter("InstituteID",FilterOperator.EQ, quotationInstituteID),
+				new Filter("InstituteID",FilterOperator.EQ, selectedItem.QuotationInstituteID),
 				new Filter("CountryCode",FilterOperator.EQ, countryCode),
 			]
             paymentTermsBinding.filter(orFilters);
@@ -94,6 +95,87 @@ sap.ui.define([
 
 		getQuotationInstituteID: function () {
 			return this.selectedOfferQuotationInstituteID;
+		},
+
+		onChangeInstituteType: function (originalInputField, selectedItem, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
+
+			originalInputField.getModel().setProperty(`${path}/InstituteID`, undefined);
+			originalInputField.getModel().setProperty(`${path}/InstituteName`, undefined);
+
+			switch (countryCode) {
+				case "GB":
+					const regionsField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+
+					if (selectedItem.ChannelName === "Region(s)") {
+						regionsField.setVisible(true);
+					}else {
+						regionsField.setVisible(false);
+					}
+
+					originalInputField.getModel().setProperty(`${path}/State`, undefined);
+					regionsField.getFields()[0].removeAllTokens()
+					break;
+				case "TW": 
+					originalInputField.getModel().setProperty(`${path}/External_InstituteId`, undefined);
+					originalInputField.getModel().setProperty(`${path}/Address`, undefined);
+					originalInputField.getModel().setProperty(`${path}/Custom_String_3`, "");
+					originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0].removeAllTokens();
+					break
+				default:
+					break;
+			}
+		},
+
+		onChangeInstituteName: async function (originalInputField, selectedItem, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
+
+
+
+			switch (countryCode) {
+				case "TW":
+					const instInBranchField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0];
+					let institutesInBranch = await StandardSingletonService.getInstituteBranchs(selectedItem, countryCode, originalInputField);
+					originalInputField.getModel().setProperty(`${path}/Custom_String_3`, institutesInBranch);
+					instInBranchField.removeAllTokens();
+					for(const value of institutesInBranch.split(",")){
+						instInBranchField?.addToken(new Token({key: value, text:value}));
+					}
+					
+					break;
+				default:
+					break;
+			}
+		},
+
+		getInstituteBranchs: async function (selectedItem, countryCode, originalInputField) {
+			return new Promise((resolve, reject) => {
+				originalInputField.getModel().read('/InstituteInBranchView', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("ParentInstituteID", "EQ", selectedItem.ParentInstituteID),
+						new Filter("InstituteID", "NE", selectedItem.InstituteID)
+					],
+					success: function (res) {
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
 		},
 
         // onChangeProductIncluded: function (event) {

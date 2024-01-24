@@ -255,6 +255,15 @@ sap.ui.define([
 					})
 				}
 			});
+			if (messages.length === 0) {
+				messages.push({
+					type: 'Success',
+					title: 'Products added successfully',
+					description: 'Products added successfully',
+					subtitle: 'Products added successfully',
+					counter: 1
+				});
+			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
 		},
 
@@ -280,7 +289,9 @@ sap.ui.define([
 			const form = this.byId(`idOfferForm`);
 			//if(!this.validateOffer()) return; //error
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+			this.getModel().refresh();
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
@@ -334,6 +345,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
+			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
@@ -397,6 +409,7 @@ sap.ui.define([
 
 			//make an object with all possible fields exposed in CDS view
 			const newOfferObj = oBoundContext.getObject();
+			const userId = this.getModel("st").getProperty("/UserID");
 
 			//set default values if needed
 			newOfferObj.TenderID = this.objectId;
@@ -410,6 +423,7 @@ sap.ui.define([
 			newOfferObj.CreationDate = new Date().toISOString();
             newOfferObj.SubmissionDate = new Date().toISOString();
             newOfferObj.SubmittedOn = new Date().toISOString();
+            newOfferObj.SubmittedBy = userId;
 			newOfferObj.Currency = oBoundContext.getObject().Currency;
 			newOfferObj.DistributorID = oBoundContext.getObject().DistributorID;
 			newOfferObj.InternalBidDueDate = oBoundContext.getObject().InternalBidDueDate;
@@ -524,7 +538,8 @@ sap.ui.define([
 			
 			await this.createAddOfferProductDialog();
 			const selectedOffer = await this.stState.getService().getOffer(this.offerID);
-			await this.getCountryBrands(this.countryCode, selectedOffer.Division);
+			const userInfo = await this.getUserInfo(this.getModel("st").getProperty("/UserID"));
+			await this.getCountryBrands(this.countryCode, selectedOffer.Division, userInfo);
 			await this.getInstituteDistributorBrandProducts(this.countryCode, selectedOffer.InstituteID, selectedOffer.DistributorID, selectedOffer.SellingCompany, selectedOffer.Channel, selectedOffer.Division);
 
 			this.getView().setBusy(false);
@@ -580,6 +595,7 @@ sap.ui.define([
 			const table = this.byId("idOfferProductsTable");
 			let dialog = sap.ui.getCore().byId("addProductDialog");
 			const products = this.getModel("ui").getProperty("/OfferProductTable/products");
+			const userId = this.getModel("st").getProperty("/UserID");
 			if(products){
 				for(const product of products){
 
@@ -611,7 +627,9 @@ sap.ui.define([
 										NoOfTier:0,
 										DEFAULT_COMMISSION_RATE:0,
 										MinInvoiceAmount:0,
-										UoM: 'Pack'
+										UoM: 'Pack',
+										SubmittedOn: new Date().toISOString(),
+										SubmittedBy: userId
 									}
 					});
 					const newItem = table.getBindingInfo("items").template.clone();
@@ -970,7 +988,7 @@ sap.ui.define([
 			table.getItems()[siblingItemIndex].setSelected(true);
 		},
 		
-		getCountryBrands: async function (countryCode, division) {
+		getCountryBrands: async function (countryCode, division, userInfo) {
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryBrands", {
 					filters: [
@@ -982,7 +1000,23 @@ sap.ui.define([
 					}
 				});
 			}).then(data => {
+				if(userInfo && userInfo.results[0].BU !== null){
+					data.results = data.results.filter(item => item.BU === userInfo.results[0].BU);
+				}
 				this.getModel("ui").setProperty("/OfferProductTable/countryBrands", data.results);
+			})
+		},
+
+		getUserInfo: async function(cwid){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/Users", {
+					filters: [
+						new Filter("UserID", "EQ", cwid)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
 			})
 		},
 

@@ -1,0 +1,53 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:up="sap.uxap"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.uxap"
+    xmlns:t="sap.ui.table"
+    xmlns:l="sap.ui.layout"
+    xmlns:mvc="sap.ui.core.mvc"
+>
+    <Table
+        id="idOfferHistoryTable"
+        columns="{path:'template>/detailDetailOfferProductConfig/countryTemplate/template/table/columns'}"
+        class="sapFDynamicPageAlignContent"
+        width="auto"
+        contextualWidth="Auto"
+        growing="true"
+        growingThreshold="15"
+        growingScrollToLoad="false"
+        busyIndicatorDelay="0"
+    >
+        <headerToolbar>
+            <Toolbar>
+                <content>
+                    <ToolbarSpacer />
+                    <CheckBox
+                        id="currentInstituteCheckId"
+                        text="{i18n>OfferHistoryCurrentInstitute}"
+                        selected="true"
+                        select=".onHistoryFilterCheck"
+                    />
+                    <CheckBox
+                        id="wonCheckId"
+                        text="{i18n>OfferHistoryWon}"
+                        selected="true"
+                        select=".onHistoryFilterCheck"
+                    />
+                    <CheckBox
+                        id="lostCheckId"
+                        text="{i18n>OfferHistoryLost}"
+                        selected="false"
+                        select=".onHistoryFilterCheck"
+                    />
+                </content>
+            </Toolbar>
+        </headerToolbar>
+        <columns>
+            <Column importance="{template>importance}">
+                <Text text="{template>title}" />
+            </Column>
+        </columns>
+    </Table>
+</core:FragmentDefinition>

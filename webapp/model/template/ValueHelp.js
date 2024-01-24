@@ -10,8 +10,9 @@ sap.ui.define([
   "sap/m/Text", 
   "sap/ui/model/Filter",
   "sap/ui/model/FilterOperator",
+  "sap/m/Label",
   "../../service/StandardSingletonService",
-], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator, StandardSingletonService) {
+], function (BaseObject, Table, TemplateFilter, TemplateStaticValue, TableSelectDialog, ColumnListItem,Column,Token, Text, Filter, FilterOperator, Label, StandardSingletonService) {
     const ValueHelp = BaseObject.extend("com.bayer.tender.statenderapp.model.template.ValueHelp", {
       constructor: function (data) {
         BaseObject.prototype.constructor.call(this);
@@ -42,9 +43,12 @@ sap.ui.define([
         if(originalInputField instanceof sap.m.MultiInput){
           let aSelectedItems = oEvent.getParameter("selectedItems");
           let originalInputFieldItems = originalInputField.getTokens();
+          let selectedTexts = [];
 
-          if (aSelectedItems && aSelectedItems.length > 0) {       
-            const selectedTexts = aSelectedItems.map(oItem => oItem.getBindingContext().getObject().Name);
+          if (aSelectedItems && aSelectedItems.length > 0) {      
+            this.selectedField.forEach(field => {
+              selectedTexts = aSelectedItems.map(oItem => oItem.getBindingContext().getObject()[field.Name]);
+            });
             
             originalInputFieldItems.forEach(function (token) {
               const tokenText = token.getText();
@@ -52,17 +56,18 @@ sap.ui.define([
                 originalInputField.removeToken(token);
               }
             });
-           
-            aSelectedItems.forEach(function (oItem) {
-              const itemText = oItem.getBindingContext().getObject().Name;
-              const isTokenExists = originalInputFieldItems.some(token => token.getText() === itemText);
-              if (!isTokenExists) {
-                const oToken = new Token({
-                  text: itemText
-                });
-                originalInputField.addToken(oToken);
-              }
-            });
+            this.selectedField.forEach(field => {
+              aSelectedItems.forEach(function (oItem) {
+                const itemText = oItem.getBindingContext().getObject()[field.Name];
+                const isTokenExists = originalInputFieldItems.some(token => token.getText() === itemText);
+                if (!isTokenExists) {
+                  const oToken = new Token({
+                    text: itemText
+                  });
+                  originalInputField.addToken(oToken);
+                }
+              });
+            })
           } else {            
             originalInputField.removeAllTokens();
           }
@@ -77,12 +82,11 @@ sap.ui.define([
 
                 const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
                 originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]); 
-
-                const changeFunction = StandardSingletonService[`onChange${this.title}`];
-                if (changeFunction) {
-                  changeFunction(originalInputField, selectedItem[field.ID], StandardSingletonService);
-                }
             })
+            const changeFunction = StandardSingletonService[`onChange${this.title}`];
+            if (changeFunction) {
+              changeFunction(originalInputField, selectedItem, StandardSingletonService);
+            }
           }
         }     
       },
@@ -109,7 +113,10 @@ sap.ui.define([
             template: new ColumnListItem({
                 type: "Active",
                 cells: columns.map(col => col.getControl().generateControl())
-            })	
+            }),
+            events: {
+              dataReceived: this.onDataReceived.bind(this, oSource)
+            }	
           },
           liveChange: function (oEvent) {
             let orFilters = [];
@@ -166,7 +173,11 @@ sap.ui.define([
           // cancel: handleCloseValueHelp
         });
         columns.forEach(col => {
-          let newColumn = new Column();
+          
+          let newColumn = oSource instanceof sap.m.MultiInput ? new Column({ 
+            header: new Label({ text: ""})
+          }) : new Column();
+
           this.valueHelpTableSelectDialog.addColumn(newColumn);
         })
         
@@ -182,6 +193,24 @@ sap.ui.define([
         selectedItems.forEach(selectedItem => {
           valueHelpDialog.getItems()?.find(item => item.getBindingContext().getObject().Name === selectedItem.getProperty('text'))?.setSelected(true)
         })
+      },
+
+      onDataReceived: function (oSource, event) {
+        if (oSource instanceof sap.m.MultiInput) {
+          const tokens = oSource.getTokens();
+
+          if (tokens.length == 0) return;
+
+          this.valueHelpTableSelectDialog.getItems().forEach(item => {
+            const itemName = item.getCells()[0].getProperty('text');
+
+            const selectedToken = tokens.find(t => t.getProperty('text') === itemName);
+
+            if (selectedToken) {
+              item.setSelected(true);
+            }
+          });
+        }
       },
 
       _setFilters: function (modelInfo) {

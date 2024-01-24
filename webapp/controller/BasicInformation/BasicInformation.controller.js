@@ -36,6 +36,7 @@ sap.ui.define([
 			
 			this.objectId = objectId;
 			this.selectedTab = iconTabfilter.getKey();
+			this.countryCode = countryCode;
 
 			if(this.selectedTab !== "Tender") return; // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
 
@@ -44,7 +45,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.productScope = productScope; 
-			
+			this.selectedTender = await this.stState.getService().getTender(this.objectId);
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 
@@ -96,26 +97,36 @@ sap.ui.define([
 				groupId: "Basicinfo",
 				events: {
 					change: () => {
-						let regionsField = this.getRegionCustomString(form);
-						regionsField?.removeAllTokens();
-						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_2");
+						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						if (this.countryCode === "GB") {
+							this.setRegionsFieldVisible(form, instituteType);
+						}
+
+						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+						multiInputCustomField.control?.removeAllTokens();
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						if(cs){
 							for(const value of cs.split(",")){
 
-								regionsField?.addToken(new Token({key: value, text:value}));
+								multiInputCustomField.control?.addToken(new Token({key: value, text:value}));
 
 							}
 						}
 					},
 
 					dataReceived: () => {
-						let regionsField = this.getRegionCustomString(form);
-						regionsField?.removeAllTokens();
-						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_2");
+						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						if (this.countryCode === "GB") {
+							this.setRegionsFieldVisible(form, instituteType);
+						}
+
+						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+						multiInputCustomField.control?.removeAllTokens();
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						if(cs){
 							for(const value of cs.split(",")){
 
-								regionsField?.addToken(new Token({key: value, text:value}));
+								multiInputCustomField.control?.addToken(new Token({key: value, text:value}));
 
 							}
 						}
@@ -145,6 +156,46 @@ sap.ui.define([
 			return regionsField;
 		},
 
+		getInstituteInBranchCustomString: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let instituteInBranch;
+			formContainers.forEach(forContainer => {
+				if(forContainer.getAggregation("title") === 'Institute & Type'){
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Institute In Branch'){
+							instituteInBranch = formElement.getAggregation("fields")[0];
+						}
+					});
+				};
+			});
+			return instituteInBranch;
+		},
+
+		getMultiInputCustomField: function (countryCode, form) {
+			if (countryCode === "TW") {
+				return {
+					customFieldName: "Custom_String_3",
+					control: this.getInstituteInBranchCustomString(form)
+				}
+			}
+			return {
+				customFieldName: "Custom_String_2",
+				control: this.getRegionCustomString(form)
+			}
+		},
+
+		setRegionsFieldVisible: function (form, instituteType) {
+			const regionsField = form.getAggregation("formContainers")
+			.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+			.find(el => el.getAggregation("label") === "Regions");
+
+			if (instituteType === "Region(s)") {
+				regionsField.setVisible(true);
+			}else {
+				regionsField.setVisible(false);
+			}
+		},
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
 		 * FYI: the table ID in the View is a concatination of "id" + tableName
@@ -171,16 +222,23 @@ sap.ui.define([
 			});
 		},
 
-		onTenderFormEditBtnPress: function(event){
+		onTenderFormEditBtnPress: async function(event){
+			if (this.countryCode === "TW") {
+				const parentInstituteID = await this.getParentInstituteID(this.countryCode, this.selectedTender.InstituteID);
+				const path = this.getModel().createKey("/TenderFormView", {
+					TenderID: this.objectId
+				});
+				this.getModel().setProperty(`${path}/ParentInstituteID`, parentInstituteID);
+			}
 			this.getModel("ui").setProperty('/TenderForm/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
 
 			const messages = this.getMessages(["TenderFormView"]);
 			const form = this.byId(`idTenderForm`);
-			let regionsField = this.getRegionCustomString(form);
+			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_2", regionsField?.getTokens()?.reduce((prev,token,idx)=>
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
 			prev?`${prev},${token.getText()}`:token.getText(),""));
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
@@ -204,6 +262,18 @@ sap.ui.define([
 		onTenderFormCancelBtnPress: function(event){
 			this.cancelPendingChanges(["TenderFormView"], "basicInfoMsg");	
 			this.getModel("ui").setProperty('/TenderForm/editMode', false);
+
+			if (this.countryCode === "TW") {
+				const tenderForm = this.byId("idTenderForm");
+				const instInBranchField = tenderForm.getAggregation("formContainers")
+						.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+						.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0];
+				const obj = tenderForm.getBindingContext().getObject();
+				instInBranchField.removeAllTokens();
+				for(const value of obj.Custom_String_3.split(",")){
+					instInBranchField.addToken(new Token({key: value, text:value}));
+				}
+			}
 		},
 		
 		onAwardCriteriaEditBtnPress: function(event){
@@ -315,6 +385,22 @@ sap.ui.define([
 			})
 		},
 
+		getParentInstituteID: async function (countryCode, instituteID) {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/InstitutesView", {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("InstituteID", "EQ", instituteID),
+					],
+					success: function (res) {
+						resolve(res.results[0].ParentInstituteID)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
 		// onMessagePopoverPress : function (oEvent) {
 		// 	const oSourceControl = oEvent.getSource();
 		// 	this._getMessagePopover().then(function(oMessagePopover){
