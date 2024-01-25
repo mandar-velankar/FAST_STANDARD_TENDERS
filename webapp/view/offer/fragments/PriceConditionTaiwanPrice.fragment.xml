@@ -92,6 +92,7 @@
 					<form:FormElement label="Main Customer">
 						<form:fields>
 							<Input
+								required="true"
 								value="{AnticipatedYearlyVolumeMainCustomer}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanPrice')"
@@ -101,6 +102,7 @@
 					<form:FormElement label="Branch">
 						<form:fields>
 							<Input 
+								required="true"
 								value="{AnticipatedYearlyVolumeBranch}"
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanPrice')"
