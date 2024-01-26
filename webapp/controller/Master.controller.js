@@ -843,7 +843,7 @@ sap.ui.define([
 			{ path: "TenderID", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "Classification", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "TenderName", operator: FilterOperator.Contains, value: sSearch },
-			{ path: "createdBy", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "createdByName", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "DistributorName", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "InstituteName", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "OfferID", operator: FilterOperator.Contains, value: sSearch },
