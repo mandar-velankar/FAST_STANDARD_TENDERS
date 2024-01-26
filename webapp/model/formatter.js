@@ -8,7 +8,10 @@ sap.ui.define([
 		maxFractionDigits: 2
 	});
 
-	const currencyInstance = NumberFormat.getCurrencyInstance();
+	const currencyInstance = NumberFormat.getCurrencyInstance({
+		minFractionDigits: 2,
+		maxFractionDigits: 2
+	});
 
 	return {
 		/**
@@ -42,8 +45,10 @@ sap.ui.define([
 			return floatInstance.parse(value);
 		},
 
-		formatCurrency: function(value){
-			return currencyInstance.format(value);
+		formatCurrency: function(value, currency){
+			if (!value && value != 0) return;
+			const roundedValue = parseFloat(value).toFixed(2);
+			return currencyInstance.format(roundedValue) + " " + currency;
 		},
 
 		parseCurrency: function(value){

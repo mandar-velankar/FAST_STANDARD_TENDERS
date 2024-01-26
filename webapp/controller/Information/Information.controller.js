@@ -250,8 +250,7 @@ sap.ui.define([
 				default:
 					break;
 			}
-			totalAmount = formatter.formatCurrency(totalAmount);
-			return `${totalAmount} ${currency}`;
+			return formatter.formatCurrency(totalAmount, currency);
 		},
 
 		formatApprovalStatus: function (approvalStatus) {
