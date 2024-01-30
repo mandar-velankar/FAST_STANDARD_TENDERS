@@ -185,12 +185,34 @@
 							/>
 						</form:fields>
 					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GeneralDiscountValue}" >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['GeneralDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.SecondDiscount}" >
 						<form:fields>
 							<Input 
 								value="{
 									path: 'Level2Discount2',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.SecondDiscountValue}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['SecondDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
 							/>
@@ -375,12 +397,38 @@
 					</form:FormElement>
 					<form:FormElement >
 						<form:fields>
+							<Input
+								value="{
+									parts: ['GeneralDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
 							<Input 
 								value="{
 									path: 'Level2Discount2',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['SecondDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
                                 width="300px"
 							/>

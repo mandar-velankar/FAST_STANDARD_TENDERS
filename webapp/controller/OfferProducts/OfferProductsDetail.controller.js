@@ -780,6 +780,8 @@ sap.ui.define([
 			let grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
 			let totalDiscount = (basePrice - price3) / basePrice;
 			let priceImpact = (invoicePrice - price3) / invoicePrice;
+			let generalDiscountAmount = invoicePrice * deductions;
+			let secondDiscountAmount = invoicePrice * level2Discount2;
 
 			
 			context.getModel().setProperty("NetPrice", netPrice, context);
@@ -790,6 +792,8 @@ sap.ui.define([
 			context.getModel().setProperty("TotalYearlyValueBranch", grpEstSaleValue, context);
 			context.getModel().setProperty("TotalDiscountNHI", totalDiscount, context);
 			context.getModel().setProperty("TotalDiscountInvoice", priceImpact, context);
+			context.getModel().setProperty("GeneralDiscount_Amount", generalDiscountAmount, context);
+			context.getModel().setProperty("SecondDiscount_Amount", secondDiscountAmount, context);
 		},
 
 		onAnticipatedYearlyVolumeLiveChange: function(event, conditonType){

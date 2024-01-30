@@ -13,7 +13,7 @@ sap.ui.define([
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType", {
 
         formatValue: function(parts) {
-			return `${oCurrencyFormat.format(Number(parts[0]))} ${parts[1]}` ;
+			return `${oCurrencyFormat.format(Number(parts[0] ?? 0))} ${parts[1] ?? ''}` ;
         },
 
         parseValue: function(oValue) {
