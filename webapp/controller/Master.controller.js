@@ -126,6 +126,7 @@ sap.ui.define([
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
+			this.onLanguageChange();
 			// this.setFilter(oEvent);
 		},
 
@@ -930,6 +931,28 @@ sap.ui.define([
 		onDownloadZuelligExtractCSV: function () {
 			const url = "/v2/sta_tender/CSVAttachment(Zuellig=true)/content";
 			URLHelper.redirect(url, true);
+		},
+
+		onLanguageChange: function (evt) {
+			let language;
+
+			if (evt) {
+				// Language change event
+				language = evt.getParameter("selectedItem").getKey();
+				
+			} else {
+				// Called without an event, get language from config
+				language = sap.ui.getCore().getConfiguration().getLanguage();
+			}
+			const oCountrySelectedItem = this.byId("idSlctCountry").getSelectedItem();
+			const sCountryCode = oCountrySelectedItem?.getKey();
+			sCountryCode !== 'TW' ? language = 'EN' : language;			
+			let config = sap.ui.getCore().getConfiguration();
+			config.setLanguage(language.toLowerCase());
+			this.getModel("appView").setProperty("/language", language.toLowerCase());
+			// Update the Select control
+			const oSelect = this.byId("idlanguageChange");
+			oSelect.setSelectedKey(language);
 		}
 	});
 

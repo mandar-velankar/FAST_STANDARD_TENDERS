@@ -5,6 +5,7 @@ sap.ui.define(["../BaseObject", "./XMLView"], function (BaseObject, XMLView) {
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
+        this.titleLocale = data.TitleLocale;
         this.description = data.Description;
         this.icon = data.Icon;
         this.xmlView = data?.XMLView && new XMLView(data.XMLView);
@@ -19,6 +20,7 @@ sap.ui.define(["../BaseObject", "./XMLView"], function (BaseObject, XMLView) {
       return {
         ID: this.id,
         Title: this.title,
+        TitleLocale: this.titleLocale,
         Description: this.description,
         Icon: this.icon,
         XMLView: this.xmlView.getJSON()

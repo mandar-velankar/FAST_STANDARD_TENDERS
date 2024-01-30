@@ -46,7 +46,7 @@
         </headerToolbar>
         <columns>
             <Column importance="{template>importance}">
-                <Text text="{template>title}" />
+                <Text text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}" />
             </Column>
         </columns>
     </Table>
