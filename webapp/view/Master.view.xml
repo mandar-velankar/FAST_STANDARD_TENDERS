@@ -89,6 +89,10 @@
 					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
 					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
 					<Button icon="sap-icon://download" text="Download CSV" press=".onDownloadZuelligExtractCSV" visible="{= ${accessControl>/standardtenderAccess/ZuelligExtract}}"/>
+					<Select id = "idlanguageChange" change=".onLanguageChange">
+						<core:Item key="EN" text="English" />
+						<core:Item key="LOCAL" text="Local" />
+					</Select>
 				</OverflowToolbar>
 				<Table id="genericMasterTable" 
 					columns="{path:'template>/masterConfig/countryTemplate/template/table/columns'}"
@@ -108,7 +112,7 @@
 				>
 					<columns>
 						<Column importance="{template>importance}" >
-							<Text text="{template>title}" />
+							<Text text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}" />
 						</Column>
 					</columns>
 				</Table>

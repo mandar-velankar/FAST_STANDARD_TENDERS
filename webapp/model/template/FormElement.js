@@ -6,6 +6,7 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
       if (data) {
         this.id = data.ID;
         this.label = data.Label;
+        this.labelLocale = data.LabelLocale;
         this.visible = data.Visible;
         for (const control of data.Controls) {
           this.controls.push(new Control(formId, control));
@@ -25,6 +26,7 @@ sap.ui.define(["../BaseObject", "./Control"], function (BaseObject, Control) {
       return {
         ID: this.id,
         Label: this.label,
+        LabelLocale: this.labelLocale,
         Visible: this.visible,
         Controls: this.controls.map(control => control.getJSON())
       };

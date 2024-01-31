@@ -6,7 +6,7 @@
 >
     <m:Panel
         expandable="true"
-        headerText="Award Details"
+        headerText="{i18n>AwardDetails}"
     >
         <form:Form
             id="idAwardedProductsDetailForm"
@@ -73,7 +73,7 @@
                 >
                     <form:formElements>
                         <form:FormElement
-                            label="{template>label}"
+                            label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}"
                             fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
                         />
                     </form:formElements>
