@@ -5,6 +5,7 @@ sap.ui.define(["../BaseObject", "./Control", "sap/m/ViewSettingsItem"], function
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
+        this.titleLocale = data.TitleLocale;
         this.importance = data.Importance;
         this.isValueHelpKey = data.IsValueHelpKey;
         this.isValueHelpText = data.IsValueHelpText;
@@ -35,6 +36,7 @@ sap.ui.define(["../BaseObject", "./Control", "sap/m/ViewSettingsItem"], function
       return {
         ID: this.id,
         Title: this.title,
+        TitleLocale: this.titleLocale,
         Control: this.control.getJSON()
       };
     }
