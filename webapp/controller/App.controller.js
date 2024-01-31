@@ -20,7 +20,8 @@ sap.ui.define([
 					midColumn : {
 						fullScreen : false
 					}
-				}
+				},
+				language: "en"
 			});
 			this.setModel(oViewModel, "appView");
 

@@ -59,7 +59,7 @@
             <VBox>
                 <Panel
                     expandable="true"
-                    headerText="Product Info"
+                    headerText="{i18n>OfferProductsDetailView.ProductInfo}"
                 >
                     <VBox>
                         <form:Form
@@ -131,7 +131,7 @@
                                 >
                                     <form:formElements>
                                         <form:FormElement
-                                            label="{template>label}"
+                                            label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}"
                                             fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
                                         >
                                             <!-- <form:fields>

@@ -13,7 +13,7 @@ sap.ui.define([
     return SimpleType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
 
         formatValue: function(value) {
-			return oPercentFormat.format(value);
+			return oPercentFormat.format(Number(value));
         },
 
         parseValue: function(oValue) {

@@ -5,6 +5,7 @@ sap.ui.define([
 	"../model/datatypes/CustomPercentageType",
 	"../model/datatypes/CustomNumberType",
 	"../model/datatypes/CustomDecimalType",
+	"../model/datatypes/CustomCurrencyType",
 	"sap/ui/core/Fragment",
 	"sap/m/MessagePopover",
 	"sap/m/MessageItem",
@@ -22,6 +23,7 @@ sap.ui.define([
 	CustomPercentageType, 
 	CustomNumberType, 
 	CustomDecimalType, 
+	CustomCurrencyType,
 	Fragment, 
 	MessagePopover, 
 	MessageItem, 
@@ -42,7 +44,8 @@ sap.ui.define([
 		customTypes: {
 			percentage: CustomPercentageType,
 			number: CustomNumberType,
-			decimal: CustomDecimalType
+			decimal: CustomDecimalType,
+			currency: CustomCurrencyType,
 		},
 
 		/**

@@ -15,11 +15,11 @@
 			editable="true"
 			formContainers="{path:'template>xmlView/formByName/OfferForm/formContainers',templateShareable:true}">
 			<form:title>
-				<core:Title text="{template>title}" />
+				<core:Title text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}" />
 			</form:title>
 			<form:toolbar>
 				<Toolbar>
-					<Title text="{template>title}"/>
+					<Title text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}"/>
 					<ToolbarSpacer />
 					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<MenuButton 
@@ -64,7 +64,7 @@
 			<form:formContainers>
 				<form:FormContainer formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						<form:FormElement label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						<form:FormElement label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
@@ -84,7 +84,7 @@
 		<headerToolbar>
 			<OverflowToolbar>
 				<content>
-					<Title text="{path:'template>xmlView/tableByName/OfferProductsTable/title'}" level="H2"/>
+					<Title text="{i18n>OfferProductsView.Products}" level="H2"/>
 					<ToolbarSpacer />
 				<Button id="AddOfferProductBtnId" text="Add Product" icon="sap-icon://add" press=".onOpenAddOfferProductDialog" visible="{= ${ui>/OfferProductTable/editMode} }"/>
 				<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteOfferProductBtnPress" visible="{= ${ui>/OfferProductTable/editMode} }" enabled="{= ${ui>/OfferProductTable/enableDeleteProductButton}}"/>
@@ -108,7 +108,7 @@
 		</headerToolbar>
 		<columns>
 			<Column>
-				<Text text="{template>title}" />
+				<Text text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}" />
 			</Column>
 		</columns>
 	</Table>

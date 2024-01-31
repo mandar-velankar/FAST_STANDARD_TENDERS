@@ -82,6 +82,14 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "Discount with FOC";
 					break;
+				case 'taiwanprice'	:
+					stringToReplace	= originalString;
+					replacementString = "Taiwan Price";
+					break;
+				case 'taiwandiscount'	:
+					stringToReplace	= originalString;
+					replacementString = "Taiwan Discount";
+					break;
 				default:
 					return originalString;
 			}
