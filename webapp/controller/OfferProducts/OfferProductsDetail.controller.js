@@ -1022,10 +1022,10 @@ sap.ui.define([
 			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
 			const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
 
-			deductions = deductions ? deductions : priceObj.Deductions;
-			level2Discount2 = level2Discount2 ? level2Discount2 : priceObj.Level2Discount2;
-			branchVolume = branchVolume ? branchVolume : priceObj.AnticipatedYearlyVolumeBranch;
-			invoicePrice = invoicePrice? invoicePrice : priceObj.OfferPrice;
+			deductions = (deductions !== undefined && deductions !== null && deductions !== "") ? deductions : priceObj.Deductions;
+			level2Discount2 = (level2Discount2 !== undefined && level2Discount2 !== null && level2Discount2 !== "") ? level2Discount2 : priceObj.Level2Discount2;
+			branchVolume = (branchVolume !== undefined && branchVolume !== null && branchVolume !== "") ? branchVolume : priceObj.AnticipatedYearlyVolumeBranch;
+			invoicePrice = (invoicePrice !== undefined && invoicePrice !== null && invoicePrice !== "") ? invoicePrice : priceObj.OfferPrice;
 
 			let paidVolume = 0;
 			let totalVolume = 0;
