@@ -19,7 +19,7 @@
 			</form:title>
 			<form:toolbar>
 				<Toolbar>
-					<Title text="Tender and Offer Details" />
+					<Title text="{i18n>TenderandOfferDetails}" />
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"
@@ -108,7 +108,7 @@
 			<form:formContainers>
 				<form:FormContainer title="" formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						<form:FormElement visible="{template>visible}" label="{template>label}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						<form:FormElement visible="{template>visible}" label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
@@ -126,30 +126,30 @@
 			>
 			<headerToolbar>
 			<OverflowToolbar>
-					<Title text="Product Information" />
+					<Title text="{i18n>ProductInformation}" />
 			</OverflowToolbar>
 			</headerToolbar>
 				<columns>
 					<Column>
-						<Label text="Product" wrapping="true"/>
+						<Label text="{i18n>Product}" wrapping="true"/>
 					</Column>
 					<Column>
-						<Label text="Qty" wrapping="true"/>
+						<Label text="{i18n>Qty}" wrapping="true"/>
 					</Column>
 					<Column>
-						<Label text="Unit Price" wrapping="true"/>
+						<Label text="{i18n>UnitPrice}" wrapping="true"/>
 					</Column>
 					<Column>
-						<Label text="Pack Price" wrapping="true"/>
+						<Label text="{i18n>PackPrice}" wrapping="true"/>
 					</Column>
 					<Column>
-						<Label text="Net Price per Unit" wrapping="true"/>
+						<Label text="{i18n>NetPriceperUnit}" wrapping="true"/>
 					</Column>
 					<Column>
-						<Label text="Net Price per Pack" wrapping="true"/>
+						<Label text="{i18n>NetPriceperPack}" wrapping="true"/>
 					</Column>
 					<Column>
-						<Label text="Total Amount" wrapping="true"/>
+						<Label text="{i18n>TotalAmount}" wrapping="true"/>
 					</Column>
 				</columns>
 				<items>

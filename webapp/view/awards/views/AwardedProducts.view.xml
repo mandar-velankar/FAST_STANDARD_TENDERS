@@ -20,10 +20,10 @@
 				selectionChange=".onAwardedProductPress">
 				<columns>
 					<Column >
-						<Label text="Product" wrapping="true"/>
+						<Label text="{i18n>Product}" wrapping="true"/>
 					</Column>
 					<Column >
-						<Label text="Outcome" wrapping="true"/>
+						<Label text="{i18n>Outcome}" wrapping="true"/>
 					</Column>
 				</columns>
 				<items>

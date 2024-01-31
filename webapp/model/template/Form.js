@@ -6,6 +6,7 @@ sap.ui.define(["../BaseObject", "./FormContainer", "./Layout"], function (BaseOb
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
+        this.titleLocale = data.TitleLocale;
         this.description = data.Description;
         this.formId = data.FormID;
         this.entity = data.Entity;
@@ -26,6 +27,7 @@ sap.ui.define(["../BaseObject", "./FormContainer", "./Layout"], function (BaseOb
       return {
         ID: this.id,
         Title: this.title,
+        TitleLocale: this.titleLocale,
         Description: this.description,
         Entity: this.entity,
         FormContainers: this.formContainers.map(formContainer => formContainer.getJSON()),
