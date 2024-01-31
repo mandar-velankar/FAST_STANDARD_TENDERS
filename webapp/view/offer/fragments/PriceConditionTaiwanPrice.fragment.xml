@@ -389,7 +389,7 @@
 									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
-								enabled="{ui>/PricingForm/editMode}"
+								enabled="false"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
                                 width="300px"
 							/>
@@ -402,7 +402,7 @@
 									parts: ['GeneralDiscount_Amount', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
-								enabled="false"
+								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
                                 width="300px"
 							/>
@@ -415,7 +415,7 @@
 									path: 'Level2Discount2',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
-								enabled="{ui>/PricingForm/editMode}"
+								enabled="false"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
                                 width="300px"
 							/>
@@ -428,7 +428,7 @@
 									parts: ['SecondDiscount_Amount', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
-								enabled="false"
+								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
                                 width="300px"
 							/>

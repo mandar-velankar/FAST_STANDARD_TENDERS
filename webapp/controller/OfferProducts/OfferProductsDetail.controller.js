@@ -464,6 +464,42 @@ sap.ui.define([
 			});
 		},
 
+		onTaiwanDiscountFormSaveBtnPress: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionTaiwanDiscountView"]).length > 0;
+			if(hasErrorMessages) return;
+			this.setMessageSection(["PriceConditionTaiwanDiscountView"], "priceCondPrice");
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesTaiwanDiscountSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesTaiwanDiscountSuccess: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionTaiwanDiscountView"]).length > 0;
+			this.setMessageSection(["PriceConditionTaiwanDiscountView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionTaiwanDiscountView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionTaiwanDiscountView"], "priceCondPrice");
+			} 
+			this._refreshOfferProductTable();
+			this.refreshPricingForm();
+		},
+
+		onTaiwanDiscountFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionTaiwanDiscountView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
 		onOfferDetailFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
@@ -729,6 +765,9 @@ sap.ui.define([
 				case "discountwithfoc":
 					this.calculateDiscountWithFOCConditionType({property, value, context});
 					break;
+				case "taiwandiscount":
+					this.calculateTaiwanDiscountConditionType({property, value, context});
+					break;
 				case "taiwanprice":
 					this.calculateTaiwanPriceConditionType({property, value, context});
 					break;
@@ -763,7 +802,7 @@ sap.ui.define([
 		 * @param {object} options.context - The context object
 		 * @returns {void} - Changes context properties
 		 */
-		calculateTaiwanPriceConditionType: function({property, value, context}){
+		calculateTaiwanDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
 			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.OfferPrice);
@@ -794,6 +833,39 @@ sap.ui.define([
 			context.getModel().setProperty("TotalDiscountInvoice", priceImpact, context);
 			context.getModel().setProperty("GeneralDiscount_Amount", generalDiscountAmount, context);
 			context.getModel().setProperty("SecondDiscount_Amount", secondDiscountAmount, context);
+		},
+
+		calculateTaiwanPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
+			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.OfferPrice);
+			let mainCustomerVolume = property?.toLowerCase().includes("anticipatedyearlyvolumemaincustomer") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeMainCustomer);
+			let branchVolume = property?.toLowerCase().includes("anticipatedyearlyvolumebranch") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeBranch);
+			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
+			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
+			let generalDiscountAmount = property?.toLowerCase().includes("generaldiscount_amount") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.GeneralDiscount_Amount);
+			let secondDiscountAmount = property?.toLowerCase().includes("seconddiscount_amount") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.SecondDiscount_Amount);
+			let deductions = generalDiscountAmount / invoicePrice;
+			let level2Discount2 = secondDiscountAmount / invoicePrice;
+			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj}); 
+			let level3Discount1 = annualDiscount / branchVolume;
+			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
+			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
+			let grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
+			let totalDiscount = (basePrice - price3) / basePrice;
+			let priceImpact = (invoicePrice - price3) / invoicePrice;
+
+			
+			context.getModel().setProperty("NetPrice", netPrice, context);
+			context.getModel().setProperty("Level3Discount1", level3Discount1, context);
+			context.getModel().setProperty("Price3", price3, context);
+			// context.getModel().setProperty("NegotiationPrice", negotiationPrice, context);
+			context.getModel().setProperty("TotalYearlyValueMainCustomer", estSaleValue, context);
+			context.getModel().setProperty("TotalYearlyValueBranch", grpEstSaleValue, context);
+			context.getModel().setProperty("TotalDiscountNHI", totalDiscount, context);
+			context.getModel().setProperty("TotalDiscountInvoice", priceImpact, context);
+			context.getModel().setProperty("Deductions", deductions, context);
+			context.getModel().setProperty("Level2Discount2", level2Discount2, context);
 		},
 
 		onAnticipatedYearlyVolumeLiveChange: function(event, conditonType){
@@ -1064,7 +1136,7 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
-				if (this.sCountryCode === "TW" && conditionType === "TaiwanPrice") {
+				if (this.sCountryCode === "TW") {
 					this.bindCurrentSectionFields(form, contextData);
 				}
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
@@ -1102,7 +1174,7 @@ sap.ui.define([
 				"ConditionType": conditionType
 			});
 
-			if (this.sCountryCode === "TW" && conditionType === "TaiwanPrice") {
+			if (this.sCountryCode === "TW") {
 				form.getAggregation("items").forEach(item => {
 					item.bindElement({
 						path: path,
