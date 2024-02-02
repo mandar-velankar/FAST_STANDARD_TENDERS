@@ -713,10 +713,10 @@ sap.ui.define([
 			const formContainers = form.getAggregation("formContainers");
 			let instituteInBranch;
 			formContainers.forEach(forContainer => {
-				if(forContainer.getAggregation("title") === 'Institute & Type'){
+				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch'){
+						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
