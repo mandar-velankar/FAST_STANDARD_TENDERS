@@ -102,6 +102,7 @@ sap.ui.define([
 		tabsFactory: function (tab,idx){
 			const xmlView = tab.getXMLView();
 			const viewFolder = tab.title.toLowerCase().split(" ").join("");
+			const language = this.getModel("appView").getProperty("/language");
 			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder}.views.${xmlView.getName()}`;
 			const viewData = {
 				objectId:this.sObjectId,
@@ -112,7 +113,7 @@ sap.ui.define([
 			const isVisible = this.getTabVisibility(tab.title);
 
 			const iconTabFilter = new IconTabFilter({
-				text: tab.title,
+				text: language === 'en' ? tab.title : tab.titleLocale !== null ? tab.titleLocale : tab.title,
 				key: tab.title,
 				visible: isVisible
 			}); 
@@ -146,7 +147,7 @@ sap.ui.define([
 			this.views[viewName].setBindingContext(context,"template");
 			this.views[viewName].getController().onBeforeShow && this.views[viewName].getController().onBeforeShow(tab,data);	
 			tab.insertContent(this.views[viewName]);
-			const tabName = tab.getProperty("text");
+			const tabName = tab.getProperty("key");
 			const isVisible = this.getTabVisibility(tabName);
 			tab.setProperty("visible", isVisible);
 		},

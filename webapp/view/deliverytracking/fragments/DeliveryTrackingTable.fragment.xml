@@ -164,7 +164,7 @@
                         <form:formElements>
                             <form:FormElement
                                 visible="{template>visible}"
-                                label="{template>label}"
+                                label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}"
                                 fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}"
                             >
                                 <!-- <form:fields>

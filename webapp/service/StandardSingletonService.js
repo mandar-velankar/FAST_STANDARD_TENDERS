@@ -126,8 +126,8 @@ sap.ui.define([
 					originalInputField.getModel().setProperty(`${path}/Address`, undefined);
 					originalInputField.getModel().setProperty(`${path}/Custom_String_3`, "");
 					originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
-					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-					.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0].removeAllTokens();
+					.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0].removeAllTokens();
 					break
 				default:
 					break;
@@ -144,8 +144,8 @@ sap.ui.define([
 			switch (countryCode) {
 				case "TW":
 					const instInBranchField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
-					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-					.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0];
+					.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0];
 					let institutesInBranch = await StandardSingletonService.getInstituteBranchs(selectedItem, countryCode, originalInputField);
 					originalInputField.getModel().setProperty(`${path}/Custom_String_3`, institutesInBranch);
 					instInBranchField.removeAllTokens();

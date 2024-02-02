@@ -250,8 +250,7 @@ sap.ui.define([
 				default:
 					break;
 			}
-			totalAmount = formatter.formatCurrency(totalAmount);
-			return `${totalAmount} ${currency}`;
+			return formatter.formatCurrency(totalAmount, currency);
 		},
 
 		formatApprovalStatus: function (approvalStatus) {
@@ -533,7 +532,7 @@ sap.ui.define([
 						AwardedProduct: product.PRODUCTNAME,
 						AwardedCompany: "Bayer",
 						UoM: product.UNIT,
-						AwardedPrice: product.OFFER_PRICE,
+						AwardedPrice: this.countryCode === 'TW' ? product.NET_PRICE : product.OFFER_PRICE,
 						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
 					},

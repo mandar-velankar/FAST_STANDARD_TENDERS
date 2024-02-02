@@ -7,6 +7,7 @@ sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElem
       if (data) {
         this.id = data.ID;
         this.title = data.Title;
+        this.titleLocale = data.TitleLocale;
         for (const formElement of data.FormElements) {
           const element = new FormElement(formId, formElement)
           this.formElements.push(element);
@@ -24,6 +25,7 @@ sap.ui.define(["../BaseObject", "./FormElement"], function (BaseObject, FormElem
       return {
         ID: this.id,
         Title: this.title,
+        TitleLocale: this.titleLocale,
         FormElements: this.formElements.map(formElement => formElement.getJSON())
       };
     }

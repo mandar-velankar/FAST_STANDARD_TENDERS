@@ -1,0 +1,541 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>   
+ 
+   <VBox >
+	     <form:Form
+		id="idTaiwanPricingForm"
+		editable="true"
+	>
+    <form:toolbar>
+			<Toolbar>
+				<Title text="{i18n>PriceConditionTaiwanPricingFragment.InTaiwanPricing}"/>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/priceCondPrice}.length }"
+					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'priceCondPrice')" 
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onPricingFormEditBtnPress"
+					visible="{= !${ui>/PricingForm/editMode} }"
+					enabled="{= ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onTaiwanDiscountFormSaveBtnPress"
+					visible="{= ${ui>/PricingForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onTaiwanDiscountFormCancelBtnPress"
+					visible="{= ${ui>/PricingForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="5"
+				labelSpanL="5"
+				labelSpanM="5"
+				labelSpanS="9"
+				adjustLabelSpan="false"
+				emptySpanXL="0"
+				emptySpanL="0"
+				emptySpanM="0"
+				emptySpanS="0"
+				columnsXL="3"
+				columnsL="3"
+				columnsM="3"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement>
+						<form:fields>
+							<Text text="{i18n>PriceConditionTaiwanPricingFragment.Last12monthVolume}" />
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement>
+						<form:fields>
+							<Text text="" />
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement>
+						<form:fields>
+							<Text text="{i18n>PriceConditionTaiwanPricingFragment.AnticipatedYearlyVolume}" />
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+            <form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="Main Customer">
+						<form:fields>
+							<Input value="{Last12MonthsVolumeMainCustomer}" enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="Branch">
+						<form:fields>
+							<Input value="{Last12MonthsVolumeBranch}" enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="Main Customer">
+						<form:fields>
+							<Input
+								required="true"
+								value="{AnticipatedYearlyVolumeMainCustomer}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanDiscount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="Branch">
+						<form:fields>
+							<Input 
+								required="true"
+								value="{AnticipatedYearlyVolumeBranch}"
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanDiscount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+   
+	<!-- FORM WITH Pricing DATA -->
+	<form:Form
+		id="idPricingForm"
+		editable="true"
+	>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="6"
+				labelSpanL="6"
+				labelSpanM="6"
+				labelSpanS="6"
+				adjustLabelSpan="false"
+				emptySpanXL="0"
+				emptySpanL="0"
+				emptySpanM="0"
+				emptySpanS="0"
+				columnsXL="2"
+				columnsL="2"
+				columnsM="2"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+                <form:toolbar>
+                    <Toolbar width="300px">
+                        <ToolbarSpacer />
+                        <Title text = "Current"/>
+                    </Toolbar>
+                </form:toolbar>
+				<form:formElements>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.BasePrice}">
+						<form:fields>
+							<Input value="{
+										parts: ['Price0', 'Currency'],
+										type: 'sap.ui.model.type.Currency',
+										formatOptions: {
+											showMeasure: true,
+											minFractionDigits: 2,
+											maxFractionDigits: 2,
+											preserveDecimals: false
+										}	
+									}"  
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.InvoicePrice}" >
+						<form:fields>
+							<Input value="{
+										parts: ['Price1', 'Currency'],
+										type: 'sap.ui.model.type.Currency',
+										formatOptions: {
+											showMeasure: true,
+											minFractionDigits: 2,
+											maxFractionDigits: 2,
+											preserveDecimals: false
+										}	
+									}"  
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GeneralDiscount}" >
+						<form:fields>
+							<Input
+								value="{
+									path: 'Level2Discount1',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GeneralDiscountValue}" >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['GeneralDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.SecondDiscount}" >
+						<form:fields>
+							<Input 
+								value="{
+									path: 'Level2Discount2',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.SecondDiscountValue}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['SecondDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.NetOfferPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['Price2', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.QuotationAnnualDiscount}" >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['AnnualDiscountForBranch', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.AnnualDiscountAmount}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['Level3Discount1', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.NetPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['Price3', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.NegotiationPrice}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['AwardedPrice', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.EstSaleValueMainCustomer}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['TotalYearlyValueMainCustomer', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GroupEstSaleValueBranch}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['TotalYearlyValueBranch', 'Currency'],
+									type: 'sap.ui.model.type.Currency',
+									formatOptions: {
+										showMeasure: true,
+										minFractionDigits: 2,
+										maxFractionDigits: 2,
+										preserveDecimals: false
+									}	
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.TotalDiscount}" >
+						<form:fields>
+							<Input 
+								value="{
+									path: 'TotalDiscountNHI',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.PriceImpact}" >
+						<form:fields>
+							<Input 
+								value="{
+									path: 'TotalDiscountInvoice',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+            <form:FormContainer>
+                <form:toolbar>
+                    <Toolbar>
+                        <Title text = "Quotation"/>
+                    </Toolbar>
+                </form:toolbar>
+				<form:formElements>
+					<form:FormElement>
+						<form:fields>
+							<Input value="{
+										parts: ['BasePrice', 'Currency'],
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+									}"  
+									enabled="false" width="300px"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement>
+						<form:fields>
+							<Input value="{
+										parts: ['OfferPrice', 'Currency'],
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+									}"  
+									enabled="{ui>/PricingForm/editMode}" 
+									liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+									width="300px"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input
+								value="{
+									path: 'Deductions',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['GeneralDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									path: 'Level2Discount2',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['SecondDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NetPrice', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['AnnualDiscountForBranch', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['Level3Discount1', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false" width="300px"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['Price3', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false" width="300px"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NegotiationPrice', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}" 
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanDiscount')"
+								width="300px"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['TotalYearlyValueMainCustomer', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false" width="300px"
+                                />
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['TotalYearlyValueBranch', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false" width="300px"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									path: 'TotalDiscountNHI',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false" width="300px"/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									path: 'TotalDiscountInvoice',
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false" width="300px"/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+   </VBox>
+
+</core:FragmentDefinition>

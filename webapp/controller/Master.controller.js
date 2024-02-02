@@ -112,6 +112,7 @@ sap.ui.define([
 			const userID = oEvent?.getParameter("data")?.results[0]?.CWID || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CWID")
 			this.getModel("st").setProperty("/UserFullName", userFullName);
 			this.getModel("st").setProperty("/UserID", userID);
+			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.countryCode = sCountryCode;
 			// set filter which is needed later on
 			// if(sCountryCode){
@@ -126,6 +127,7 @@ sap.ui.define([
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
+			this.onLanguageChange();
 			// this.setFilter(oEvent);
 		},
 
@@ -133,6 +135,7 @@ sap.ui.define([
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry");
 			let sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
 			sProductScope = sProductScope ? sProductScope.replace(/\s+/g, '') : 'NA';
+			this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			
 			this._getTemplateConfig(sCountryCode,sProductScope);
 		},
@@ -158,8 +161,6 @@ sap.ui.define([
 		_getTemplateConfig: async function (sCountryCode,sProductScope) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
-			this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			try {
 				await this.templateState.read("MASTER", {
 					countryCode: sCountryCode, 
@@ -712,10 +713,10 @@ sap.ui.define([
 			const formContainers = form.getAggregation("formContainers");
 			let instituteInBranch;
 			formContainers.forEach(forContainer => {
-				if(forContainer.getAggregation("title") === 'Institute & Type'){
+				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch'){
+						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
@@ -843,7 +844,7 @@ sap.ui.define([
 			{ path: "TenderID", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "Classification", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "TenderName", operator: FilterOperator.Contains, value: sSearch },
-			{ path: "createdBy", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "createdByName", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "DistributorName", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "InstituteName", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "OfferID", operator: FilterOperator.Contains, value: sSearch },
@@ -930,6 +931,28 @@ sap.ui.define([
 		onDownloadZuelligExtractCSV: function () {
 			const url = "/v2/sta_tender/CSVAttachment(Zuellig=true)/content";
 			URLHelper.redirect(url, true);
+		},
+
+		onLanguageChange: function (evt) {
+			let language;
+
+			if (evt) {
+				// Language change event
+				language = evt.getParameter("selectedItem").getKey();
+				
+			} else {
+				// Called without an event, get language from config
+				language = sap.ui.getCore().getConfiguration().getLanguage();
+			}
+			const oCountrySelectedItem = this.byId("idSlctCountry").getSelectedItem();
+			const sCountryCode = oCountrySelectedItem?.getKey();
+			sCountryCode !== 'TW' ? language = 'EN' : language;			
+			let config = sap.ui.getCore().getConfiguration();
+			config.setLanguage(language.toLowerCase());
+			this.getModel("appView").setProperty("/language", language.toLowerCase());
+			// Update the Select control
+			const oSelect = this.byId("idlanguageChange");
+			oSelect.setSelectedKey(language);
 		}
 	});
 

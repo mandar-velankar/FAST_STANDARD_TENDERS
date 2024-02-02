@@ -92,6 +92,7 @@
 					<form:FormElement label="Main Customer">
 						<form:fields>
 							<Input
+								required="true"
 								value="{AnticipatedYearlyVolumeMainCustomer}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanPrice')"
@@ -101,6 +102,7 @@
 					<form:FormElement label="Branch">
 						<form:fields>
 							<Input 
+								required="true"
 								value="{AnticipatedYearlyVolumeBranch}"
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanPrice')"
@@ -183,12 +185,34 @@
 							/>
 						</form:fields>
 					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GeneralDiscountValue}" >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['GeneralDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.SecondDiscount}" >
 						<form:fields>
 							<Input 
 								value="{
 									path: 'Level2Discount2',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.SecondDiscountValue}" >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['SecondDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
 							/>
@@ -342,13 +366,7 @@
 						<form:fields>
 							<Input value="{
 										parts: ['BasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											minFractionDigits: 2,
-											maxFractionDigits: 2,
-											preserveDecimals: false
-										}	
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
 									enabled="false" width="300px"/>
 						</form:fields>
@@ -357,13 +375,7 @@
 						<form:fields>
 							<Input value="{
 										parts: ['OfferPrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											minFractionDigits: 2,
-											maxFractionDigits: 2,
-											preserveDecimals: false
-										}	
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="{ui>/PricingForm/editMode}" 
 									liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
@@ -376,6 +388,19 @@
 								value="{
 									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input
+								value="{
+									parts: ['GeneralDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
@@ -390,6 +415,19 @@
 									path: 'Level2Discount2',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
+                                width="300px"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement >
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['SecondDiscount_Amount', 'Currency'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
                                 width="300px"
@@ -401,13 +439,7 @@
 							<Input 
 								value="{
 									parts: ['NetPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
                                 width="300px"
@@ -419,13 +451,7 @@
 							<Input
 								value="{
 									parts: ['AnnualDiscountForBranch', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
@@ -438,13 +464,7 @@
 							<Input 
 								value="{
 									parts: ['Level3Discount1', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false" width="300px"/>
 						</form:fields>
@@ -454,13 +474,7 @@
 							<Input 
 								value="{
 									parts: ['Price3', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false" width="300px"/>
 						</form:fields>
@@ -470,13 +484,7 @@
 							<Input 
 								value="{
 									parts: ['NegotiationPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}" 
 								liveChange=".onPricingFormLiveChange($event, 'TaiwanPrice')"
@@ -488,13 +496,7 @@
 							<Input 
 								value="{
 									parts: ['TotalYearlyValueMainCustomer', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false" width="300px"
                                 />
@@ -505,13 +507,7 @@
 							<Input 
 								value="{
 									parts: ['TotalYearlyValueBranch', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false" width="300px"/>
 						</form:fields>
