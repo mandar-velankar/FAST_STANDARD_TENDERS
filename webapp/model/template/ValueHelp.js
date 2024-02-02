@@ -188,11 +188,17 @@ sap.ui.define([
       },
       
       handleUpdateFinished: function(event, source){
+        try{
         const selectedItems = source.getTokens();
         const valueHelpDialog = event.getSource();
         selectedItems.forEach(selectedItem => {
           valueHelpDialog.getItems()?.find(item => item.getBindingContext().getObject().Name === selectedItem.getProperty('text'))?.setSelected(true)
         })
+        }
+        catch(error){
+          console.error(error);
+        }
+
       },
 
       onDataReceived: function (oSource, event) {
