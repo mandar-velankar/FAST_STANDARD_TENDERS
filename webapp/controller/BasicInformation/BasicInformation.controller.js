@@ -160,10 +160,10 @@ sap.ui.define([
 			const formContainers = form.getAggregation("formContainers");
 			let instituteInBranch;
 			formContainers.forEach(forContainer => {
-				if(forContainer.getAggregation("title") === 'Institute & Type'){
+				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch'){
+						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
@@ -266,8 +266,8 @@ sap.ui.define([
 			if (this.countryCode === "TW") {
 				const tenderForm = this.byId("idTenderForm");
 				const instInBranchField = tenderForm.getAggregation("formContainers")
-						.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-						.find(el => el.getAggregation("label") === "Institute In Branch").getFields()[0];
+						.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
+						.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0];
 				const obj = tenderForm.getBindingContext().getObject();
 				instInBranchField.removeAllTokens();
 				for(const value of obj.Custom_String_3.split(",")){
