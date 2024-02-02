@@ -112,6 +112,7 @@ sap.ui.define([
 			const userID = oEvent?.getParameter("data")?.results[0]?.CWID || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CWID")
 			this.getModel("st").setProperty("/UserFullName", userFullName);
 			this.getModel("st").setProperty("/UserID", userID);
+			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.countryCode = sCountryCode;
 			// set filter which is needed later on
 			// if(sCountryCode){
@@ -134,6 +135,7 @@ sap.ui.define([
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry");
 			let sProductScope = this.getModel("st").getProperty("/ProductScope") || oEvent?.getParameter("data")?.results[0]?.ProductScope || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("ProductScope"); // we default to first country in the list
 			sProductScope = sProductScope ? sProductScope.replace(/\s+/g, '') : 'NA';
+			this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			
 			this._getTemplateConfig(sCountryCode,sProductScope);
 		},
@@ -159,8 +161,6 @@ sap.ui.define([
 		_getTemplateConfig: async function (sCountryCode,sProductScope) {
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
-			this.getView().getModel('st').setProperty("/SelectedProductScope", sProductScope);
 			try {
 				await this.templateState.read("MASTER", {
 					countryCode: sCountryCode, 
