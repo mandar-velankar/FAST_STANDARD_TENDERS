@@ -25,8 +25,7 @@ sap.ui.define([
 			});
 
 			const messagesModel = new JSONModel({
-				awardedProduct: [],
-				competitorResults: [],
+				deliveryTrackingDetail: [],
 			})
 			// set message model
 			this.oMessageManager = sap.ui.getCore().getMessageManager();
@@ -130,11 +129,36 @@ sap.ui.define([
 					new Filter("OfferID", "EQ", this.offerId),
 					new Filter("ProductCode","EQ",this.productCode)
 				],
-				template: template
+				template: template,
+				events: {
+					dataReceived: this.deliveryTrackingDataReceived.bind(this)
+				}
 			})
 			this.unbindDeliveryTrackingForm();
 		},
 
+		deliveryTrackingDataReceived: function () {
+			this.bindInstItutesField()
+		},
+
+		bindInstItutesField: async function () {
+			const tender = await this.stState.getService().getTender(this.tenderId);
+
+			this.byId("idDeliveryTrackingTable").getBindingInfo("items").template.getCells().forEach(cell => {
+				const bindingInfoPath = cell.getBindingInfo("items")?.path.includes("ChildInstitutesView");
+				if (bindingInfoPath) {
+					const template = cell.getBindingInfo("items").template.clone();
+					cell.bindItems({
+						path: "/ChildInstitutesView",
+						filters: [
+							new Filter("CountryCode", "EQ", tender.CountryCode),
+							new Filter("ParentInstituteID","EQ", tender.InstituteID)
+						],
+						template: template,
+					});
+				}
+			});
+		},
 		bindText: function(){
 			let path = "";
 			const entity = 'DeliveryProductTableView';
@@ -154,20 +178,42 @@ sap.ui.define([
 			
 		},
 
-		onButtonDeliveryTrackingCreatePress: function () {
+		onButtonDeliveryTrackingCreatePress: async function () {
 			const deliveryTrackingTable = this.byId("idDeliveryTrackingTable");
+			const tender = await this.stState.getService().getTender(this.tenderId);
 			const context = this.defaultModel.createEntry("/DeliveryTrackingDetailView", {
 				properties: {
+					TenderID: this.tenderId,
 					OfferID: this.offerId,
-					ProductCode: this.productCode
+					ProductCode: this.productCode,
+					CountryCode: this.countryCode,
+					InstituteID: tender.InstituteID
 				},
 				groupId: "Deliveries"
 			});
 			const newDelivery = deliveryTrackingTable.getBindingInfo("items").template.clone();
 			newDelivery.setBindingContext(context);
 			deliveryTrackingTable.insertItem(newDelivery);
+			this.onFilterDeliveryTrackingInstituteField(newDelivery);
 		},
 
+		onFilterDeliveryTrackingInstituteField: function (newDelivery) {
+			const countryCode = this.stState.getProperty("/SelectedCountry");
+			const parentInstituteID = this.stState.getProperty("/SelectedInstituteID");
+
+			const filters = [
+				new Filter("CountryCode", "EQ", countryCode),
+				new Filter("ParentInstituteID","EQ", parentInstituteID)
+			];
+
+			newDelivery.getCells().forEach(cell => {
+				const bindingInfoPath = cell.getBindingInfo("items")?.path.includes("ChildInstitutesView");
+				if (bindingInfoPath) {
+					cell.getBinding("items").filter(filters);
+				}
+			})	
+		},
+	
 		onButtonEditDeliveryPress: function (event) {
 			const deliveryTracking = this.byId("idDeliveryTrackingTable").getItems();
 			this.getModel('ui').setProperty('/DeliveryTrackingForm/editMode', true);
@@ -177,6 +223,7 @@ sap.ui.define([
 			this.unbindDeliveryTrackingForm();
 			this.byId("idDeliveryTrackingTable").removeSelections(true)
 			this.getModel('ui').setProperty('/DeliveryTrackingForm/editMode', false);
+			this.cancelPendingChanges(['DeliveryTrackingDetailView'], 'deliveryTrackingDetail');
 		},
 
 		onButtonDeleteDeliveryPress: function  (event) {
@@ -214,5 +261,28 @@ sap.ui.define([
 			deliveryTrackingForm.unbindElement();
 			deliveryTrackingForm.setVisible(false);
 		},
+
+		onButtonDeliverySavePress: function (event) {
+			this.defaultModel.submitChanges({
+				groupId: 'Deliveries',
+				error: this.onSubmitChangesDeliveryFail.bind(this),
+				success: this.onSubmitChangesDeliverySuccess.bind(this),
+			});
+		},
+
+		onSubmitChangesDeliverySuccess: function (res) {
+			const hasErrorMessages =  this.getMessages(["DeliveryTrackingDetailView"]).length > 0;
+			this.setMessageSection(["DeliveryTrackingDetailView"], "deliveryTrackingDetail");
+
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/DeliveryTrackingForm/editMode`, false);
+				this.cancelPendingChanges(['DeliveryTrackingDetailView'], 'deliveryTrackingDetail');
+				this.unbindDeliveryTrackingForm();
+			} 
+		},
+
+		onSubmitChangesDeliveryFail: function (error) {
+
+		}
     });
 });
