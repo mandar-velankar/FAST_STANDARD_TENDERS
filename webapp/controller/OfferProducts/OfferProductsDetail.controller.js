@@ -455,7 +455,7 @@ sap.ui.define([
 
 		onTaiwanPriceFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges(["PriceConditionTaiwanPriceView"], "priceCondPrice");
+			this.cancelPendingChanges(["PriceConditionTaiwanPriceView", "PriceConditionTaiwanDiscountView"], "priceCondPrice");
 			
 			// reload saved condition type
 			this.getSavedPriceConditionType().then((priceConditionType) => {
@@ -491,7 +491,7 @@ sap.ui.define([
 
 		onTaiwanDiscountFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
-			this.cancelPendingChanges(["PriceConditionTaiwanDiscountView"], "priceCondPrice");
+			this.cancelPendingChanges(["PriceConditionTaiwanDiscountView", "PriceConditionTaiwanPriceView"], "priceCondPrice");
 			
 			// reload saved condition type
 			this.getSavedPriceConditionType().then((priceConditionType) => {
@@ -1245,7 +1245,9 @@ sap.ui.define([
 					"PriceConditionPriceView",
 					"PriceConditionDiscountView",
 					"PriceConditionDiscountWithFOCView",
-					"PriceConditionPriceWithFOCView"
+					"PriceConditionPriceWithFOCView",
+					"PriceConditionTaiwanPriceView",
+					"PriceConditionTaiwanDiscountView"
 				], 
 				"priceCondPrice"
 			);
