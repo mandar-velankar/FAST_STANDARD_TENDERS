@@ -61,6 +61,14 @@ sap.ui.define([
             this.BU = BU;
         },
 
+		getTenderID: function(){
+			return this.tenderID;
+		},
+
+		setTenderID: function(tenderID){
+			this.tenderID = tenderID;
+		},
+
         onChangeOutcome: function (event, StandardSingletonService) {
             const source = event.getSource();
             const reasonItemBinding = source.getParent().getParent().getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");

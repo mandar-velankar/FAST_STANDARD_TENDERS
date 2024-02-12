@@ -574,6 +574,7 @@ sap.ui.define([
 			this.filterMasterTable(oItem.TenderID);
 			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getModel("st").setProperty("/SelectedInstituteID", oItem?.InstituteID);
+			StandardSingletonService.setTenderID(oItem?.TenderID);
 			StandardSingletonService.setParentInstituteID(oItem?.InstituteID);
 			if (oItem.OfferID) {
 				const offer = await this.stState.getService().getOffer(oItem.OfferID);
