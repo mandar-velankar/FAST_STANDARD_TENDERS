@@ -86,7 +86,8 @@
                 <ColumnListItem>
                     <cells>
                         <Select
-                            items="{/ChildInstitutesView}"
+                            id="idChildInstitutesSelect"
+                            items="{path: '/ChildInstitutesView', templateShareable:true}"
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                             selectedKey="{InstituteID}"
                         >
