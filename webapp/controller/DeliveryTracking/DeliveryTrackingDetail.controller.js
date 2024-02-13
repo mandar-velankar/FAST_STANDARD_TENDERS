@@ -78,6 +78,7 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
             this.bindTable();
 			this.bindText();
+			this.bindInstItutesField()
 		},
 
 		getDeliveryTrackingTemplateConfig: async function () {
@@ -129,34 +130,25 @@ sap.ui.define([
 					new Filter("OfferID", "EQ", this.offerId),
 					new Filter("ProductCode","EQ",this.productCode)
 				],
-				template: template,
-				events: {
-					dataReceived: this.deliveryTrackingDataReceived.bind(this)
-				}
+				template: template
 			})
 			this.unbindDeliveryTrackingForm();
 		},
 
-		deliveryTrackingDataReceived: function () {
-			this.bindInstItutesField()
-		},
 
 		bindInstItutesField: async function () {
 			const tender = await this.stState.getService().getTender(this.tenderId);
 
-			this.byId("idDeliveryTrackingTable").getBindingInfo("items").template.getCells().forEach(cell => {
-				const bindingInfoPath = cell.getBindingInfo("items")?.path.includes("ChildInstitutesView");
-				if (bindingInfoPath) {
-					const template = cell.getBindingInfo("items").template.clone();
-					cell.bindItems({
-						path: "/ChildInstitutesView",
-						filters: [
-							new Filter("CountryCode", "EQ", tender.CountryCode),
-							new Filter("ParentInstituteID","EQ", tender.InstituteID)
-						],
-						template: template,
-					});
-				}
+			const instSelect = this.byId('idChildInstitutesSelect');
+			const template = instSelect.getBindingInfo("items").template.clone();
+			instSelect.bindItems({
+				path: "/ChildInstitutesView",
+				filters: [
+					new Filter("CountryCode", "EQ", tender.CountryCode),
+					new Filter("ParentInstituteID","EQ", tender.InstituteID)
+				],
+				templateShareable:true,
+				template: template,
 			});
 		},
 		bindText: function(){
@@ -181,13 +173,16 @@ sap.ui.define([
 		onButtonDeliveryTrackingCreatePress: async function () {
 			const deliveryTrackingTable = this.byId("idDeliveryTrackingTable");
 			const tender = await this.stState.getService().getTender(this.tenderId);
+			const sku = await this.stState.getService().getProductSKU(this.countryCode, this.productCode);
+
 			const context = this.defaultModel.createEntry("/DeliveryTrackingDetailView", {
 				properties: {
 					TenderID: this.tenderId,
 					OfferID: this.offerId,
 					ProductCode: this.productCode,
 					CountryCode: this.countryCode,
-					InstituteID: tender.InstituteID
+					InstituteID: tender.InstituteID,
+					SKUCode: sku?.SKUCode
 				},
 				groupId: "Deliveries"
 			});
@@ -279,6 +274,7 @@ sap.ui.define([
 				this.cancelPendingChanges(['DeliveryTrackingDetailView'], 'deliveryTrackingDetail');
 				this.unbindDeliveryTrackingForm();
 			} 
+			this.defaultModel.refresh();
 		},
 
 		onSubmitChangesDeliveryFail: function (error) {
