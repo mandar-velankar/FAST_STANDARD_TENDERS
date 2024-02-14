@@ -970,8 +970,22 @@ sap.ui.define([
 			const containsOfferProductAndIsAdded = hasObjectWithProductCodeAndIsAdded(foc, offerProduct); 
 			const containsOfferProductAndIsIncluded = hasObjectWithProductCodeAndIsIncluded(foc, offerProduct); 
 
-			//Cases 1,2 and 3
-			if(foc.length === 0 || !containsOfferProduct || containsOfferProductAndIsAdded) return offerPrice;
+			//Cases 1 and 2
+			if(foc.length === 0 || !containsOfferProduct) return offerPrice;
+
+			// Case 3
+			if(containsOfferProductAndIsAdded) {
+				const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
+				switch(addedFOC.FreeGoodsOther_ABS_PCT){
+					case "ABS":
+						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume + addedFOC.FreeGoodsOther);
+					case "PCT":
+						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume * (1 + addedFOC.FreeGoodsOther)) ;
+					case "STP":
+						return priceObj.RequestedVolume * offerPrice / ((priceObj.RequestedVolume + priceObj.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+				}
+			}
+
 			// Cases 4
 			if(containsOfferProductAndIsIncluded) {
 				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
@@ -999,6 +1013,10 @@ sap.ui.define([
 
 			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
 				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			}
+
+			function getAddedFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
 			}
 
 		},
@@ -1035,15 +1053,15 @@ sap.ui.define([
 			if(foc.length === 0 || !containsOfferProduct) return (invoicePrice * (1 - deductions - level2Discount2));
 
 			// Cases 2
-			if(containsOfferProductAndIsIncluded) {
-				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-				switch(includedFOC.FreeGoodsOther_ABS_PCT){
+			if(containsOfferProductAndIsIncluded || containsOfferProductAndIsAdded) {
+				const FOC = getFOCWitSameProductCode(foc, offerProduct);
+				switch(FOC.FreeGoodsOther_ABS_PCT){
 					case "ABS":
-						focVolume = includedFOC.FreeGoodsOther;
+						focVolume = FOC.FreeGoodsOther;
 					case "PCT":
-						focVolume = includedFOC.FreeGoodsOther * branchVolume;
+						focVolume = FOC.FreeGoodsOther * branchVolume;
 					case "STP":
-						focVolume = parseInt(branchVolume / includedFOC.FreeGoodsOther_Step) * includedFOC.FreeGoodsOther;
+						focVolume = parseInt(branchVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
 				}
 			}
 
@@ -1073,8 +1091,8 @@ sap.ui.define([
 				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 			}
 
-			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			function getFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct);
 			}
 
 			return netOfferPrice;
