@@ -73,6 +73,30 @@ sap.ui.define([
 			return oOfferProduct;
 		},
 
+		getProductSKU: async function (countryCode, productCode) {
+			const sOfferProductKey = this.model.createKey("/PT_TMSKUPRDPCK", {
+				CountryCode: countryCode,
+				ProductPackID: productCode,
+				ActiveRecord: "Yes"
+			});
+			let productSku = this.model.getObject(sOfferProductKey);
+			if (!productSku) {
+				return new Promise((resolve, reject) => {
+					this.model.read("/PT_TMSKUPRDPCK", {
+						filters: [
+							new Filter("CountryCode", "EQ", countryCode),
+							new Filter("ProductPackID", "EQ", productCode),
+							new Filter("ActiveRecord", "EQ", "Yes")
+						],
+						success: function (res) {
+							resolve(res?.results[0])
+						}
+					});
+				})
+			}
+			return productSku;
+		},
+
 		getOfferProductValidation: async function (offerID){
 			return new Promise((resolve, reject) => {
 				this.model.read("/OfferProductValidation", {
