@@ -52,6 +52,7 @@ sap.ui.define([
 			});
 			
 			this.setModel(oModel, "ui");
+			this.bindTable();
 		},
 		_onObjectMatched: async function (oEvent) {
 			const selectedTender = this.getModel("st").getProperty("/SelectedTender");

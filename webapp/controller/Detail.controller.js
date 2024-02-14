@@ -191,6 +191,7 @@ sap.ui.define([
 				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
+				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();

@@ -111,6 +111,9 @@ sap.ui.define([
 				"PriceConditionTaiwanPriceView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionTaiwanDiscountView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
