@@ -728,8 +728,8 @@ sap.ui.define([
 		 * @param {string} conditionType - The condition type.
 		 */
 		onPricingFormLiveChange:function(event, conditonType){
-			const value = event.getParameter("newValue");
-			if(!value) return;
+			let value = event.getParameter("newValue");
+			if(!value){value = '0';}
 			const type = event.getSource().getBinding('value').getType();
 			const parsedValue = type.getModelFormat().parse(value);
 			const property = event.getSource().getBindingPath("value");
@@ -805,12 +805,12 @@ sap.ui.define([
 		calculateTaiwanDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
-			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.OfferPrice);
+			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.OfferPrice)) ? 0 : parseFloat(priceObj.OfferPrice));
 			let mainCustomerVolume = property?.toLowerCase().includes("anticipatedyearlyvolumemaincustomer") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeMainCustomer);
 			let branchVolume = property?.toLowerCase().includes("anticipatedyearlyvolumebranch") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeBranch);
-			let deductions = property?.toLowerCase().includes("deductions") ? value : parseFloat(priceObj.Deductions);
-			let level2Discount2 = property?.toLowerCase().includes("level2discount2") ? value : parseFloat(priceObj.Level2Discount2);
-			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
+			let deductions = property?.toLowerCase().includes("deductions") ? value : (isNaN(parseFloat(priceObj.Deductions)) ? 0 : parseFloat(priceObj.Deductions));
+			let level2Discount2 = property?.toLowerCase().includes("level2discount2") ? value : (isNaN(parseFloat(priceObj.Level2Discount2)) ? 0 : parseFloat(priceObj.Level2Discount2));
+			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.AnnualDiscountForBranch)) ? 0 : parseFloat(priceObj.AnnualDiscountForBranch));
 			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
 			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj}); 
 			let level3Discount1 = annualDiscount / branchVolume;
@@ -838,13 +838,13 @@ sap.ui.define([
 		calculateTaiwanPriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
-			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.OfferPrice);
+			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.OfferPrice)) ? 0 : parseFloat(priceObj.OfferPrice));
 			let mainCustomerVolume = property?.toLowerCase().includes("anticipatedyearlyvolumemaincustomer") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeMainCustomer);
 			let branchVolume = property?.toLowerCase().includes("anticipatedyearlyvolumebranch") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeBranch);
-			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.AnnualDiscountForBranch);
+			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.AnnualDiscountForBranch)) ? 0 : parseFloat(priceObj.AnnualDiscountForBranch));
 			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
-			let generalDiscountAmount = property?.toLowerCase().includes("generaldiscount_amount") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.GeneralDiscount_Amount);
-			let secondDiscountAmount = property?.toLowerCase().includes("seconddiscount_amount") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.SecondDiscount_Amount);
+			let generalDiscountAmount = property?.toLowerCase().includes("generaldiscount_amount") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.GeneralDiscount_Amount)) ? 0 : parseFloat(priceObj.GeneralDiscount_Amount));
+			let secondDiscountAmount = property?.toLowerCase().includes("seconddiscount_amount") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.SecondDiscount_Amount)) ? 0 : parseFloat(priceObj.SecondDiscount_Amount));
 			let deductions = generalDiscountAmount / invoicePrice;
 			let level2Discount2 = secondDiscountAmount / invoicePrice;
 			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj}); 
@@ -1415,7 +1415,9 @@ sap.ui.define([
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: async function(evt){
-            const netPrice = evt.getParameter("data").NetPrice;
+            const netPrice = evt.getParameter("data").CountryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
+			let netOfferPrice = '';
+			if(evt.getParameter("data").CountryCode == 'TW'){ netOfferPrice = evt.getParameter("data").NetPrice; }
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
 				ProductCode: this.productId,
@@ -1429,6 +1431,7 @@ sap.ui.define([
 				context = this.getModel().getContext(path);
 			}
             this.getModel().setProperty("NetPrice", netPrice, context);
+			if(evt.getParameter("data").CountryCode == 'TW'){ this.getModel().setProperty("NetofferPrice", netOfferPrice, context); }
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
