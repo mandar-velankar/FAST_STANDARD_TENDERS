@@ -174,7 +174,7 @@
 										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
 										{path: 'CURRENCY'}
 									],
-									formatter: '.formatter.formatCurrency'	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
 							/>	
 							<ObjectStatus 
@@ -183,19 +183,19 @@
 										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
 										{path: 'CURRENCY'}
 									],
-									formatter: '.formatter.formatCurrency'	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
 							/>
 							<Text 
 								text = "{
 									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY'],
-									formatter: '.formatter.formatCurrency'	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"					
 							/>
 							<Text 
 								text = "{
 									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY'],
-									formatter: '.formatter.formatCurrency'	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>
 							<ObjectStatus 
