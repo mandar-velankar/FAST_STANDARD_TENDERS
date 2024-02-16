@@ -1058,10 +1058,15 @@ sap.ui.define([
 				switch(FOC.FreeGoodsOther_ABS_PCT){
 					case "ABS":
 						focVolume = FOC.FreeGoodsOther;
+						break;
 					case "PCT":
 						focVolume = FOC.FreeGoodsOther * branchVolume;
+						break;
 					case "STP":
 						focVolume = parseInt(branchVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+						break;
+					default:
+						break;
 				}
 			}
 
