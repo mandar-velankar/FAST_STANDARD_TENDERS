@@ -50,14 +50,14 @@
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.AddedIncluded}"/>
                 </Column>
                 <Column>
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.UoM}"/>
+                </Column>
+                <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCQuantity}"/>
                 </Column>
                 <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCStep}"/>
                 </Column>    
-                <Column>
-                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.UoM}"/>
-                </Column>
                 <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.Action}"/>
                 </Column>               
@@ -83,6 +83,11 @@
                         <core:Item key="Included" text="Included" />
                         <core:Item key="Added" text="Added" />
                     </Select>
+                    <Text class="sapUiSmallMarginTop"
+                        text="{= 
+                            ${FreeGoodsOther_ABS_PCT} === 'PCT' ? '%': ${ui>/FocForm/UOM}
+                        }">
+                    </Text> 
                     <HBox>
                         <Input 
                             type="Number" 
@@ -107,11 +112,6 @@
                         value="{path:'FreeGoodsOther_Step'}" 
                         enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
                     />
-                    <Text class="sapUiSmallMarginTop"
-                        text="{= 
-                            ${FreeGoodsOther_ABS_PCT} === 'PCT' ? '%': ${ui>/FocForm/UOM}
-                        }">
-                    </Text> 
                     <Button 
                         icon="sap-icon://delete" 
                         press=".onButtonDeleteOtherProductPress"
