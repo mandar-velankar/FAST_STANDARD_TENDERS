@@ -1064,7 +1064,7 @@ sap.ui.define([
 						focVolume = FOC.FreeGoodsOther * branchVolume;
 						break;
 					case "STP":
-						focVolume = parseInt(branchVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+						focVolume = (branchVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
 						break;
 					default:
 						break;
