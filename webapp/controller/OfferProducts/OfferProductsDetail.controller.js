@@ -731,6 +731,7 @@ sap.ui.define([
 			let value = event.getParameter("newValue");
 			if(!value){value = '0';}
 			const type = event.getSource().getBinding('value').getType();
+			value = value.replace(/(?<=\d),(?=\d{3}(\.|$))/g, '');
 			const parsedValue = type.getModelFormat().parse(value);
 			const property = event.getSource().getBindingPath("value");
 			const context = event.getSource().getBindingContext();
@@ -1063,7 +1064,7 @@ sap.ui.define([
 						focVolume = FOC.FreeGoodsOther * branchVolume;
 						break;
 					case "STP":
-						focVolume = parseInt(branchVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+						focVolume = (branchVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
 						break;
 					default:
 						break;
