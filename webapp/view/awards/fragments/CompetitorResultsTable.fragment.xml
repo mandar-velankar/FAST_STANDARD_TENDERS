@@ -123,14 +123,8 @@
                             </ComboBox>
                             <Input
                                 value="{
-                                    parts: ['AWARDEDPRICE', 'CURRENCY'],
-                                    type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}
+                                    parts: ['AWARDEDPRICE', 'CURRENCY', 'ui>/CompetitorResultsForm/region'],
+                                    type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
                                 }"
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                             />

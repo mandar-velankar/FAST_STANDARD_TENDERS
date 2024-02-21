@@ -172,7 +172,8 @@
 								text="{
 									parts: [
 										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
-										{path: 'CURRENCY'}
+										{path: 'CURRENCY'},
+										{path: 'Region'}
 									],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
@@ -181,20 +182,21 @@
 								text="{
 									parts: [
 										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
-										{path: 'CURRENCY'}
+										{path: 'CURRENCY'},
+										{path: 'Region'}
 									],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
 							/>
 							<Text 
 								text = "{
-									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY'],
+									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"					
 							/>
 							<Text 
 								text = "{
-									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY'],
+									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>
