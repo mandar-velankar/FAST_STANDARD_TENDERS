@@ -99,7 +99,8 @@ sap.ui.define([
 
 		truncToTwoDecimalPlaces: function(number) {
 			const factor = 100; // 10^2 for two decimal places
-			return Math.trunc(number * factor) / factor;
+			const result = Math.round(number * factor) / factor;
+    		return parseFloat(result.toFixed(2));
 		}
 	};
 });
