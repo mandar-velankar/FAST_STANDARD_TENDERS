@@ -110,6 +110,7 @@ sap.ui.define([
 				},
 				CompetitorResultsForm:{
 					editMode: false,
+					region: "",
 					selectedItems: []
 				},
 				enableDeleteProductButton: false
@@ -277,7 +278,7 @@ sap.ui.define([
 		 * To be able to add new row we can use JSONModel 
 		 * Push needed data into JSONModel and refresh binding of table
 		 */
-		onButtonCompetitorResultsCreatePress: function () {
+		onButtonCompetitorResultsCreatePress: async function () {
 			const competitorResultsTable = this.byId("idCompetitorResultTable");
 			const context = this.defaultModel.createEntry("/CompetitorResultsTableView", {
 				properties: {
@@ -291,6 +292,11 @@ sap.ui.define([
 			newCompetitor.setBindingContext(context);
 			competitorResultsTable.insertItem(newCompetitor);
 			this.filterCompetitorResultComboBoxes(newCompetitor);
+			const offerProductValidation = await this.stState.getOfferProductValidation(this.offerId);
+			if (Array.isArray(offerProductValidation) && offerProductValidation.length > 0) {
+				const firstProduct = offerProductValidation[0];
+				this.getModel('ui').setProperty('/CompetitorResultsForm/region', firstProduct.Region);
+			}
 		},
 
 		filterCompetitorResultComboBoxes: function (competitorRow) {

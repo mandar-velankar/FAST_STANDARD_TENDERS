@@ -121,14 +121,8 @@
 		<Text 
 			id='idTotalAmountOfferProducts' 
 			text="{
-				parts: ['OfferTotal', 'Currency'],
-				type: 'sap.ui.model.type.Currency',
-				formatOptions: {
-					showMeasure: true,
-					minFractionDigits: 2,
-					maxFractionDigits: 2,
-					preserveDecimals: false
-				}
+				parts: ['OfferTotal', 'Currency', 'Region'],
+				type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 			}" 
 		/>
 	</HBox>	
