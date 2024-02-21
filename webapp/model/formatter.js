@@ -45,10 +45,17 @@ sap.ui.define([
 			return floatInstance.parse(value);
 		},
 
-		formatCurrency: function(value, currency){
+		formatCurrency: function(value, currency, region){
 			if (!value && value != 0) return;
-			const roundedValue = parseFloat(value).toFixed(2);
-			return currencyInstance.format(roundedValue) + " " + currency;
+			var numberFormat = NumberFormat.getFloatInstance({
+				maxFractionDigits: region === 'MEA' ? 3 : 2,
+				minFractionDigits: region === 'MEA' ? 3 : 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			const roundedValue = parseFloat(value);
+			return numberFormat.format(roundedValue) + " " + currency;
 		},
 
 		parseCurrency: function(value){
