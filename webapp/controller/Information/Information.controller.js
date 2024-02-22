@@ -514,7 +514,6 @@ sap.ui.define([
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();
 			this.createNewAwardedProducts();
-			this.defaultModel.refresh(true);
 		},
 		
 		createNewAwardedProducts: function () {
@@ -539,8 +538,18 @@ sap.ui.define([
 					groupId: "AwardedProduct"
 				})
 			})
-			this.defaultModel.submitChanges({groupId: "AwardedProduct"})
+			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesNewAwardedProductsSuccess.bind(this),
+				groupId: "AwardedProduct"
+			})
 			
+		},
+		_onSubmitChangesNewAwardedProductsSuccess: async function () {
+			const offerStatus = await this.stState.getService().getOfferStatus(this.offerId);
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
+				offerStatus: offerStatus?.STATUS
+			});
 		}
 	})
 });
