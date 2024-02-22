@@ -273,8 +273,9 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/DeliveryTrackingForm/editMode`, false);
 				this.cancelPendingChanges(['DeliveryTrackingDetailView'], 'deliveryTrackingDetail');
 				this.unbindDeliveryTrackingForm();
+				this.defaultModel.refresh();
 			} 
-			this.defaultModel.refresh();
+			this.byId('idDeliveryTrackingTable').setProperty('busy', false);
 		},
 
 		onSubmitChangesDeliveryFail: function (error) {
