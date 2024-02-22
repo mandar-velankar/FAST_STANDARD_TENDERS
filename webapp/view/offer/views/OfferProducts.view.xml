@@ -34,6 +34,7 @@
 								<MenuItem text="Revised Offer" />
 								<MenuItem text="Continued Offer" />
 								<MenuItem text="Affiliate Offer" visible="{= ${st>/SelectedCountry} === 'PK'}" />
+								<MenuItem text="Different award price" visible="{= ${st>/SelectedCountry} === 'TW'}" />
 							</Menu>
 						</menu>
 					</MenuButton>
