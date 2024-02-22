@@ -43,6 +43,7 @@ sap.ui.define([
 			
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
+			this.getOwnerComponent().getEventBus().subscribe("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent", this.handleRefreshAwardedProductTable, this);
 		},
 
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode, productScope}) {
@@ -126,6 +127,10 @@ sap.ui.define([
 					countryCode: this.countryCode
 				});
 			}.bind(this));
+		},
+
+		handleRefreshAwardedProductTable: function () {
+			this.byId('idAwardedProducts').getBinding('items').refresh();
 		}
     });
 });
