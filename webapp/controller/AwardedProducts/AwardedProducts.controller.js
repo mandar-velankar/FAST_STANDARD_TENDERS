@@ -79,7 +79,7 @@ sap.ui.define([
 			this.countryCode = oEvent.getParameter("arguments").countryCode;
 			this.productScope = oEvent.getParameter("arguments").productScope;
 			this.tenderId = oEvent.getParameter("arguments").objectId;
-			this.offerId = selectedTender?.OfferID || oEvent.getParameter("arguments").offerId;
+			this.offerId = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
@@ -90,7 +90,6 @@ sap.ui.define([
 		bindTable: function () {
 			const awarderProductsTable = this.byId("idAwardedProducts");
 			const template = awarderProductsTable.getBindingInfo("items").template
-
 			awarderProductsTable.bindItems({
 				path: "/AwardedProducts",
 				filters: [
