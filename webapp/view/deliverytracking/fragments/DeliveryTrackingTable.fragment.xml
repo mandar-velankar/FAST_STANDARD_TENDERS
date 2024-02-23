@@ -64,14 +64,16 @@
                 </Column>
                 <Column>
                     <Label
-                        text="{i18n>DeliveryTrackingProductReqDeliveryDate}"
+                        text="{i18n>DeliveryTrackingProductActualDeliveryDate}"
                         wrapping="true"
+                        required="true"
                     />
                 </Column>
                 <Column>
                     <Label
-                        text="{i18n>DeliveryTrackingProductRequestedQty}"
+                        text="{i18n>DeliveryTrackingProductActualDeliveryQty}"
                         wrapping="true"
+                        required="true"
                     />
                 </Column>
                 <Column>
@@ -101,7 +103,7 @@
                         <DatePicker
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                             value="{
-                                'path':'RequestedDeliveryDate',
+                                'path':'ActualDeliveryDate',
                                 'type':'sap.ui.model.type.Date',
                                 'formatOptions': {
                                     pattern: 'dd-MM-yyyy',
@@ -110,7 +112,7 @@
                             }"
                         />
                          <Input
-                            value="{RequestedQuantity}"
+                            value="{ActualDeliveryQuantity}"
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                         />
                         <Select
