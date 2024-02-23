@@ -63,7 +63,10 @@ sap.ui.define([
 
         onChangeOutcome: function (event, StandardSingletonService) {
             const source = event.getSource();
-            const reasonItemBinding = source.getParent().getParent().getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
+            const reasonItemBinding = source.getParent().getParent().getAggregation("formElements")
+				.find(el => el.getAggregation("label") === "Reason" || el.getAggregation("label") === "得標或失敗原因")
+				.getAggregation("fields")[0].getBinding("items");
+				
             this.setOutcome(source.getSelectedKey());
             reasonItemBinding.aApplicationFilters = []
             const orFilters = [
