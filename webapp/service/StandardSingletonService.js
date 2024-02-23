@@ -228,10 +228,10 @@ sap.ui.define([
 					TenderTab: {
 						isVisible: true,
 						AwardCriteria:{
-							editMode: isTenderOfferOverviewVisible
+							editMode: !status || isTenderOfferOverviewVisible
 						},
 						TenderForm:{
-							editMode: isTenderOfferOverviewVisible	
+							editMode: !status || isTenderOfferOverviewVisible	
 						},
 					},
 					OfferTab: {
