@@ -127,6 +127,12 @@ sap.ui.define([
 			});
 		},
 
+		setPaymentTermFieldVisible: function (form) {
+			const paymentTermsField = form.getAggregation("formContainers")[1]
+			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
+			paymentTermsField.setVisible(false);
+		},
+
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
 		 * FYI: the table ID in the View is a concatination of "id" + tableName
@@ -318,6 +324,7 @@ sap.ui.define([
 		},
 
 		_bindCreateOfferForm: async function () {
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
 			const tenderPath = this.getModel().createKey("/TenderFormView", {
 				TenderID: this.objectId
 			});
@@ -348,6 +355,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
+			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form);}
 		},
 
 
@@ -381,9 +389,20 @@ sap.ui.define([
 		},
 
 		setNewOfferPendingChanges: async function (oForm,nextOfferID) {
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
+			let institute;
+			let distributor;
 			const oDefaultModel = oForm.getModel();
 			const oStandModel = oForm.getModel("ui");
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
+			if(selectedTender.Region === 'MEA'){
+				if(selectedTender.TenderChannel === 'Direct'){
+					institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
+				}
+				else{
+					distributor = await this.stState.getService().getDistributor(oBoundContext.getObject().DistributorID,this.countryCode);
+				}
+			}
 
 			/* this doesn't work if you want to have dynamic fields from the ui templates, we should always receive and work with all possible fields related to CDS view
 			const newOfferObj = {
@@ -432,6 +451,9 @@ sap.ui.define([
 			newOfferObj.Division = oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 			newOfferObj.DistributorComments = this.productScope;
+			if(selectedTender.Region === 'MEA'){
+				newOfferObj.Custom_String_1 = selectedTender.TenderChannel === 'Direct' ? institute.PaymentTerms : distributor.PaymentTerms;
+			}
 
 			const statusObj = {
 					TenderID: this.objectId,
