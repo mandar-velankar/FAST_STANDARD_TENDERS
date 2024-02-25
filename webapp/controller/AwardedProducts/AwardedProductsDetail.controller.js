@@ -436,6 +436,7 @@ sap.ui.define([
 				case "AwardedCompany":
 					path = `${path}/AWARDEDCOMPANY`;
 					this.defaultModel.setProperty(path, value, context);
+					this.filterAwardedProducts(event.getSource(), value);
 					break;
 				case "AwardedProduct":
 					path = `${path}/AWARDEDPRODUCT`;
@@ -448,6 +449,17 @@ sap.ui.define([
 				default:
 					break;
 			}
+		},
+
+		filterAwardedProducts: function (companySelect, competitorCompany) {
+			const awardedProductsSelect = companySelect.getParent().getCells()[1];
+			const filters = [
+				new Filter("CountryCode",FilterOperator.EQ, this.countryCode),
+				new Filter("ProductCode",FilterOperator.EQ, this.productId),
+				new Filter("CompetitorCompany",FilterOperator.EQ, competitorCompany)
+			];
+
+			awardedProductsSelect.getBinding('items').filter(filters)
 		}
     });
 });
