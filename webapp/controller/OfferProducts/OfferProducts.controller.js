@@ -297,7 +297,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
-			this.getModel().refresh();
+			//this.getModel().refresh();
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
