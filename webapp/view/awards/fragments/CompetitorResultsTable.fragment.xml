@@ -98,7 +98,7 @@
                             <ComboBox
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{AWARDEDPRODUCT}"
-                                items="{/MasterCompetitors}"
+                                items="{/MasterCompetitorProducts}"
                                 change=".onSetCompetitorResultsChanges($event, 'AwardedProduct')"
                             >
                                 <items>
