@@ -322,7 +322,7 @@ sap.ui.define([
 			];
 			competitorRow.getCells().forEach(cell => {
 				const bindingInfoPath = cell.getBindingInfo("items")?.path;
-				const bindingInfo =  bindingInfoPath === "/MasterCompetitors";
+				const bindingInfo =  bindingInfoPath === "/MasterCompetitors" || bindingInfoPath === "MasterCompetitorProducts";
 				if (bindingInfo && bindingInfoPath) {
 					cell.getBinding("items").filter(masterCompetitorFilters);
 				}else if(!bindingInfo && bindingInfoPath) {
