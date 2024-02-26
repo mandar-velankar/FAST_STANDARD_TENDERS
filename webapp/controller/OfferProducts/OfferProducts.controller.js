@@ -389,12 +389,12 @@ sap.ui.define([
 		},
 
 		setNewOfferPendingChanges: async function (oForm,nextOfferID) {
-			const selectedTender = await this.stState.getService().getTender(this.objectId);
 			let institute;
 			let distributor;
 			const oDefaultModel = oForm.getModel();
 			const oStandModel = oForm.getModel("ui");
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
 			if(selectedTender.Region === 'MEA'){
 				if(selectedTender.TenderChannel === 'Direct'){
 					institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
