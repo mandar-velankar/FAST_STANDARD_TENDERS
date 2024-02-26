@@ -324,7 +324,6 @@ sap.ui.define([
 		},
 
 		_bindCreateOfferForm: async function () {
-			const selectedTender = await this.stState.getService().getTender(this.objectId);
 			const tenderPath = this.getModel().createKey("/TenderFormView", {
 				TenderID: this.objectId
 			});
@@ -353,9 +352,10 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
 			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
+			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form);}
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
-			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form);}
 		},
 
 
@@ -378,9 +378,21 @@ sap.ui.define([
 
 		onCreateNewOffer: async function () {
 			this.oMessageManager.removeAllMessages();
+			let paymentTerm = '';
 			const oNewOfferForm = this.byId("idNewOfferForm");
 			const nextOfferID = await this._getNextOfferID(this.objectId);
-			this.setNewOfferPendingChanges(oNewOfferForm,nextOfferID);
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
+			if(selectedTender.Region === 'MEA'){
+				if(selectedTender.TenderChannel === 'Direct'){
+					const institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
+					paymentTerm = institute.PaymentTerms;
+				}
+				else{
+					const distributor = await this.stState.getService().getDistributor(oNewOfferForm.getElementBinding().getBoundContext().getObject().DistributorID,this.countryCode);
+					paymentTerm = distributor.PaymentTerms;
+				}
+			}
+			this.setNewOfferPendingChanges(oNewOfferForm,nextOfferID, selectedTender.Region, paymentTerm);
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
@@ -388,21 +400,10 @@ sap.ui.define([
 			});
 		},
 
-		setNewOfferPendingChanges: async function (oForm,nextOfferID) {
-			let institute;
-			let distributor;
+		setNewOfferPendingChanges: async function (oForm,nextOfferID, region, paymentTerm) {
 			const oDefaultModel = oForm.getModel();
 			const oStandModel = oForm.getModel("ui");
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
-			const selectedTender = await this.stState.getService().getTender(this.objectId);
-			if(selectedTender.Region === 'MEA'){
-				if(selectedTender.TenderChannel === 'Direct'){
-					institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
-				}
-				else{
-					distributor = await this.stState.getService().getDistributor(oBoundContext.getObject().DistributorID,this.countryCode);
-				}
-			}
 
 			/* this doesn't work if you want to have dynamic fields from the ui templates, we should always receive and work with all possible fields related to CDS view
 			const newOfferObj = {
@@ -451,9 +452,10 @@ sap.ui.define([
 			newOfferObj.Division = oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 			newOfferObj.DistributorComments = this.productScope;
-			if(selectedTender.Region === 'MEA'){
-				newOfferObj.Custom_String_1 = selectedTender.TenderChannel === 'Direct' ? institute.PaymentTerms : distributor.PaymentTerms;
+			if(region === 'MEA'){
+				newOfferObj.Custom_String_1 = paymentTerm;
 			}
+			
 
 			const statusObj = {
 					TenderID: this.objectId,
