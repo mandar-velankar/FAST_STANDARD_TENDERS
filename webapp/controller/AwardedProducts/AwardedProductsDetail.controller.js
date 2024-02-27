@@ -454,6 +454,7 @@ sap.ui.define([
 				case "Outcome":
 					path = `${path}/OUTCOME`;
 					this.defaultModel.setProperty(path, value, context);
+					this.onChangeOutcome(value);
 					break;
 				default:
 					break;
@@ -469,6 +470,14 @@ sap.ui.define([
 			];
 
 			awardedProductsSelect.getBinding('items').filter(filters)
-		}
+		},
+
+		onChangeOutcome: function (value) {
+			const competitorForm = this.byId("idCompetitorResultsForm");
+            const reasonItemBinding = competitorForm.getAggregation("formContainers")[0].getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
+            reasonItemBinding.aApplicationFilters = []
+            const filterOutcome = new Filter("Outcome",FilterOperator.EQ, value)			
+            reasonItemBinding.filter(filterOutcome);
+        },
     });
 });

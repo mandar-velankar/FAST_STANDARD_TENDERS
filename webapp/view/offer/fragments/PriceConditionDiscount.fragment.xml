@@ -63,11 +63,7 @@
 						<form:fields>
 							<Input value="{
 										parts: ['CurrentBasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											preserveDecimals: false
-										}	
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}" 
 									enabled="false"/>
 						</form:fields>
@@ -76,11 +72,7 @@
 						<form:fields>
 							<Input value="{
 										parts: ['BasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											preserveDecimals: false
-										}	
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"   
 									enabled="false"/>
 						</form:fields>
@@ -103,11 +95,7 @@
 								id = "idOfferPrice"
 								value="{
 									parts: ['OfferPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
 								liveChange=".onPricingFormLiveChange($event, 'Discount')"
@@ -131,11 +119,7 @@
 							<Input 
 								value="{
 									parts: ['NetPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"/>
 						</form:fields>
