@@ -91,6 +91,7 @@
 					<form:FormElement label="{i18n>OfferPrice}" >
 						<form:fields>
 							<Input 
+								id = "idPriceWithFOCOfferPrice"
 								value="{
 									parts: ['OfferPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
