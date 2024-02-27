@@ -1421,9 +1421,10 @@ sap.ui.define([
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: async function(evt){
-            const netPrice = evt.getParameter("data").CountryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
+			const countryCode = evt.getParameter("data")?.CountryCode || this.sCountryCode;
+            const netPrice = countryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
 			let netOfferPrice = '';
-			if(evt.getParameter("data").CountryCode == 'TW'){ netOfferPrice = evt.getParameter("data").NetPrice; }
+			if(countryCode == 'TW'){ netOfferPrice = evt.getParameter("data").NetPrice; }
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
 				ProductCode: this.productId,
@@ -1437,7 +1438,7 @@ sap.ui.define([
 				context = this.getModel().getContext(path);
 			}
             this.getModel().setProperty("NetPrice", netPrice, context);
-			if(evt.getParameter("data").CountryCode == 'TW'){ this.getModel().setProperty("NetofferPrice", netOfferPrice, context); }
+			if(countryCode == 'TW'){ this.getModel().setProperty("NetofferPrice", netOfferPrice, context); }
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
