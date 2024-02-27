@@ -510,6 +510,13 @@ sap.ui.define([
 			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
 			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idPriceWithFOCOfferPrice")?.getProperty("value");
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesPriceWithFOCSuccess.bind(this),
@@ -1421,9 +1428,10 @@ sap.ui.define([
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: async function(evt){
-            const netPrice = evt.getParameter("data").CountryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
+			const countryCode = evt.getParameter("data")?.CountryCode || this.sCountryCode;
+            const netPrice = countryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
 			let netOfferPrice = '';
-			if(evt.getParameter("data").CountryCode == 'TW'){ netOfferPrice = evt.getParameter("data").NetPrice; }
+			if(countryCode == 'TW'){ netOfferPrice = evt.getParameter("data").NetPrice; }
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
 				ProductCode: this.productId,
@@ -1437,7 +1445,7 @@ sap.ui.define([
 				context = this.getModel().getContext(path);
 			}
             this.getModel().setProperty("NetPrice", netPrice, context);
-			if(evt.getParameter("data").CountryCode == 'TW'){ this.getModel().setProperty("NetofferPrice", netOfferPrice, context); }
+			if(countryCode == 'TW'){ this.getModel().setProperty("NetofferPrice", netOfferPrice, context); }
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();

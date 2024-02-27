@@ -322,10 +322,18 @@ sap.ui.define([
 			];
 			competitorRow.getCells().forEach(cell => {
 				const bindingInfoPath = cell.getBindingInfo("items")?.path;
-				const bindingInfo =  bindingInfoPath === "/MasterCompetitors" || bindingInfoPath === "MasterCompetitorProducts";
-				if (bindingInfo && bindingInfoPath) {
+				if (bindingInfoPath && bindingInfoPath === "/MasterCompetitors") {
 					cell.getBinding("items").filter(masterCompetitorFilters);
-				}else if(!bindingInfo && bindingInfoPath) {
+				}
+				else if (bindingInfoPath && bindingInfoPath === "/MasterCompetitorProducts") {
+					const awardedCompany = cell.getBindingContext().getObject().AWARDEDCOMPANY;
+					masterCompetitorFilters.push(new Filter({
+						path: "CompetitorCompany",
+						operator: FilterOperator.EQ,
+						value1: awardedCompany
+					}));
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}else if(bindingInfoPath) {
 					cell.getBinding("items").filter(competitorOutcomeFilters);
 				}
 			})		
@@ -374,6 +382,7 @@ sap.ui.define([
 			this.unbindCompetitorResultForm();
 			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+			this.byId('idCompetitorResultTable').getBinding('items').refresh();
 		},
 
 		onButtonDeleteCompetitorPress: function  (event) {
@@ -434,8 +443,8 @@ sap.ui.define([
 
 			switch (comboBox) {
 				case "AwardedCompany":
-					path = `${path}/AWARDEDCOMPANY`;
-					this.defaultModel.setProperty(path, value, context);
+					this.defaultModel.setProperty(`${path}/AWARDEDCOMPANY`, value, context);
+					this.defaultModel.setProperty(`${path}/AWARDEDPRODUCT`, '', context);
 					this.filterAwardedProducts(event.getSource(), value);
 					break;
 				case "AwardedProduct":
