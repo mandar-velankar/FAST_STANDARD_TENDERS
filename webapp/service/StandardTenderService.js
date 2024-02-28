@@ -136,7 +136,51 @@ sap.ui.define([
 					}
 				});
 			})
-		}
+		},
+
+		getInstitute: async function (institudeID, countryCode) {
+			const sInstituteKey = this.model.createKey("/PT_TMINST", {
+				InstituteID: institudeID,
+				CountryCode: countryCode
+			});
+			let oInstitute = this.model.getObject(sInstituteKey);
+			if (!oInstitute) {
+				return new Promise((resolve, reject) => {
+					this.model.read("/PT_TMINST", {
+						filters: [
+							new Filter("InstituteID", "EQ", institudeID),
+							new Filter("CountryCode", "EQ", countryCode)
+						],
+						success: function (res) {
+							resolve(res?.results[0])
+						}
+					});
+				})
+			}
+			return oInstitute;
+		},
+
+		getDistributor: async function (distributorID, countryCode) {
+			const sDistributorKey = this.model.createKey("/PT_TMDIST", {
+				DistributorID: distributorID,
+				CountryCode: countryCode
+			});
+			let oDistributor = this.model.getObject(sDistributorKey);
+			if (!oDistributor) {
+				return new Promise((resolve, reject) => {
+					this.model.read("/PT_TMDIST", {
+						filters: [
+							new Filter("DistributorID", "EQ", distributorID),
+							new Filter("CountryCode", "EQ", countryCode)
+						],
+						success: function (res) {
+							resolve(res?.results[0])
+						}
+					});
+				})
+			}
+			return oDistributor;
+		},
 
     });
 });
