@@ -198,9 +198,19 @@ sap.ui.define([
 					new Filter("PRODUCTCODE",FilterOperator.EQ, productCode),
 					new Filter("LOTID",FilterOperator.EQ, "1")
 				],
-				template: template
+				template: template,
+				events: {
+					dataReceived: this.onDataReceived.bind(this)
+				}
 			});
 			this.unbindCompetitorResultForm();
+		},
+
+		onDataReceived: function(event) {
+			const competitorResults = this.byId("idCompetitorResultTable").getItems();
+			for (let item in competitorResults) {
+				this.filterCompetitorResultComboBoxesOnDataReceived(competitorResults[item]);
+			}
 		},
 
 		_onMetadataLoaded: function () {
@@ -340,6 +350,40 @@ sap.ui.define([
 			})		
 		},
 
+		filterCompetitorResultComboBoxesOnDataReceived: function (competitorRow) {
+			const masterCompetitorFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				}),
+				new Filter({
+					path: "ProductCode",
+					operator: FilterOperator.EQ,
+					value1: this.productId
+				})
+			];
+
+			const competitorOutcomeFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				})
+			];
+			competitorRow.getCells().forEach(cell => {
+				const bindingInfoPath = cell.getBindingInfo("items")?.path;
+				if (bindingInfoPath && bindingInfoPath === "/MasterCompetitors") {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}
+				else if (bindingInfoPath && bindingInfoPath === "/MasterCompetitorProducts") {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}else if(bindingInfoPath) {
+					cell.getBinding("items").filter(competitorOutcomeFilters);
+				}
+			})		
+		},
+
 		onButtonEditCompetitorPress: function (event) {
 			const competitorResults = this.byId("idCompetitorResultTable").getItems();
 			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', true);
@@ -372,7 +416,9 @@ sap.ui.define([
 
 		onSubmitChangesCompetitorsSuccess: function (res) {
 			this.unbindCompetitorResultForm();
+			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+			this.byId('idCompetitorResultTable').getBinding('items').refresh();
 		},
 
 		onSubmitChangesCompetitorFail: function (error) {
@@ -437,7 +483,7 @@ sap.ui.define([
 			})
 		},
 
-		onSetCompetitorResultsChanges: function (event, comboBox) {
+		onSetCompetitorResultsChanges: async function (event, comboBox) {
 			const value = event.getParameter("value");
 			let path = event.getSource().getBindingContext().getPath();
 			const context = this.defaultModel.getContext(path);
@@ -447,6 +493,9 @@ sap.ui.define([
 					this.defaultModel.setProperty(`${path}/AWARDEDCOMPANY`, value, context);
 					this.defaultModel.setProperty(`${path}/AWARDEDPRODUCT`, '', context);
 					this.filterAwardedProducts(event.getSource(), value);
+					const masterCompetitors = await this.getMasterCompetitors(value);
+					this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
+					this.defaultModel.setProperty(`${path}/Custom_String_2`, this.countryCode, context) //MasterCompetitors field used for MasterCompetitors upsert operation
 					break;
 				case "AwardedProduct":
 					path = `${path}/AWARDEDPRODUCT`;
@@ -480,5 +529,24 @@ sap.ui.define([
             const filterOutcome = new Filter("Outcome",FilterOperator.EQ, value)			
             reasonItemBinding.filter(filterOutcome);
         },
+
+		getMasterCompetitors: async function (competitorCompany) {
+			const path = "/MasterCompetitors"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("CountryCode",FilterOperator.EQ, this.countryCode),
+						new Filter("ProductCode",FilterOperator.EQ, this.productId),
+						new Filter("CompetitorCompany", FilterOperator.EQ, competitorCompany)
+					],
+					success: function (res) {
+						resolve(res.results[0])
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
     });
 });
