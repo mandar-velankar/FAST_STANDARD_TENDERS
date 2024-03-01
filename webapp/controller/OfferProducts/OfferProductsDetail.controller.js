@@ -400,6 +400,7 @@ sap.ui.define([
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
+				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 				this._refreshOfferProductTable();
 			}
 			
@@ -652,7 +653,10 @@ sap.ui.define([
 				"PriceConditionPriceView",
 				"PriceConditionDiscountView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			} 
 
 			this._refreshOfferProductTable();
 		},
