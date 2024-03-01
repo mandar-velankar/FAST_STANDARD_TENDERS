@@ -209,7 +209,7 @@ sap.ui.define([
 		onDataReceived: function(event) {
 			const competitorResults = this.byId("idCompetitorResultTable").getItems();
 			for (let item in competitorResults) {
-				this.filterCompetitorResultComboBoxes(competitorResults[item]);
+				this.filterCompetitorResultComboBoxesonDataReceived(competitorResults[item]);
 			}
 		},
 
@@ -349,6 +349,40 @@ sap.ui.define([
 			})		
 		},
 
+		filterCompetitorResultComboBoxesonDataReceived: function (competitorRow) {
+			const masterCompetitorFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				}),
+				new Filter({
+					path: "ProductCode",
+					operator: FilterOperator.EQ,
+					value1: this.productId
+				})
+			];
+
+			const competitorOutcomeFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				})
+			];
+			competitorRow.getCells().forEach(cell => {
+				const bindingInfoPath = cell.getBindingInfo("items")?.path;
+				if (bindingInfoPath && bindingInfoPath === "/MasterCompetitors") {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}
+				else if (bindingInfoPath && bindingInfoPath === "/MasterCompetitorProducts") {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}else if(bindingInfoPath) {
+					cell.getBinding("items").filter(competitorOutcomeFilters);
+				}
+			})		
+		},
+
 		onButtonEditCompetitorPress: function (event) {
 			const competitorResults = this.byId("idCompetitorResultTable").getItems();
 			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', true);
@@ -381,7 +415,9 @@ sap.ui.define([
 
 		onSubmitChangesCompetitorsSuccess: function (res) {
 			this.unbindCompetitorResultForm();
+			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+			this.byId('idCompetitorResultTable').getBinding('items').refresh();
 		},
 
 		onSubmitChangesCompetitorFail: function (error) {
