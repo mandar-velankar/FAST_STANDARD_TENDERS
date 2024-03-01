@@ -209,7 +209,7 @@ sap.ui.define([
 		onDataReceived: function(event) {
 			const competitorResults = this.byId("idCompetitorResultTable").getItems();
 			for (let item in competitorResults) {
-				this.filterCompetitorResultComboBoxesonDataReceived(competitorResults[item]);
+				this.filterCompetitorResultComboBoxesOnDataReceived(competitorResults[item]);
 			}
 		},
 
@@ -349,7 +349,7 @@ sap.ui.define([
 			})		
 		},
 
-		filterCompetitorResultComboBoxesonDataReceived: function (competitorRow) {
+		filterCompetitorResultComboBoxesOnDataReceived: function (competitorRow) {
 			const masterCompetitorFilters = [
 				new Filter({
 					path: "CountryCode",
