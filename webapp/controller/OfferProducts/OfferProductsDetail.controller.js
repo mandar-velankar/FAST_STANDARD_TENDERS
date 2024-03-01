@@ -626,6 +626,13 @@ sap.ui.define([
 				"PriceConditionDiscountView"
 			]).length > 0;
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idOfferPrice")?.getProperty("value");
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccess.bind(this),
