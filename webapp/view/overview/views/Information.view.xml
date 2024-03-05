@@ -56,7 +56,7 @@
 					enabled="{= ${ui>/enableApprovalButton} }"
 				/>
 
-				<MenuButton id="idDownloadAttachmentButton" text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode} &amp;&amp; (${st>/SelectedCountry} !== 'PK' || ${accessControl>/standardtenderAccess/OverviewDownload}) }" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">
+				<MenuButton id="idDownloadAttachmentButton" text="Download" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode} &amp;&amp; (${st>/SelectedCountry} !== 'PK' || ${accessControl>/standardtenderAccess/OverviewDownload}) }" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">
 					<menu>
 						<Menu itemSelected="onMenuAction">
 							<MenuItem id="btnWordDownload" text="Word" icon="sap-icon://doc-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
