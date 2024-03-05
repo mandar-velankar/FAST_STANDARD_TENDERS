@@ -25,6 +25,7 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 			this.getRouter().getRoute("objectDetailDeliveries").attachPatternMatched(this._onObjectMatched, this);
+			this.getOwnerComponent().getEventBus().subscribe("deliveryTrackingTableChannel", "filterDeliveryTrackingTable", this.handleFilterDeliveryTrackingTable, this);
 
 		},
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode, productScope}) {
@@ -96,6 +97,10 @@ sap.ui.define([
 					countryCode: this.countryCode
 				});
 			}.bind(this));
+		},
+
+		handleFilterDeliveryTrackingTable: function () {
+			this.byId('idDeliveryProducts').getBinding('items').refresh();
 		}
     });
 });
