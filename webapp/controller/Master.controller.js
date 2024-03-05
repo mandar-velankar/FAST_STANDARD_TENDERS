@@ -616,6 +616,7 @@ sap.ui.define([
 		 * @private
 		 */
 		_applyFilterSearch: function () {
+			this._oList.getBinding("items").aFilters = [];
 			var aFilters = this._oListFilterState.aSearch.concat(this._oListFilterState.aFilter),
 				oViewModel = this.getModel("masterView");
 			this._oList.getBinding("items").filter(aFilters, "Application");
@@ -871,9 +872,8 @@ sap.ui.define([
 			if (sCountryCode) {
 				this.andFilters.push(new Filter({
 					path: "CountryCode",
-					operator: FilterOperator.Contains,
-					value1: sCountryCode,
-					caseSensitive: false
+					operator: FilterOperator.EQ,
+					value1: sCountryCode
 				}));
 
 				StandardSingletonService.setCountryCode(sCountryCode);
@@ -893,9 +893,8 @@ sap.ui.define([
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
 				this.andFilters.push(new Filter({
 					path: "BrandID",
-					operator: FilterOperator.Contains,
-					value1: sBrandId,
-					caseSensitive: false
+					operator: FilterOperator.EQ,
+					value1: sBrandId
 				}));
 			}
 
@@ -915,6 +914,13 @@ sap.ui.define([
 
 
 			if (this.andFilters.length > 0) {
+				this._oList.getBinding('items').aApplicationFilters = [];
+				//BrandID filter always should be in the of filter list
+				this.andFilters.sort((a, b) => a?.sPath < b?.sPath ? 1 : (a.sPath === b.sPath ? 0 : -1));
+				if(!('sPath' in this.andFilters[this.andFilters.length-1])) {
+					let searchFilters = this.andFilters.splice(this.andFilters.length-1, 1);
+					this.andFilters.unshift(searchFilters[0]);
+				}
 				const oFilters = new Filter(this.andFilters, true);
 				// this._oList.getBinding("items").aFilters = []
 				//Binding to table with the filters and the sorters
