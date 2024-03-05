@@ -806,7 +806,7 @@ sap.ui.define([
 		 */
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
 			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
@@ -934,7 +934,7 @@ sap.ui.define([
 		calculatePriceWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : priceObj.OfferPrice;
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : Number(this.byId("idPriceWithFOCOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})) : this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
