@@ -259,12 +259,23 @@ sap.ui.define([
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
 			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
+			const sorters = [
+				new Sorter({
+					path: 'TenderID', 
+					descending: true
+				}),
+				new Sorter({
+					path: 'OfferID', 
+					descending: true
+				})
+			]
 
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
 			table && table.bindItems({
 				path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
 				filters: [oFilterCountry],
+				sorter: sorters,
 				//   model: '',
 				template: new ColumnListItem({
 					type: "Active",
