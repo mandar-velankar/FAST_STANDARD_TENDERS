@@ -248,7 +248,8 @@ sap.ui.define([
 			this.setMessageSection(["AwardedProductFormView"], "awardedProduct");
 			const hasErrorMessages =  messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
-			this.defaultModel.refresh();
+			this.getOwnerComponent().getEventBus().publish("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent");
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onButtonAwardProductDetailFormCancelPress: function(event){

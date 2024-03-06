@@ -1071,6 +1071,7 @@ sap.ui.define([
 				case "revisedoffer": return this.createRevisedOffer(evt);
 				case "continuedoffer": return this.createContinuedOffer(evt);
 				case "affiliateoffer": return this.onOpenAffiliateOfferPopup(evt);
+				case "differentawardprice": return this.createDifferentAwardPriceOffer(evt);
 			}
 		},
 
@@ -1118,6 +1119,15 @@ sap.ui.define([
 			}else {
 				this.byId("idAffiliatedOfferDialog").open();
 			}
+		},
+
+		createDifferentAwardPriceOffer: function(evt){
+			const requestHandle = this.defaultModel.callFunction("/copyOffer", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID,"type": "differentawardprice", "productScope": this.productScope},
+				success: this.onOfferCopySuccess.bind(this),
+				error: this.onOfferCopyFail.bind(this)
+			});
 		},
 
 		bindQuotationInstitute: function () {

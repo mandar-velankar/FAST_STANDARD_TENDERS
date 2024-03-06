@@ -452,6 +452,7 @@ sap.ui.define([
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onTaiwanPriceFormCancelBtnPress: function(event){
@@ -488,6 +489,7 @@ sap.ui.define([
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onTaiwanDiscountFormCancelBtnPress: function(event){

@@ -104,6 +104,7 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 
 			this.stState = this.getOwnerComponent().getModel("st");
+			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -960,6 +961,10 @@ sap.ui.define([
 			// Update the Select control
 			const oSelect = this.byId("idlanguageChange");
 			oSelect.setSelectedKey(language);
+		},
+
+		handleUpdateMasterTable: function () {
+			this.byId('genericMasterTable').getBinding("items").refresh();
 		}
 	});
 
