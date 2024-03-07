@@ -512,6 +512,7 @@ sap.ui.define([
 		},
 
 		onSubmitQuotation: async function(){
+			this.cancelPendingChanges(["OfferValidation"], "OverviewForm");
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();
 			this.createNewAwardedProducts();
