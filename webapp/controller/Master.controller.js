@@ -104,6 +104,7 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 
 			this.stState = this.getOwnerComponent().getModel("st");
+			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -259,12 +260,23 @@ sap.ui.define([
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
 			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
+			const sorters = [
+				new Sorter({
+					path: 'TenderID', 
+					descending: true
+				}),
+				new Sorter({
+					path: 'OfferID', 
+					descending: true
+				})
+			]
 
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
 			table && table.bindItems({
 				path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
 				filters: [oFilterCountry],
+				sorter: sorters,
 				//   model: '',
 				template: new ColumnListItem({
 					type: "Active",
@@ -960,6 +972,10 @@ sap.ui.define([
 			// Update the Select control
 			const oSelect = this.byId("idlanguageChange");
 			oSelect.setSelectedKey(language);
+		},
+
+		handleUpdateMasterTable: function () {
+			this.byId('genericMasterTable').getBinding("items").refresh();
 		}
 	});
 
