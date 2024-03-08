@@ -232,6 +232,7 @@ sap.ui.define([
 		},
 
 		onButtonAwardProductDetailFormSavePress: function(event){
+			this.cancelPendingChanges(["OfferValidation"], "OverviewForm");
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesAwardedProductFormSuccess.bind(this),
