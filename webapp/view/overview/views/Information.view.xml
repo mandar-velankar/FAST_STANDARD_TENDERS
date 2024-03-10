@@ -201,10 +201,10 @@
 								}"						
 							/>
 							<ObjectStatus 
-								text="{
-									path: '',
-									formatter: '.calculateTotalAmount'
-								}"
+								text = "{
+									parts: ['NET_SALES_OFFER_CURRENCY', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
 							/>					
 						</cells>
 					</ColumnListItem>
