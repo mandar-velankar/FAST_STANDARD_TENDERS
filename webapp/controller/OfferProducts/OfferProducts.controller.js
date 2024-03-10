@@ -167,11 +167,11 @@ sap.ui.define([
 		_bindText(textId){
 			let path = "";
 			if(textId === 'TotalAmountOfferProducts'){
-				const entity = 'OfferProductsTotalForOffer';
+				const entity = 'OfferValidation';
 				const textField = this.byId(`id${textId}`);
 
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-					OfferID: this.offerID
+					OFFERID: this.offerID
 				});
 
 				textField.bindElement({

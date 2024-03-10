@@ -24,7 +24,7 @@
 					text="Edit"
 					press=".onPricingFormEditBtnPress"
 					visible="{= !${ui>/PricingForm/editMode} }"
-					enabled="{= ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
+					enabled="{= ${ui>/PricingForm/hasOfferProductDetailsSaved} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
 				/>
 				<Button
 					icon="sap-icon://save"
