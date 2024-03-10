@@ -100,6 +100,7 @@ sap.ui.define([
 				//this._bindForm("ProductForm");
 				this._filterPriceCondition();	
 				this.setHasFocPriceConditionClassification();
+				this.setHasOfferProductDetailsSaved();
 			}.bind(this));
 		},
 
@@ -150,7 +151,8 @@ sap.ui.define([
 				},
 				PricingForm:{
 					editMode: false,
-					mainPriceConditionID: null
+					mainPriceConditionID: null,
+					hasOfferProductDetailsSaved: false
 				},
 				FocForm:{
 					hasFocPriceCondition: false,
@@ -400,6 +402,7 @@ sap.ui.define([
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 				this._refreshOfferProductTable();
 			}
@@ -999,7 +1002,7 @@ sap.ui.define([
 					case "ABS":
 						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume + addedFOC.FreeGoodsOther);
 					case "PCT":
-						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume * (1 + addedFOC.FreeGoodsOther)) ;
+						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume * (1 + Number(addedFOC.FreeGoodsOther))) ;
 					case "STP":
 						return priceObj.RequestedVolume * offerPrice / ((priceObj.RequestedVolume + priceObj.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
 				}
@@ -1648,6 +1651,33 @@ sap.ui.define([
 			offerHistoryTable.getBinding("items").aApplicationFilters = [];
 			const filters = this.getOfferHistoryFilters(tender, this.offerId, this.sCountryCode, this.productId);
 			offerHistoryTable.getBinding("items").filter(filters);
-		}
+		},
+
+		setHasOfferProductDetailsSaved: async function(){
+			const selectedOfferProduct = await this.getProductDetails(this.sOfferId, this.productId);
+			const isRequestedVolumeSet = !selectedOfferProduct || selectedOfferProduct.RequestedVolume === 0 || selectedOfferProduct.RequestedVolume === null ? false : true;
+			this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, isRequestedVolumeSet);
+			return isRequestedVolumeSet;
+		},
+
+		getProductDetails: async function (offerId, productCode) {
+			const path = "/PT_TMOFPR"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("OfferID",FilterOperator.EQ, offerId),
+						new Filter("ProductCode",FilterOperator.EQ, productCode),
+						new Filter("Active",FilterOperator.EQ, 1),
+						new Filter("LotID",FilterOperator.EQ, 1)
+					],
+					success: function (res) {
+						resolve(res.results[0])
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
     });
 });
