@@ -810,7 +810,8 @@ sap.ui.define([
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
+			let netPrice = offerPrice * (1 - deductions);
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
@@ -917,7 +918,8 @@ sap.ui.define([
 			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let offerPrice = Number((parseFloat(priceObj.CurrentBasePrice) * (1 - discount)).toFixed(2));
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
+			let netPrice = offerPrice * (1 - deductions);
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
@@ -936,11 +938,12 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : Number(this.byId("idPriceWithFOCOfferPrice").getValue().replace(/[^\d.]/g, ''));
-			let netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})) : this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice * (1 - deductions)) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
-
+			let netPrice = netOfferPrice * (1 - deductions);
+			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
+			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
@@ -962,9 +965,11 @@ sap.ui.define([
 			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
 			let discount = property?.toLowerCase().includes("discount") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : priceObj.Discount;
 			let offerPrice = priceObj.Region === 'MEA' ? Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(3) : Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
-			let netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})) : this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice * (1 - deductions)) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
+			let netPrice = netOfferPrice * (1 - deductions);
+			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
+			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
 
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
@@ -995,31 +1000,29 @@ sap.ui.define([
 			//Cases 1 and 2
 			if(foc.length === 0 || !containsOfferProduct) return offerPrice;
 
+			let focVolume = 0;
+
 			// Case 3
-			if(containsOfferProductAndIsAdded) {
-				const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
-				switch(addedFOC.FreeGoodsOther_ABS_PCT){
+			if(containsOfferProductAndIsAdded || containsOfferProductAndIsIncluded) {
+				const FOC = getFOCWitSameProductCode(foc, offerProduct);
+				switch(FOC.FreeGoodsOther_ABS_PCT){
 					case "ABS":
-						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume + addedFOC.FreeGoodsOther);
+						focVolume = FOC.FreeGoodsOther;
+						break;
 					case "PCT":
-						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume * (1 + Number(addedFOC.FreeGoodsOther))) ;
+						focVolume = Math.round(priceObj.RequestedVolume * FOC.FreeGoodsOther);
+						break;
 					case "STP":
-						return priceObj.RequestedVolume * offerPrice / ((priceObj.RequestedVolume + priceObj.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+						focVolume = Math.floor(priceObj.RequestedVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+						break;
+					default:
+						break;
 				}
 			}
 
-			// Cases 4
-			if(containsOfferProductAndIsIncluded) {
-				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-				switch(includedFOC.FreeGoodsOther_ABS_PCT){
-					case "ABS":
-						return (priceObj.RequestedVolume - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
-					case "PCT":
-						return priceObj.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
-					case "STP":
-						return  (priceObj.RequestedVolume - priceObj.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
-				}
-			}
+			let paidVolume = containsOfferProductAndIsAdded ? priceObj.RequestedVolume : priceObj.RequestedVolume - focVolume;
+			let totalVolume = containsOfferProductAndIsAdded ? priceObj.RequestedVolume + focVolume : priceObj.RequestedVolume;
+			let netOfferPrice = offerPrice * paidVolume / totalVolume;
 
 			function hasObjectWithProductCode(arr, offerProduct) {
 				return arr.some(obj => obj.ProductPackId === offerProduct);
@@ -1033,13 +1036,11 @@ sap.ui.define([
 				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 			}
 
-			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			function getFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct);
 			}
 
-			function getAddedFOCWitSameProductCode(arr, offerProduct) {
-				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
-			}
+			return netOfferPrice;
 
 		},
 
