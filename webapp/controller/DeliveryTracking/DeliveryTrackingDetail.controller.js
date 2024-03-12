@@ -273,7 +273,8 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/DeliveryTrackingForm/editMode`, false);
 				this.cancelPendingChanges(['DeliveryTrackingDetailView'], 'deliveryTrackingDetail');
 				this.unbindDeliveryTrackingForm();
-				this.defaultModel.refresh();
+				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+				this.getOwnerComponent().getEventBus().publish("deliveryTrackingTableChannel", "filterDeliveryTrackingTable");
 			} 
 			this.byId('idDeliveryTrackingTable').setProperty('busy', false);
 		},

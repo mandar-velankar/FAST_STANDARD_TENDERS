@@ -59,7 +59,7 @@
 										<cells>
 											
 											<!-- Approver Type -->
-											<Label text="{ApproverType}"/>
+											<Label wrapping="true" text="{ApproverType}"/>
 
 											<!-- Hierarchy -->
 											<Input 
