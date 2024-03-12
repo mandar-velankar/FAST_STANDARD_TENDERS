@@ -107,13 +107,13 @@ sap.ui.define([
 		truncToTwoDecimalPlaces: function(number) {
 			const factor = 100; // 10^2 for two decimal places
 			const result = Math.round(number * factor) / factor;
-    		return parseFloat(result.toFixed(2));
+    		return result;
 		},
 
 		truncToThreeDecimalPlaces: function(number) {
 			const factor = 1000; // 10^3 for three decimal places
 			const result = Math.round(number * factor) / factor;
-			return parseFloat(result.toFixed(3));
+			return result;
 		}
 	};
 });
