@@ -450,6 +450,7 @@ sap.ui.define([
 
 		_onSubmitChangesApprovalsSuccess: async function(res){
 			await this._enableApprovalCancelButtons();
+			this.cancelPendingChanges(["OfferProductOfferStatus"], "approvalMsg");
 		},
 
 		/**
