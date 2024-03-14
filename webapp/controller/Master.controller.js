@@ -683,12 +683,16 @@ sap.ui.define([
 			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
 			const nextTenderID = await this._getNextTenderID(sCountryCode);
 			const userFullName = this.getModel("st").getProperty("/UserFullName");
-
+			const today = new Date();
+			const nextDate = new Date(today);
+			nextDate.setDate(today.getDate() + 1);
 			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`, this.countryCode === 'TW' ? 'Tender': '');
+			this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, this.countryCode === 'TW' ? today: '');
+			this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, this.countryCode === 'TW' ? nextDate: '');
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
