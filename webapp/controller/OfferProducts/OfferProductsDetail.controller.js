@@ -408,7 +408,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
-				this._refreshOfferProductTable();
+				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 			}
 			
 		},
