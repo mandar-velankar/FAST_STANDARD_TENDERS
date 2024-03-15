@@ -102,12 +102,13 @@
 							</HBox>
 
 							<!-- Target -->
-							<VBox width="50%">
+							<VBox width="50%" height="100%" >
 								<items>
 									
 									<ScrollContainer
 										id="idListProductsOutputContainer"
 										width="100%"
+										height="100%" 
 										vertical="true"
 										focusable="true">
 										<!--Output list -->
