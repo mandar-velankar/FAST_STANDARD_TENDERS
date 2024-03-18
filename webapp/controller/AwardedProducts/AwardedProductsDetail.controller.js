@@ -248,8 +248,12 @@ sap.ui.define([
 			const messages = this.getMessages(["AwardedProductFormView"]);
 			this.setMessageSection(["AwardedProductFormView"], "awardedProduct");
 			const hasErrorMessages =  messages.length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
-			this.defaultModel.refresh();
+			if (!hasErrorMessages){
+				this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
+				this.cancelPendingChanges(["AwardedProductFormView"], "awardedProduct");
+			}
+			this.getOwnerComponent().getEventBus().publish("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent");
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onButtonAwardProductDetailFormCancelPress: function(event){
