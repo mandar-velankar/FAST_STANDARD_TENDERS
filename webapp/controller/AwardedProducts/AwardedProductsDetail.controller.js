@@ -416,10 +416,15 @@ sap.ui.define([
 		},
 
 		onSubmitChangesCompetitorsSuccess: function (res) {
-			this.unbindCompetitorResultForm();
-			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
-			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
-			this.byId('idCompetitorResultTable').getBinding('items').refresh();
+			const messages = this.getMessages(["CompetitorResultsTableView"]);
+			this.setMessageSection(["CompetitorResultsTableView"], "competitorResults");
+			if (messages.length == 0) {
+				this.unbindCompetitorResultForm();
+				this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
+				this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+				this.byId('idCompetitorResultTable').getBinding('items').refresh();
+			}
+			this.byId('idCompetitorResultTable').setBusy(false);
 		},
 
 		onSubmitChangesCompetitorFail: function (error) {
