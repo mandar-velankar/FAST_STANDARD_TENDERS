@@ -688,6 +688,10 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`, this.countryCode === 'TW' ? 'Tender': '');
+			if(this.countryCode === 'TW'){
+				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
+				this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, nextDate);
+			}
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
