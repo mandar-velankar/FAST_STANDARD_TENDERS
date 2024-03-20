@@ -226,8 +226,8 @@ sap.ui.define([
 		 * @param {string} offerStatus - The status that influences the visibility of tabs.
 		 */
 
-		updateVisibilityOfTabs: function (iconTabBar, offerStatus) {
-			this.updateEnablementModel(offerStatus);
+		updateVisibilityOfTabs: function (iconTabBar, offerStatus, productKeys) {
+			this.updateEnablementModel(offerStatus, productKeys);
 			if (!iconTabBar) return;
 			const tabs = iconTabBar.getAggregation("items");
 			tabs.forEach(tab => {
@@ -262,10 +262,17 @@ sap.ui.define([
 			return isVisible;
 		},
 
-		updateEnablementModel: async function (offerStatus) {
-			const obj = StandardSingletonService.getEnablementObject(offerStatus);
+		updateEnablementModel: async function (offerStatus, productKeys) {
+			const isProductDeclined = await this.checkIsProductInactive(productKeys);
+			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined);
 			const enablementModel = new JSONModel(obj);
 			this.getOwnerComponent().setModel(enablementModel, 'em');
+		},
+
+		checkIsProductInactive: async function ({OfferID, ProductCode}) {
+			const stState = this.getOwnerComponent().getModel("st");
+			const product = await stState.getService().getOfferProduct(OfferID, ProductCode);
+			return product && product.ActiveProduct === 2;
 		},
 
 		showMessageCompositeView: function (sTitle, aMessages, sState) {
