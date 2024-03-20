@@ -58,7 +58,7 @@ sap.ui.define([
 		},
 
 		handleStatusChange: function(channel, event, data) {
-			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus);
+			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus, {OfferID: this.sOfferId, ProductCode: this.productId});
 		},
 
 		/* =========================================================== */
@@ -195,7 +195,7 @@ sap.ui.define([
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();
-				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS);
+				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId});
 			}.bind(this));
 		},
 
