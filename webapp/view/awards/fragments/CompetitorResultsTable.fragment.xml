@@ -22,6 +22,13 @@
                     <OverflowToolbar>
                         <ToolbarSpacer />
                         <Button
+                            icon="sap-icon://alert"
+                            text="{= ${messages>/competitorResults}.length }"
+                            visible="{= ${messages>/competitorResults}.length > 0 &amp;&amp; ${ui>/CompetitorResultsForm/editMode}}"
+                            type="Emphasized"
+                            press="onMessagePopoverPress($event, 'competitorResults')"
+                        />
+                        <Button
                             icon="sap-icon://add"
                             text="Add"
                             press=".onButtonCompetitorResultsCreatePress"
