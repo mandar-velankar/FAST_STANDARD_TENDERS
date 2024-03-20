@@ -5,8 +5,9 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
-	"../../service/StandardSingletonService"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService) {
+	"../../service/StandardSingletonService",
+	"sap/ui/model/Sorter",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -96,6 +97,10 @@ sap.ui.define([
 				filters: [
 					new Filter("OfferID", "EQ", this.offerId)
 				],
+				sorter: new Sorter({
+					path: 'SORTER',
+					descending: false
+				}),
 				template: template
 			})
 		},
