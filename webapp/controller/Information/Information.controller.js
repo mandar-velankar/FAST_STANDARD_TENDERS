@@ -57,7 +57,7 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			this.bindFields();
-			
+			if(this.offerId && this.offerId !== "NA") {await this.bindProductFOCInformationTable(this.countryCode, this.offerId);}			
 			await this.approvalButtonEnableCheck();
 			await this.assignWordTemplates();
 			await this.assignExcelTemplates();
@@ -158,7 +158,6 @@ sap.ui.define([
 		bindFields: function () {
 			if (this.offerId && this.offerId !== "NA") {
 				this.bindTable();
-				this.bindFOCInfoTable();
 				this.bindForm(this.selectedTab);
 			}
 		},
@@ -171,6 +170,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();			
 			this.bindFields();
+			if(this.offerId && this.offerId !== "NA"){await this.bindProductFOCInformationTable(this.countryCode, this.offerId);}
 			await this.approvalButtonEnableCheck();
 			//this.getOwnerComponent().getModel().refresh(true);			
 		},
@@ -200,27 +200,6 @@ sap.ui.define([
 					}),
 				],
 				template: prodInfoTemplate
-			})
-		},
-
-		bindFOCInfoTable:function() {
-			const focInfoTable = this.byId("idProductFOCInformationTable");
-			const focInfoTemplate = focInfoTable.getBindingInfo("items").template;
-			focInfoTable.bindItems({
-				path: "/StandardTenderFOCInformation",
-				filters: [
-					new Filter({
-						path: "OfferID",
-						operator: FilterOperator.EQ,
-						value1: this.offerId
-					}),
-					new Filter({
-						path: "CountryCode",
-						operator: FilterOperator.EQ,
-						value1: this.countryCode
-					}),
-				],
-				template: focInfoTemplate
 			})
 		},
 		
@@ -575,6 +554,22 @@ sap.ui.define([
 			this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
 				offerStatus: offerStatus?.STATUS
 			});
+		},
+
+		bindProductFOCInformationTable: async function(countryCode, offerId){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/StandardTenderFOCInformation", {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("OfferID", "EQ", offerId)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/StandardTenderFOCInformation", data.results);
+			})
 		}
 	})
 });
