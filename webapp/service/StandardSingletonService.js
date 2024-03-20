@@ -207,7 +207,7 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status) {
+        getEnablementObject: function (status, isProductDeclined) {
 
 			const isOverviewTabVisible = !!status;
 			const checkCopyOfferBtn = status === "Quotation Submitted" || status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
@@ -270,10 +270,10 @@ sap.ui.define([
 						editMode: isTenderOfferOverviewVisible
 					},
 					OfferPricingInfo:{
-						editMode: isTenderOfferOverviewVisible
+						editMode: isTenderOfferOverviewVisible && !isProductDeclined 
 					},
 					OfferProductFOC:{
-						editMode: isTenderOfferOverviewVisible
+						editMode: isTenderOfferOverviewVisible && !isProductDeclined
 					},
 				},
 				AwardedProductDetail: {
