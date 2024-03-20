@@ -15,7 +15,6 @@
 											<content>
 												<Title text="Mandatory/Optional approvals" level="H2"/>
 												<ToolbarSpacer />
-												<Button icon="sap-icon://refresh" text="{i18n>Refresh}" type="Default" press="onRefreshApprovalsPress"/>
 											</content>
 										</OverflowToolbar>
 								</headerToolbar>
