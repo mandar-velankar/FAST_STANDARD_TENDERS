@@ -745,13 +745,26 @@ sap.ui.define([
 
 				const aFilteredBrandProducts = this.filterBrandProducts(brands);
 				this.getModel("ui").setProperty("/OfferProductTable/productCollection", aFilteredBrandProducts);
-
+				this.setScrollProductsInputContainter();
 			} else {
 
 				MessageToast.show("No new item was selected.");
 
 			}
 			
+		},
+
+		setScrollProductsInputContainter:function(){
+			const productsInput = this.getModel('ui').getProperty('/OfferProductTable/productCollection');
+			const inputItemsHeight = productsInput.length * 67;
+			const dialogContentHeight = sap.ui.getCore().byId('addProductDialog').getContent()[0].getDomRef().offsetHeight;
+			let parentHeight = dialogContentHeight - 49 - 65; //todo: add check for message of MercadoInProductsMessage
+			sap.ui.getCore().byId("idListProductsInputContainer").removeStyleClass("listInDialogWithMessage");
+			sap.ui.getCore().byId("idListProductsOutputContainer").removeStyleClass("listInDialogWithMessage");
+			if(inputItemsHeight>=parentHeight){
+				sap.ui.getCore().byId("idListProductsInputContainer").addStyleClass("listInDialogWithMessage");
+				sap.ui.getCore().byId("idListProductsOutputContainer").addStyleClass("listInDialogWithMessage");
+			}
 		},
 
 		filterBrandProducts: function(brands){
