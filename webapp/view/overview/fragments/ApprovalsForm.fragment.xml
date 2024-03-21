@@ -59,15 +59,13 @@
 										<cells>
 											
 											<!-- Approver Type -->
-											<Label text="{ApproverType}"/>
+											<Label wrapping="true" text="{ApproverType}"/>
 
 											<!-- Hierarchy -->
-											<Input value="{ 
-														parts:[
-																{path:'ApproverTypes'}
-															  ],
-														formatter: '.formatHierarchy'
-													}" required="true"/>
+											<Input 
+												value="{Hierarchy}" 
+												required="true"
+											/>
 
 											<!-- Content -->
 											<Label text="{ApprovalContent}"/>

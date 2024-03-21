@@ -110,6 +110,7 @@ sap.ui.define([
 				},
 				CompetitorResultsForm:{
 					editMode: false,
+					region: "",
 					selectedItems: []
 				},
 				enableDeleteProductButton: false
@@ -197,9 +198,19 @@ sap.ui.define([
 					new Filter("PRODUCTCODE",FilterOperator.EQ, productCode),
 					new Filter("LOTID",FilterOperator.EQ, "1")
 				],
-				template: template
+				template: template,
+				events: {
+					dataReceived: this.onDataReceived.bind(this)
+				}
 			});
 			this.unbindCompetitorResultForm();
+		},
+
+		onDataReceived: function(event) {
+			const competitorResults = this.byId("idCompetitorResultTable").getItems();
+			for (let item in competitorResults) {
+				this.filterCompetitorResultComboBoxesOnDataReceived(competitorResults[item]);
+			}
 		},
 
 		_onMetadataLoaded: function () {
@@ -221,6 +232,7 @@ sap.ui.define([
 		},
 
 		onButtonAwardProductDetailFormSavePress: function(event){
+			this.cancelPendingChanges(["OfferValidation"], "OverviewForm");
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesAwardedProductFormSuccess.bind(this),
@@ -236,7 +248,10 @@ sap.ui.define([
 			const messages = this.getMessages(["AwardedProductFormView"]);
 			this.setMessageSection(["AwardedProductFormView"], "awardedProduct");
 			const hasErrorMessages =  messages.length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
+			if (!hasErrorMessages){
+				this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
+				this.cancelPendingChanges(["AwardedProductFormView"], "awardedProduct");
+			}
 			this.getOwnerComponent().getEventBus().publish("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent");
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
@@ -278,7 +293,7 @@ sap.ui.define([
 		 * To be able to add new row we can use JSONModel 
 		 * Push needed data into JSONModel and refresh binding of table
 		 */
-		onButtonCompetitorResultsCreatePress: function () {
+		onButtonCompetitorResultsCreatePress: async function () {
 			const competitorResultsTable = this.byId("idCompetitorResultTable");
 			const context = this.defaultModel.createEntry("/CompetitorResultsTableView", {
 				properties: {
@@ -292,6 +307,11 @@ sap.ui.define([
 			newCompetitor.setBindingContext(context);
 			competitorResultsTable.insertItem(newCompetitor);
 			this.filterCompetitorResultComboBoxes(newCompetitor);
+			const offerProductValidation = await this.stState.getOfferProductValidation(this.offerId);
+			if (Array.isArray(offerProductValidation) && offerProductValidation.length > 0) {
+				const firstProduct = offerProductValidation[0];
+				this.getModel('ui').setProperty('/CompetitorResultsForm/region', firstProduct.Region);
+			}
 		},
 
 		filterCompetitorResultComboBoxes: function (competitorRow) {
@@ -317,10 +337,52 @@ sap.ui.define([
 			];
 			competitorRow.getCells().forEach(cell => {
 				const bindingInfoPath = cell.getBindingInfo("items")?.path;
-				const bindingInfo =  bindingInfoPath === "/MasterCompetitors";
-				if (bindingInfo && bindingInfoPath) {
+				if (bindingInfoPath && bindingInfoPath === "/MasterCompetitors") {
 					cell.getBinding("items").filter(masterCompetitorFilters);
-				}else if(!bindingInfo && bindingInfoPath) {
+				}
+				else if (bindingInfoPath && bindingInfoPath === "/MasterCompetitorProducts") {
+					const awardedCompany = cell.getBindingContext().getObject().AWARDEDCOMPANY;
+					masterCompetitorFilters.push(new Filter({
+						path: "CompetitorCompany",
+						operator: FilterOperator.EQ,
+						value1: awardedCompany
+					}));
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}else if(bindingInfoPath) {
+					cell.getBinding("items").filter(competitorOutcomeFilters);
+				}
+			})		
+		},
+
+		filterCompetitorResultComboBoxesOnDataReceived: function (competitorRow) {
+			const masterCompetitorFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				}),
+				new Filter({
+					path: "ProductCode",
+					operator: FilterOperator.EQ,
+					value1: this.productId
+				})
+			];
+
+			const competitorOutcomeFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode
+				})
+			];
+			competitorRow.getCells().forEach(cell => {
+				const bindingInfoPath = cell.getBindingInfo("items")?.path;
+				if (bindingInfoPath && bindingInfoPath === "/MasterCompetitors") {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}
+				else if (bindingInfoPath && bindingInfoPath === "/MasterCompetitorProducts") {
+					cell.getBinding("items").filter(masterCompetitorFilters);
+				}else if(bindingInfoPath) {
 					cell.getBinding("items").filter(competitorOutcomeFilters);
 				}
 			})		
@@ -357,8 +419,15 @@ sap.ui.define([
 		},
 
 		onSubmitChangesCompetitorsSuccess: function (res) {
-			this.unbindCompetitorResultForm();
-			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+			const messages = this.getMessages(["CompetitorResultsTableView"]);
+			this.setMessageSection(["CompetitorResultsTableView"], "competitorResults");
+			if (messages.length == 0) {
+				this.unbindCompetitorResultForm();
+				this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
+				this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+				this.byId('idCompetitorResultTable').getBinding('items').refresh();
+			}
+			this.byId('idCompetitorResultTable').setBusy(false);
 		},
 
 		onSubmitChangesCompetitorFail: function (error) {
@@ -369,6 +438,7 @@ sap.ui.define([
 			this.unbindCompetitorResultForm();
 			this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 			this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
+			this.byId('idCompetitorResultTable').getBinding('items').refresh();
 		},
 
 		onButtonDeleteCompetitorPress: function  (event) {
@@ -422,15 +492,19 @@ sap.ui.define([
 			})
 		},
 
-		onSetCompetitorResultsChanges: function (event, comboBox) {
+		onSetCompetitorResultsChanges: async function (event, comboBox) {
 			const value = event.getParameter("value");
 			let path = event.getSource().getBindingContext().getPath();
 			const context = this.defaultModel.getContext(path);
 
 			switch (comboBox) {
 				case "AwardedCompany":
-					path = `${path}/AWARDEDCOMPANY`;
-					this.defaultModel.setProperty(path, value, context);
+					this.defaultModel.setProperty(`${path}/AWARDEDCOMPANY`, value, context);
+					this.defaultModel.setProperty(`${path}/AWARDEDPRODUCT`, '', context);
+					this.filterAwardedProducts(event.getSource(), value);
+					const masterCompetitors = await this.getMasterCompetitors(value);
+					this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
+					this.defaultModel.setProperty(`${path}/Custom_String_2`, this.countryCode, context) //MasterCompetitors field used for MasterCompetitors upsert operation
 					break;
 				case "AwardedProduct":
 					path = `${path}/AWARDEDPRODUCT`;
@@ -439,10 +513,49 @@ sap.ui.define([
 				case "Outcome":
 					path = `${path}/OUTCOME`;
 					this.defaultModel.setProperty(path, value, context);
+					this.onChangeOutcome(value);
 					break;
 				default:
 					break;
 			}
-		}
+		},
+
+		filterAwardedProducts: function (companySelect, competitorCompany) {
+			const awardedProductsSelect = companySelect.getParent().getCells()[1];
+			const filters = [
+				new Filter("CountryCode",FilterOperator.EQ, this.countryCode),
+				new Filter("ProductCode",FilterOperator.EQ, this.productId),
+				new Filter("CompetitorCompany",FilterOperator.EQ, competitorCompany)
+			];
+
+			awardedProductsSelect.getBinding('items').filter(filters)
+		},
+
+		onChangeOutcome: function (value) {
+			const competitorForm = this.byId("idCompetitorResultsForm");
+            const reasonItemBinding = competitorForm.getAggregation("formContainers")[0].getAggregation("formElements").find(el => el.getAggregation("label") === "Reason").getAggregation("fields")[0].getBinding("items");
+            reasonItemBinding.aApplicationFilters = []
+            const filterOutcome = new Filter("Outcome",FilterOperator.EQ, value)			
+            reasonItemBinding.filter(filterOutcome);
+        },
+
+		getMasterCompetitors: async function (competitorCompany) {
+			const path = "/MasterCompetitors"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("CountryCode",FilterOperator.EQ, this.countryCode),
+						new Filter("ProductCode",FilterOperator.EQ, this.productId),
+						new Filter("CompetitorCompany", FilterOperator.EQ, competitorCompany)
+					],
+					success: function (res) {
+						resolve(res.results[0])
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
     });
 });

@@ -100,6 +100,7 @@ sap.ui.define([
 				//this._bindForm("ProductForm");
 				this._filterPriceCondition();	
 				this.setHasFocPriceConditionClassification();
+				this.setHasOfferProductDetailsSaved();
 			}.bind(this));
 		},
 
@@ -151,7 +152,8 @@ sap.ui.define([
 				PricingForm:{
 					editMode: false,
 					mainPriceConditionID: null,
-					instituteInBranch: true
+					instituteInBranch: true,
+					hasOfferProductDetailsSaved: false
 				},
 				FocForm:{
 					hasFocPriceCondition: false,
@@ -404,6 +406,8 @@ sap.ui.define([
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
+				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 				this._refreshOfferProductTable();
 			}
 			
@@ -516,6 +520,13 @@ sap.ui.define([
 			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
 			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idPriceWithFOCOfferPrice")?.getProperty("value");
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesPriceWithFOCSuccess.bind(this),
@@ -624,6 +635,13 @@ sap.ui.define([
 				"PriceConditionDiscountView"
 			]).length > 0;
 			this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idOfferPrice")?.getProperty("value");
+			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSuccess.bind(this),
@@ -649,7 +667,10 @@ sap.ui.define([
 				"PriceConditionPriceView",
 				"PriceConditionDiscountView"
 			]);
-			!hasErrorMessages && this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
+			} 
 
 			this._refreshOfferProductTable();
 		},
@@ -792,10 +813,11 @@ sap.ui.define([
 		 */
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
+			let netPrice = offerPrice * (1 - deductions);
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
@@ -905,7 +927,8 @@ sap.ui.define([
 			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let offerPrice = Number((parseFloat(priceObj.CurrentBasePrice) * (1 - discount)).toFixed(2));
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(offerPrice * (1 - deductions));
+			let netPrice = offerPrice * (1 - deductions);
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
@@ -922,13 +945,14 @@ sap.ui.define([
 		 */
 		calculatePriceWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			priceObj.CurrentBasePrice = this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : priceObj.OfferPrice;
-			let netOfferPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
+			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : Number(this.byId("idPriceWithFOCOfferPrice").getValue().replace(/[^\d.]/g, ''));
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
-
+			let netPrice = netOfferPrice * (1 - deductions);
+			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
+			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
@@ -947,12 +971,14 @@ sap.ui.define([
 		 */
 		calculateDiscountWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			priceObj.CurrentBasePrice = this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);; // Truncate number to two decimal places without rounding. For correct rounding
-			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(2) : priceObj.Discount;
-			let offerPrice = Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
-			let netOfferPrice = this.formatter.truncToTwoDecimalPlaces(this.calculateNetOfferPrice({offerPrice, priceObj})); 
+			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
+			let discount = property?.toLowerCase().includes("discount") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : priceObj.Discount;
+			let offerPrice = priceObj.Region === 'MEA' ? Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(3) : Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
+			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let netPrice = this.formatter.truncToTwoDecimalPlaces(netOfferPrice * (1 - deductions));
+			let netPrice = netOfferPrice * (1 - deductions);
+			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
+			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
 
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
@@ -983,31 +1009,29 @@ sap.ui.define([
 			//Cases 1 and 2
 			if(foc.length === 0 || !containsOfferProduct) return offerPrice;
 
+			let focVolume = 0;
+
 			// Case 3
-			if(containsOfferProductAndIsAdded) {
-				const addedFOC = getAddedFOCWitSameProductCode(foc, offerProduct);
-				switch(addedFOC.FreeGoodsOther_ABS_PCT){
+			if(containsOfferProductAndIsAdded || containsOfferProductAndIsIncluded) {
+				const FOC = getFOCWitSameProductCode(foc, offerProduct);
+				switch(FOC.FreeGoodsOther_ABS_PCT){
 					case "ABS":
-						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume + addedFOC.FreeGoodsOther);
+						focVolume = FOC.FreeGoodsOther;
+						break;
 					case "PCT":
-						return priceObj.RequestedVolume * offerPrice / (priceObj.RequestedVolume * (1 + addedFOC.FreeGoodsOther)) ;
+						focVolume = Math.round(priceObj.RequestedVolume * FOC.FreeGoodsOther);
+						break;
 					case "STP":
-						return priceObj.RequestedVolume * offerPrice / ((priceObj.RequestedVolume + priceObj.RequestedVolume) / (addedFOC.FreeGoodsOther_Step * addedFOC.FreeGoodsOther));
+						focVolume = Math.floor(priceObj.RequestedVolume / FOC.FreeGoodsOther_Step) * FOC.FreeGoodsOther;
+						break;
+					default:
+						break;
 				}
 			}
 
-			// Cases 4
-			if(containsOfferProductAndIsIncluded) {
-				const includedFOC = getIncludedFOCWitSameProductCode(foc, offerProduct);
-				switch(includedFOC.FreeGoodsOther_ABS_PCT){
-					case "ABS":
-						return (priceObj.RequestedVolume - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
-					case "PCT":
-						return priceObj.RequestedVolume * (1 - includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
-					case "STP":
-						return  (priceObj.RequestedVolume - priceObj.RequestedVolume / includedFOC.FreeGoodsOther_Step * includedFOC.FreeGoodsOther) * offerPrice / priceObj.RequestedVolume;
-				}
-			}
+			let paidVolume = containsOfferProductAndIsAdded ? priceObj.RequestedVolume : priceObj.RequestedVolume - focVolume;
+			let totalVolume = containsOfferProductAndIsAdded ? priceObj.RequestedVolume + focVolume : priceObj.RequestedVolume;
+			let netOfferPrice = offerPrice * paidVolume / totalVolume;
 
 			function hasObjectWithProductCode(arr, offerProduct) {
 				return arr.some(obj => obj.ProductPackId === offerProduct);
@@ -1021,13 +1045,11 @@ sap.ui.define([
 				return arr.some(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
 			}
 
-			function getIncludedFOCWitSameProductCode(arr, offerProduct) {
-				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Included');
+			function getFOCWitSameProductCode(arr, offerProduct) {
+				return arr.find(obj => obj.ProductPackId === offerProduct);
 			}
 
-			function getAddedFOCWitSameProductCode(arr, offerProduct) {
-				return arr.find(obj => obj.ProductPackId === offerProduct && obj.ADD_INCLUDE === 'Added');
-			}
+			return netOfferPrice;
 
 		},
 
@@ -1430,9 +1452,9 @@ sap.ui.define([
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: async function(evt){
-            const netPrice = evt.getParameter("data").CountryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
-			let netOfferPrice = '';
-			if(evt.getParameter("data").CountryCode == 'TW'){ netOfferPrice = evt.getParameter("data").NetPrice; }
+			const countryCode = evt.getParameter("data")?.CountryCode || this.sCountryCode;
+            const netPrice = countryCode == 'TW' ? evt.getParameter("data").Price3 : evt.getParameter("data").NetPrice;
+			const netOfferPrice = countryCode == 'TW' ? evt.getParameter("data").NetPrice : evt.getParameter("data").NetOfferPrice;
             const path =this.getModel().createKey("/PT_TMBDPR", {
 				OfferID: this.sOfferId,
 				ProductCode: this.productId,
@@ -1446,7 +1468,8 @@ sap.ui.define([
 				context = this.getModel().getContext(path);
 			}
             this.getModel().setProperty("NetPrice", netPrice, context);
-			if(evt.getParameter("data").CountryCode == 'TW'){ this.getModel().setProperty("NetofferPrice", netOfferPrice, context); }
+			this.getModel().setProperty("NetofferPrice", netOfferPrice, context);
+
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
@@ -1647,6 +1670,33 @@ sap.ui.define([
 					filters: [
 						new Filter("CountryCode",FilterOperator.EQ, countryCode),
 						new Filter("InstituteID",FilterOperator.EQ, instituteId)	
+					],
+					success: function (res) {
+						resolve(res.results[0])
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+			
+		setHasOfferProductDetailsSaved: async function(){
+			const selectedOfferProduct = await this.getProductDetails(this.sOfferId, this.productId);
+			const isRequestedVolumeSet = !selectedOfferProduct || selectedOfferProduct.RequestedVolume === 0 || selectedOfferProduct.RequestedVolume === null ? false : true;
+			this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, isRequestedVolumeSet);
+			return isRequestedVolumeSet;
+		},
+
+		getProductDetails: async function (offerId, productCode) {
+			const path = "/PT_TMOFPR"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("OfferID",FilterOperator.EQ, offerId),
+						new Filter("ProductCode",FilterOperator.EQ, productCode),
+						new Filter("Active",FilterOperator.EQ, 1),
+						new Filter("LotID",FilterOperator.EQ, 1)
 					],
 					success: function (res) {
 						resolve(res.results[0])
