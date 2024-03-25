@@ -152,8 +152,8 @@ sap.ui.define([
 				PricingForm:{
 					editMode: false,
 					mainPriceConditionID: null,
-					hasOfferProductDetailsSaved: false,
-					instituteInBranch: true
+					instituteInBranch: true,
+					hasOfferProductDetailsSaved: false
 				},
 				FocForm:{
 					hasFocPriceCondition: false,
@@ -1664,6 +1664,24 @@ sap.ui.define([
 			offerHistoryTable.getBinding("items").filter(filters);
 		},
 
+		getInstituteView: function(instituteId, countryCode){
+			const path = "/InstitutesView"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("CountryCode",FilterOperator.EQ, countryCode),
+						new Filter("InstituteID",FilterOperator.EQ, instituteId)	
+					],
+					success: function (res) {
+						resolve(res.results[0])
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+			
 		setHasOfferProductDetailsSaved: async function(){
 			const selectedOfferProduct = await this.getProductDetails(this.sOfferId, this.productId);
 			const isRequestedVolumeSet = !selectedOfferProduct || selectedOfferProduct.RequestedVolume === 0 || selectedOfferProduct.RequestedVolume === null ? false : true;
@@ -1680,25 +1698,6 @@ sap.ui.define([
 						new Filter("ProductCode",FilterOperator.EQ, productCode),
 						new Filter("Active",FilterOperator.EQ, 1),
 						new Filter("LotID",FilterOperator.EQ, 1)
-					],
-					success: function (res) {
-						resolve(res.results[0])
-					},
-					error: function (err) {
-						reject(err)
-					}
-				});
-			});
-		},
-
-
-		getInstituteView: function(instituteId, countryCode){
-			const path = "/InstitutesView"; 
-			return new Promise((resolve, reject) => {
-				this.defaultModel.read(path, {
-					filters: [
-						new Filter("CountryCode",FilterOperator.EQ, countryCode),
-						new Filter("InstituteID",FilterOperator.EQ, instituteId)	
 					],
 					success: function (res) {
 						resolve(res.results[0])
