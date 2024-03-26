@@ -152,6 +152,7 @@ sap.ui.define([
 				PricingForm:{
 					editMode: false,
 					mainPriceConditionID: null,
+					instituteInBranch: true,
 					hasOfferProductDetailsSaved: false
 				},
 				FocForm:{
@@ -173,6 +174,9 @@ sap.ui.define([
 			this._bindView();
 			this._bindForm("ProductForm");
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
+			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -397,6 +401,7 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccessProductForm: function(res){
+			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 			this.refreshPricingForm();
 			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
@@ -404,7 +409,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
-				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId});
+				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 			}
 			
@@ -830,6 +835,7 @@ sap.ui.define([
 		 */
 		calculateTaiwanDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
+			let instituteInBranch = this.getModel("ui").getProperty("/PricingForm/instituteInBranch");
 			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
 			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.OfferPrice)) ? 0 : parseFloat(priceObj.OfferPrice));
 			let mainCustomerVolume = property?.toLowerCase().includes("anticipatedyearlyvolumemaincustomer") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeMainCustomer);
@@ -837,12 +843,12 @@ sap.ui.define([
 			let deductions = property?.toLowerCase().includes("deductions") ? value : (isNaN(parseFloat(priceObj.Deductions)) ? 0 : parseFloat(priceObj.Deductions));
 			let level2Discount2 = property?.toLowerCase().includes("level2discount2") ? value : (isNaN(parseFloat(priceObj.Level2Discount2)) ? 0 : parseFloat(priceObj.Level2Discount2));
 			let annualDiscount = property?.toLowerCase().includes("annualdiscountforbranch") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.AnnualDiscountForBranch)) ? 0 : parseFloat(priceObj.AnnualDiscountForBranch));
-			let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
-			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj}); 
-			let level3Discount1 = annualDiscount / branchVolume;
+			//let negotiationPrice = property?.toLowerCase().includes("negotiationprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.NegotiationPrice);
+			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,instituteInBranch,mainCustomerVolume,branchVolume,priceObj}); 
+			let level3Discount1 = instituteInBranch ? annualDiscount / branchVolume : annualDiscount / mainCustomerVolume;
 			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
 			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
-			let grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
+			let grpEstSaleValue = instituteInBranch && this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
 			let totalDiscount = (basePrice - price3) / basePrice;
 			let priceImpact = (invoicePrice - price3) / invoicePrice;
 			let generalDiscountAmount = invoicePrice * deductions;
@@ -863,6 +869,8 @@ sap.ui.define([
 
 		calculateTaiwanPriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
+			let instituteInBranch = this.getModel("ui").getProperty("/PricingForm/instituteInBranch");
+			let grpEstSaleValue = 0;
 			let basePrice = property?.toLowerCase().includes("baseprice") ? parseFloat(value).toFixed(2) : parseFloat(priceObj.BasePrice);
 			let invoicePrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.OfferPrice)) ? 0 : parseFloat(priceObj.OfferPrice));
 			let mainCustomerVolume = property?.toLowerCase().includes("anticipatedyearlyvolumemaincustomer") ? parseInt(value) : parseInt(priceObj.AnticipatedYearlyVolumeMainCustomer);
@@ -873,11 +881,11 @@ sap.ui.define([
 			let secondDiscountAmount = property?.toLowerCase().includes("seconddiscount_amount") ? parseFloat(value).toFixed(2) : (isNaN(parseFloat(priceObj.SecondDiscount_Amount)) ? 0 : parseFloat(priceObj.SecondDiscount_Amount));
 			let deductions = generalDiscountAmount / invoicePrice;
 			let level2Discount2 = secondDiscountAmount / invoicePrice;
-			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,branchVolume,priceObj}); 
-			let level3Discount1 = annualDiscount / branchVolume;
+			let netPrice = this.calculateNetOfferTaiwanPrice({invoicePrice,deductions,level2Discount2,instituteInBranch,mainCustomerVolume,branchVolume,priceObj}); 
+			let level3Discount1 = instituteInBranch ? annualDiscount / branchVolume : annualDiscount / mainCustomerVolume; 
 			let price3 = this.formatter.truncToTwoDecimalPlaces(netPrice - level3Discount1);
 			let estSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * mainCustomerVolume);
-			let grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume);
+			if (instituteInBranch) { grpEstSaleValue = this.formatter.truncToTwoDecimalPlaces(price3 * branchVolume); }
 			let totalDiscount = (basePrice - price3) / basePrice;
 			let priceImpact = (invoicePrice - price3) / invoicePrice;
 
@@ -1056,7 +1064,7 @@ sap.ui.define([
 		 * Warning: These functions need to be aligned with the backend implementations. 
 		 * see sta-service.js -> PriceConditionPriceWithFOCView
 		**/
-		calculateNetOfferTaiwanPrice: function({invoicePrice,deductions,level2Discount2,branchVolume, priceObj}){
+		calculateNetOfferTaiwanPrice: function({invoicePrice,deductions,level2Discount2,instituteInBranch,mainCustomerVolume,branchVolume, priceObj}){
 			const multiInput = this.byId('idFOCMultiInput');
 			
 			const offerProduct = priceObj.ProductCode;
@@ -1068,7 +1076,7 @@ sap.ui.define([
 
 			deductions = (deductions !== undefined && deductions !== null && deductions !== "") ? deductions : priceObj.Deductions;
 			level2Discount2 = (level2Discount2 !== undefined && level2Discount2 !== null && level2Discount2 !== "") ? level2Discount2 : priceObj.Level2Discount2;
-			branchVolume = (branchVolume !== undefined && branchVolume !== null && branchVolume !== "") ? branchVolume : priceObj.AnticipatedYearlyVolumeBranch;
+			branchVolume = instituteInBranch ? ((branchVolume !== undefined && branchVolume !== null && branchVolume !== "") ? branchVolume : priceObj.AnticipatedYearlyVolumeBranch) : mainCustomerVolume;
 			invoicePrice = (invoicePrice !== undefined && invoicePrice !== null && invoicePrice !== "") ? invoicePrice : priceObj.OfferPrice;
 
 			let paidVolume = 0;
@@ -1657,6 +1665,24 @@ sap.ui.define([
 			offerHistoryTable.getBinding("items").filter(filters);
 		},
 
+		getInstituteView: function(instituteId, countryCode){
+			const path = "/InstitutesView"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("CountryCode",FilterOperator.EQ, countryCode),
+						new Filter("InstituteID",FilterOperator.EQ, instituteId)	
+					],
+					success: function (res) {
+						resolve(res.results[0])
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+			
 		setHasOfferProductDetailsSaved: async function(){
 			const selectedOfferProduct = await this.getProductDetails(this.sOfferId, this.productId);
 			const isRequestedVolumeSet = !selectedOfferProduct || selectedOfferProduct.RequestedVolume === 0 || selectedOfferProduct.RequestedVolume === null ? false : true;
@@ -1683,5 +1709,22 @@ sap.ui.define([
 				});
 			});
 		},
+
+		getTaiwanInstituteInBranch: async function(instituteId, parentInstituteId, countryCode){
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/InstituteInBranchView", {
+					filters: [
+						new Filter("ParentInstituteID", "EQ", parentInstituteId),
+						new Filter("InstituteID", "NE", instituteId),
+						new Filter("CountryCode", "EQ", countryCode)
+					],
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/PricingForm/instituteInBranch", data.results.length > 0);
+			})
+		}
     });
 });

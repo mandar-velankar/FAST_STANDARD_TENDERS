@@ -207,7 +207,7 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status, isProductDeclined) {
+        getEnablementObject: function (status, isProductDeclined, stTenderRoles) {
 
 			const isOverviewTabVisible = !!status;
 			const checkCopyOfferBtn = status === "Quotation Submitted" || status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
@@ -247,7 +247,7 @@ sap.ui.define([
 						},
 					},
 					OverviewTab: {
-						isVisible: isOverviewTabVisible,
+						isVisible: isOverviewTabVisible && !stTenderRoles.LimitedPricingTabAccess,
 						enableDownload: checkOverviewDownloadBtn,
 						enableSetAsSubmited: checkOverviewSetAsSubmitBtn,
 						OverviewForm: {
@@ -259,10 +259,10 @@ sap.ui.define([
 						}
 					},
 					AwardTab: {
-						isVisible: checkCopyOfferBtn,
+						isVisible: checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess,
 					},
 					DeliveryTrackingTab: {
-						isVisible: isDeliveryTruckingVisible,
+						isVisible: isDeliveryTruckingVisible && !stTenderRoles.LimitedPricingTabAccess,
 					}
 				},
 				OfferProductDetail: {
@@ -270,9 +270,11 @@ sap.ui.define([
 						editMode: isTenderOfferOverviewVisible
 					},
 					OfferPricingInfo:{
+						isVisible: !stTenderRoles.LimitedPricingTabAccess,
 						editMode: isTenderOfferOverviewVisible && !isProductDeclined 
 					},
 					OfferProductFOC:{
+						isVisible: !stTenderRoles.LimitedPricingTabAccess,
 						editMode: isTenderOfferOverviewVisible && !isProductDeclined
 					},
 				},

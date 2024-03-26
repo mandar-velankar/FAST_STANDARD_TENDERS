@@ -114,6 +114,16 @@
 			}
 		},
 
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css",
+					"id": ""
+				}
+			],
+			"js": []
+		},
+
 		"routing": {
 			"config": {
 				"routerClass": "sap.f.routing.Router",
