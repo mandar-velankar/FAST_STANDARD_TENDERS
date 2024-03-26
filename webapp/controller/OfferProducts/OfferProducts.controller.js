@@ -127,6 +127,12 @@ sap.ui.define([
 			});
 		},
 
+		setPaymentTermFieldVisible: function (form) {
+			const paymentTermsField = form.getAggregation("formContainers")[1]
+			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
+			paymentTermsField.setVisible(false);
+		},
+
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
 		 * FYI: the table ID in the View is a concatination of "id" + tableName
@@ -291,7 +297,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
-			this.getModel().refresh();
+			//this.getModel().refresh();
 		},
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
@@ -346,6 +352,8 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
 			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
+			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form);}
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
@@ -370,9 +378,21 @@ sap.ui.define([
 
 		onCreateNewOffer: async function () {
 			this.oMessageManager.removeAllMessages();
+			let paymentTerm = '';
 			const oNewOfferForm = this.byId("idNewOfferForm");
 			const nextOfferID = await this._getNextOfferID(this.objectId);
-			this.setNewOfferPendingChanges(oNewOfferForm,nextOfferID);
+			const selectedTender = await this.stState.getService().getTender(this.objectId);
+			if(selectedTender.Region === 'MEA'){
+				if(selectedTender.TenderChannel === 'Direct'){
+					const institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
+					paymentTerm = institute.PaymentTerms;
+				}
+				else{
+					const distributor = await this.stState.getService().getDistributor(oNewOfferForm.getElementBinding().getBoundContext().getObject().DistributorID,this.countryCode);
+					paymentTerm = distributor.PaymentTerms;
+				}
+			}
+			this.setNewOfferPendingChanges(oNewOfferForm,nextOfferID, selectedTender.Region, paymentTerm);
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
@@ -380,7 +400,7 @@ sap.ui.define([
 			});
 		},
 
-		setNewOfferPendingChanges: async function (oForm,nextOfferID) {
+		setNewOfferPendingChanges: async function (oForm,nextOfferID, region, paymentTerm) {
 			const oDefaultModel = oForm.getModel();
 			const oStandModel = oForm.getModel("ui");
 			const oBoundContext = oForm.getElementBinding().getBoundContext();
@@ -432,6 +452,10 @@ sap.ui.define([
 			newOfferObj.Division = oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 			newOfferObj.DistributorComments = this.productScope;
+			if(region === 'MEA'){
+				newOfferObj.Custom_String_1 = paymentTerm;
+			}
+			
 
 			const statusObj = {
 					TenderID: this.objectId,
@@ -745,13 +769,26 @@ sap.ui.define([
 
 				const aFilteredBrandProducts = this.filterBrandProducts(brands);
 				this.getModel("ui").setProperty("/OfferProductTable/productCollection", aFilteredBrandProducts);
-
+				this.setScrollProductsInputContainter();
 			} else {
 
 				MessageToast.show("No new item was selected.");
 
 			}
 			
+		},
+
+		setScrollProductsInputContainter:function(){
+			const productsInput = this.getModel('ui').getProperty('/OfferProductTable/productCollection');
+			const inputItemsHeight = productsInput.length * 67;
+			const dialogContentHeight = sap.ui.getCore().byId('addProductDialog').getContent()[0].getDomRef().offsetHeight;
+			let parentHeight = dialogContentHeight - 49 - 65; //todo: add check for message of MercadoInProductsMessage
+			sap.ui.getCore().byId("idListProductsInputContainer").removeStyleClass("listInDialogWithMessage");
+			sap.ui.getCore().byId("idListProductsOutputContainer").removeStyleClass("listInDialogWithMessage");
+			if(inputItemsHeight>=parentHeight){
+				sap.ui.getCore().byId("idListProductsInputContainer").addStyleClass("listInDialogWithMessage");
+				sap.ui.getCore().byId("idListProductsOutputContainer").addStyleClass("listInDialogWithMessage");
+			}
 		},
 
 		filterBrandProducts: function(brands){

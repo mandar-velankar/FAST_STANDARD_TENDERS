@@ -62,7 +62,7 @@
 				<form:formElements>
 					<form:FormElement>
 						<form:fields>
-							<Text text="{i18n>PriceConditionTaiwanPricingFragment.Last12monthVolume}" />
+							<Text text="{i18n>PriceConditionTaiwanPricingFragment.Last12monthVolume}" visible="{ui>/PricingForm/instituteInBranch}"/>
 						</form:fields>
 					</form:FormElement>
                     <form:FormElement>
@@ -72,24 +72,24 @@
 					</form:FormElement>
 					<form:FormElement>
 						<form:fields>
-							<Text text="{i18n>PriceConditionTaiwanPricingFragment.AnticipatedYearlyVolume}" />
+							<Text text="{i18n>PriceConditionTaiwanPricingFragment.AnticipatedYearlyVolume}" visible="{ui>/PricingForm/instituteInBranch}"/>
 						</form:fields>
 					</form:FormElement>
 				</form:formElements>
 			</form:FormContainer>
             <form:FormContainer>
 				<form:formElements>
-					<form:FormElement label="Main Customer">
+					<form:FormElement label="{= ${ui>/PricingForm/instituteInBranch} ? ${i18n>PriceConditionTaiwanPricingFragment.MainCustomer} : ${i18n>PriceConditionTaiwanPricingFragment.Last12monthVolume} }">
 						<form:fields>
 							<Input value="{Last12MonthsVolumeMainCustomer}" enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="Branch">
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.Branch}" visible="{ui>/PricingForm/instituteInBranch}">
 						<form:fields>
-							<Input value="{Last12MonthsVolumeBranch}" enabled="false"/>
+							<Input value="{Last12MonthsVolumeBranch}" enabled="false" visible="{ui>/PricingForm/instituteInBranch}"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="Main Customer">
+					<form:FormElement label="{= ${ui>/PricingForm/instituteInBranch} ? ${i18n>PriceConditionTaiwanPricingFragment.MainCustomer} : ${i18n>PriceConditionTaiwanPricingFragment.AnticipatedYearlyVolume} }">
 						<form:fields>
 							<Input
 								required="true"
@@ -99,12 +99,13 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="Branch">
+					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.Branch}" visible="{ui>/PricingForm/instituteInBranch}">
 						<form:fields>
 							<Input 
 								required="true"
 								value="{AnticipatedYearlyVolumeBranch}"
 								enabled="{ui>/PricingForm/editMode}"
+								visible="{ui>/PricingForm/instituteInBranch}"
 								liveChange=".onAnticipatedYearlyVolumeLiveChange($event, 'TaiwanDiscount')"
 							/>
 						</form:fields>
@@ -235,7 +236,7 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.QuotationAnnualDiscount}" >
+					<form:FormElement label="{= ${ui>/PricingForm/instituteInBranch} ? ${i18n>PriceConditionTaiwanPricingFragment.QuotationAnnualDiscount} : ${i18n>PriceConditionTaiwanPricingFragment.QuotationAnnualDiscountWithoutBranch} }">
 						<form:fields>
 							<Input
 								value="{
@@ -301,7 +302,7 @@
 								enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.EstSaleValueMainCustomer}" >
+                    <form:FormElement label="{= ${ui>/PricingForm/instituteInBranch} ? ${i18n>PriceConditionTaiwanPricingFragment.EstSaleValueMainCustomer} : ${i18n>PriceConditionTaiwanPricingFragment.EstSaleValueMainCustomerWithoutBranch} }">
 						<form:fields>
 							<Input 
 								value="{
@@ -317,7 +318,7 @@
 								enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GroupEstSaleValueBranch}" >
+                    <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.GroupEstSaleValueBranch}" visible="{ui>/PricingForm/instituteInBranch}">
 						<form:fields>
 							<Input 
 								value="{
@@ -330,7 +331,8 @@
 										preserveDecimals: false
 									}	
 								}" 
-								enabled="false"/>
+								enabled="false"
+								visible="{ui>/PricingForm/instituteInBranch}"/>
 						</form:fields>
 					</form:FormElement>
                     <form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.TotalDiscount}" >
@@ -509,7 +511,9 @@
 									parts: ['TotalYearlyValueBranch', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
-								enabled="false" width="300px"/>
+								enabled="false" 
+								visible="{ui>/PricingForm/instituteInBranch}"
+								width="300px"/>
 						</form:fields>
 					</form:FormElement>
                     <form:FormElement >

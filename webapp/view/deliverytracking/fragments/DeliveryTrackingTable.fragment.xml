@@ -32,7 +32,13 @@
                             press=".onButtonEditDeliveryPress"
                             visible="{= !${ui>/DeliveryTrackingForm/editMode}}"
                         />
-                        
+                        <Button
+                            icon="sap-icon://alert"
+                            text="{= ${messages>/deliveryTrackingDetail}.length }"
+                            visible="{= ${messages>/deliveryTrackingDetail}.length > 0 &amp;&amp; ${ui>/DeliveryTrackingForm/editMode}}"
+                            type="Emphasized"
+                            press="onMessagePopoverPress($event, 'deliveryTrackingDetail')"
+                        />
                         <Button
                             class="sapUiSmallMarginBegin"
                             icon="sap-icon://save"
@@ -58,14 +64,16 @@
                 </Column>
                 <Column>
                     <Label
-                        text="{i18n>DeliveryTrackingProductReqDeliveryDate}"
+                        text="{i18n>DeliveryTrackingProductActualDeliveryDate}"
                         wrapping="true"
+                        required="true"
                     />
                 </Column>
                 <Column>
                     <Label
-                        text="{i18n>DeliveryTrackingProductRequestedQty}"
+                        text="{i18n>DeliveryTrackingProductActualDeliveryQty}"
                         wrapping="true"
+                        required="true"
                     />
                 </Column>
                 <Column>
@@ -79,21 +87,23 @@
             <items>
                 <ColumnListItem>
                     <cells>
-                        <ComboBox
+                        <Select
+                            id="idChildInstitutesSelect"
+                            items="{path: '/ChildInstitutesView', templateShareable:true}"
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
-                            selectedKey="{InstituteName}"
+                            selectedKey="{InstituteID}"
                         >
                             <items>
                                 <core:Item
                                     text="{InstituteName}"
-                                    key="{InstituteName}"
+                                    key="{InstituteID}"
                                 />
                             </items>
-                        </ComboBox>
+                        </Select>
                         <DatePicker
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                             value="{
-                                'path':'RequestedDeliveryDate',
+                                'path':'ActualDeliveryDate',
                                 'type':'sap.ui.model.type.Date',
                                 'formatOptions': {
                                     pattern: 'dd-MM-yyyy',
@@ -102,20 +112,28 @@
                             }"
                         />
                          <Input
-                            value="{RequestedQuantity}"
+                            value="{ActualDeliveryQuantity}"
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                         />
-                        <ComboBox
+                        <Select
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                             selectedKey="{PaidOrFree}"
                         >
                             <items>
                                 <core:Item
-                                    text="{PaidOrFree}"
-                                    key="{PaidOrFree}"
+                                    text=""
+                                    key=""
+                                />
+                                <core:Item
+                                    text="Paid"
+                                    key="Paid"
+                                />
+                                <core:Item
+                                    text="Free"
+                                    key="Free"
                                 />
                             </items>
-                        </ComboBox>                   
+                        </Select>                   
                         <Button
                             class="sapUiSmallMarginBegin"
                             icon="sap-icon://delete"

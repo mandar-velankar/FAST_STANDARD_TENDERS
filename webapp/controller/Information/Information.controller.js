@@ -239,6 +239,7 @@ sap.ui.define([
 		calculateTotalAmount: function (offer) {
 			const unit = offer.UNIT;
 			const currency = offer.CURRENCY || "";
+			const region = offer.Region || "";
 			let totalAmount = "";
 			switch (unit) {
 				case "Unit":
@@ -250,7 +251,7 @@ sap.ui.define([
 				default:
 					break;
 			}
-			return formatter.formatCurrency(totalAmount, currency);
+			return formatter.formatCurrency(totalAmount, currency, region);
 		},
 
 		formatApprovalStatus: function (approvalStatus) {
@@ -449,6 +450,7 @@ sap.ui.define([
 
 		_onSubmitChangesApprovalsSuccess: async function(res){
 			await this._enableApprovalCancelButtons();
+			this.cancelPendingChanges(["OfferProductOfferStatus"], "approvalMsg");
 		},
 
 		/**
@@ -511,6 +513,7 @@ sap.ui.define([
 		},
 
 		onSubmitQuotation: async function(){
+			this.cancelPendingChanges(["OfferValidation"], "OverviewForm");
 			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
 			this.onOverviewTenderFormSaveBtnPress();
 			this.createNewAwardedProducts();

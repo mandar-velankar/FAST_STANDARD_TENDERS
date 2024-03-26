@@ -260,12 +260,23 @@ sap.ui.define([
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
 			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
+			const sorters = [
+				new Sorter({
+					path: 'TenderID', 
+					descending: true
+				}),
+				new Sorter({
+					path: 'OfferID', 
+					descending: true
+				})
+			]
 
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;
 			table && table.bindItems({
 				path: `/${this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getEntity()}`,
 				filters: [oFilterCountry],
+				sorter: sorters,
 				//   model: '',
 				template: new ColumnListItem({
 					type: "Active",
@@ -575,6 +586,7 @@ sap.ui.define([
 			this.filterMasterTable(oItem.TenderID);
 			this.getModel("st").setProperty("/SelectedTender", oItem);
 			this.getModel("st").setProperty("/SelectedInstituteID", oItem?.InstituteID);
+			StandardSingletonService.setTenderID(oItem?.TenderID);
 			StandardSingletonService.setParentInstituteID(oItem?.InstituteID);
 			if (oItem.OfferID) {
 				const offer = await this.stState.getService().getOffer(oItem.OfferID);
@@ -615,6 +627,7 @@ sap.ui.define([
 		 * @private
 		 */
 		_applyFilterSearch: function () {
+			this._oList.getBinding("items").aFilters = [];
 			var aFilters = this._oListFilterState.aSearch.concat(this._oListFilterState.aFilter),
 				oViewModel = this.getModel("masterView");
 			this._oList.getBinding("items").filter(aFilters, "Application");
@@ -670,12 +683,16 @@ sap.ui.define([
 			const sCountryCode = this.byId("idSlctCountry").getSelectedKey();
 			const nextTenderID = await this._getNextTenderID(sCountryCode);
 			const userFullName = this.getModel("st").getProperty("/UserFullName");
-
+			const today = new Date();
+			const nextDate = new Date(today);
+			nextDate.setDate(today.getDate() + 1);
 			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`, this.countryCode === 'TW' ? 'Tender': '');
+			this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, this.countryCode === 'TW' ? today: '');
+			this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, this.countryCode === 'TW' ? nextDate: '');
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
@@ -870,9 +887,8 @@ sap.ui.define([
 			if (sCountryCode) {
 				this.andFilters.push(new Filter({
 					path: "CountryCode",
-					operator: FilterOperator.Contains,
-					value1: sCountryCode,
-					caseSensitive: false
+					operator: FilterOperator.EQ,
+					value1: sCountryCode
 				}));
 
 				StandardSingletonService.setCountryCode(sCountryCode);
@@ -892,9 +908,8 @@ sap.ui.define([
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
 				this.andFilters.push(new Filter({
 					path: "BrandID",
-					operator: FilterOperator.Contains,
-					value1: sBrandId,
-					caseSensitive: false
+					operator: FilterOperator.EQ,
+					value1: sBrandId
 				}));
 			}
 
@@ -914,6 +929,13 @@ sap.ui.define([
 
 
 			if (this.andFilters.length > 0) {
+				this._oList.getBinding('items').aApplicationFilters = [];
+				//BrandID filter always should be in the of filter list
+				this.andFilters.sort((a, b) => a?.sPath < b?.sPath ? 1 : (a.sPath === b.sPath ? 0 : -1));
+				if(!('sPath' in this.andFilters[this.andFilters.length-1])) {
+					let searchFilters = this.andFilters.splice(this.andFilters.length-1, 1);
+					this.andFilters.unshift(searchFilters[0]);
+				}
 				const oFilters = new Filter(this.andFilters, true);
 				// this._oList.getBinding("items").aFilters = []
 				//Binding to table with the filters and the sorters

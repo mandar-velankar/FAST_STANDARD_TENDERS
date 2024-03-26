@@ -56,7 +56,7 @@
 					enabled="{= ${ui>/enableApprovalButton} }"
 				/>
 
-				<MenuButton id="idDownloadAttachmentButton" text="Download" buttonMode="Split" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode} &amp;&amp; (${st>/SelectedCountry} !== 'PK' || ${accessControl>/standardtenderAccess/OverviewDownload}) }" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">
+				<MenuButton id="idDownloadAttachmentButton" text="Download" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode} &amp;&amp; (${st>/SelectedCountry} !== 'PK' || ${accessControl>/standardtenderAccess/OverviewDownload}) }" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">
 					<menu>
 						<Menu itemSelected="onMenuAction">
 							<MenuItem id="btnWordDownload" text="Word" icon="sap-icon://doc-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0}" items="{ui>/WordTemplateCountry}">
@@ -172,37 +172,39 @@
 								text="{
 									parts: [
 										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
-										{path: 'CURRENCY'}
+										{path: 'CURRENCY'},
+										{path: 'Region'}
 									],
-									formatter: '.formatter.formatCurrency'	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
 							/>	
 							<ObjectStatus 
 								text="{
 									parts: [
 										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
-										{path: 'CURRENCY'}
+										{path: 'CURRENCY'},
+										{path: 'Region'}
 									],
-									formatter: '.formatter.formatCurrency'	
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
 							/>
 							<Text 
 								text = "{
-									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY'],
-									formatter: '.formatter.formatCurrency'	
+									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"					
 							/>
 							<Text 
 								text = "{
-									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY'],
-									formatter: '.formatter.formatCurrency'	
+									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>
 							<ObjectStatus 
-								text="{
-									path: '',
-									formatter: '.calculateTotalAmount'
-								}"
+								text = "{
+									parts: ['NET_SALES_OFFER_CURRENCY', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
 							/>					
 						</cells>
 					</ColumnListItem>

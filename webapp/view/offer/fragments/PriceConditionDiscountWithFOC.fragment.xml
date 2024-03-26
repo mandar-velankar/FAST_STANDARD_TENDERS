@@ -24,7 +24,7 @@
 					text="Edit"
 					press=".onPricingFormEditBtnPress"
 					visible="{= !${ui>/PricingForm/editMode} }"
-					enabled="{= ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
+					enabled="{= ${ui>/PricingForm/hasOfferProductDetailsSaved} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
 				/>
 				<Button
 					icon="sap-icon://save"
@@ -62,12 +62,8 @@
 					<form:FormElement label="{i18n>CurrentBasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											preserveDecimals: false
-										}	
+										parts: ['CurrentBasePrice', 'Currency', 'Region'],
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="false"/>
 						</form:fields>
@@ -75,12 +71,8 @@
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'sap.ui.model.type.Currency',
-										formatOptions: {
-											showMeasure: true,
-											preserveDecimals: false
-										}	
+										parts: ['BasePrice', 'Currency', 'Region'],
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="false"/>
 						</form:fields>
@@ -101,12 +93,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['OfferPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									parts: ['OfferPrice', 'Currency', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
 							/>
@@ -116,12 +104,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetOfferPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									parts: ['NetOfferPrice', 'Currency', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
 							/>
@@ -143,12 +127,8 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency'],
-									type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										preserveDecimals: false
-									}	
+									parts: ['NetPrice', 'Currency', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"/>
 						</form:fields>

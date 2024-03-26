@@ -61,6 +61,14 @@ sap.ui.define([
             this.BU = BU;
         },
 
+		getTenderID: function(){
+			return this.tenderID;
+		},
+
+		setTenderID: function(tenderID){
+			this.tenderID = tenderID;
+		},
+
         onChangeOutcome: function (event, StandardSingletonService) {
             const source = event.getSource();
             const reasonItemBinding = source.getParent().getParent().getAggregation("formElements")
@@ -220,10 +228,10 @@ sap.ui.define([
 					TenderTab: {
 						isVisible: true,
 						AwardCriteria:{
-							editMode: isTenderOfferOverviewVisible
+							editMode: !status || isTenderOfferOverviewVisible
 						},
 						TenderForm:{
-							editMode: isTenderOfferOverviewVisible	
+							editMode: !status || isTenderOfferOverviewVisible	
 						},
 					},
 					OfferTab: {

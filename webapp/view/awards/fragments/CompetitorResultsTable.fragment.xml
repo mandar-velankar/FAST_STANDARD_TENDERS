@@ -22,6 +22,13 @@
                     <OverflowToolbar>
                         <ToolbarSpacer />
                         <Button
+                            icon="sap-icon://alert"
+                            text="{= ${messages>/competitorResults}.length }"
+                            visible="{= ${messages>/competitorResults}.length > 0 &amp;&amp; ${ui>/CompetitorResultsForm/editMode}}"
+                            type="Emphasized"
+                            press="onMessagePopoverPress($event, 'competitorResults')"
+                        />
+                        <Button
                             icon="sap-icon://add"
                             text="Add"
                             press=".onButtonCompetitorResultsCreatePress"
@@ -98,7 +105,7 @@
                             <ComboBox
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                                 selectedKey="{AWARDEDPRODUCT}"
-                                items="{/MasterCompetitors}"
+                                items="{/MasterCompetitorProducts}"
                                 change=".onSetCompetitorResultsChanges($event, 'AwardedProduct')"
                             >
                                 <items>
@@ -123,14 +130,8 @@
                             </ComboBox>
                             <Input
                                 value="{
-                                    parts: ['AWARDEDPRICE', 'CURRENCY'],
-                                    type: 'sap.ui.model.type.Currency',
-									formatOptions: {
-										showMeasure: true,
-										minFractionDigits: 2,
-										maxFractionDigits: 2,
-										preserveDecimals: false
-									}
+                                    parts: ['AWARDEDPRICE', 'CURRENCY', 'ui>/CompetitorResultsForm/region'],
+                                    type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
                                 }"
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
                             />

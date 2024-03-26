@@ -5,18 +5,26 @@ sap.ui.define([
 ], function (CompositeType,ValidateException,NumberFormat) {
     "use strict";
 
-    const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+    /*const oCurrencyFormat = NumberFormat.getCurrencyInstance({
         minFractionDigits: 2,
         maxFractionDigits: 2
-    });
+    });*/
 
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType", {
 
         formatValue: function(parts) {
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+                    minFractionDigits: parts[2] === 'MEA' ? 3 : 2,
+                    maxFractionDigits: parts[2] === 'MEA' ? 3 : 2
+                });
 			return `${oCurrencyFormat.format(Number(parts[0] ?? 0))} ${parts[1] ?? ''}` ;
         },
 
         parseValue: function(oValue) {
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+                    // minFractionDigits: 2,
+                    // maxFractionDigits: 2
+                });
             return oCurrencyFormat.parse(oValue.replace(",","."));
 
         },
