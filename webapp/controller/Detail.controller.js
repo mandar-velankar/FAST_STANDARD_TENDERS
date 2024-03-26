@@ -58,7 +58,8 @@ sap.ui.define([
 		},
 
 		handleStatusChange: function(channel, event, data) {
-			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus, {OfferID: this.sOfferId, ProductCode: this.productId});
+			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
+			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 		},
 
 		/* =========================================================== */
@@ -190,12 +191,13 @@ sap.ui.define([
 				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
 				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+				const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();
-				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId});
+				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 			}.bind(this));
 		},
 
