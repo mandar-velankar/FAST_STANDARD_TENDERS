@@ -50,7 +50,8 @@ sap.ui.define([
 			this.stState = this.getOwnerComponent().getModel("st");
 
 			const oModel = this.getOwnerComponent().getModel();
-			
+
+			this.getOwnerComponent().getEventBus().subscribe("OfferProductsTableChannel", "updateOfferProductsTable", this.handleUpdateOfferProductTable, this);
 		},
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			// get state data
@@ -1278,6 +1279,10 @@ sap.ui.define([
 		isCopiedOffer: function(str) {
 			const match = str.match(/-[^-]*[CR]/);
 			return match !== null;
+		},
+
+		handleUpdateOfferProductTable: function () {
+			this.byId('idOfferProductsTable').getBinding("items").refresh();
 		}
 	});
 });

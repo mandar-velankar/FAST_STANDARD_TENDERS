@@ -168,7 +168,7 @@ sap.ui.define([
 			});
 	
 			this.setModel(oModel, "ui");
-
+			this.offerStatus = await this.stState.getOfferStatus(sOfferId);
 			const priceConditionType = await this.getSavedPriceConditionType();
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 			this._bindView();
@@ -408,7 +408,8 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
-				this._refreshOfferProductTable();
+				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId});
+				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 			}
 			
 		},
