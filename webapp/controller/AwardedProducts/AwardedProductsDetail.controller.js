@@ -426,6 +426,7 @@ sap.ui.define([
 				this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 				this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
 				this.byId('idCompetitorResultTable').getBinding('items').refresh();
+				this.bindTable(this.offerId, this.productId);
 			}
 			this.byId('idCompetitorResultTable').setBusy(false);
 		},
@@ -502,8 +503,8 @@ sap.ui.define([
 					this.defaultModel.setProperty(`${path}/AWARDEDCOMPANY`, value, context);
 					this.defaultModel.setProperty(`${path}/AWARDEDPRODUCT`, '', context);
 					this.filterAwardedProducts(event.getSource(), value);
-					const masterCompetitors = await this.getMasterCompetitors(value);
-					this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
+					// const masterCompetitors = await this.getMasterCompetitors(value);
+					// this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
 					this.defaultModel.setProperty(`${path}/Custom_String_2`, this.countryCode, context) //MasterCompetitors field used for MasterCompetitors upsert operation
 					break;
 				case "AwardedProduct":
