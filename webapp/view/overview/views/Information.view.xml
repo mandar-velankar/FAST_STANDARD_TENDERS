@@ -210,4 +210,59 @@
 					</ColumnListItem>
 				</items>
 			</Table>
+
+			<Table 
+				id="idProductFOCInformationTable" 
+				mode="SingleSelectMaster"
+				items="{path : 'ui>/StandardTenderFOCInformation'}"
+			>
+			<headerToolbar>
+			<OverflowToolbar>
+					<Title text="{i18n>FOCInformation}" />
+			</OverflowToolbar>
+			</headerToolbar>
+				<columns>
+					<Column>
+						<Label text="{i18n>MainProduct}" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="{i18n>FOCProduct}" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="{i18n>AddedIncluded}" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="{i18n>Type}" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="{i18n>Bonus}" wrapping="true"/>
+					</Column>
+					<Column>
+						<Label text="{i18n>MinOrderQty}" wrapping="true"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{ui>MainProductName}"/>	
+							<Text text="{ui>FOCProductName}"/>
+							<Text text="{ui>ADD_INCLUDE}"/>
+							<Text text="{ui>Type}"/>
+							<Text text="{ui>Bonus}"/>
+							<Text 
+								text ="{
+									path: 'ui>MinOrderQty',
+									type: 'sap.ui.model.type.Integer',
+									formatOptions: { 
+										maxFractionDigits: 0,
+										minFractionDigits: 0, 
+										groupingEnabled: true, 
+										groupingSeparator: ','
+									}
+								}"							
+							/>				
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
 </mvc:View>
