@@ -48,15 +48,7 @@ sap.ui.define([
 			return oOffer;
 		},
 		getOfferProduct: async function (offerID, productCode) {
-			const sOfferProductKey = this.model.createKey("/OfferProductsDetailView", {
-				OfferID: offerID,
-				ProductCode: productCode,
-				Active: 1,
-				LotID: 1
-			});
-			let oOfferProduct = this.model.getObject(sOfferProductKey);
-			if (!oOfferProduct) {
-				return new Promise((resolve, reject) => {
+			return new Promise((resolve, reject) => {
 					this.model.read("/OfferProductsDetailView", {
 						filters: [
 							new Filter("OfferID", "EQ", offerID),
@@ -69,8 +61,6 @@ sap.ui.define([
 						}
 					});
 				})
-			}
-			return oOfferProduct;
 		},
 
 		getProductSKU: async function (countryCode, productCode) {
