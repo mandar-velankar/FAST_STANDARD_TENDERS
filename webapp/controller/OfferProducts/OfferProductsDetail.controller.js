@@ -974,7 +974,7 @@ sap.ui.define([
 		calculateDiscountWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
-			let discount = property?.toLowerCase().includes("discount") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : priceObj.Discount;
+			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(4) : priceObj.Discount;
 			let offerPrice = priceObj.Region === 'MEA' ? Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(3) : Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
 			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
@@ -1018,7 +1018,7 @@ sap.ui.define([
 				const FOC = getFOCWitSameProductCode(foc, offerProduct);
 				switch(FOC.FreeGoodsOther_ABS_PCT){
 					case "ABS":
-						focVolume = FOC.FreeGoodsOther;
+						focVolume = Number(FOC.FreeGoodsOther);
 						break;
 					case "PCT":
 						focVolume = Math.round(priceObj.RequestedVolume * FOC.FreeGoodsOther);
@@ -1091,7 +1091,7 @@ sap.ui.define([
 				const FOC = getFOCWitSameProductCode(foc, offerProduct);
 				switch(FOC.FreeGoodsOther_ABS_PCT){
 					case "ABS":
-						focVolume = FOC.FreeGoodsOther;
+						focVolume = Number(FOC.FreeGoodsOther);
 						break;
 					case "PCT":
 						focVolume = FOC.FreeGoodsOther * branchVolume;
