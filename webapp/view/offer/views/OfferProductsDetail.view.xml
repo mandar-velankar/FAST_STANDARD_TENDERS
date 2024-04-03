@@ -147,6 +147,7 @@
                 <Panel
                     expandable="true"
                     headerText="{i18n>OfferProductsDetailView.PricingInfo}"
+                    visible="{= ${em>/OfferProductDetail/OfferPricingInfo/isVisible}}"
                 >
                     <Label 
                         text="Set price by:" 
@@ -170,7 +171,7 @@
 				</Panel>
                  <Panel
                     expandable="true"
-                    visible="{ui>/FocForm/hasFocPriceCondition}"
+                    visible="{= ${ui>/FocForm/hasFocPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/isVisible}}"
                     headerText="{i18n>OfferProductsDetailView.FreeGoods}"
                 >
                     <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionFOC" type="XML"/>
