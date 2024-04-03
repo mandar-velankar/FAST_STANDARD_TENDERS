@@ -7,8 +7,9 @@ sap.ui.define(["sap/m/Text",
                "sap/m/DatePicker", 
                "./ValueHelp",
                "../../service/StandardSingletonService",
-               "sap/ui/model/Filter"
-], function (Text, BaseObject, ControlProperty, Input, MultiInput, DatePicker, ValueHelp, StandardSingletonService, Filter) {
+               "sap/ui/model/Filter",
+               "sap/m/TextArea"
+], function (Text, BaseObject, ControlProperty, Input, MultiInput, DatePicker, ValueHelp, StandardSingletonService, Filter,TextArea) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (parentId,data) {
@@ -34,6 +35,8 @@ sap.ui.define(["sap/m/Text",
       for (const prop of this.properties) {
         if(prop.getName() === "enabled"){
           props[prop.getName()] = prop.getIsBinding() ? '{= '+prop.getValue()+' && ${ui>/'+this.parentId+'/editMode}}' : prop.getValue();
+        }else if (prop.getName() === 'rows'){
+          props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : +prop.getValue();
         }else{
           props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : prop.getValue();
         }
