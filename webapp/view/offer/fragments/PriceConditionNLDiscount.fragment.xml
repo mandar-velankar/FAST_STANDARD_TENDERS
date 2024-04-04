@@ -29,13 +29,13 @@
 				<Button
 					icon="sap-icon://save"
 					text="Save"
-					press=".onPricingFormSaveBtnPress"
+					press=".onNetherlandsPricingFormSaveBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 				<Button
 					icon="sap-icon://decline"
 					text="Cancel"
-					press=".onPricingFormCancelBtnPress"
+					press=".onNetherLandsPricingFormCancelBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 			</Toolbar>
@@ -62,7 +62,7 @@
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.AIP}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency'],
+										parts: ['BasePrice', 'Currency'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}" 
 									enabled="false"

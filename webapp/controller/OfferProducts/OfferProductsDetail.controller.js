@@ -801,6 +801,12 @@ sap.ui.define([
 				case "taiwanprice":
 					this.calculateTaiwanPriceConditionType({property, value, context});
 					break;
+				case "nldiscount":
+					this.calculateNetherlandsDiscountConditionType({property, value, context});
+					break;
+				case "nlprice":
+					this.calculateNetherlandsPriceConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -1725,6 +1731,70 @@ sap.ui.define([
 			}).then(data => {
 				this.getModel("ui").setProperty("/PricingForm/instituteInBranch", data.results.length > 0);
 			})
+		},
+
+		onNetherLandsPricingFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionNLPriceView", "PriceConditionNLDiscountView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
+		onNetherlandsPricingFormSaveBtnPress: function(event){
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idOfferPrice")?.getProperty("value");
+			// this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesNetherlandsPriceSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesNetherlandsPriceSuccess: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionNLPriceView", "PriceConditionNLDiscountView"]).length > 0;
+			this.setMessageSection(["PriceConditionNLPriceView", "PriceConditionNLDiscountView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionNLPriceView", 
+				"PriceConditionNLDiscountView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["idOfferPrice", "PriceConditionNLPriceView", "PriceConditionNLDiscountView"], "priceCondPrice");
+			} 
+			this._refreshOfferProductTable();
+			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+		},
+
+		calculateNetherlandsDiscountConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
+			// let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let offerPrice = Number((parseFloat(priceObj.CurrentBasePrice) * (1 - discount)).toFixed(2));
+			// let netPrice = offerPrice * (1 - deductions);
+			// netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
+			context.getModel().setProperty("OfferPrice", offerPrice, context);
+			// context.getModel().setProperty("NetPrice", netPrice, context);
+		},
+
+		calculateNetherlandsPriceConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
+			// let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
+			// let netPrice = offerPrice * (1 - deductions);
+			// netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
+			context.getModel().setProperty("Discount", discount, context);
+			// context.getModel().setProperty("NetPrice", netPrice, context);
 		}
     });
 });
