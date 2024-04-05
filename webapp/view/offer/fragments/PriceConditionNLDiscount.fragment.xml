@@ -71,10 +71,7 @@
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
-									}"   
+							<Input value="{Custom_Integer_1}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
@@ -105,10 +102,7 @@
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
-									}"   
+							<Input value="{Custom_Integer_2}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
@@ -139,10 +133,7 @@
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
-									}"   
+							<Input value="{Custom_Integer_3}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
