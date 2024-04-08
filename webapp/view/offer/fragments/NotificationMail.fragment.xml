@@ -46,7 +46,7 @@
                                        showGroupStructure="true"
                                        showGroupTextAlign="true"
                                        showGroupUndo="true"
-                                       ready="onMCEEditorLoaded"/>
+                                       />
                 </form:content>
 		</form:SimpleForm>
    	</Dialog>	

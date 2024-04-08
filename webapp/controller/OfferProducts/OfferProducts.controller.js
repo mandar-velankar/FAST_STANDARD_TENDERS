@@ -85,12 +85,12 @@ sap.ui.define([
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
 				},
-				// notificationMail:{
-				// 	from: '',
-				// 	to: '',
-				// 	subject: '',
-				// 	content: ''
-				// }
+				notificationMail:{
+					from: '',
+					to: '',
+					subject: '',
+					content: ''
+				}
 				
 			});
 	
@@ -1312,6 +1312,7 @@ sap.ui.define([
 			oSender.setTokens([
 				new Token({text: userEmail, key: userEmail}),
 			]);
+			this.byId('idEditor').setValue('<p><em>Beste Hospital Manager,   </em></p><p><em>Er staat een nieuwe offerteaanvraag klaar met ID: {OfferID}</em></p><p><em>Het betreft: {InstituteName}, met omschrijving: {TenderReference}</em></p><p><em>De Startdatum is: {ContractStartDate}  De deadline is: {ContractEndDate}</em></p><p><em>Prijzen kunnen ingevuld worden via onderstaande link:</em></p><p><em>{DirectURLToOffer}</em></p><p><em>Met vriendelijke groet / Best regards,</em></p><p><a id="Fullname"></a><a id="JobTitle"></a><em>Alette de Meyere</em></p><p><strong><em>Contract Management Officer</em></strong></p><p><a id="Divider"></a><strong><em>////////////////////////</em></strong></p><p><a id="Division"></a><em>Bayer B.V.</em></p><p><em>Pharmaceuticals Division</em></p><p><em>Established Products</em></p><p><em>Siriusdreef 36 </em></p><p><em>2132 WT Hoofddorp, the Netherlands</em></p><p><em>Tel        +31 23 711 8029</em></p><p><em>Mobile  +31 6 25168742</em></p><p><em>E-mail   </em><a href="mailto:alettede.meyere@bayer.com"><em>alettede.meyere@bayer.com</em></a></p><p><em>Web     </em><a href="http://www.bayer.nl/"><em>http://www.bayer.nl</em></a></p><p><a href="https://eur03.safelinks.protection.outlook.com/?url=https%3A%2F%2Fbayer.com%2Fdppa&amp;data=05%7C02%7C%7Cb9aabdc263c548ee6eb108dc2df25492%7Cfcb2b37b5da0466b9b830014b67a7c78%7C0%7C0%7C638435766025780972%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&amp;sdata=220erTllhLTlz4U3jd%2BVFagQIU8TODc%2BQ6hIdSSN%2F0w%3D&amp;reserved=0"><em>Data Privacy Information</em></a></p><p><em>Translation for your information:</em></p><p><em>Dear Hospital Manager,</em><br /><br /><em>A new quote request is ready with ID: {OfferID}</em></p><p><em>This concerns: {InstituteName}, with description: {TenderReference}</em></p><p><em>The Start Date is {ContractStartDate}, the deadline is: {ContractEndDate}</em></p><p><em>Prices can be entered via the link below: </em><br /><em>{DirectURLToOffer}</em></p>');
 		},
 		onSendNotificationMail: function(evt){
 			const requestNotification = this.defaultModel.callFunction("/notificationMail", {
