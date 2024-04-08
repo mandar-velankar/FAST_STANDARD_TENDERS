@@ -84,7 +84,13 @@ sap.ui.define([
 					enableDeleteProductButton: false,
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
-				}
+				},
+				// notificationMail:{
+				// 	from: '',
+				// 	to: '',
+				// 	subject: '',
+				// 	content: ''
+				// }
 				
 			});
 	
@@ -1283,6 +1289,49 @@ sap.ui.define([
 
 		handleUpdateOfferProductTable: function () {
 			this.byId('idOfferProductsTable').getBinding("items").refresh();
+		},
+		onOpenNotification: function () {
+			const that = this;
+			
+			 Fragment.load({
+				id: that.getView().getId(),
+				name: "com.bayer.tender.statenderapp.view.offer.fragments.NotificationMail",
+				controller: that,
+				
+			}).then(function (oDialog) {
+				oDialog.setModel(that.getModel())
+				oDialog.open();
+				that.setNotificationFormValues()
+				that.onGetNotificationContent()
+			})
+			
+		},
+		setNotificationFormValues: function () {
+			let oSender = this.byId("idFrom");
+			const userEmail = this.stState.getProperty("/UserEmail")
+			oSender.setTokens([
+				new Token({text: userEmail, key: userEmail}),
+			]);
+		},
+		onSendNotificationMail: function(evt){
+			const requestNotification = this.defaultModel.callFunction("/notificationMail", {
+				method:"POST", 
+				urlParameters: {"offerID": this.offerID, "From": "String", "To": "String", "Subject": "String", "Content": "String"},
+				// success: this.onOfferCopySuccess.bind(this),
+				// error: this.onOfferCopyFail.bind(this)
+			});
+		},
+		onCancelNotificationMail: function () {
+				this.byId("SendNotificationMailDialog").destroy();
+		},
+		onGetNotificationContent: function () {
+			const url = window.location.href
+			const requestNotification = this.defaultModel.callFunction("/getNotificationMailTemplate", {
+				method:"GET", 
+				urlParameters: {"offerID": this.offerID, templateId: 'NotificationMailTemplate', 'url': url},
+				// success: this.onOfferCopySuccess.bind(this),
+				// error: this.onOfferCopyFail.bind(this)
+			});
 		}
 	});
 });

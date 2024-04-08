@@ -1,0 +1,53 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:l="sap.ui.layout" xmlns:form="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:rtx="sap.ui.richtexteditor" > 
+
+    <Dialog title="Send Notification Mail" stretch="true" id="SendNotificationMailDialog">
+        <buttons>
+                    <Button text="Send" press="onSendNotificationMail" />
+                    <Button text="Cancel" press="onCancelNotificationMail" />
+        </buttons> 
+
+			<form:SimpleForm editable="true" 
+                            maxContainerCols="1" 
+                            layout="ResponsiveGridLayout"  
+                            labelSpanL="1" 
+                            labelSpanM="1"
+                            emptySpanL="0" 
+                            emptySpanM="0" 
+                            columnsL="1" 
+                            columnsM="1" 
+                            class="editableForm" 
+                            visible="true"
+                            id="mail">           
+				<form:content >
+					<core:Title/>
+
+                   <Label text="From" required="true"/>
+                   <MultiInput id="idFrom" width="70%" showValueHelp="false" required="true" enabled="false"/>
+
+                    <Label text="To" required="true"/>
+                    <!--<MultiInput id="idTo" width="70%" showValueHelp="false" required="true"/>-->
+                    <MultiComboBox id="idTo" width="70%" required="true" 
+                                   items="{/PdfEmail}">
+                                <core:Item key="{UserName}" text="{UserName}"/>
+                    </MultiComboBox>
+
+                    <Label text="Subject" required="true"/>
+                    <Input id="idSubject" required="true" value="{ui>/notificationMail/subject}"/>
+
+                   <Label text="Content" required="true"/>
+                   <rtx:RichTextEditor id="idEditor" 
+                                       editorType="TinyMCE5"
+                                       value="{ui>/notificationMail/content}" 
+                                       height="800px"
+                                       customToolbar="true"
+                                       showGroupFont="true"
+                                       showGroupFontStyle="true"
+                                       showGroupLink="true"
+                                       showGroupStructure="true"
+                                       showGroupTextAlign="true"
+                                       showGroupUndo="true"
+                                       ready="onMCEEditorLoaded"/>
+                </form:content>
+		</form:SimpleForm>
+   	</Dialog>	
+</core:FragmentDefinition>
