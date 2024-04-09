@@ -176,7 +176,7 @@ sap.ui.define([
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
-			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+			countryCode === 'TW' && await this.getTaiwanInstituteInBranch(selectedTender);
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -1710,13 +1710,12 @@ sap.ui.define([
 			});
 		},
 
-		getTaiwanInstituteInBranch: async function(instituteId, parentInstituteId, countryCode){
+		getTaiwanInstituteInBranch: async function({InstituteID, InstituteName}){
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/InstituteInBranchView", {
 					filters: [
-						new Filter("ParentInstituteID", "EQ", parentInstituteId),
-						new Filter("InstituteID", "NE", instituteId),
-						new Filter("CountryCode", "EQ", countryCode)
+						new Filter("InstituteName", "NE", InstituteName),
+						new Filter("InstituteID", "EQ", InstituteID)
 					],
 					success: function (res) {
 						resolve(res)

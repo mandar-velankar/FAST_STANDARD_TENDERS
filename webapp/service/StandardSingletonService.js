@@ -174,9 +174,8 @@ sap.ui.define([
 			return new Promise((resolve, reject) => {
 				originalInputField.getModel().read('/InstituteInBranchView', {
 					filters: [
-						new Filter("CountryCode", "EQ", countryCode),
-						new Filter("ParentInstituteID", "EQ", selectedItem.ParentInstituteID),
-						new Filter("InstituteID", "NE", selectedItem.InstituteID)
+						new Filter("InstituteName", "NE", selectedItem.InstituteName),
+						new Filter("InstituteID", "EQ", selectedItem.InstituteID)
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
