@@ -2,6 +2,13 @@
 
     <Dialog title="Send Notification Mail" stretch="true" id="SendNotificationMailDialog">
         <buttons>
+                    <Button
+                        icon="sap-icon://alert"
+                        text="{= ${messages>/notificationMailMsg}.length }"
+                        visible="{= ${messages>/notificationMailMsg}.length > 0}"
+                        type="Emphasized"
+                        press="onMessagePopoverPress($event, 'notificationMailMsg')" 
+				    />
                     <Button text="Send" press="onSendNotificationMail" />
                     <Button text="Cancel" press="onCancelNotificationMail" />
         </buttons> 
@@ -27,17 +34,17 @@
                     <Label text="To" required="true"/>
                     <!--<MultiInput id="idTo" width="70%" showValueHelp="false" required="true"/>-->
                     <MultiComboBox id="idTo" width="70%" required="true" 
-                                   items="{/PdfEmail}">
+                                   items="{/NotificationUserList}">
                                 <core:Item key="{UserName}" text="{UserName}"/>
                     </MultiComboBox>
 
                     <Label text="Subject" required="true"/>
-                    <Input id="idSubject" required="true" value="{ui>/notificationMail/subject}"/>
+                    <Input id="idSubject" required="true" value="{Subject}"/>
 
                    <Label text="Content" required="true"/>
                    <rtx:RichTextEditor id="idEditor" 
                                        editorType="TinyMCE5"
-                                       value="{ui>/notificationMail/content}" 
+                                       value="{MailBody}" 
                                        height="800px"
                                        customToolbar="true"
                                        showGroupFont="true"

@@ -69,6 +69,7 @@ sap.ui.define([
 			this.countryCode = countryCode;
 			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
+			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
 
 			const oModel = new JSONModel({
 				busy: false,
@@ -84,14 +85,8 @@ sap.ui.define([
 					enableDeleteProductButton: false,
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
-				},
-				notificationMail:{
-					from: '',
-					to: '',
-					subject: '',
-					content: ''
-				}
-				
+					count: productCount
+				}			
 			});
 	
 			this.setModel(oModel, "ui");
@@ -100,6 +95,7 @@ sap.ui.define([
 			this._bindForm("OfferForm", this.objectId, this.offerID);
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
+			
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.offerID = oEvent.getParameter("arguments").offerId;
@@ -238,7 +234,7 @@ sap.ui.define([
 			else{
 				oAddOfferProductButton.setEnabled(false);
 			}
-
+			
 		},
 
 		onOfferProductTableSaveBtnPress: function(event){
@@ -276,6 +272,7 @@ sap.ui.define([
 					subtitle: 'Products added successfully',
 					counter: 1
 				});
+				this.byId('notificationButton').setEnabled(true)
 			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
 		},
@@ -1300,39 +1297,76 @@ sap.ui.define([
 				
 			}).then(function (oDialog) {
 				oDialog.setModel(that.getModel())
+				oDialog.setModel(that.getModel('messages'),'messages')
 				oDialog.open();
-				that.setNotificationFormValues()
 				that.onGetNotificationContent()
+				that.NotificationMailFormBinding()
 			})
-			
-		},
-		setNotificationFormValues: function () {
-			let oSender = this.byId("idFrom");
-			const userEmail = this.stState.getProperty("/UserEmail")
-			oSender.setTokens([
-				new Token({text: userEmail, key: userEmail}),
-			]);
-			this.byId('idEditor').setValue('<p><em>Beste Hospital Manager,   </em></p><p><em>Er staat een nieuwe offerteaanvraag klaar met ID: {OfferID}</em></p><p><em>Het betreft: {InstituteName}, met omschrijving: {TenderReference}</em></p><p><em>De Startdatum is: {ContractStartDate}  De deadline is: {ContractEndDate}</em></p><p><em>Prijzen kunnen ingevuld worden via onderstaande link:</em></p><p><em>{DirectURLToOffer}</em></p><p><em>Met vriendelijke groet / Best regards,</em></p><p><a id="Fullname"></a><a id="JobTitle"></a><em>Alette de Meyere</em></p><p><strong><em>Contract Management Officer</em></strong></p><p><a id="Divider"></a><strong><em>////////////////////////</em></strong></p><p><a id="Division"></a><em>Bayer B.V.</em></p><p><em>Pharmaceuticals Division</em></p><p><em>Established Products</em></p><p><em>Siriusdreef 36 </em></p><p><em>2132 WT Hoofddorp, the Netherlands</em></p><p><em>Tel        +31 23 711 8029</em></p><p><em>Mobile  +31 6 25168742</em></p><p><em>E-mail   </em><a href="mailto:alettede.meyere@bayer.com"><em>alettede.meyere@bayer.com</em></a></p><p><em>Web     </em><a href="http://www.bayer.nl/"><em>http://www.bayer.nl</em></a></p><p><a href="https://eur03.safelinks.protection.outlook.com/?url=https%3A%2F%2Fbayer.com%2Fdppa&amp;data=05%7C02%7C%7Cb9aabdc263c548ee6eb108dc2df25492%7Cfcb2b37b5da0466b9b830014b67a7c78%7C0%7C0%7C638435766025780972%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&amp;sdata=220erTllhLTlz4U3jd%2BVFagQIU8TODc%2BQ6hIdSSN%2F0w%3D&amp;reserved=0"><em>Data Privacy Information</em></a></p><p><em>Translation for your information:</em></p><p><em>Dear Hospital Manager,</em><br /><br /><em>A new quote request is ready with ID: {OfferID}</em></p><p><em>This concerns: {InstituteName}, with description: {TenderReference}</em></p><p><em>The Start Date is {ContractStartDate}, the deadline is: {ContractEndDate}</em></p><p><em>Prices can be entered via the link below: </em><br /><em>{DirectURLToOffer}</em></p>');
 		},
 		onSendNotificationMail: function(evt){
-			const requestNotification = this.defaultModel.callFunction("/notificationMail", {
-				method:"POST", 
-				urlParameters: {"offerID": this.offerID, "From": "String", "To": "String", "Subject": "String", "Content": "String"},
-				// success: this.onOfferCopySuccess.bind(this),
-				// error: this.onOfferCopyFail.bind(this)
-			});
+			const Form = this.byId('SendNotificationMailDialog')
+			const context = Form.getBindingContext()
+			let Recipients = this.byId("idTo").getSelectedKeys().join(';')
+			this.getModel().setProperty('Recipients', Recipients, context)
+			this.getModel().submitChanges({
+				success: this.onSendNotificationMailSuccess.bind(this),
+				groupId: "NotificationMail"
+			})
 		},
 		onCancelNotificationMail: function () {
+				this.cancelPendingChanges(["Outbox"], "notificationMailMsg");
 				this.byId("SendNotificationMailDialog").destroy();
 		},
 		onGetNotificationContent: function () {
 			const url = window.location.href
-			const requestNotification = this.defaultModel.callFunction("/getNotificationMailTemplate", {
+			this.defaultModel.callFunction("/getNotificationMailTemplate", {
 				method:"GET", 
-				urlParameters: {"offerID": this.offerID, templateId: 'NotificationMailTemplate', 'url': url},
-				// success: this.onOfferCopySuccess.bind(this),
-				// error: this.onOfferCopyFail.bind(this)
+				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
+				success: this.onGetNotificationContentSuccess.bind(this),
+				error: this.onGetNotificationContentError.bind(this)
 			});
+		},
+		onGetNotificationContentSuccess: function (data) {
+			this.byId('idEditor').setValue(data);
+			this.getModel().resetChanges('/Outbox')
+		},
+		onGetNotificationContentError: function () {
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+		},
+		onSendNotificationMailSuccess: function () {
+			
+			const hasErrorMessages = this.getMessages(["Outbox"]).length > 0;
+			this.setMessageSection(["Outbox"], "notificationMailMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Successfully notified");
+				this.onCancelNotificationMail();
+			}
+		},
+		NotificationMailFormBinding: function () {
+			const Form = this.byId('SendNotificationMailDialog')
+			let oSender = this.byId("idFrom");
+			let userEmail = this.stState.getProperty("/UserEmail")
+			oSender.setTokens([
+				new Token({text: userEmail, key: userEmail}),
+			]);
+			let notificationObj = {
+				CountryCode: this.countryCode,
+				TenderID: this.objectId,
+				OfferID: this.offerID,
+				Sender: userEmail,
+				Recipients: '',
+				Subject: this.byId('idSubject').getValue(),
+				MailBody: this.byId('idEditor').getValue(),
+				Sent: false			
+			}
+			
+			const NotificationPendingChenges = this.getModel().createEntry("/Outbox", {
+				properties: notificationObj,
+				groupId: "NotificationMail"
+			})
+			
+			const path = NotificationPendingChenges.getPath()
+			Form.bindElement({path, groupId: "NotificationMail"})
 		}
 	});
 });
