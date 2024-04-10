@@ -71,10 +71,7 @@
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
-									}"   
+							<Input value="{NLPriceConditionType/0/ContractDuration}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
@@ -82,11 +79,11 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Discount',
+									path: 'NLPriceConditionType/0/Discount',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
-								liveChange=".onPricingFormLiveChange($event, 'Discount')"
+								liveChange=".onPricingFormLiveChange($event, 'NLPrice')"
 								
 							/>
 						</form:fields>
@@ -95,21 +92,18 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['OfferPrice', 'Currency'],
+									parts: ['NLPriceConditionType/0/OfferPrice', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'Discount')"
+								liveChange=".onPricingFormLiveChange($event, 'NLPrice')"
 								class="sapUiSmallMarginBottom"
 							/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
-									}"   
+							<Input value="{NLPriceConditionType/1/ContractDuration}"  
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
@@ -117,11 +111,11 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Discount',
+									path: 'NLPriceConditionType/1/Discount',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
-								liveChange=".onPricingFormLiveChange($event, 'Discount')"
+								liveChange=".onPricingFormLiveChange($event, 'NLPrice')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -130,21 +124,18 @@
 							<Input 
 								
 								value="{
-									parts: ['OfferPrice', 'Currency'],
+									parts: ['NLPriceConditionType/1/OfferPrice', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'Discount')"
+								liveChange=".onPricingFormLiveChange($event, 'NLPrice')"
 								class="sapUiSmallMarginBottom"
 							/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
 						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
-									}"   
+							<Input value="{NLPriceConditionType/2/ContractDuration}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
@@ -152,11 +143,11 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Discount',
+									path: 'NLPriceConditionType/2/Discount',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
-								liveChange=".onPricingFormLiveChange($event, 'Discount')"
+								liveChange=".onPricingFormLiveChange($event, 'NLPrice')"
 							/>
 						</form:fields>
 					</form:FormElement>
@@ -165,11 +156,11 @@
 							<Input 
 								
 								value="{
-									parts: ['OfferPrice', 'Currency'],
+									parts: ['NLPriceConditionType/2/OfferPrice', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
-								liveChange=".onPricingFormLiveChange($event, 'Discount')"
+								liveChange=".onPricingFormLiveChange($event, 'NLPrice')"
 							/>
 						</form:fields>
 					</form:FormElement>
