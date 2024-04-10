@@ -62,7 +62,23 @@ sap.ui.define([
 					});
 				})
 		},
-
+		getOfferProducts: async function (offerID) {
+			return new Promise((resolve, reject) => {
+					this.model.read("/OfferProductsTableView", {
+						filters: [
+							new Filter("OfferID", "EQ", offerID),
+							new Filter("Active", "EQ", 1),
+							new Filter("LotID", "EQ", 1),
+						],
+						success: function (res) {
+							resolve({
+								products: res?.results,
+								productCount: res?.results.length
+							}) 
+						}
+					});
+				})
+		},
 		getProductSKU: async function (countryCode, productCode) {
 			const sOfferProductKey = this.model.createKey("/PT_TMSKUPRDPCK", {
 				CountryCode: countryCode,

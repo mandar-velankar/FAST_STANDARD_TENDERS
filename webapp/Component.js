@@ -63,7 +63,8 @@ sap.ui.define([
 				"Approvals",
 				"Competitors",
 				"Deliveries",
-				"TenderMasterView"
+				"TenderMasterView",
+				"NotificationMail"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -146,6 +147,9 @@ sap.ui.define([
 				},
 				"TenderMasterView": {
 					groupId: "TenderMasterView"
+				},
+				"Outbox":{
+					groupId: "NotificationMail"
 				}
 			});
 		},
