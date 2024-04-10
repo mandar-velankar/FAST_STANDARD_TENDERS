@@ -63,7 +63,8 @@ sap.ui.define([
 				"Approvals",
 				"Competitors",
 				"Deliveries",
-				"TenderMasterView"
+				"TenderMasterView",
+				"NotificationMail"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -114,6 +115,12 @@ sap.ui.define([
 				"PriceConditionTaiwanDiscountView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionNLPriceView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionNLDiscountView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
@@ -140,6 +147,9 @@ sap.ui.define([
 				},
 				"TenderMasterView": {
 					groupId: "TenderMasterView"
+				},
+				"Outbox":{
+					groupId: "NotificationMail"
 				}
 			});
 		},
