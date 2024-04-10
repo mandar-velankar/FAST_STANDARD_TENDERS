@@ -163,7 +163,7 @@ sap.ui.define([
 				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分支機構"){
+						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
