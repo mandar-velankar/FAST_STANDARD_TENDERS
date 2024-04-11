@@ -134,7 +134,7 @@ sap.ui.define([
 				this.model.read("/AppConfig", {
 					filters: [
 						new Filter("CountryCode", "EQ", sCountry),
-						new Filter("ApplicationName", "EQ", 'StandardTender'),
+						new Filter("ApplicationName", "EQ", 'Standard'),
 						new Filter("Environment", "EQ", window.location.host.search('dev') > -1 ? 'DEV' : window.location.host.search('qa') > -1 ? 'QA' : window.location.host.search('sbx') > -1 ? 'SBX' : window.location.host.search('prod') > -1 ? 'PRD' : 'LOCL')
 					],
 					success: function (res) {
