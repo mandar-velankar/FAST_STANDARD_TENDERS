@@ -69,6 +69,7 @@ sap.ui.define([
 			this.countryCode = countryCode;
 			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
+			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
 
 			const oModel = new JSONModel({
 				busy: false,
@@ -84,8 +85,8 @@ sap.ui.define([
 					enableDeleteProductButton: false,
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
-				}
-				
+					count: productCount
+				}			
 			});
 	
 			this.setModel(oModel, "ui");
@@ -94,6 +95,7 @@ sap.ui.define([
 			this._bindForm("OfferForm", this.objectId, this.offerID);
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
+			
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.offerID = oEvent.getParameter("arguments").offerId;
@@ -232,7 +234,7 @@ sap.ui.define([
 			else{
 				oAddOfferProductButton.setEnabled(false);
 			}
-
+			
 		},
 
 		onOfferProductTableSaveBtnPress: function(event){
@@ -270,6 +272,7 @@ sap.ui.define([
 					subtitle: 'Products added successfully',
 					counter: 1
 				});
+				this.byId('notificationButton').setEnabled(true)
 			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
 		},
@@ -1296,6 +1299,87 @@ sap.ui.define([
 
 		handleUpdateOfferProductTable: function () {
 			this.byId('idOfferProductsTable').getBinding("items").refresh();
+		},
+		onOpenNotification: function () {
+			const that = this;
+			
+			 Fragment.load({
+				id: that.getView().getId(),
+				name: "com.bayer.tender.statenderapp.view.offer.fragments.NotificationMail",
+				controller: that,
+				
+			}).then(function (oDialog) {
+				oDialog.setModel(that.getModel())
+				oDialog.setModel(that.getModel('messages'),'messages')
+				oDialog.open();
+				that.onGetNotificationContent()
+				that.NotificationMailFormBinding()
+			})
+		},
+		onSendNotificationMail: function(evt){
+			const Form = this.byId('SendNotificationMailDialog')
+			const context = Form.getBindingContext()
+			let Recipients = this.byId("idTo").getSelectedKeys().join(';')
+			this.getModel().setProperty('Recipients', Recipients, context)
+			this.getModel().submitChanges({
+				success: this.onSendNotificationMailSuccess.bind(this),
+				groupId: "NotificationMail"
+			})
+		},
+		onCancelNotificationMail: function () {
+				this.cancelPendingChanges(["Outbox"], "notificationMailMsg");
+				this.byId("SendNotificationMailDialog").destroy();
+		},
+		onGetNotificationContent: function () {
+			const url = window.location.href
+			this.defaultModel.callFunction("/getNotificationMailTemplate", {
+				method:"GET", 
+				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
+				success: this.onGetNotificationContentSuccess.bind(this),
+				error: this.onGetNotificationContentError.bind(this)
+			});
+		},
+		onGetNotificationContentSuccess: function (data) {
+			this.byId('idEditor').setValue(data);
+			this.getModel().resetChanges('/Outbox')
+		},
+		onGetNotificationContentError: function () {
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+		},
+		onSendNotificationMailSuccess: function () {
+			
+			const hasErrorMessages = this.getMessages(["Outbox"]).length > 0;
+			this.setMessageSection(["Outbox"], "notificationMailMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Successfully notified");
+				this.onCancelNotificationMail();
+			}
+		},
+		NotificationMailFormBinding: function () {
+			const Form = this.byId('SendNotificationMailDialog')
+			let oSender = this.byId("idFrom");
+			let userEmail = this.stState.getProperty("/UserEmail")
+			oSender.setTokens([
+				new Token({text: userEmail, key: userEmail}),
+			]);
+			let notificationObj = {
+				CountryCode: this.countryCode,
+				TenderID: this.objectId,
+				OfferID: this.offerID,
+				Sender: userEmail,
+				Recipients: '',
+				Subject: this.byId('idSubject').getValue(),
+				MailBody: this.byId('idEditor').getValue(),
+				Sent: false			
+			}
+			
+			const NotificationPendingChenges = this.getModel().createEntry("/Outbox", {
+				properties: notificationObj,
+				groupId: "NotificationMail"
+			})
+			
+			const path = NotificationPendingChenges.getPath()
+			Form.bindElement({path, groupId: "NotificationMail"})
 		}
 	});
 });

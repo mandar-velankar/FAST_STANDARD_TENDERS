@@ -111,8 +111,10 @@ sap.ui.define([
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			const userFullName = oEvent?.getParameter("data")?.results[0]?.UserName || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserName")
 			const userID = oEvent?.getParameter("data")?.results[0]?.CWID || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CWID")
+			const userEmail = oEvent?.getParameter("data")?.results[0]?.UserEmail || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserEmail")
 			this.getModel("st").setProperty("/UserFullName", userFullName);
 			this.getModel("st").setProperty("/UserID", userID);
+			this.getModel("st").setProperty("/UserEmail", userEmail);
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.countryCode = sCountryCode;
 			// set filter which is needed later on
