@@ -112,7 +112,7 @@ sap.ui.define([
 			const countryCode = StandardSingletonService.getCountryCode();
 			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
 			const path = ctx.getPath();
-
+			const stModel = originalInputField.getModel('st');
 			originalInputField.getModel().setProperty(`${path}/InstituteID`, undefined);
 			originalInputField.getModel().setProperty(`${path}/InstituteName`, undefined);
 
@@ -139,6 +139,25 @@ sap.ui.define([
 					originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
 					.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
 					.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0].removeAllTokens();
+					break
+				case "NL": 
+					const groupNameField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Group Name");
+					const institutesInGroup = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institutes In Group");
+					const institutesName = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institute Name");
+					const bBuyingGroupSelected =  selectedItem.ChannelName === "Buying Group";
+					!bBuyingGroupSelected && originalInputField.getModel().setProperty(`${path}/Custom_String_3`, '');
+					originalInputField.getModel().setProperty(`${path}/Custom_String_4`, bBuyingGroupSelected ? selectedItem.ChannelName: '');
+					bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
+					bBuyingGroupSelected && stModel.setProperty('/NLInstInGroupTypeSTModelField', '');
+					groupNameField.setVisible(!!bBuyingGroupSelected);
+					institutesInGroup.setVisible(!!bBuyingGroupSelected);
+					institutesName.setVisible(!bBuyingGroupSelected);
 					break
 				default:
 					break;
@@ -170,6 +189,24 @@ sap.ui.define([
 			}
 		},
 
+		onChangeGroupName: async function (originalInputField, selectedItem, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
+			const defaultModel = originalInputField.getModel();
+			const stModel = originalInputField.getModel('st');
+			let institutesInGroup = await StandardSingletonService.getInstitutesInGroup(selectedItem, countryCode, defaultModel);
+			const institutesInGroupField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institutes In Group").getFields()[0];
+			stModel.setProperty('/NLInstInGroupTypeSTModelField', selectedItem.InstituteType);
+			defaultModel.setProperty(`${path}/Custom_String_3`, institutesInGroup);
+			institutesInGroupField.removeAllTokens();
+			for(const value of institutesInGroup.split(",")){
+				institutesInGroupField?.addToken(new Token({key: value, text:value}));
+			}
+		},
+
 		getInstituteBranchs: async function (selectedItem, countryCode, originalInputField) {
 			return new Promise((resolve, reject) => {
 				originalInputField.getModel().read('/InstituteInBranchView', {
@@ -177,6 +214,25 @@ sap.ui.define([
 						new Filter("CountryCode", "EQ", countryCode),
 						new Filter("ParentInstituteID", "EQ", selectedItem.ParentInstituteID),
 						new Filter("InstituteID", "NE", selectedItem.InstituteID)
+					],
+					success: function (res) {
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
+
+		getInstitutesInGroup: async function (selectedItem, countryCode, defaultModel) {
+			return new Promise((resolve, reject) => {
+				defaultModel.read('/InstitutesView', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("InstituteType", "EQ", selectedItem.InstituteType),
+						new Filter("InstituteID", "NE", selectedItem.InstituteID),
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
