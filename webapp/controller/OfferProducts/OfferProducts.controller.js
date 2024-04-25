@@ -130,8 +130,8 @@ sap.ui.define([
 			});
 		},
 
-		setPaymentTermFieldVisible: function (form) {
-			const paymentTermsField = form.getAggregation("formContainers")[1]
+		setPaymentTermFieldVisible: function (form, containerIndex) {
+			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
 			paymentTermsField.setVisible(false);
 		},
@@ -359,7 +359,8 @@ sap.ui.define([
 			this.countryCode.toLowerCase().includes('hm') && this.getModel().setProperty(`${sElemBindingPath}/Custom_Date_3`,tender.AwardDate)
 			
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
-			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form);}
+			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form,1);}
+			if(this.countryCode.toLowerCase().includes('hm')){this.setPaymentTermFieldVisible(form,2);}
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
@@ -388,7 +389,7 @@ sap.ui.define([
 			const oNewOfferForm = this.byId("idNewOfferForm");
 			const nextOfferID = await this._getNextOfferID(this.objectId);
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
-			if(selectedTender.Region === 'MEA'){
+			if(selectedTender.Region === 'MEA' || this.countryCode.toLowerCase().includes('hm')){
 				if(selectedTender.TenderChannel === 'Direct'){
 					const institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
 					paymentTerm = institute.PaymentTerms;
@@ -460,6 +461,9 @@ sap.ui.define([
 			newOfferObj.DistributorComments = this.productScope;
 			if(region === 'MEA'){
 				newOfferObj.Custom_String_1 = paymentTerm;
+			}
+			if(this.countryCode.toLowerCase().includes('hm')){
+				newOfferObj.Custom_String_4 = paymentTerm
 			}
 			
 
