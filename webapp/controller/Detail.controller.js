@@ -105,7 +105,7 @@ sap.ui.define([
 			const xmlView = tab.getXMLView();
 			const viewFolder = tab.title.toLowerCase().split(" ").join("");
 			const language = this.getModel("appView").getProperty("/language");
-			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder}.views.${xmlView.getName()}`;
+			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder === "pricerequest"? "tender" : viewFolder}.views.${xmlView.getName()}`;
 			const viewData = {
 				objectId:this.sObjectId,
 				offerId:this.sOfferId,
@@ -360,7 +360,7 @@ sap.ui.define([
 		onTabSelect: function (event) {
 			let hash = this.getRouter().getHashChanger().getHash();
 			const offerId = this.sOfferId || this.getModel("st").getProperty("/SelectedTender/OfferID") || "NA";
-			const selectedTabKey = event.getParameter("key").toLowerCase();
+			const selectedTabKey = event.getParameter("key").toLowerCase() === 'price request'? 'tender': event.getParameter("key").toLowerCase();
 			this.changeHash({selectedTabKey, hash, offerId});
 		},
 		changeHash: function ({selectedTabKey, hash, offerId}) {

@@ -62,7 +62,7 @@
 					
 					<!-- SELECTED TENDER INFO -->
 					<VBox justifyContent="Center" class="sapUiSmallMarginEnd">
-						<Label text="{i18n>TenderName}"/>
+						<Label text ="{= ${st>/SelectedCountry} === 'NL'? ${i18n>NLTenderName} :${i18n>TenderName}}"/>
 						<Text id="idHdrTndrNme" text="{TenderName}"/>
 					</VBox>
 					

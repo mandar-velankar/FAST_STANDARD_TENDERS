@@ -28,6 +28,13 @@ sap.ui.define([
       },
     
       generateFilter: function (modelInfo) {
+        if (this.value2) {
+          const filters = [
+            new Filter({path: this.path, operator: this.operator, value1: this._resolveBinding(modelInfo,this.value1)}),
+            new Filter({path: this.path, operator: this.operator, value1: this._resolveBinding(modelInfo,this.value2)})
+          ]
+          return new Filter(filters, true);
+        }
         return new Filter(this.path, this.operator, this._resolveBinding(modelInfo,this.value1), this._resolveBinding(modelInfo,this.value2) );
       },
 
@@ -37,6 +44,12 @@ sap.ui.define([
           model = stateModel;
           return model.getProperty(`/${value}`);
         }
+
+        if (value.toLowerCase().includes("stmodelfield")) {
+          model = stateModel;
+          return model.getProperty(`/${value}`);
+        }
+
         return model.getProperty(`${defaultEntityPath}/${value}`);
       }
     });
