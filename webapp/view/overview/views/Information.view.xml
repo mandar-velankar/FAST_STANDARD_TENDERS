@@ -19,7 +19,7 @@
 			</form:title>
 			<form:toolbar>
 				<Toolbar>
-					<Title text="{i18n>TenderandOfferDetails}" />
+					<Title text="{= ${st>/SelectedCountry} === 'NL'? ${i18n>NLTenderandOfferDetails}: ${i18n>TenderandOfferDetails}}" />
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"
