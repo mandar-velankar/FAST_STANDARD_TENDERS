@@ -302,14 +302,15 @@ sap.ui.define([
 		 * and using publish function of EventBus in order to trigger handleStatusChange function in Detail controller every time when receive tenders
 		 */
 
-		publishSelectedOfferStatus: function (res) {
+		publishSelectedOfferStatus: async function (res) {
 			const hash = this.getRouter().getHashChanger().getHash();
 			const offerId = hash.split("/")[4];
 			const offers = res.getParameter("data")?.results;
 			const selectedOffer = offers.find(offer => offer.OfferID === offerId);
+			const OfferStatus = await this.stState.getOfferStatus(offerId);
 			if (selectedOffer) {
 				this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
-					offerStatus: selectedOffer?.STATUS
+					offerStatus: OfferStatus?.STATUS
 				});
 			}
 		},
@@ -922,7 +923,7 @@ sap.ui.define([
 			const oSelectStatus = this.byId("idSlctStatus");
 			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
 			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
-			if (sStatus && !sStatus.toLowerCase().includes('all')) {
+			if (sStatus && sStatus.toLowerCase() !== 'all') {
 				this.andFilters.push(new Filter({
 					path: "STATUS",
 					operator: FilterOperator.Contains,
