@@ -38,7 +38,8 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
 
-			if(this.selectedTab !== "Tender") return; // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
+			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request") return;
+			 // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
 
 			this.defaultModel = this.getOwnerComponent().getModel();
 			this.stState = this.getOwnerComponent().getModel("st");
@@ -100,6 +101,9 @@ sap.ui.define([
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
+						}else if (this.countryCode === "NL") {
+							const buyingGroupInstType = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_4");
+							buyingGroupInstType && buyingGroupInstType === 'Buying Group' && this.setInstitutesinGroupFieldVisible(form, buyingGroupInstType, instituteType);
 						}
 
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
@@ -118,6 +122,9 @@ sap.ui.define([
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
+						}else if (this.countryCode === "NL") {
+							const buyingGroupInstType = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_4");
+							buyingGroupInstType && buyingGroupInstType === 'Buying Group' && this.setInstitutesinGroupFieldVisible(form, buyingGroupInstType, instituteType);
 						}
 
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
@@ -172,11 +179,33 @@ sap.ui.define([
 			return instituteInBranch;
 		},
 
+		getInstituteInGroupField: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let institutesInGroup;
+			formContainers.forEach(forContainer => {
+				if(forContainer.getAggregation("title") === 'Institute & Type'){
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Institutes In Group'){
+							institutesInGroup = formElement.getAggregation("fields")[0];
+						}
+					});
+				};
+			});
+			return institutesInGroup;
+		},
+
 		getMultiInputCustomField: function (countryCode, form) {
 			if (countryCode === "TW") {
 				return {
 					customFieldName: "Custom_String_3",
 					control: this.getInstituteInBranchCustomString(form)
+				}
+			}
+			if (countryCode === "NL") {
+				return {
+					customFieldName: "Custom_String_3",
+					control: this.getInstituteInGroupField(form)
 				}
 			}
 			return {
@@ -195,6 +224,25 @@ sap.ui.define([
 			}else {
 				regionsField.setVisible(false);
 			}
+		},
+
+		setInstitutesinGroupFieldVisible: function (form, buyingGroupInstType, instituteType) {
+			const path = form?.getElementBinding()?.getBoundContext().getPath();
+			this.getModel('st').setProperty('/NLInstInGroupTypeSTModelField',instituteType);
+			this.getModel().setProperty(`${path}/InstituteType`, buyingGroupInstType);
+			const groupNameField = form.getAggregation("formContainers")
+				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+				.find(el => el.getAggregation("label") === "Group Name");
+			const institutesInGroup = form.getAggregation("formContainers")
+				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+				.find(el => el.getAggregation("label") === "Institutes In Group");
+			const institutesName = form.getAggregation("formContainers")
+				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+				.find(el => el.getAggregation("label") === "Institute Name");
+
+			groupNameField.setVisible(true);
+			institutesInGroup.setVisible(true);
+			institutesName.setVisible(false);
 		},
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
