@@ -10,8 +10,6 @@ sap.ui.define(
             constructor: function (url) {
                 JSONModel.prototype.constructor.call(this, {
                     SelectedPriceConditionType: "Price",
-                    NLGroupTypeHospitalSTModelField: "Hospital",
-                    NLGroupTypePharmacieSTModelField: "Pharmacie"
                 });
                 this.url = url;
                 const model = new ODataModel({
