@@ -1,9 +1,8 @@
 sap.ui.define([
     "sap/ui/model/CompositeType",
-    "sap/ui/model/SimpleType",
     "sap/ui/model/ValidateException",
     "sap/ui/core/format/NumberFormat"
-], function (CompositeType, SimpleType,ValidateException, NumberFormat) {
+], function (CompositeType,ValidateException, NumberFormat) {
     "use strict";
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomNumberType", {
 
@@ -18,14 +17,14 @@ sap.ui.define([
         },
 
         parseValue: function(number) {
-            return number;
+           return [number];
         },
 
         validateValue: function(number) {
 
-            if(!(/^\+?[0-9]\d*$/.test(number))) {
-                throw new ValidateException("Not a valid number");
-            }
+            // if(!(/^\+?[0-9]\d*$/.test(number[0]))) {
+            //     throw new ValidateException("Not a valid number");
+            // }
         }
 
     });
