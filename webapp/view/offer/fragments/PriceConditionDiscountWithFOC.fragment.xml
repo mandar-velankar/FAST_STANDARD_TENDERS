@@ -62,7 +62,7 @@
 					<form:FormElement label="{i18n>CurrentBasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency', 'Region'],
+										parts: ['CurrentBasePrice', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="false"/>
@@ -71,7 +71,7 @@
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'Currency', 'Region'],
+										parts: ['BasePrice', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="false"/>
@@ -93,7 +93,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['OfferPrice', 'Currency', 'Region'],
+									parts: ['OfferPrice', 'Currency', 'Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
@@ -104,7 +104,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetOfferPrice', 'Currency', 'Region'],
+									parts: ['NetOfferPrice', 'Currency', 'Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
@@ -127,7 +127,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency', 'Region'],
+									parts: ['NetPrice', 'Currency', 'Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"/>
