@@ -122,7 +122,7 @@
 		<Text 
 			id='idTotalAmountOfferProducts' 
 			text="{
-				parts: ['OfferTotal', 'Currency', 'Region'],
+				parts: ['OfferTotal', 'Currency', 'Region','st>/SelectedCountry'],
 				type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 			}" 
 		/>
