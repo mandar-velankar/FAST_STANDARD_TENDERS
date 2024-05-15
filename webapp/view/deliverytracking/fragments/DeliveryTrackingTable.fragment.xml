@@ -112,7 +112,14 @@
                             }"
                         />
                          <Input
-                            value="{ActualDeliveryQuantity}"
+                            value="{
+                                parts: [
+                                    {path: 'ActualDeliveryQuantity'}, 
+                                    {path: 'CountryCode'},
+                                    {path: 'st>/SelectedTender/Region'}
+                                ], 
+                                type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+                            }"
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                         />
                         <Select
