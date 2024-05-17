@@ -98,17 +98,16 @@ sap.ui.define([
 				groupId: "Basicinfo",
 				events: {
 					change: () => {
+						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
 						}else if (this.countryCode === "NL") {
-							const buyingGroupInstType = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_4");
-							buyingGroupInstType && buyingGroupInstType === 'Buying Group' && this.setInstitutesinGroupFieldVisible(form, buyingGroupInstType, instituteType);
+							this.setInstitutesinGroupFieldVisible(form, cs);
 						}
 
-						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
-						multiInputCustomField.control?.removeAllTokens();
-						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						if(cs){
 							for(const value of cs.split(",")){
 
@@ -119,17 +118,16 @@ sap.ui.define([
 					},
 
 					dataReceived: () => {
+						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
 						}else if (this.countryCode === "NL") {
-							const buyingGroupInstType = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_4");
-							buyingGroupInstType && buyingGroupInstType === 'Buying Group' && this.setInstitutesinGroupFieldVisible(form, buyingGroupInstType, instituteType);
+							this.setInstitutesinGroupFieldVisible(form, cs);
 						}
 
-						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
-						multiInputCustomField.control?.removeAllTokens();
-						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						if(cs){
 							for(const value of cs.split(",")){
 
@@ -226,23 +224,13 @@ sap.ui.define([
 			}
 		},
 
-		setInstitutesinGroupFieldVisible: function (form, buyingGroupInstType, instituteType) {
+		setInstitutesinGroupFieldVisible: function (form, cs) {
 			const path = form?.getElementBinding()?.getBoundContext().getPath();
-			this.getModel('st').setProperty('/NLInstInGroupTypeSTModelField',instituteType);
-			this.getModel().setProperty(`${path}/InstituteType`, buyingGroupInstType);
-			const groupNameField = form.getAggregation("formContainers")
-				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-				.find(el => el.getAggregation("label") === "Group Name");
 			const institutesInGroup = form.getAggregation("formContainers")
 				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
 				.find(el => el.getAggregation("label") === "Institutes In Group");
-			const institutesName = form.getAggregation("formContainers")
-				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-				.find(el => el.getAggregation("label") === "Institute Name");
 
-			groupNameField.setVisible(true);
-			institutesInGroup.setVisible(true);
-			institutesName.setVisible(false);
+			institutesInGroup.setVisible(!!cs);
 		},
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.

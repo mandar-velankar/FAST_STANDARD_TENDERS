@@ -355,7 +355,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
-			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
+			this.getModel().setProperty(`${sElemBindingPath}/Division`, this.countryCode === 'NL' ? 'All' : "");
 			this.countryCode.toLowerCase().includes('hm') && this.getModel().setProperty(`${sElemBindingPath}/Custom_Date_3`,tender.AwardDate)
 			
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
@@ -456,7 +456,7 @@ sap.ui.define([
 			newOfferObj.InternalBidDueDate = oBoundContext.getObject().InternalBidDueDate;
 			newOfferObj.OfferDueDate = oBoundContext.getObject().OfferDueDate;
 			newOfferObj.SellingCompany = oBoundContext.getObject().SellingCompany;
-			newOfferObj.Division = oBoundContext.getObject().Division;
+			newOfferObj.Division = this.countryCode === 'NL' ? 'All' : oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 			newOfferObj.DistributorComments = this.productScope;
 			if(region === 'MEA'){
@@ -1049,12 +1049,13 @@ sap.ui.define([
 		},
 		
 		getCountryBrands: async function (countryCode, division, userInfo) {
+			const filters = [
+				new Filter("COUNTRY_CODE", "EQ", countryCode),
+			];
+			division !== "All" && filters.push(new Filter("DIVISION", "EQ", division));
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryBrands", {
-					filters: [
-						new Filter("COUNTRY_CODE", "EQ", countryCode),
-						new Filter("DIVISION", "EQ", division)
-					],
+					filters,
 					success: function (res) {
 						resolve(res)
 					}
@@ -1081,16 +1082,17 @@ sap.ui.define([
 		},
 
 		getInstituteDistributorBrandProducts: async function (countryCode, instituteId, distributorId, sellingCompany, channel, division) {
+			const filters = [
+				new Filter("COUNTRY_CODE", "EQ", countryCode),
+				new Filter("INSTITUTE_ID", "EQ", instituteId),
+				new Filter("DISTRIBUTOR_ID", "EQ", distributorId),
+				new Filter("LEGAL_ENTITY_CODE", "EQ", sellingCompany),
+				new Filter("CHANNEL", "EQ", channel),
+			]
+			division !== "All" && filters.push(new Filter("DIVISION", "EQ", division));
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/InstituteDistributorBrandProduct", {
-					filters: [
-						new Filter("COUNTRY_CODE", "EQ", countryCode),
-						new Filter("INSTITUTE_ID", "EQ", instituteId),
-						new Filter("DISTRIBUTOR_ID", "EQ", distributorId),
-						new Filter("DIVISION", "EQ", division),
-						new Filter("LEGAL_ENTITY_CODE", "EQ", sellingCompany),
-						new Filter("CHANNEL", "EQ", channel),
-					],
+					filters,
 					success: function (res) {
 						resolve(res)
 					}

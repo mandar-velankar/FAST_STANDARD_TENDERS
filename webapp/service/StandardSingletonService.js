@@ -141,23 +141,13 @@ sap.ui.define([
 					.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0].removeAllTokens();
 					break
 				case "NL": 
-					const groupNameField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
-					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-					.find(el => el.getAggregation("label") === "Group Name");
 					const institutesInGroup = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
 					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
 					.find(el => el.getAggregation("label") === "Institutes In Group");
-					const institutesName = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
-					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-					.find(el => el.getAggregation("label") === "Institute Name");
 					const bBuyingGroupSelected =  selectedItem.ChannelName === "Buying Group";
 					!bBuyingGroupSelected && originalInputField.getModel().setProperty(`${path}/Custom_String_3`, '');
-					originalInputField.getModel().setProperty(`${path}/Custom_String_4`, bBuyingGroupSelected ? selectedItem.ChannelName: '');
-					bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
-					bBuyingGroupSelected && stModel.setProperty('/NLInstInGroupTypeSTModelField', '');
-					groupNameField.setVisible(!!bBuyingGroupSelected);
-					institutesInGroup.setVisible(!!bBuyingGroupSelected);
-					institutesName.setVisible(!bBuyingGroupSelected);
+					!bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
+					institutesInGroup.setVisible(true);
 					break
 				default:
 					break;
@@ -168,7 +158,7 @@ sap.ui.define([
 			const countryCode = StandardSingletonService.getCountryCode();
 			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
 			const path = ctx.getPath();
-
+			const defaultModel = originalInputField.getModel();
 
 
 			switch (countryCode) {
@@ -184,26 +174,21 @@ sap.ui.define([
 					}
 					
 					break;
+				case "NL":
+					let institutesInGroup = await StandardSingletonService.getInstitutesInGroup(selectedItem, countryCode, defaultModel);
+					const institutesInGroupField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institutes In Group");
+					institutesInGroupField.setVisible(!!institutesInGroup);
+					defaultModel.setProperty(`${path}/Custom_String_3`, institutesInGroup);
+					institutesInGroupField.getFields()[0].removeAllTokens();
+					for(const value of institutesInGroup.split(",")){
+						institutesInGroupField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
+						
+					break;
 				default:
 					break;
-			}
-		},
-
-		onChangeGroupName: async function (originalInputField, selectedItem, StandardSingletonService) {
-			const countryCode = StandardSingletonService.getCountryCode();
-			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
-			const path = ctx.getPath();
-			const defaultModel = originalInputField.getModel();
-			const stModel = originalInputField.getModel('st');
-			let institutesInGroup = await StandardSingletonService.getInstitutesInGroup(selectedItem, countryCode, defaultModel);
-			const institutesInGroupField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
-					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
-					.find(el => el.getAggregation("label") === "Institutes In Group").getFields()[0];
-			stModel.setProperty('/NLInstInGroupTypeSTModelField', selectedItem.InstituteType);
-			defaultModel.setProperty(`${path}/Custom_String_3`, institutesInGroup);
-			institutesInGroupField.removeAllTokens();
-			for(const value of institutesInGroup.split(",")){
-				institutesInGroupField?.addToken(new Token({key: value, text:value}));
 			}
 		},
 
@@ -227,11 +212,11 @@ sap.ui.define([
 
 		getInstitutesInGroup: async function (selectedItem, countryCode, defaultModel) {
 			return new Promise((resolve, reject) => {
-				defaultModel.read('/InstitutesView', {
+				defaultModel.read('/InstitutesInGroup', {
 					filters: [
 						new Filter("CountryCode", "EQ", countryCode),
-						new Filter("InstituteType", "EQ", selectedItem.InstituteType),
-						new Filter("InstituteID", "NE", selectedItem.InstituteID),
+						new Filter("ParentInstituteID", "EQ", selectedItem?.InstituteID),
+						new Filter("InstituteID", "NE", selectedItem?.InstituteID),
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))

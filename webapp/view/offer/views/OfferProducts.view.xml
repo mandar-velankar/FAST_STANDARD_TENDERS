@@ -66,7 +66,7 @@
 			<form:formContainers>
 				<form:FormContainer formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						<form:FormElement label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						<form:FormElement visible="{template>visible}" label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
