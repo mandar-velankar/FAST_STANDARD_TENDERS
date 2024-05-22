@@ -89,7 +89,7 @@ sap.ui.define([
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
 					count: productCount,
-					source: ''
+					source: selectedOffer?.Custom_String_1
 				}			
 			});
 	
@@ -305,6 +305,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
 			//this.getModel().refresh();
 		},
 		onOfferFormCancelBtnPress: function(event){
