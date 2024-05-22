@@ -14,7 +14,8 @@ sap.ui.define([
 	"sap/ui/model/Sorter",
 	"sap/m/TableSelectDialog", 
 	"sap/m/Text", 
-	"sap/m/Column"
+	"sap/m/Column",
+	"sap/ui/unified/FileUploaderParameter"
 ], function (
 		BaseController, 
 		JSONModel, 
@@ -31,7 +32,8 @@ sap.ui.define([
 		Sorter, 
 		TableSelectDialog, 
 		Text, 
-		Column) {
+		Column,
+		FileUploaderParameter) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -70,6 +72,7 @@ sap.ui.define([
 			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
 			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
+			const selectedOffer = await this.stState.getService().getOffer(offerId);
 
 			const oModel = new JSONModel({
 				busy: false,
@@ -85,7 +88,8 @@ sap.ui.define([
 					enableDeleteProductButton: false,
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
-					count: productCount
+					count: productCount,
+					source: selectedOffer?.Custom_String_1
 				}			
 			});
 	
@@ -301,6 +305,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
 			//this.getModel().refresh();
 		},
 		onOfferFormCancelBtnPress: function(event){
@@ -1375,6 +1380,76 @@ sap.ui.define([
 			
 			const path = NotificationPendingChenges.getPath()
 			Form.bindElement({path, groupId: "NotificationMail"})
-		}
+		},
+
+		onOpenUploadZagisFileDialog: function () {
+			if (!this.byId("idUploadZagisFileDialog")) {
+				Fragment.load({
+					id: this.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.ZagisFileUpload",
+					controller: this
+				}).then(function (oDialog) {
+					// connect dialog to the root view of this component (models, lifecycle)
+					this.getView().addDependent(oDialog);
+					oDialog.addStyleClass(this.getOwnerComponent().getContentDensityClass());
+					oDialog.open();
+				}.bind(this));
+			} else {
+				this.byId("idUploadZagisFileDialog").open();
+			}
+		},
+	  
+		onCloseZagisFileUploadDialog: function () {
+			this.byId("idUploadZagisFileDialog").close();
+		},
+
+		handleZagisFileUploadComplete: function(evt) {
+			const response = evt.getParameter("responseRaw") && JSON.parse(evt.getParameter("responseRaw"));
+			const statusCode = evt.getParameter("status");
+
+			if (statusCode === 204) {
+				this.onCloseZagisFileUploadDialog();
+				this.byId("idOfferProductsTable").getBinding('items').refresh();
+				MessageBox.success("Zagis File imported successfully");
+			}else {
+				MessageBox.error(response?.error?.message?.value)
+			}
+		},
+
+		onHandleUploadZagisFilePress: async function () {
+			const oFileUploader = this.byId("idZagisFileUploader");
+			const zagisOfferID = await this.createZagisFileEntry(this.offerID);
+			oFileUploader.setUploadUrl(`/v2/sta_tender/ZagisUploadFile(OfferID='${zagisOfferID}')/content`);
+			oFileUploader.setHttpRequestMethod('PUT');
+			//setting X-CSRF-Token if it is not set upload process will fail for deployed application
+			if(window.location.host.search('port8080') === -1) {
+				oFileUploader.removeAllHeaderParameters()
+				const csrfToken = this.getOwnerComponent().getModel().getSecurityToken();
+				const headerParam = new FileUploaderParameter();
+				headerParam.setName('x-csrf-token');
+				headerParam.setValue(csrfToken);
+				oFileUploader.addHeaderParameter(headerParam);
+			}
+			oFileUploader.checkFileReadable().then(function() {
+				oFileUploader.upload();
+			}, function(error) {
+				MessageToast.show("The file cannot be read. It may have changed.");
+			}).then(function() {
+				oFileUploader.clear();
+			});
+		},
+
+		createZagisFileEntry: async function (offerID) {
+			return new Promise((resolve, reject) => {
+				this.getModel().create("/ZagisUploadFile", {
+					OfferID: offerID
+				}, {
+					success: (response) => {
+						resolve(response.OfferID);
+					}
+				});
+
+			})
+		},
 	});
 });
