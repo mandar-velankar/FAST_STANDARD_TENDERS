@@ -182,7 +182,7 @@ sap.ui.define([
 					institutesInGroupField.setVisible(!!institutesInGroup);
 					defaultModel.setProperty(`${path}/Custom_String_3`, institutesInGroup);
 					institutesInGroupField.getFields()[0].removeAllTokens();
-					for(const value of institutesInGroup.split(",")){
+					for(const value of institutesInGroup.split(";")){
 						institutesInGroupField.getFields()[0]?.addToken(new Token({key: value, text:value}));
 					}
 						
@@ -219,7 +219,7 @@ sap.ui.define([
 						new Filter("InstituteID", "NE", selectedItem?.InstituteID),
 					],
 					success: function (res) {
-						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
 					},
 
 					error: function (err) {

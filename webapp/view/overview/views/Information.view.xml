@@ -151,6 +151,15 @@
 					<Column>
 						<Label text="{i18n>TotalAmount}" wrapping="true"/>
 					</Column>
+					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
+						<Label text="Price (Duration {Custom_Integer_1})" wrapping="true"/>
+					</Column>
+					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
+						<Label text="Price (Duration {Custom_Integer_2})" wrapping="true"/>
+					</Column>
+					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
+						<Label text="Price (Duration {Custom_Integer_3})" wrapping="true"/>
+					</Column>
 				</columns>
 				<items>
 					<ColumnListItem>
@@ -203,6 +212,24 @@
 							<ObjectStatus 
 								text = "{
 									parts: ['NET_SALES_OFFER_CURRENCY', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
+							/>
+							<Text 
+								text = "{
+									parts: ['OfferPrice_1', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
+							/>
+							<Text 
+								text = "{
+									parts: ['OfferPrice_2', 'CURRENCY', 'Region'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
+							/>
+							<Text 
+								text = "{
+									parts: ['OfferPrice_3', 'CURRENCY', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>					
