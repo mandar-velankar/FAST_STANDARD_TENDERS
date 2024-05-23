@@ -109,7 +109,8 @@ sap.ui.define([
 						}
 
 						if(cs){
-							for(const value of cs.split(",")){
+							const separator = this.countryCode === "NL" ? ";" : ",";
+							for(const value of cs.split(separator)){
 
 								multiInputCustomField.control?.addToken(new Token({key: value, text:value}));
 
@@ -129,7 +130,8 @@ sap.ui.define([
 						}
 
 						if(cs){
-							for(const value of cs.split(",")){
+							const separator = this.countryCode === "NL" ? ";" : ",";
+							for(const value of cs.split(separator)){
 
 								multiInputCustomField.control?.addToken(new Token({key: value, text:value}));
 
