@@ -179,7 +179,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Level2Discount1',
+									parts: ['Level2Discount1', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -201,7 +201,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'Level2Discount2',
+									parts: ['Level2Discount2', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -339,7 +339,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'TotalDiscountNHI',
+									parts: ['TotalDiscountNHI', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"/>
@@ -349,7 +349,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'TotalDiscountInvoice',
+									parts: ['TotalDiscountInvoice', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"/>
@@ -388,7 +388,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Deductions',
+									parts: ['Deductions', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -414,7 +414,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'Level2Discount2',
+									parts: ['Level2Discount2', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -520,7 +520,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'TotalDiscountNHI',
+									parts: ['TotalDiscountNHI', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false" width="300px"/>
@@ -530,7 +530,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'TotalDiscountInvoice',
+									parts: ['TotalDiscountInvoice', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false" width="300px"/>

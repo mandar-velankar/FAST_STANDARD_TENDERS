@@ -81,7 +81,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Discount',
+									parts: [ 'Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								liveChange=".onPricingFormLiveChange($event, 'DiscountWithFOC')"
@@ -115,7 +115,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Deductions',
+									parts: [ 'Deductions', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
