@@ -57,7 +57,7 @@
                         type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
                     }"/>	
                     <Text text="{
-                        path: 'DeliveredPercentage',
+                        parts: ['DeliveredPercentage', 'CountryCode'],
                         type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
                         }"/>				
                 </cells>
