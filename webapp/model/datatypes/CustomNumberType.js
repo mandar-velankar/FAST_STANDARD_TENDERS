@@ -7,6 +7,9 @@ sap.ui.define([
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomNumberType", {
 
         formatValue: function(parts) {
+            if(!parts){
+                return "";
+            }
             const oCurrencyFormat = NumberFormat.getIntegerInstance({
                 maxFractionDigits: 0,
                 minFractionDigits: 0,
