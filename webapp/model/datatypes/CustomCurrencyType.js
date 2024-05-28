@@ -13,6 +13,9 @@ sap.ui.define([
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType", {
 
         formatValue: function(parts) {
+            if(!parts){
+                return "";
+            }
             const oCurrencyFormat = NumberFormat.getCurrencyInstance({
                     minFractionDigits: parts[2] === 'MEA' ? 3 : parts[3]?.includes('HM') ? 4 : 2,
                     maxFractionDigits: parts[2] === 'MEA' ? 3 : parts[3]?.includes('HM') ? 4 : 2,
