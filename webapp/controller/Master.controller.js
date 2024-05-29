@@ -692,12 +692,16 @@ sap.ui.define([
 			const userFullName = this.getModel("st").getProperty("/UserFullName");
 			const today = new Date();
 			const nextDate = new Date(today);
+			const classificationObj = {
+				'TW':'Tender',
+				'NL':'Price Request'
+			}
 			nextDate.setDate(today.getDate() + 1);
 			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
-			this.getModel().setProperty(`${sElemBindingPath}/Classification`, this.countryCode === 'TW' ? 'Tender': '');
+			this.getModel().setProperty(`${sElemBindingPath}/Classification`,classificationObj[this.countryCode]? classificationObj[this.countryCode]: '');
 			if(this.countryCode === 'TW'){
 				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
 				this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, nextDate);

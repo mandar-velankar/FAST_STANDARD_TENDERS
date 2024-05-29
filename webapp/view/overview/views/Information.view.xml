@@ -136,19 +136,19 @@
 					<Column>
 						<Label text="{i18n>Qty}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>UnitPrice}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>PackPrice}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>NetPriceperUnit}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>NetPriceperPack}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>TotalAmount}" wrapping="true"/>
 					</Column>
 					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
