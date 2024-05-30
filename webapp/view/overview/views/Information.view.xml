@@ -151,13 +151,13 @@
 					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>TotalAmount}" wrapping="true"/>
 					</Column>
-					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
+					<Column visible="{= ${st>/SelectedCountry} === 'NL' &amp;&amp; !!${Custom_Integer_1}}">
 						<Label text="Price (Duration {Custom_Integer_1})" wrapping="true"/>
 					</Column>
-					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
+					<Column visible="{= ${st>/SelectedCountry} === 'NL' &amp;&amp; !!${Custom_Integer_2}}">
 						<Label text="Price (Duration {Custom_Integer_2})" wrapping="true"/>
 					</Column>
-					<Column visible="{= ${st>/SelectedCountry} === 'NL'}">
+					<Column visible="{= ${st>/SelectedCountry} === 'NL' &amp;&amp; !!${Custom_Integer_3}}">
 						<Label text="Price (Duration {Custom_Integer_3})" wrapping="true"/>
 					</Column>
 				</columns>
