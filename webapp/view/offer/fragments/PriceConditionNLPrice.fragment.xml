@@ -69,13 +69,13 @@
 									class="sapUiSmallMarginBottom"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${NLPriceConditionType/0/ContractDuration}}">
 						<form:fields>
 							<Input value="{NLPriceConditionType/0/ContractDuration}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" visible="{= !!${NLPriceConditionType/0/ContractDuration}}">
 						<form:fields>
 							<Input
 								value="{
@@ -88,7 +88,7 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" visible="{= !!${NLPriceConditionType/0/ContractDuration}}">
 						<form:fields>
 							<Input 
 								value="{
@@ -101,13 +101,13 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${NLPriceConditionType/1/ContractDuration}}">
 						<form:fields>
 							<Input value="{NLPriceConditionType/1/ContractDuration}"  
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" visible="{= !!${NLPriceConditionType/1/ContractDuration}}">
 						<form:fields>
 							<Input
 								value="{
@@ -119,7 +119,7 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}">
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" visible="{= !!${NLPriceConditionType/1/ContractDuration}}">
 						<form:fields>
 							<Input 
 								
@@ -133,13 +133,13 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${NLPriceConditionType/2/ContractDuration}}">
 						<form:fields>
 							<Input value="{NLPriceConditionType/2/ContractDuration}"   
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" visible="{= !!${NLPriceConditionType/2/ContractDuration}}">
 						<form:fields>
 							<Input
 								value="{
@@ -151,7 +151,7 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" visible="{= !!${NLPriceConditionType/2/ContractDuration}}">
 						<form:fields>
 							<Input 
 								
