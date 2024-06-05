@@ -13,6 +13,9 @@ sap.ui.define([
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
 
         formatValue: function(parts) {
+            if(!parts){
+                return "";
+            }
             const oPercentFormat = NumberFormat.getPercentInstance({
                 minFractionDigits: parts[1] === 'AU' ? 4 : 2,
                 maxFractionDigits: parts[2] === 'AU' ? 4 : 2,
