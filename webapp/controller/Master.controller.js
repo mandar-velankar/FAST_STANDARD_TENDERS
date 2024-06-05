@@ -919,17 +919,16 @@ sap.ui.define([
 			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
-				debugger
 				const brandsInOffer = await this.stState.getService().getBrandsInOffer(sBrandId, sCountryCode)
+				const filters = [];
 				for(let offerID in brandsInOffer){
-
-					this.orFilters.push(new Filter({
+					filters.push(new Filter({
 						path: "OfferID",
 						operator: FilterOperator.EQ,
 						value1: brandsInOffer[offerID]
 					}));
 				}
-				this.andFilters.push(new Filter(this.orFilters, false));
+				this.andFilters.push(new Filter(filters, false));
 			}
 
 			// Status 

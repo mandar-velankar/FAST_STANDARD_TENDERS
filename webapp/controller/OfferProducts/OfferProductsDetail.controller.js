@@ -672,8 +672,8 @@ sap.ui.define([
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 				this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			} 
-
+			}
+			
 			this._refreshOfferProductTable();
 		},
 
@@ -822,7 +822,7 @@ sap.ui.define([
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value) : Number(this.byId("idOfferPrice")?.getValue()?.replace(/[^\d.]/g, ''));
 			offerPrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(offerPrice) : this.formatter.truncToTwoDecimalPlaces(offerPrice);
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
@@ -961,7 +961,7 @@ sap.ui.define([
 		calculatePriceWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
 			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value) : Number(this.byId("idPriceWithFOCOfferPrice").getValue().replace(/[^\d.]/g, ''));
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value) : Number(this.byId("idPriceWithFOCOfferPrice")?.getValue()?.replace(/[^\d.]/g, ''));
 			offerPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(offerPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(offerPrice) : this.formatter.truncToTwoDecimalPlaces(offerPrice);
 			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
 			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
