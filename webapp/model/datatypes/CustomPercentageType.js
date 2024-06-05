@@ -1,25 +1,36 @@
 sap.ui.define([
-    "sap/ui/model/SimpleType",
+    "sap/ui/model/CompositeType",
     "sap/ui/model/ValidateException",
     "sap/ui/core/format/NumberFormat"
-], function (SimpleType,ValidateException,NumberFormat) {
+], function (CompositeType,ValidateException,NumberFormat) {
     "use strict";
 
-    const oPercentFormat = NumberFormat.getPercentInstance({
+    /*const oPercentFormat = NumberFormat.getPercentInstance({
         minFractionDigits: 2,
         maxFractionDigits: 2
-    });
+    });*/
 
-    return SimpleType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
+    return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
 
-        formatValue: function(value) {
-			return oPercentFormat.format(Number(value));
+        formatValue: function(parts) {
+            if(!parts){
+                return "";
+            }
+            const oPercentFormat = NumberFormat.getPercentInstance({
+                minFractionDigits: parts[1] === 'AU' ? 4 : 2,
+                maxFractionDigits: parts[2] === 'AU' ? 4 : 2,
+                groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: ".",
+                preserveDecimals: true
+            });
+            return oPercentFormat.format(Number(parts[0] ?? 0));
+			//return oPercentFormat.format(Number(value));
         },
 
         parseValue: function(oValue) {
-            var floatNum = parseFloat(oValue.replace(",","."));
-            return (floatNum/100);
-
+            let floatNum = parseFloat(oValue); 
+            return [floatNum/100];
         },
 
         validateValue: function(oValue) {

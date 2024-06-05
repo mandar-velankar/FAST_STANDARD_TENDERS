@@ -122,6 +122,12 @@ sap.ui.define([
 			const factor = 1000; // 10^3 for three decimal places
 			const result = Math.round(number * factor) / factor;
 			return result;
+		},
+
+		truncToFourDecimalPlaces: function(number) {
+			const factor = 10000; // 10^4 for four decimal places
+			const result = Math.round(number * factor) / factor;
+			return result;
 		}
 	};
 });
