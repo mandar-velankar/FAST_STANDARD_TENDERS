@@ -943,6 +943,10 @@ sap.ui.define([
 
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
+
+			if(priceObj.CountryCode !== 'AU'){
+				this.validatePriceWithFOCForm(context, { offerPrice });
+			}
 		},	
 
 
@@ -1001,6 +1005,10 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+
+			if(priceObj.CountryCode !== 'AU'){
+				this.validatePriceWithFOCForm(context, { offerPrice });
+			}
 			
 		},
 
@@ -1157,7 +1165,7 @@ sap.ui.define([
 
 			// Error messages
 			const target = `${context.getPath()}/OfferPrice`;
-			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView","PriceConditionPriceView"]);
+			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView","PriceConditionDiscountView","PriceConditionPriceView","PriceConditionDiscountWithFOCView"]);
 			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target)); 
 
 			// Rules
@@ -1169,7 +1177,7 @@ sap.ui.define([
 					target: target,
 					processor: this.getView().getModel()
 				}));
-				this.setMessageSection(["PriceConditionPriceWithFOCView","PriceConditionPriceView"], "priceCondPrice");
+				this.setMessageSection(["PriceConditionPriceWithFOCView","PriceConditionDiscountView","PriceConditionPriceView", "PriceConditionDiscountWithFOCView"], "priceCondPrice");
 			}else if(!isOfferPriceHigher && errorMessage){
 				this.oMessageManager.removeMessages(errorMessage);
 				this.removeMessages(errorMessage, "priceCondPrice");
