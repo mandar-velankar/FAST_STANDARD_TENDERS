@@ -387,8 +387,6 @@ sap.ui.define([
 				case 'AU':
 					const object = form?.getBindingContext().getObject();
 					this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_Integer_1", object?.PACKFACTOR);
-				case 'GB':
-					this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_Integer_1", form?.getAggregation("formContainers")[1]?.getAggregation("formElements")[8]?.getAggregation("fields")[0]?.getValue());
 				default:
 					break;
 			}
