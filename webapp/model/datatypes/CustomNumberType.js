@@ -16,7 +16,7 @@ sap.ui.define([
                 groupingEnabled:true,
                 groupingSeparator: ','
             });
-            return parts[2] === 'MEA' || (parts[2] !== 'MEA' && parts[1].toLowerCase().includes('hm')) ? oCurrencyFormat.format(Number(parts[0] ?? 0)) : parts[0] ;
+            return parts[2] === 'MEA' || (parts[2] !== 'MEA' && parts[1]?.toLowerCase()?.includes('hm')) ? oCurrencyFormat.format(Number(parts[0] ?? 0)) : parts[0] ;
         },
 
         parseValue: function(number) {
