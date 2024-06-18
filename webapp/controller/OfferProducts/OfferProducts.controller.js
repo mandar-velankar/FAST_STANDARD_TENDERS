@@ -510,6 +510,7 @@ sap.ui.define([
 			const ctxPath = newOfferCtx.getPath().replace("/", "");
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
 			this.cancelPendingChanges(["PT_TMTNOFST"]);
+			this.cancelPendingChanges(["TenderFormView"]);
 			this.setMessageSection([ctxPath], "offerProductsMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Offer has been successfully created");

@@ -793,6 +793,7 @@ sap.ui.define([
 			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Tender has been successfully created");
+				this.cancelPendingChanges(["TenderFormView"], "newTenderMsg");
 				this.onCloseTenderCreationDialog();
 				this._showDetail(newTenderCtx.getObject());
 			}
