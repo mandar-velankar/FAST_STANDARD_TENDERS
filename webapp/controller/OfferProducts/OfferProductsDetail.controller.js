@@ -1223,9 +1223,9 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
-				if (this.sCountryCode === "TW") {
-					this.bindCurrentSectionFields(form, contextData);
-				}
+				// if (this.sCountryCode === "TW") {
+				// 	this.bindCurrentSectionFields(form, contextData);
+				// }
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
 				return form;
