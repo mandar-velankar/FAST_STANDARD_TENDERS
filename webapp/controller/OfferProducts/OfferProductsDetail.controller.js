@@ -1813,6 +1813,7 @@ sap.ui.define([
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
+			discount = this.formatter.truncToFourDecimalPlaces(discount);
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			const NLPriceConditionType = priceObj.NLPriceConditionType;
