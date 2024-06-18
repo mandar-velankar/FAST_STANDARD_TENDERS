@@ -79,7 +79,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'NLPriceConditionType/0/Discount',
+									parts: ['NLPriceConditionType/0/Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -111,7 +111,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'NLPriceConditionType/1/Discount',
+									parts: ['NLPriceConditionType/1/Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -143,7 +143,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'NLPriceConditionType/2/Discount',
+									parts: ['NLPriceConditionType/2/Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
