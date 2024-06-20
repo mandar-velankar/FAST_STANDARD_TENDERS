@@ -24,7 +24,7 @@
                             columnsM="1" 
                             class="editableForm" 
                             visible="true"
-                            id="mail">           
+                            id="SendNotificationMailForm">           
 				<form:content >
 					<core:Title/>
 
