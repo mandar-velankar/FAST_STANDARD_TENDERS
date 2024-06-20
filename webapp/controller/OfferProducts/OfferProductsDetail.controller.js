@@ -547,6 +547,7 @@ sap.ui.define([
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
@@ -585,6 +586,7 @@ sap.ui.define([
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			
 		},
 
@@ -674,6 +676,7 @@ sap.ui.define([
 			}
 			
 			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		_refreshOfferProductTable: function(){
@@ -1216,9 +1219,9 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
-				if (this.sCountryCode === "TW") {
-					this.bindCurrentSectionFields(form, contextData);
-				}
+				// if (this.sCountryCode === "TW") {
+				// 	this.bindCurrentSectionFields(form, contextData);
+				// }
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
 				return form;
@@ -1498,6 +1501,7 @@ sap.ui.define([
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			// we need to detach the data received event otherwise we will get into a loop
 			if (evt.getSource()) {
 				evt.getSource().detachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);

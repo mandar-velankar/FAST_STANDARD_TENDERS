@@ -77,7 +77,7 @@
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>Discount}" >
+					<form:FormElement label="{= ${CountryCode} === 'PK' ? ${i18n>CustomerDiscount} : ${i18n>Discount}}" >
 						<form:fields>
 							<Input
 								value="{
@@ -101,7 +101,7 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>Deductions}" >
+					<form:FormElement  label="{= ${CountryCode} === 'PK' ? ${i18n>DistributorDiscount} : ${i18n>Deductions}}" >
 						<form:fields>
 							<Input
 								value="{
