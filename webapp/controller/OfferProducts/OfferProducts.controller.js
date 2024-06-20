@@ -1317,7 +1317,7 @@ sap.ui.define([
 			})
 		},
 		onSendNotificationMail: function(evt){
-			const Form = this.byId('SendNotificationMailDialog')
+			const Form = this.byId('SendNotificationMailForm')
 			const context = Form.getBindingContext()
 			let Recipients = this.byId("idTo").getSelectedKeys().join(';')
 			this.getModel().setProperty('Recipients', Recipients, context)
@@ -1356,7 +1356,7 @@ sap.ui.define([
 			}
 		},
 		NotificationMailFormBinding: function () {
-			const Form = this.byId('SendNotificationMailDialog')
+			const Form = this.byId('SendNotificationMailForm')
 			let oSender = this.byId("idFrom");
 			let userEmail = this.stState.getProperty("/UserEmail")
 			oSender.setTokens([
@@ -1368,7 +1368,7 @@ sap.ui.define([
 				OfferID: this.offerID,
 				Sender: userEmail,
 				Recipients: '',
-				Subject: this.byId('idSubject').getValue(),
+				Subject:`Action Required: Price Details Input for Offer ID ${this.offerID}`,
 				MailBody: this.byId('idEditor').getValue(),
 				Sent: false			
 			}
