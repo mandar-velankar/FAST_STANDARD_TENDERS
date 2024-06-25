@@ -1,0 +1,70 @@
+<core:FragmentDefinition 
+	xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+
+	<Dialog title="{i18n>ContractInformationFragment.AssignDistributor}" contentWidth="550px">
+		<buttons>
+			<Button 
+                text="Save" 
+                press=".onButtonApplyWholesalersProductsPress" 
+            />
+			<Button 
+                text="Cancel" 
+                press=".onButtonCancelWholesalersPress" 
+            />
+		</buttons>
+        <form:Form
+            id="idContractInformationWholesalersProductsForm"
+            editable="true"
+        >
+            <form:layout>
+                <form:ResponsiveGridLayout
+                    labelSpanXL="3"
+                    labelSpanL="3"
+                    labelSpanM="3"
+                    labelSpanS="12"
+                    adjustLabelSpan="false"
+                    emptySpanXL="4"
+                    emptySpanL="4"
+                    emptySpanM="4"
+                    emptySpanS="0"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1"
+                    singleContainerFullSize="false"
+                />
+            </form:layout>
+            <form:formContainers>
+                <form:FormContainer>
+                    <form:formElements>
+                       <form:FormElement label="{i18n>ContractInformationFragment.Wholesalers}">
+                            <form:fields>            
+                                <MultiInput 
+                                    id="idContractInformationWholesalersMultiInput"
+                                    change=".onChangeDistributor"
+                                    valueHelpOnly="true" 
+                                    valueLiveUpdate="true"
+                                    valueHelpRequest=".onWholesalersInputValueHelpRequest" 
+                                >
+                                </MultiInput>
+                            </form:fields>
+					    </form:FormElement>	
+                        <form:FormElement label="{i18n>ContractInformationFragment.Products}">
+                            <form:fields>            
+                                <MultiInput 
+                                    id="idContractInformationProductsMultiInput"
+                                    valueHelpOnly="true" 
+                                    valueHelpRequest=".onProductNameInputValueHelpRequest" 
+                                >
+                                </MultiInput>
+                            </form:fields>
+					    </form:FormElement>	
+                    </form:formElements>
+                </form:FormContainer>
+            </form:formContainers>
+        </form:Form>
+       
+   	</Dialog>	
+</core:FragmentDefinition>
