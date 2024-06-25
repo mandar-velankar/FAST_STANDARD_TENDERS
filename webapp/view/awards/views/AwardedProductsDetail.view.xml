@@ -64,6 +64,9 @@
 				<m:VBox>
 					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.awards.fragments.CompetitorResultsTable" type="XML"/>
 				</m:VBox>
+                <m:VBox visible="{= ${st>/SelectedCountry} === 'NL'}">
+					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.awards.fragments.ContractInformation" type="XML"/>
+				</m:VBox>
 			</m:VBox>
         </f:content>
     </f:DynamicPage>
