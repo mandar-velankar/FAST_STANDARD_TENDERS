@@ -200,5 +200,47 @@ sap.ui.define([
 					});
 				})
 		},
+
+		getNLOfferDistributors: async function (offerID) {
+			const filters = [
+				new Filter("OfferID",FilterOperator.EQ, offerID),
+			]
+			return new Promise((resolve, reject) => {
+				this.model.read("/NLOfferDistributors", {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results) 
+					}
+				});
+			})
+		},
+
+		getInstituteBrandProducts: async function (offer) {
+			const filters = [
+				new Filter("COUNTRY_CODE",FilterOperator.EQ, offer.CountryCode),
+				new Filter("INSTITUTE_ID",FilterOperator.EQ, offer.InstituteID),
+				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offer.DistributorID),
+				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
+			]
+			offer.Division !== 'All' && filters.push(new Filter("DIVISION",FilterOperator.EQ, offer.Division));
+			return new Promise((resolve, reject) => {
+				this.model.read("/InstituteDistributorBrandProduct", {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results) 
+					}
+				});
+			})
+		},
+
+		deleteNLOfferDistributors: async function (ID) {
+			const path = this.model.createKey("/NLOfferDistributors", {
+				ID: ID
+			});
+			return new Promise((resolve, reject) => {
+				this.model.remove(path);
+			})
+		}
+
     });
 });

@@ -1,0 +1,70 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        expandable="true"
+        headerText="{i18n>ContractInformation}"
+    >
+        <form:Form
+            id="idContractInformationForm"
+            editable="true"
+        >
+            <form:toolbar>
+                <Toolbar>
+                    <ToolbarSpacer />
+                    <Button
+                        id="idContractInformationEditbtn"
+                        icon="sap-icon://edit"
+                        text="Edit"
+                        press=".onButtonContractInformationFormEditPress"
+                        visible="{= !${ui>/ContractInformation/editMode} }"
+                    />
+                    <Button
+                        icon="sap-icon://accept"
+                        text="Close"
+                        press=".onButtonContractInformationFormAcceptPress"
+                        visible="{= ${ui>/ContractInformation/editMode} }"
+				    />
+                </Toolbar>
+            </form:toolbar>
+            <form:layout>
+                <form:ResponsiveGridLayout
+                    labelSpanXL="3"
+                    labelSpanL="3"
+                    labelSpanM="3"
+                    labelSpanS="12"
+                    adjustLabelSpan="false"
+                    emptySpanXL="4"
+                    emptySpanL="4"
+                    emptySpanM="4"
+                    emptySpanS="0"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1"
+                    singleContainerFullSize="false"
+                />
+            </form:layout>
+            <form:formContainers>
+                <form:FormContainer>
+                    <form:formElements>
+                       <form:FormElement label="{i18n>ContractInformationFragment.Wholesalers}">
+						<form:fields>            
+							<MultiInput 
+								id="idWholesarlersMultiInput"
+								valueHelpOnly="true" 
+								valueHelpRequest=".onMultiInputWholesalersValueHelpRequest" 
+								enabled="{ui>/ContractInformation/editMode}"
+							>
+								<!-- Tokens are bound in the Controller.bindFOCMultiInputTokens method -->
+							</MultiInput>
+						</form:fields>
+					</form:FormElement>	
+                    </form:formElements>
+                </form:FormContainer>
+            </form:formContainers>
+        </form:Form>
+    </Panel>
+</core:FragmentDefinition>
