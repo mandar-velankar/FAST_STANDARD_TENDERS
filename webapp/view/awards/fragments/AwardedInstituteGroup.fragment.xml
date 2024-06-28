@@ -10,6 +10,7 @@
 		liveChange=".handleAwardedInstituteGroupValueHelpSearch"
 		confirm=".handleAwardedInstituteGroupHelpConfirm"
 		multiSelect="true"
+		cancel=".handleAwardedInstituteGroupHelpCancelPress"
 		items="{
 			path: '/InstitutesInGroup',
 			sorter: {path: 'InstituteName'}

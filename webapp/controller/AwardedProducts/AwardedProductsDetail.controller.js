@@ -8,8 +8,9 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"sap/m/Token",
 	"sap/ui/core/Item",
-	"sap/m/MessageBox"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox) {
+	"sap/m/MessageBox",
+	"sap/ui/model/Sorter",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox, Sorter) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail", {
@@ -915,12 +916,14 @@ sap.ui.define([
                     controller: this,
                 }).then(function(oFragment) {
                     this._AwardedInstituteGroupFragment = oFragment;
+					oFragment.setRememberSelections(true);
                     this._AwardedInstituteGroupFragment.setModel(this.getView().getModel());
                     this.getView().addDependent(oFragment);
                     this._AwardedInstituteGroupFragment.open();
 					this.bindAwardedInstituteGroupTable();
                 }.bind(this));
             } else {
+				this.bindAwardedInstituteGroupTable();
                 this._AwardedInstituteGroupFragment.open();
             }
 		},
@@ -965,6 +968,11 @@ sap.ui.define([
 			}
 		},
 
+		handleAwardedInstituteGroupHelpCancelPress: function () {
+			const list = this.byId("idAwardedInstituteGroupDialog");
+			list.unbindElement()
+		},
+
 		handleAwardedInstituteGroupHelpConfirm: function(oEvent){
 			const contexts = oEvent.getParameter('selectedContexts');
 			const InstituteGroupList = this.byId("idAwardedInstituteGroupMultiSelect");
@@ -989,8 +997,12 @@ sap.ui.define([
 				const contractDurationValue = this.byId("idContractDuration").getSelectedKey()
 				const obj = form.getBindingContext("ui").getObject();
 				const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
-				obj.InstituteName = InstituteGroupIds            
-				obj.ContractDuration = contractDurationValue
+				obj.InstituteName = InstituteGroupIds;            
+				obj.ContractDuration = contractDurationValue;
+				obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate).toISOString();
+				obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate).toISOString();
+				obj.OfferID = this.offerId;
+				obj.ProductCode = this.productId;
 				this.getModel().createEntry('/ContractInfomation', {
                     properties: obj,
 					groupId: "ContractDuration"
@@ -1000,12 +1012,11 @@ sap.ui.define([
 				    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
 				    groupId: "ContractDuration"
 			    });
-				 
+				this.getModel("appView").setProperty('/busy', false);
 			} catch (error) {
 				MessageBox.error(response?.error?.message?.value);
+				this.getModel("appView").setProperty('/busy', false);
 			}
-
-			this.getModel("appView").setProperty('/busy', false);
 
 		},
 
@@ -1015,11 +1026,12 @@ sap.ui.define([
 			const errMessage = event?.__batchResponses?.[0]?.response?.body;
 			if (errStatus == 403) {
 				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
+				this.getModel("appView").setProperty('/busy', false);
 			}else {
 				await this.getAwardedContractDurations()
 				MessageBox.success('Contract Duration was saved successfully');
+				this.getModel("appView").setProperty('/busy', false);
 			}
-			this.getModel("appView").setProperty('/busy', false);
 		},
 
 		bindContractDurationSelectionForm: function(){
@@ -1041,6 +1053,7 @@ sap.ui.define([
 			const awardedProductPath = this.getModel().createKey("/AwardedProductFormView",{
                     OfferID: OfferID,
 					ProductCode: ProductCode,
+					LotID: 1
 			})
 
 			const awardedProduct = this.getModel().getProperty(awardedProductPath) 
@@ -1049,8 +1062,12 @@ sap.ui.define([
 				path: "/NLPriceConditions",
 				template: template,
 				filters: [    
-					new Filter("priceconditionID" ,FilterOperator.EQ, awardedProduct.priceconditionID),
-				] 
+					new Filter("PriceCondition_ID" ,FilterOperator.EQ, awardedProduct.priceconditionID),
+				],
+				sorter: new Sorter({
+					path: 'ContractDuration',
+					descending: false
+				})
 		    })
 		},
 		
