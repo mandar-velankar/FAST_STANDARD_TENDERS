@@ -1,0 +1,95 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        expandable="true"
+        headerText="{i18n>ContractDuration}"
+    >
+        <form:Form
+		    id="idContractDurationForm"
+		    editable="true"       
+	    >
+		<form:toolbar>
+			<Toolbar>
+				<ToolbarSpacer />
+				<!-- <Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/priceCondPrice}.length }"
+					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'priceCondPrice')" 
+				/> -->
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onAwardedContractDurationFormEditBtnPress"
+					visible="{= !${ui>/ContractDuration/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onSavehandleAwardedContractDuration"
+					visible="{= ${ui>/ContractDuration/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onAwardedContractDurationFormCancelBtnPress"
+					visible="{= ${ui>/ContractDuration/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>ContractDuration}" >
+						<form:fields>
+							<Select id="idContractDuration"  enabled="{= ${ui>/ContractDuration/editMode} }">
+                                <core:Item  text="{ContractDuration}" key="{ContractDuration}"/>             
+                            </Select>
+						</form:fields>
+					</form:FormElement>
+
+                    <form:FormElement label="{i18n>ContractStartDate}" >
+						<form:fields>
+							<DatePicker value="{ui>ContractStartDate}" enabled="{= ${ui>/ContractDuration/editMode} }" />
+						</form:fields>
+					</form:FormElement>
+
+                    <form:FormElement label="{i18n>ContractEndDate}" >
+						<form:fields>
+							<DatePicker value="{ui>ContractEndDate}"   enabled="{= ${ui>/ContractDuration/editMode} }" />
+						</form:fields>
+					</form:FormElement>
+
+                    <form:FormElement label="{i18n>InstitutesInGroup}" >
+						<form:fields>
+							<MultiInput id="idAwardedInstituteGroupMultiSelect"   enabled="{= ${ui>/ContractDuration/editMode} }"  valueHelpOnly="true" valueHelpRequest=".onOpenAwardedInstituteGroup"/>
+						</form:fields>
+					</form:FormElement>
+					
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+    </Panel>
+</core:FragmentDefinition>
