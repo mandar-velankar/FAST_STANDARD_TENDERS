@@ -122,6 +122,16 @@ sap.ui.define([
 			const factor = 1000; // 10^3 for three decimal places
 			const result = Math.round(number * factor) / factor;
 			return result;
-		}
+		},
+		formatRequestedQuantity: function (value, uom) {
+			if (!value && value != 0) return;
+			const numberFormat = NumberFormat.getIntegerInstance({
+				maxFractionDigits: 0,
+				minFractionDigits: 0, 
+				groupingEnabled: true, 
+				groupingSeparator: ','
+			});
+			return `${numberFormat.format(value)} ${uom}`;
+		}	
 	};
 });
