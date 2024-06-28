@@ -22,7 +22,7 @@ sap.ui.define([
                 groupingEnabled: true,
 				groupingSeparator: ",",
 				decimalSeparator: ".",
-                //preserveDecimals: parts[1] === 'AU' ? true : false
+                preserveDecimals: parts[1] === 'AU' ? true : false
             });
             return oPercentFormat.format(Number(parts[0] ?? 0));
 			//return oPercentFormat.format(Number(value));
