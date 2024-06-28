@@ -240,7 +240,21 @@ sap.ui.define([
 			return new Promise((resolve, reject) => {
 				this.model.remove(path);
 			})
-		}
+		},
 
+		getAwardedContractDurations: async function (offerID, ProductCode) {
+			const filters = [
+				new Filter("OfferID",FilterOperator.EQ, offerID),
+				new Filter("ProductCode",FilterOperator.EQ, ProductCode)
+			]
+			return new Promise((resolve, reject) => {
+				this.model.read("/ContractInfomation", {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results) 
+					}
+				});
+			})
+		},
     });
 });
