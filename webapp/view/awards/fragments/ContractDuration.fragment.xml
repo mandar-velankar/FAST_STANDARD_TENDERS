@@ -63,7 +63,7 @@
 				<form:formElements>
 					<form:FormElement label="{i18n>ContractDuration}" >
 						<form:fields>
-							<Select id="idContractDuration"  enabled="{= ${ui>/ContractDuration/editMode} }">
+							<Select id="idContractDuration"  enabled="{= ${ui>/ContractDuration/editMode} }" selectedKey="{ui>ContractDuration}">
                                 <core:Item  text="{ContractDuration}" key="{ContractDuration}"/>             
                             </Select>
 						</form:fields>
@@ -71,13 +71,27 @@
 
                     <form:FormElement label="{i18n>ContractStartDate}" >
 						<form:fields>
-							<DatePicker value="{ui>ContractStartDate}" enabled="{= ${ui>/ContractDuration/editMode} }" />
+							<DatePicker value="{
+								path: 'ui>ContractStartDate',
+								type: 'sap.ui.model.type.Date', 
+								formatOptions: { 
+									pattern: 'dd.MM.yyyy', 
+									UTC:true
+								}
+							}" enabled="{= ${ui>/ContractDuration/editMode} }" />
 						</form:fields>
 					</form:FormElement>
 
                     <form:FormElement label="{i18n>ContractEndDate}" >
 						<form:fields>
-							<DatePicker value="{ui>ContractEndDate}"   enabled="{= ${ui>/ContractDuration/editMode} }" />
+							<DatePicker value="{
+								path: 'ui>ContractEndDate',
+								type: 'sap.ui.model.type.Date', 
+								formatOptions: { 
+									pattern: 'dd.MM.yyyy', 
+									UTC:true
+								}	
+							}"   enabled="{= ${ui>/ContractDuration/editMode} }" />
 						</form:fields>
 					</form:FormElement>
 
