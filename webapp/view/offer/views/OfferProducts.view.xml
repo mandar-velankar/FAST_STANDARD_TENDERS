@@ -110,7 +110,10 @@
 			</OverflowToolbar>
 		</headerToolbar>
 		<columns>
-			<Column>
+			<Column visible="{
+				parts: ['template>title'],
+				formatter: '.OfferProductColumnVisibility'
+			}">
 				<Text text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}" />
 			</Column>
 		</columns>
