@@ -1464,5 +1464,24 @@ sap.ui.define([
 
 			})
 		},
+
+		OfferProductColumnVisibility: function (title) {
+			const tender = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
+			if (!tender || !title) return true;
+			if (tender.CountryCode !== 'NL') return true;
+			const cases = {
+				'Contract Duration 1': tender.Custom_Integer_1,
+				'Contract Duration 2': tender.Custom_Integer_2,
+				'Contract Duration 3': tender.Custom_Integer_3,
+				'Price 1': tender.Custom_Integer_1,
+				'Price 2': tender.Custom_Integer_2,
+				'Price 3': tender.Custom_Integer_3,
+			}
+			if (!cases.hasOwnProperty(title)) return true;
+
+
+			return !!cases[title];
+
+		}
 	});
 });
