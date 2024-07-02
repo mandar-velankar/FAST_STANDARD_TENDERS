@@ -43,7 +43,7 @@ sap.ui.define(["sap/m/Text",
             const formatterValueIndex = prop.getValue().search(/.formatter\.(\w+)/g);
             props[prop.getName()] = this.updateBindingObject(prop, formatterValueIndex);  
           }else {
-            prop.getValue()
+            props[prop.getName()] = prop.getValue();
           }
         }
       }
