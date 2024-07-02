@@ -1403,12 +1403,14 @@ sap.ui.define([
 			this.byId("idUploadZagisFileDialog").close();
 		},
 
-		handleZagisFileUploadComplete: function(evt) {
+		handleZagisFileUploadComplete: async function(evt) {
 			const response = evt.getParameter("responseRaw") && JSON.parse(evt.getParameter("responseRaw"));
 			const statusCode = evt.getParameter("status");
 
 			if (statusCode === 204) {
 				this.onCloseZagisFileUploadDialog();
+				const {productCount} = await this.stState.getService().getOfferProducts(this.offerID);
+				this.getModel('ui').setProperty('/OfferProductTable/count', productCount);
 				this.byId("idOfferProductsTable").getBinding('items').refresh();
 				MessageBox.success("Zagis File imported successfully");
 			}else {
