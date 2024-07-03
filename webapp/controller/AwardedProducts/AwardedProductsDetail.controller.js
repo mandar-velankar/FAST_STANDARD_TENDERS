@@ -908,42 +908,48 @@ sap.ui.define([
 			}
 		},
 
-		onOpenAwardedInstituteGroup: function(){
+		onOpenAwardedInstituteGroup: async function(){
 			if (!this._AwardedInstituteGroupFragment) {
                 this._AwardedInstituteGroupFragment = Fragment.load({
                     id: this.getView().getId(),
                     name: "com.bayer.tender.statenderapp.view.awards.fragments.AwardedInstituteGroup",
                     controller: this,
-                }).then(function(oFragment) {
+                }).then(async function(oFragment) {
                     this._AwardedInstituteGroupFragment = oFragment;
 					oFragment.setRememberSelections(true);
                     this._AwardedInstituteGroupFragment.setModel(this.getView().getModel());
                     this.getView().addDependent(oFragment);
                     this._AwardedInstituteGroupFragment.open();
-					this.bindAwardedInstituteGroupTable();
+					await this.bindAwardedInstituteGroupTable();
                 }.bind(this));
             } else {
-				this.bindAwardedInstituteGroupTable();
+				await this.bindAwardedInstituteGroupTable();
                 this._AwardedInstituteGroupFragment.open();
             }
 		},
 
-		bindAwardedInstituteGroupTable: function(){
+		bindAwardedInstituteGroupTable: async function(){
 			const list = this.byId("idAwardedInstituteGroupDialog");
             const template = list.getBindingInfo("items").template.clone();
 			const {InstituteID} = this.getView().getBindingContext().getObject()
-          
-            list.bindItems({
-                path: "/InstitutesInGroup",
-                template: template,
-				filter: [
-					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
-					new Filter("InstituteID", FilterOperator.NE, InstituteID)
-				],
-				events:{
-                    dataReceived: this.handleAwardedInstituteGroupValueHelpUpdateFinished.bind(this)
-				}
-            });
+			const {Custom_String_3} = await this.stState.getService().getTender(this.tenderId);
+			const InstituteNames = Custom_String_3.split(";")
+			const orFilters = []
+			const andFilters = [
+				new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
+				new Filter("InstituteID", FilterOperator.NE, InstituteID),
+
+			]
+			for(let instituteName in InstituteNames){
+				orFilters.push(new Filter({
+					path: "InstituteName",
+					operator: FilterOperator.EQ,
+					value1: InstituteNames[instituteName]
+				}));
+			}
+			andFilters.push(new Filter(orFilters, false))
+			const oFilters = new Filter(andFilters, true);
+			list.getBinding('items').filter(oFilters)
 		},
 
 		handleAwardedInstituteGroupValueHelpSearch: function(oEvent){
@@ -1012,12 +1018,12 @@ sap.ui.define([
 				    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
 				    groupId: "ContractDuration"
 			    });
-				this.getModel("appView").setProperty('/busy', false);
+				this.getModel("ui").setProperty('/ContractDuration/editMode', false);
 			} catch (error) {
 				MessageBox.error(response?.error?.message?.value);
 				this.getModel("appView").setProperty('/busy', false);
 			}
-
+			
 		},
 
 

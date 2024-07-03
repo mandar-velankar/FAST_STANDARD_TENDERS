@@ -13,7 +13,10 @@
 		cancel=".handleAwardedInstituteGroupHelpCancelPress"
 		items="{
 			path: '/InstitutesInGroup',
-			sorter: {path: 'InstituteName'}
+			sorter: {path: 'InstituteName'},
+			events:{
+            	dataReceived: '.handleAwardedInstituteGroupValueHelpUpdateFinished'
+		 	}
 		}">
 		<columns>
 			<Column>
