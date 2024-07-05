@@ -1405,9 +1405,13 @@ sap.ui.define([
 
 		handleZagisFileUploadComplete: async function(evt) {
 			const response = evt.getParameter("responseRaw") && JSON.parse(evt.getParameter("responseRaw"));
+			const headers = evt.getParameter("headers");
+			const sapMessageObject = headers["sap-message"] && JSON.parse(headers["sap-message"]);
 			const statusCode = evt.getParameter("status");
 
-			if (statusCode === 204) {
+			if(sapMessageObject?.code == 400){
+				MessageBox.error(sapMessageObject.message);
+			}else if (statusCode === 204) {
 				this.onCloseZagisFileUploadDialog();
 				const {productCount} = await this.stState.getService().getOfferProducts(this.offerID);
 				this.getModel('ui').setProperty('/OfferProductTable/count', productCount);
