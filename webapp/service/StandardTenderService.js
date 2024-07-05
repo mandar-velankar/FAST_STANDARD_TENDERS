@@ -243,5 +243,56 @@ sap.ui.define([
 				});
 			})
 		},
+		getAwardedProduct: async function (offerID, ProductCode) {
+				const filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("ProductCode",FilterOperator.EQ, ProductCode),
+					new Filter("LotID",FilterOperator.EQ, 1)
+				]
+			return new Promise((resolve, reject) => {
+				this.model.read('/AwardedProductFormView', {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results[0]) 
+					}
+				});
+			})
+		},
+		getInstituteInContract: function ({Custom_String_3,InstituteID,CountryCode}) {
+			const InstituteNames = Custom_String_3.split(";")
+			const orFilters = []
+			let andFilters = []
+			let oFilters;
+			if (Custom_String_3) {
+				andFilters = [
+					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
+					new Filter("InstituteID", FilterOperator.NE, InstituteID),
+				]
+				for(let instituteName in InstituteNames){
+					orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.EQ,
+						value1: InstituteNames[instituteName]
+					}));
+				}
+				andFilters.push(new Filter(orFilters, false))
+			 	oFilters = [new Filter(andFilters, true)];
+			}else{
+				andFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, CountryCode ),
+					new Filter("InstituteID", FilterOperator.EQ, InstituteID),
+				]
+				oFilters = [new Filter(andFilters, true)];
+			}
+			const path = Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup';
+			return new Promise((resolve, reject) => {
+				this.model.read(path, {
+					filters: oFilters,
+					success: function (res) {
+						resolve(res?.results)
+					}
+				});
+			})
+		}
     });
 });

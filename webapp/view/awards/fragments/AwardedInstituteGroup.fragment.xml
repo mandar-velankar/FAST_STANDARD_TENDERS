@@ -11,13 +11,7 @@
 		confirm=".handleAwardedInstituteGroupHelpConfirm"
 		multiSelect="true"
 		cancel=".handleAwardedInstituteGroupHelpCancelPress"
-		items="{
-			path: '/InstitutesInGroup',
-			sorter: {path: 'InstituteName'},
-			events:{
-            	dataReceived: '.handleAwardedInstituteGroupValueHelpUpdateFinished'
-		 	}
-		}">
+		>
 		<columns>
 			<Column>
 				<Text text="Institute Name"/>

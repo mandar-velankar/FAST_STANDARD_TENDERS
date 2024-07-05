@@ -144,14 +144,13 @@ sap.ui.define([
 				ProductCode: this.productId,
 				LotID: "1"
 			});
-			
+			const awardedProduct = await this.stState.getService().getAwardedProduct(this.offerId, this.productId)
+			this.bindContractDurationSelect(awardedProduct)
 			this._bindView(awardedProductPath);
 			this.bindForm(awardedProductPath);
 			this.bindTable(this.offerId, this.productId);
 			this.setInitialWholeSalerMultiInputTokens();
 			await this.getAwardedContractDurations()
-            this.bindContractDurationSelectionForm(this.offerId, this.productId)
-			this.bindContractDurationSelect(this.offerId, this.productId)
 		},
 
 		getAwardedContractDurations: async function(){
@@ -159,28 +158,39 @@ sap.ui.define([
 			const multiInput = this.byId("idAwardedInstituteGroupMultiSelect")
 			let awardedContractDurationForm = {}; 
 			const InstituteGroupTokens = [];
-
-			result.map(function (item) {
-				const oToken = new Token({
-					text: item.InstituteName,
-					key: item.InstituteID
-				});
-				InstituteGroupTokens.push(oToken);
-				awardedContractDurationForm = {
-					OfferID: item.OfferID,
-				    ProductCode: item.ProductCode,
-				    InstituteName: "", 
-				    ContractDuration: item.ContractDuration, 
-				    ContractStartDate: item.ContractStartDate, 
-				    ContractEndDate: item.ContractEndDate,
-				}
-			});
-
+			const tender = await this.stState.getService().getTender(this.tenderId);
+			if (result.length > 0) {
+					result.map(function (item) {
+						const oToken = new Token({
+							text: item.InstituteName,
+							key: item.InstituteID
+						});
+						InstituteGroupTokens.push(oToken);
+						awardedContractDurationForm = {
+							OfferID: item.OfferID,
+							ProductCode: item.ProductCode,
+							InstituteName: "", 
+							ContractDuration: item.ContractDuration, 
+							ContractStartDate: item.ContractStartDate, 
+							ContractEndDate: item.ContractEndDate,
+						}
+					});
+			}else{
+				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender)	
+				instituteInContract.map(function (item) {
+					const oToken = new Token({
+						text: item.InstituteName,
+						key: item.InstituteID
+					});
+					InstituteGroupTokens.push(oToken);
+				})
+			}
 			this.getModel("ui").setProperty("/ContractDurationForm", awardedContractDurationForm)
 			
             multiInput.removeAllTokens();			
 
 			multiInput.setTokens(InstituteGroupTokens);	
+			this.bindContractDurationSelectionForm(this.offerId, this.productId)
 		},
 		
 		getCompetitorResults: async function (offerId, productCode) {
@@ -930,26 +940,47 @@ sap.ui.define([
 
 		bindAwardedInstituteGroupTable: async function(){
 			const list = this.byId("idAwardedInstituteGroupDialog");
-            const template = list.getBindingInfo("items").template.clone();
+            const template = new sap.m.ColumnListItem({
+                cells:[
+                    new sap.m.Text({text:'{InstituteName}'}),
+                ]
+            })
 			const {InstituteID} = this.getView().getBindingContext().getObject()
 			const {Custom_String_3} = await this.stState.getService().getTender(this.tenderId);
 			const InstituteNames = Custom_String_3.split(";")
 			const orFilters = []
-			const andFilters = [
-				new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
-				new Filter("InstituteID", FilterOperator.NE, InstituteID),
-
-			]
-			for(let instituteName in InstituteNames){
-				orFilters.push(new Filter({
-					path: "InstituteName",
-					operator: FilterOperator.EQ,
-					value1: InstituteNames[instituteName]
-				}));
+			let andFilters = []
+			let oFilters;
+			
+			if (Custom_String_3) {
+				andFilters = [
+					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
+					new Filter("InstituteID", FilterOperator.NE, InstituteID),
+				]
+				for(let instituteName in InstituteNames){
+					orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.EQ,
+						value1: InstituteNames[instituteName]
+					}));
+				}
+				andFilters.push(new Filter(orFilters, false))
+			 	oFilters = [new Filter(andFilters, true)];
+			}else{
+				andFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, this.countryCode ),
+					new Filter("InstituteID", FilterOperator.EQ, InstituteID),
+				]
+				oFilters = [new Filter(andFilters, true)];
 			}
-			andFilters.push(new Filter(orFilters, false))
-			const oFilters = new Filter(andFilters, true);
-			list.getBinding('items').filter(oFilters)
+            list.bindItems({
+				path: Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup',
+				template: template,
+				filters: oFilters,
+				events:{
+					dataReceived: this.handleAwardedInstituteGroupValueHelpUpdateFinished.bind(this)
+				}
+			});	
 		},
 
 		handleAwardedInstituteGroupValueHelpSearch: function(oEvent){
@@ -995,36 +1026,48 @@ sap.ui.define([
 			InstituteGroupList.setTokens(InstituteGroupTokens);	
 		},
 
-		onSavehandleAwardedContractDuration: function(){
-			try {
-				
-				this.getModel("appView").setProperty('/busy', true);
-				const form = this.byId("idContractDurationForm");
-				const contractDurationValue = this.byId("idContractDuration").getSelectedKey()
-				const obj = form.getBindingContext("ui").getObject();
-				const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
-				obj.InstituteName = InstituteGroupIds;            
-				obj.ContractDuration = contractDurationValue;
-				obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate).toISOString();
-				obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate).toISOString();
-				obj.OfferID = this.offerId;
-				obj.ProductCode = this.productId;
-				this.getModel().createEntry('/ContractInfomation', {
+		onDateChange: function() {
+			const form = this.byId('idContractDurationForm') 
+			const context = form.getBindingContext('ui')
+            const startDate = this.byId('idContractStartDate').getDateValue();
+            const durationSelect = this.byId("idContractDuration").getSelectedKey();
+			const endDate = new Date(startDate);
+			endDate.setDate(endDate.getDate() + 1);
+			const formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + parseInt(durationSelect)));
+			
+			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
+			context.getModel().refresh()
+        },
+
+        onSavehandleAwardedContractDuration: function(){
+            try {
+                this.getModel("appView").setProperty('/busy', true);
+                const form = this.byId("idContractDurationForm");
+                const contractDurationValue = this.byId("idContractDuration").getSelectedKey();
+                const obj = form.getBindingContext("ui").getObject();
+                const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
+                
+                obj.InstituteName = InstituteGroupIds;            
+                obj.ContractDuration = contractDurationValue;
+                obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate);
+                obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate);
+                obj.OfferID = this.offerId;
+                obj.ProductCode = this.productId;
+                
+                this.getModel().createEntry('/ContractInfomation', {
                     properties: obj,
-					groupId: "ContractDuration"
+                    groupId: "ContractDuration"
                 });
 
-				this.getModel().submitChanges({
-				    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
-				    groupId: "ContractDuration"
-			    });
-				this.getModel("ui").setProperty('/ContractDuration/editMode', false);
-			} catch (error) {
-				MessageBox.error(response?.error?.message?.value);
-				this.getModel("appView").setProperty('/busy', false);
-			}
-			
-		},
+                this.getModel().submitChanges({
+                    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
+                    groupId: "ContractDuration"
+                });
+            } catch (error) {
+                MessageBox.error(error.message);
+                this.getModel("appView").setProperty('/busy', false);
+            }
+        },
 
 
 		onSubmitChangesAwardedContractDurationSuccess: async function (event) {
@@ -1037,7 +1080,9 @@ sap.ui.define([
 				await this.getAwardedContractDurations()
 				MessageBox.success('Contract Duration was saved successfully');
 				this.getModel("appView").setProperty('/busy', false);
+				this.getModel("ui").setProperty('/ContractDuration/editMode', false);
 			}
+			this.getModel().resetChanges();
 		},
 
 		bindContractDurationSelectionForm: function(){
@@ -1049,21 +1094,9 @@ sap.ui.define([
 
 		},
 
-        bindContractDurationSelect: function(OfferID, ProductCode){
+        bindContractDurationSelect: function(awardedProduct){
 			const select = this.byId("idContractDuration")
-            const template = new Item({
-				key: "{ContractDuration}",
-				text: "{ContractDuration}"
-			})
-            
-			const awardedProductPath = this.getModel().createKey("/AwardedProductFormView",{
-                    OfferID: OfferID,
-					ProductCode: ProductCode,
-					LotID: 1
-			})
-
-			const awardedProduct = this.getModel().getProperty(awardedProductPath) 
-
+            const template = select.getBindingInfo('items').template.clone()
 			select.bindItems({
 				path: "/NLPriceConditions",
 				template: template,
