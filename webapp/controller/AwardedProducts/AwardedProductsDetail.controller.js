@@ -730,6 +730,7 @@ sap.ui.define([
 			initialWholesalerMultiInput.removeAllTokens();
 			wholesalersListMultiInput.removeAllTokens();
 			productListMultiInput.removeAllTokens();
+			productListMultiInput.setSelectedItem(null);
 		},
 
 		onProductNameInputValueHelpRequest: function(event){
