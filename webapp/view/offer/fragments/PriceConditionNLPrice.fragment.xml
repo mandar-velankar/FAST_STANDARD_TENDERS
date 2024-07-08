@@ -69,16 +69,6 @@
 									class="sapUiSmallMarginBottom"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.AIP}" visible="{= !${ui>/PricingForm/editMode} }">
-						<form:fields>
-							<Input value="{
-										parts: ['BasePrice', 'Currency'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
-									}" 
-									enabled="false" 
-									class="sapUiSmallMarginBottom"/>
-						</form:fields>
-					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${Custom_Integer_1}}">
 						<form:fields>
 							<Input value="{Custom_Integer_1}"   

@@ -626,9 +626,6 @@ sap.ui.define([
 			if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
 				context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
 			}
-			if(Number(boundObject.masterPriceAIP) !== Number(boundObject.BasePrice)){
-				context.getModel().setProperty("BasePrice", boundObject.masterPriceAIP, context);
-			}
 			this.calculatePricingFormFields({conditonType,context});
 		},
 
@@ -1787,7 +1784,7 @@ sap.ui.define([
 			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
 			let discount = property?.toLowerCase().includes("discount") ? value : nlPrice.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let offerPrice = Number((parseFloat(priceObj.BasePrice) * (1 - discount)).toFixed(2));
+			let offerPrice = Number((parseFloat(priceObj.masterPriceAIP) * (1 - discount)).toFixed(2));
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			const NLPriceConditionType = priceObj.NLPriceConditionType;
@@ -1805,7 +1802,7 @@ sap.ui.define([
 			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let discount = (parseFloat(priceObj.BasePrice) - parseFloat(offerPrice)) / priceObj.BasePrice;
+			let discount = (parseFloat(priceObj.masterPriceAIP) - parseFloat(offerPrice)) / priceObj.masterPriceAIP;
 			discount = this.formatter.truncToFourDecimalPlaces(discount);
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
