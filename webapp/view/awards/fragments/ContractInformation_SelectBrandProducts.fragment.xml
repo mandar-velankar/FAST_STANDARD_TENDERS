@@ -1,0 +1,31 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <TableSelectDialog
+		id="idSelectProductBrandDialog"
+		contentWidth="250px"
+		noDataText="No Products were Found"
+		title="{i18n>ContractInformationFragment.Products}"
+		search=".handleProductBrandsWholesalersValueHelpSearch($event, 'PRODUCT_NAME')"
+		liveChange=".handleProductBrandsWholesalersValueHelpSearch($event, 'PRODUCT_NAME')"
+		confirm=".handleProductBrandsValueHelpConfirm"
+		multiSelect="true"
+		updateFinished=".handleProductDistributorsValueHelpUpdateFinished($event, 'Product')"
+		items="{
+			path: 'ui>/brandProducts',
+			sorter: {path: 'PRODUCT_NAME'}
+		}">
+		<columns>
+			<Column>
+				<Text text="Product Name"/>
+			</Column>
+		</columns>
+		<items>
+			<ColumnListItem type="Active">
+				<cells>
+					<Text text="{ui>PRODUCT_NAME}"/>
+				</cells>
+			</ColumnListItem>
+		</items>
+	</TableSelectDialog>
+</core:FragmentDefinition>
