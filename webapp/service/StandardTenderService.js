@@ -201,10 +201,20 @@ sap.ui.define([
 				})
 		},
 
-		getNLOfferDistributors: async function (offerID) {
-			const filters = [
-				new Filter("OfferID",FilterOperator.EQ, offerID),
-			]
+		getNLOfferDistributors: async function (offerID, productCode, key) {
+			let filters = []
+
+			if (key === 'DistributorID') {
+				filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("ProductPackID",FilterOperator.EQ, productCode),
+				]
+			}else {
+				filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("AssignedProductCode",FilterOperator.EQ, productCode),
+				]
+			}
 			return new Promise((resolve, reject) => {
 				this.model.read("/NLOfferDistributors", {
 					filters: filters,

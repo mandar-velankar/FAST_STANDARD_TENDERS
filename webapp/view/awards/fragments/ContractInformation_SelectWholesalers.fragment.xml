@@ -25,7 +25,10 @@
 					value1: '100000248'
         		}
 			],
-			sorter: {path: 'DistributorName'}
+			sorter: {path: 'DistributorName'},
+			events: {
+				dataReceived: '.handleProductDistributorsValueHelpUpdateFinished($event, Distributor)'
+			}
 		}">
 		<columns>
 			<Column>
