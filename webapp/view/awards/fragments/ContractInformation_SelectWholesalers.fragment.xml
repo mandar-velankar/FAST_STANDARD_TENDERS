@@ -22,10 +22,13 @@
 				{
 					path: 'DistributorID',
 					operator: 'NE',
-					value1: '100000248'
+					value1: '100000226'
         		}
 			],
-			sorter: {path: 'DistributorName'}
+			sorter: {path: 'DistributorName'},
+			events: {
+				dataReceived: '.handleProductDistributorsValueHelpUpdateFinished($event, Distributor)'
+			}
 		}">
 		<columns>
 			<Column>

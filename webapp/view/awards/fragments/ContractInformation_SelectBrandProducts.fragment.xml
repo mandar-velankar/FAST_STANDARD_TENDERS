@@ -13,7 +13,10 @@
 		updateFinished=".handleProductDistributorsValueHelpUpdateFinished($event, 'Product')"
 		items="{
 			path: 'ui>/brandProducts',
-			sorter: {path: 'PRODUCT_NAME'}
+			sorter: {path: 'PRODUCT_NAME'},
+			events: {
+				dataReceived: '.handleProductDistributorsValueHelpUpdateFinished($event, Product)'
+			}
 		}">
 		<columns>
 			<Column>

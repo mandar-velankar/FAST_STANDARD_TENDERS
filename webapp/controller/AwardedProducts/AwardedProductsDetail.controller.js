@@ -10,7 +10,8 @@ sap.ui.define([
 	"sap/ui/core/Item",
 	"sap/m/MessageBox",
 	"sap/ui/model/Sorter",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox, Sorter) {
+	"sap/ui/core/BusyIndicator",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox, Sorter, BusyIndicator) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail", {
@@ -669,12 +670,12 @@ sap.ui.define([
 			let wholesalersListMultiInput = this.byId("idContractInformationWholesalersMultiInput");
 			let productListMultiInput = this.byId("idContractInformationProductsMultiInput");
 
-			const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
-			this.getUniqueDistributors(undefined, NLOfferDistributors, wholesalersListMultiInput, 'DistributorID');
-			this.getUniqueDistributors(undefined, NLOfferDistributors, productListMultiInput, 'ProductPackID');
+			await this.getUniqueDistributors(undefined, wholesalersListMultiInput, 'DistributorID');
+			await this.getUniqueDistributors(undefined, productListMultiInput, 'ProductPackID');
 		},
 
-		getUniqueDistributors: function (initialWholesalerMultiInput, input, multiInput, key) {
+		getUniqueDistributors: async function (initialWholesalerMultiInput, multiInput, key) {
+			const input = await this.stState.getService().getNLOfferDistributors(this.offerId, this.productId, key);
 			const uniqValues = new Map();
 			input.forEach(item => {
 				uniqValues.set(item[key], item);
@@ -688,8 +689,8 @@ sap.ui.define([
 
 		setInitialWholeSalerMultiInputTokens: async function () {
 			let initialWholesalerMultiInput = this.byId("idWholesarlersMultiInput");
-			const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
-			this.getUniqueDistributors(initialWholesalerMultiInput, NLOfferDistributors, undefined, 'DistributorID');
+			initialWholesalerMultiInput.removeAllTokens();
+			this.getUniqueDistributors(initialWholesalerMultiInput, undefined, 'DistributorID');
 		},
 
 		setSelectedTokens: function (initialWholesalerMultiInput, multiInput, item, key) {
@@ -753,7 +754,35 @@ sap.ui.define([
 				controller.getProductBrands();
 				valueHelpDialog.setRememberSelections(true);
 				valueHelpDialog.open();
-				controller.handleProductDistributorsValueHelpUpdateFinished(undefined, 'Product');
+				controller.bindProductsTable();
+			});
+		},
+
+		bindWholesalersTable: function () {
+			const wholesalersTable = this.byId("idSelectWholesalersDialog");
+			const template = wholesalersTable.getBindingInfo("items").template
+			wholesalersTable.bindItems({
+				path: "/MasterDistributors",
+				filters: [
+					new Filter("CountryCode",FilterOperator.EQ, 'NL'),
+					new Filter("DistributorID",FilterOperator.NE, 100000226)
+				],
+				template: template,
+				events: {
+					dataReceived: this.handleProductDistributorsValueHelpUpdateFinished.bind('Distributor', this)
+				}
+			});
+		},
+
+		bindProductsTable: function () {
+			const productsTable = this.byId("idSelectProductBrandDialog");
+			const template = productsTable.getBindingInfo("items").template
+			productsTable.bindItems({
+				path: "ui>/brandProducts",
+				template: template,
+				events: {
+					dataReceived: this.handleProductDistributorsValueHelpUpdateFinished.bind('Product', this)
+				}
 			});
 		},
 
@@ -763,8 +792,13 @@ sap.ui.define([
 			if(!offerFormViewObject){
 				offerFormViewObject	= await this.getOfferFormView(this.offerId);
 			}
+			const {products} = await this.stState.getService().getOfferProducts(offerFormViewObject.OfferID);
 			const instituteBrandProducts = await this.stState.getService().getInstituteBrandProducts(offerFormViewObject, productName);
-			this.getModel('ui').setProperty('/brandProducts', instituteBrandProducts);
+			const filteredInstituteBrandProducts = instituteBrandProducts.filter(item => {
+				const itemIndex = products.findIndex(pr => pr.ProductCode == item.PRODUCT_ID);
+				if (itemIndex > -1) return item;
+			});
+			this.getModel('ui').setProperty('/brandProducts', filteredInstituteBrandProducts);
 		},
 
 
@@ -828,7 +862,7 @@ sap.ui.define([
 			this.dialogSelectWholesalers.then(function (valueHelpDialog) {
 				valueHelpDialog.setRememberSelections(true);
 				valueHelpDialog.open();
-				controller.handleProductDistributorsValueHelpUpdateFinished(undefined, 'Distributor');
+				controller.bindWholesalersTable();
 			});
 		},
 
@@ -877,7 +911,7 @@ sap.ui.define([
 
 		onButtonApplyWholesalersProductsPress: async function () {
 			try {
-				this.getModel("appView").setProperty('/busy', true);
+				BusyIndicator.show(0);
 				// const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
 				const wholesalersListTokens = this.byId("idContractInformationWholesalersMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
 				const brandProductMultiInputTokens = this.byId("idContractInformationProductsMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
@@ -885,7 +919,8 @@ sap.ui.define([
 				const pendingChange = {
 					OfferID: this.offerId,
 					DistributorName: wholesalersListTokens,
-					ProductPackName: brandProductMultiInputTokens
+					ProductPackName: brandProductMultiInputTokens,
+					AssignedProductCode: this.productId
 				};
 				this.getModel().createEntry('/NLOfferDistributors', {
 					properties: pendingChange,
@@ -899,7 +934,7 @@ sap.ui.define([
 				});
 			} catch (error) {
 				MessageBox.error(response?.error?.message?.value);
-				this.getModel("appView").setProperty('/busy', false);
+				BusyIndicator.hide();
 			}
 		},
 
@@ -909,13 +944,13 @@ sap.ui.define([
 			let dialog = await this.getDistributorAssignementDialog();
 			if (errStatus == 403) {
 				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
-				this.getModel("appView").setProperty('/busy', false);
+				BusyIndicator.hide();
 			}else {
 				this.resetMultiInputTokens();
 				this.setInitialWholeSalerMultiInputTokens();
 				dialog.close();
 				MessageBox.success('Wholesalers were saved successfully');
-				this.getModel("appView").setProperty('/busy', false);
+				BusyIndicator.hide();
 			}
 		},
 
@@ -927,7 +962,7 @@ sap.ui.define([
                     controller: this,
                 }).then(async function(oFragment) {
                     this._AwardedInstituteGroupFragment = oFragment;
-					oFragment.setRememberSelections(true);
+					// oFragment.setRememberSelections(true);
                     this._AwardedInstituteGroupFragment.setModel(this.getView().getModel());
                     this.getView().addDependent(oFragment);
                     this._AwardedInstituteGroupFragment.open();
