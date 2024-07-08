@@ -1331,7 +1331,7 @@ sap.ui.define([
 			})
 		},
 		onSendNotificationMail: function(evt){
-			const Form = this.byId('SendNotificationMailDialog')
+			const Form = this.byId('SendNotificationMailForm')
 			const context = Form.getBindingContext()
 			let Recipients = this.byId("idTo").getSelectedKeys().join(';')
 			this.getModel().setProperty('Recipients', Recipients, context)
@@ -1370,7 +1370,7 @@ sap.ui.define([
 			}
 		},
 		NotificationMailFormBinding: function () {
-			const Form = this.byId('SendNotificationMailDialog')
+			const Form = this.byId('SendNotificationMailForm')
 			let oSender = this.byId("idFrom");
 			let userEmail = this.stState.getProperty("/UserEmail")
 			oSender.setTokens([
@@ -1382,7 +1382,7 @@ sap.ui.define([
 				OfferID: this.offerID,
 				Sender: userEmail,
 				Recipients: '',
-				Subject: this.byId('idSubject').getValue(),
+				Subject:`Action Required: Price Details Input for Offer ID ${this.offerID}`,
 				MailBody: this.byId('idEditor').getValue(),
 				Sent: false			
 			}
@@ -1417,12 +1417,14 @@ sap.ui.define([
 			this.byId("idUploadZagisFileDialog").close();
 		},
 
-		handleZagisFileUploadComplete: function(evt) {
+		handleZagisFileUploadComplete: async function(evt) {
 			const response = evt.getParameter("responseRaw") && JSON.parse(evt.getParameter("responseRaw"));
 			const statusCode = evt.getParameter("status");
 
 			if (statusCode === 204) {
 				this.onCloseZagisFileUploadDialog();
+				const {productCount} = await this.stState.getService().getOfferProducts(this.offerID);
+				this.getModel('ui').setProperty('/OfferProductTable/count', productCount);
 				this.byId("idOfferProductsTable").getBinding('items').refresh();
 				MessageBox.success("Zagis File imported successfully");
 			}else {
@@ -1465,5 +1467,24 @@ sap.ui.define([
 
 			})
 		},
+
+		OfferProductColumnVisibility: function (title) {
+			const tender = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
+			if (!tender || !title) return true;
+			if (tender.CountryCode !== 'NL') return true;
+			const cases = {
+				'Contract Duration 1': tender.Custom_Integer_1,
+				'Contract Duration 2': tender.Custom_Integer_2,
+				'Contract Duration 3': tender.Custom_Integer_3,
+				'Price 1': tender.Custom_Integer_1,
+				'Price 2': tender.Custom_Integer_2,
+				'Price 3': tender.Custom_Integer_3,
+			}
+			if (!cases.hasOwnProperty(title)) return true;
+
+
+			return !!cases[title];
+
+		}
 	});
 });

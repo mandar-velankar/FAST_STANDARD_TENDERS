@@ -999,6 +999,10 @@ sap.ui.define([
 
 		handleUpdateMasterTable: function () {
 			this.byId('genericMasterTable').getBinding("items").refresh();
+		},
+		onDownloadExtractOffers: function () {
+			const url = "/v2/sta_tender/ExtractNLHistoricalInformation(templateId=1)/content";
+			URLHelper.redirect(url, true);
 		}
 	});
 
