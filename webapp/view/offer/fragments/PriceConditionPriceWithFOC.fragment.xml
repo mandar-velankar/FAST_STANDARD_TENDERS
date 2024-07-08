@@ -62,7 +62,7 @@
 					<form:FormElement label="{i18n>CurrentBasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency', 'Region', 'CountryCode'],
+										parts: ['CurrentBasePrice', 'Currency', 'Region'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="false"/>
@@ -71,7 +71,7 @@
 					<form:FormElement label="{i18n>BasePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'Currency', 'Region', 'CountryCode'],
+										parts: ['BasePrice', 'Currency', 'Region'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}"  
 									enabled="false"/>
@@ -81,7 +81,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: [ 'Discount', 'CountryCode'],
+									path: 'Discount',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -93,7 +93,7 @@
 							<Input 
 								id = "idPriceWithFOCOfferPrice"
 								value="{
-									parts: ['OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									parts: ['OfferPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -105,7 +105,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetOfferPrice', 'Currency', 'Region', 'CountryCode'],
+									parts: ['NetOfferPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
@@ -116,7 +116,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: [ 'Deductions', 'CountryCode'],
+									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -128,7 +128,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NetPrice', 'Currency', 'Region', 'CountryCode'],
+									parts: ['NetPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"/>

@@ -10,7 +10,8 @@ sap.ui.define([
 	"sap/ui/core/Item",
 	"sap/m/MessageBox",
 	"sap/ui/model/Sorter",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox, Sorter) {
+	"sap/ui/core/BusyIndicator",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox, Sorter, BusyIndicator) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail", {
@@ -144,14 +145,13 @@ sap.ui.define([
 				ProductCode: this.productId,
 				LotID: "1"
 			});
-			
+			const awardedProduct = await this.stState.getService().getAwardedProduct(this.offerId, this.productId)
+			this.bindContractDurationSelect(awardedProduct)
 			this._bindView(awardedProductPath);
 			this.bindForm(awardedProductPath);
 			this.bindTable(this.offerId, this.productId);
 			this.setInitialWholeSalerMultiInputTokens();
 			await this.getAwardedContractDurations()
-            this.bindContractDurationSelectionForm(this.offerId, this.productId)
-			this.bindContractDurationSelect(this.offerId, this.productId)
 		},
 
 		getAwardedContractDurations: async function(){
@@ -159,28 +159,39 @@ sap.ui.define([
 			const multiInput = this.byId("idAwardedInstituteGroupMultiSelect")
 			let awardedContractDurationForm = {}; 
 			const InstituteGroupTokens = [];
-
-			result.map(function (item) {
-				const oToken = new Token({
-					text: item.InstituteName,
-					key: item.InstituteID
-				});
-				InstituteGroupTokens.push(oToken);
-				awardedContractDurationForm = {
-					OfferID: item.OfferID,
-				    ProductCode: item.ProductCode,
-				    InstituteName: "", 
-				    ContractDuration: item.ContractDuration, 
-				    ContractStartDate: item.ContractStartDate, 
-				    ContractEndDate: item.ContractEndDate,
-				}
-			});
-
+			const tender = await this.stState.getService().getTender(this.tenderId);
+			if (result.length > 0) {
+					result.map(function (item) {
+						const oToken = new Token({
+							text: item.InstituteName,
+							key: item.InstituteID
+						});
+						InstituteGroupTokens.push(oToken);
+						awardedContractDurationForm = {
+							OfferID: item.OfferID,
+							ProductCode: item.ProductCode,
+							InstituteName: "", 
+							ContractDuration: item.ContractDuration, 
+							ContractStartDate: item.ContractStartDate, 
+							ContractEndDate: item.ContractEndDate,
+						}
+					});
+			}else{
+				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender)	
+				instituteInContract.map(function (item) {
+					const oToken = new Token({
+						text: item.InstituteName,
+						key: item.InstituteID
+					});
+					InstituteGroupTokens.push(oToken);
+				})
+			}
 			this.getModel("ui").setProperty("/ContractDurationForm", awardedContractDurationForm)
 			
             multiInput.removeAllTokens();			
 
 			multiInput.setTokens(InstituteGroupTokens);	
+			this.bindContractDurationSelectionForm(this.offerId, this.productId)
 		},
 		
 		getCompetitorResults: async function (offerId, productCode) {
@@ -480,7 +491,6 @@ sap.ui.define([
 				this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 				this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
 				this.byId('idCompetitorResultTable').getBinding('items').refresh();
-				this.bindTable(this.offerId, this.productId);
 			}
 			this.byId('idCompetitorResultTable').setBusy(false);
 		},
@@ -557,8 +567,8 @@ sap.ui.define([
 					this.defaultModel.setProperty(`${path}/AWARDEDCOMPANY`, value, context);
 					this.defaultModel.setProperty(`${path}/AWARDEDPRODUCT`, '', context);
 					this.filterAwardedProducts(event.getSource(), value);
-					// const masterCompetitors = await this.getMasterCompetitors(value);
-					// this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
+					const masterCompetitors = await this.getMasterCompetitors(value);
+					this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
 					this.defaultModel.setProperty(`${path}/Custom_String_2`, this.countryCode, context) //MasterCompetitors field used for MasterCompetitors upsert operation
 					break;
 				case "AwardedProduct":
@@ -660,12 +670,12 @@ sap.ui.define([
 			let wholesalersListMultiInput = this.byId("idContractInformationWholesalersMultiInput");
 			let productListMultiInput = this.byId("idContractInformationProductsMultiInput");
 
-			const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
-			this.getUniqueDistributors(undefined, NLOfferDistributors, wholesalersListMultiInput, 'DistributorID');
-			this.getUniqueDistributors(undefined, NLOfferDistributors, productListMultiInput, 'ProductPackID');
+			await this.getUniqueDistributors(undefined, wholesalersListMultiInput, 'DistributorID');
+			await this.getUniqueDistributors(undefined, productListMultiInput, 'ProductPackID');
 		},
 
-		getUniqueDistributors: function (initialWholesalerMultiInput, input, multiInput, key) {
+		getUniqueDistributors: async function (initialWholesalerMultiInput, multiInput, key) {
+			const input = await this.stState.getService().getNLOfferDistributors(this.offerId, this.productId, key);
 			const uniqValues = new Map();
 			input.forEach(item => {
 				uniqValues.set(item[key], item);
@@ -679,8 +689,8 @@ sap.ui.define([
 
 		setInitialWholeSalerMultiInputTokens: async function () {
 			let initialWholesalerMultiInput = this.byId("idWholesarlersMultiInput");
-			const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
-			this.getUniqueDistributors(initialWholesalerMultiInput, NLOfferDistributors, undefined, 'DistributorID');
+			initialWholesalerMultiInput.removeAllTokens();
+			this.getUniqueDistributors(initialWholesalerMultiInput, undefined, 'DistributorID');
 		},
 
 		setSelectedTokens: function (initialWholesalerMultiInput, multiInput, item, key) {
@@ -721,6 +731,7 @@ sap.ui.define([
 			initialWholesalerMultiInput.removeAllTokens();
 			wholesalersListMultiInput.removeAllTokens();
 			productListMultiInput.removeAllTokens();
+			productListMultiInput.setSelectedItem(null);
 		},
 
 		onProductNameInputValueHelpRequest: function(event){
@@ -743,7 +754,35 @@ sap.ui.define([
 				controller.getProductBrands();
 				valueHelpDialog.setRememberSelections(true);
 				valueHelpDialog.open();
-				controller.handleProductDistributorsValueHelpUpdateFinished(undefined, 'Product');
+				controller.bindProductsTable();
+			});
+		},
+
+		bindWholesalersTable: function () {
+			const wholesalersTable = this.byId("idSelectWholesalersDialog");
+			const template = wholesalersTable.getBindingInfo("items").template
+			wholesalersTable.bindItems({
+				path: "/MasterDistributors",
+				filters: [
+					new Filter("CountryCode",FilterOperator.EQ, 'NL'),
+					new Filter("DistributorID",FilterOperator.NE, 100000226)
+				],
+				template: template,
+				events: {
+					dataReceived: this.handleProductDistributorsValueHelpUpdateFinished.bind('Distributor', this)
+				}
+			});
+		},
+
+		bindProductsTable: function () {
+			const productsTable = this.byId("idSelectProductBrandDialog");
+			const template = productsTable.getBindingInfo("items").template
+			productsTable.bindItems({
+				path: "ui>/brandProducts",
+				template: template,
+				events: {
+					dataReceived: this.handleProductDistributorsValueHelpUpdateFinished.bind('Product', this)
+				}
 			});
 		},
 
@@ -753,8 +792,13 @@ sap.ui.define([
 			if(!offerFormViewObject){
 				offerFormViewObject	= await this.getOfferFormView(this.offerId);
 			}
+			const {products} = await this.stState.getService().getOfferProducts(offerFormViewObject.OfferID);
 			const instituteBrandProducts = await this.stState.getService().getInstituteBrandProducts(offerFormViewObject, productName);
-			this.getModel('ui').setProperty('/brandProducts', instituteBrandProducts);
+			const filteredInstituteBrandProducts = instituteBrandProducts.filter(item => {
+				const itemIndex = products.findIndex(pr => pr.ProductCode == item.PRODUCT_ID);
+				if (itemIndex > -1) return item;
+			});
+			this.getModel('ui').setProperty('/brandProducts', filteredInstituteBrandProducts);
 		},
 
 
@@ -818,7 +862,7 @@ sap.ui.define([
 			this.dialogSelectWholesalers.then(function (valueHelpDialog) {
 				valueHelpDialog.setRememberSelections(true);
 				valueHelpDialog.open();
-				controller.handleProductDistributorsValueHelpUpdateFinished(undefined, 'Distributor');
+				controller.bindWholesalersTable();
 			});
 		},
 
@@ -867,7 +911,7 @@ sap.ui.define([
 
 		onButtonApplyWholesalersProductsPress: async function () {
 			try {
-				this.getModel("appView").setProperty('/busy', true);
+				BusyIndicator.show(0);
 				// const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
 				const wholesalersListTokens = this.byId("idContractInformationWholesalersMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
 				const brandProductMultiInputTokens = this.byId("idContractInformationProductsMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
@@ -875,7 +919,8 @@ sap.ui.define([
 				const pendingChange = {
 					OfferID: this.offerId,
 					DistributorName: wholesalersListTokens,
-					ProductPackName: brandProductMultiInputTokens
+					ProductPackName: brandProductMultiInputTokens,
+					AssignedProductCode: this.productId
 				};
 				this.getModel().createEntry('/NLOfferDistributors', {
 					properties: pendingChange,
@@ -889,7 +934,7 @@ sap.ui.define([
 				});
 			} catch (error) {
 				MessageBox.error(response?.error?.message?.value);
-				this.getModel("appView").setProperty('/busy', false);
+				BusyIndicator.hide();
 			}
 		},
 
@@ -899,52 +944,79 @@ sap.ui.define([
 			let dialog = await this.getDistributorAssignementDialog();
 			if (errStatus == 403) {
 				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
-				this.getModel("appView").setProperty('/busy', false);
+				BusyIndicator.hide();
 			}else {
 				this.resetMultiInputTokens();
 				this.setInitialWholeSalerMultiInputTokens();
 				dialog.close();
 				MessageBox.success('Wholesalers were saved successfully');
-				this.getModel("appView").setProperty('/busy', false);
+				BusyIndicator.hide();
 			}
 		},
 
-		onOpenAwardedInstituteGroup: function(){
+		onOpenAwardedInstituteGroup: async function(){
 			if (!this._AwardedInstituteGroupFragment) {
                 this._AwardedInstituteGroupFragment = Fragment.load({
                     id: this.getView().getId(),
                     name: "com.bayer.tender.statenderapp.view.awards.fragments.AwardedInstituteGroup",
                     controller: this,
-                }).then(function(oFragment) {
+                }).then(async function(oFragment) {
                     this._AwardedInstituteGroupFragment = oFragment;
-					oFragment.setRememberSelections(true);
+					// oFragment.setRememberSelections(true);
                     this._AwardedInstituteGroupFragment.setModel(this.getView().getModel());
                     this.getView().addDependent(oFragment);
                     this._AwardedInstituteGroupFragment.open();
-					this.bindAwardedInstituteGroupTable();
+					await this.bindAwardedInstituteGroupTable();
                 }.bind(this));
             } else {
-				this.bindAwardedInstituteGroupTable();
+				await this.bindAwardedInstituteGroupTable();
                 this._AwardedInstituteGroupFragment.open();
             }
 		},
 
-		bindAwardedInstituteGroupTable: function(){
+		bindAwardedInstituteGroupTable: async function(){
 			const list = this.byId("idAwardedInstituteGroupDialog");
-            const template = list.getBindingInfo("items").template.clone();
+            const template = new sap.m.ColumnListItem({
+                cells:[
+                    new sap.m.Text({text:'{InstituteName}'}),
+                ]
+            })
 			const {InstituteID} = this.getView().getBindingContext().getObject()
-          
-            list.bindItems({
-                path: "/InstitutesInGroup",
-                template: template,
-				filter: [
+			const {Custom_String_3} = await this.stState.getService().getTender(this.tenderId);
+			const InstituteNames = Custom_String_3.split(";")
+			const orFilters = []
+			let andFilters = []
+			let oFilters;
+			
+			if (Custom_String_3) {
+				andFilters = [
 					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
-					new Filter("InstituteID", FilterOperator.NE, InstituteID)
-				],
-				events:{
-                    dataReceived: this.handleAwardedInstituteGroupValueHelpUpdateFinished.bind(this)
+					new Filter("InstituteID", FilterOperator.NE, InstituteID),
+				]
+				for(let instituteName in InstituteNames){
+					orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.EQ,
+						value1: InstituteNames[instituteName]
+					}));
 				}
-            });
+				andFilters.push(new Filter(orFilters, false))
+			 	oFilters = [new Filter(andFilters, true)];
+			}else{
+				andFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, this.countryCode ),
+					new Filter("InstituteID", FilterOperator.EQ, InstituteID),
+				]
+				oFilters = [new Filter(andFilters, true)];
+			}
+            list.bindItems({
+				path: Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup',
+				template: template,
+				filters: oFilters,
+				events:{
+					dataReceived: this.handleAwardedInstituteGroupValueHelpUpdateFinished.bind(this)
+				}
+			});	
 		},
 
 		handleAwardedInstituteGroupValueHelpSearch: function(oEvent){
@@ -990,36 +1062,48 @@ sap.ui.define([
 			InstituteGroupList.setTokens(InstituteGroupTokens);	
 		},
 
-		onSavehandleAwardedContractDuration: function(){
-			try {
-				
-				this.getModel("appView").setProperty('/busy', true);
-				const form = this.byId("idContractDurationForm");
-				const contractDurationValue = this.byId("idContractDuration").getSelectedKey()
-				const obj = form.getBindingContext("ui").getObject();
-				const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
-				obj.InstituteName = InstituteGroupIds;            
-				obj.ContractDuration = contractDurationValue;
-				obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate).toISOString();
-				obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate).toISOString();
-				obj.OfferID = this.offerId;
-				obj.ProductCode = this.productId;
-				this.getModel().createEntry('/ContractInfomation', {
+		onDateChange: function() {
+			const form = this.byId('idContractDurationForm') 
+			const context = form.getBindingContext('ui')
+            const startDate = this.byId('idContractStartDate').getDateValue();
+            const durationSelect = this.byId("idContractDuration").getSelectedKey();
+			const endDate = new Date(startDate);
+			endDate.setDate(endDate.getDate() + 1);
+			const formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + parseInt(durationSelect)));
+			
+			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
+			context.getModel().refresh()
+        },
+
+        onSavehandleAwardedContractDuration: function(){
+            try {
+                this.getModel("appView").setProperty('/busy', true);
+                const form = this.byId("idContractDurationForm");
+                const contractDurationValue = this.byId("idContractDuration").getSelectedKey();
+                const obj = form.getBindingContext("ui").getObject();
+                const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
+                
+                obj.InstituteName = InstituteGroupIds;            
+                obj.ContractDuration = contractDurationValue;
+                obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate);
+                obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate);
+                obj.OfferID = this.offerId;
+                obj.ProductCode = this.productId;
+                
+                this.getModel().createEntry('/ContractInfomation', {
                     properties: obj,
-					groupId: "ContractDuration"
+                    groupId: "ContractDuration"
                 });
 
-				this.getModel().submitChanges({
-				    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
-				    groupId: "ContractDuration"
-			    });
-				this.getModel("appView").setProperty('/busy', false);
-			} catch (error) {
-				MessageBox.error(response?.error?.message?.value);
-				this.getModel("appView").setProperty('/busy', false);
-			}
-
-		},
+                this.getModel().submitChanges({
+                    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
+                    groupId: "ContractDuration"
+                });
+            } catch (error) {
+                MessageBox.error(error.message);
+                this.getModel("appView").setProperty('/busy', false);
+            }
+        },
 
 
 		onSubmitChangesAwardedContractDurationSuccess: async function (event) {
@@ -1032,7 +1116,9 @@ sap.ui.define([
 				await this.getAwardedContractDurations()
 				MessageBox.success('Contract Duration was saved successfully');
 				this.getModel("appView").setProperty('/busy', false);
+				this.getModel("ui").setProperty('/ContractDuration/editMode', false);
 			}
+			this.getModel().resetChanges();
 		},
 
 		bindContractDurationSelectionForm: function(){
@@ -1044,21 +1130,9 @@ sap.ui.define([
 
 		},
 
-        bindContractDurationSelect: function(OfferID, ProductCode){
+        bindContractDurationSelect: function(awardedProduct){
 			const select = this.byId("idContractDuration")
-            const template = new Item({
-				key: "{ContractDuration}",
-				text: "{ContractDuration}"
-			})
-            
-			const awardedProductPath = this.getModel().createKey("/AwardedProductFormView",{
-                    OfferID: OfferID,
-					ProductCode: ProductCode,
-					LotID: 1
-			})
-
-			const awardedProduct = this.getModel().getProperty(awardedProductPath) 
-
+            const template = select.getBindingInfo('items').template.clone()
 			select.bindItems({
 				path: "/NLPriceConditions",
 				template: template,

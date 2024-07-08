@@ -48,16 +48,10 @@
             <ColumnListItem press="onDeliveryProductPress" detailPress="onDeliveryProductPress">
                 <cells>
                     <Text text="{AwardedProduct}"/>	
+                    <Text text="{AwardedQty}"/>
+                    <Text text="{SumOfDeliveredAmount}"/>	
                     <Text text="{
-                        parts: ['AwardedQty', 'CountryCode', 'Region'], 
-                        type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-                    }"/>
-                    <Text text="{
-                        parts: ['SumOfDeliveredAmount', 'CountryCode', 'Region'], 
-                        type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-                    }"/>	
-                    <Text text="{
-                        parts: ['DeliveredPercentage', 'CountryCode'],
+                        path: 'DeliveredPercentage',
                         type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
                         }"/>				
                 </cells>

@@ -176,7 +176,7 @@ sap.ui.define([
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
-			countryCode === 'TW' && await this.getTaiwanInstituteInBranch(selectedTender);
+			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -672,8 +672,8 @@ sap.ui.define([
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 				this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			}
-			
+			} 
+
 			this._refreshOfferProductTable();
 		},
 
@@ -821,15 +821,11 @@ sap.ui.define([
 		 */
 		calculatePriceConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			priceObj.CurrentBasePrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value) : Number(this.byId("idOfferPrice")?.getValue()?.replace(/[^\d.]/g, ''));
-			offerPrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(offerPrice) : this.formatter.truncToTwoDecimalPlaces(offerPrice);
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			discount = (priceObj.CountryCode === 'AU' || priceObj.CountryCode?.includes("HM")) ? this.formatter.truncToFourDecimalPlaces(discount) : this.formatter.truncToTwoDecimalPlaces(discount);
 			let netPrice = offerPrice * (1 - deductions);
-			netPrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
-
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},
@@ -936,14 +932,11 @@ sap.ui.define([
 		 */		
 		calculateDiscountConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			priceObj.CurrentBasePrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice);
 			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let offerPrice = Number(parseFloat(priceObj.CurrentBasePrice) * (1 - discount));
-			offerPrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(offerPrice) : this.formatter.truncToTwoDecimalPlaces(offerPrice);
+			let offerPrice = Number((parseFloat(priceObj.CurrentBasePrice) * (1 - discount)).toFixed(2));
 			let netPrice = offerPrice * (1 - deductions);
-			netPrice = priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
-
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 		},	
@@ -960,17 +953,14 @@ sap.ui.define([
 		 */
 		calculatePriceWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
-			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value) : Number(this.byId("idPriceWithFOCOfferPrice")?.getValue()?.replace(/[^\d.]/g, ''));
-			offerPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(offerPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(offerPrice) : this.formatter.truncToTwoDecimalPlaces(offerPrice);
+			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? (priceObj.Region === 'MEA' ? parseFloat(value).toFixed(3) : parseFloat(value).toFixed(2)) : Number(this.byId("idPriceWithFOCOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
-			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
-			discount = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(discount) : (priceObj.CountryCode === 'AU' || priceObj.CountryCode?.includes("HM")) ? this.formatter.truncToFourDecimalPlaces(discount) : this.formatter.truncToTwoDecimalPlaces(discount);
 			let netPrice = netOfferPrice * (1 - deductions);
-			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
-
+			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
+			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
@@ -989,15 +979,14 @@ sap.ui.define([
 		 */
 		calculateDiscountWithFOCConditionType: function({property, value, context}){
 			const priceObj = context.getObject();
-			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
-			let discount = property?.toLowerCase().includes("discount") ? value : priceObj.Discount;
-			let offerPrice = Number(priceObj.CurrentBasePrice * (1 - discount));
-			offerPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(offerPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(offerPrice) : this.formatter.truncToTwoDecimalPlaces(offerPrice);
+			priceObj.CurrentBasePrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(priceObj.CurrentBasePrice) : this.formatter.truncToTwoDecimalPlaces(priceObj.CurrentBasePrice); // Truncate number to two decimal places without rounding. For correct rounding
+			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value).toFixed(4) : priceObj.Discount;
+			let offerPrice = priceObj.Region === 'MEA' ? Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(3) : Number(priceObj.CurrentBasePrice * (1 - discount)).toFixed(2);
 			let netOfferPrice = this.calculateNetOfferPrice({offerPrice, priceObj}); 
-			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let netPrice = netOfferPrice * (1 - deductions);
-			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : priceObj.CountryCode?.includes("HM") ? this.formatter.truncToFourDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
+			netOfferPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netOfferPrice) : this.formatter.truncToTwoDecimalPlaces(netOfferPrice);
+			netPrice = priceObj.Region === 'MEA' ? this.formatter.truncToThreeDecimalPlaces(netPrice) : this.formatter.truncToTwoDecimalPlaces(netPrice);
 
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
@@ -1727,12 +1716,13 @@ sap.ui.define([
 			});
 		},
 
-		getTaiwanInstituteInBranch: async function({InstituteID, InstituteName}){
+		getTaiwanInstituteInBranch: async function(instituteId, parentInstituteId, countryCode){
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/InstituteInBranchView", {
 					filters: [
-						new Filter("InstituteName", "NE", InstituteName),
-						new Filter("InstituteID", "EQ", InstituteID)
+						new Filter("ParentInstituteID", "EQ", parentInstituteId),
+						new Filter("InstituteID", "NE", instituteId),
+						new Filter("CountryCode", "EQ", countryCode)
 					],
 					success: function (res) {
 						resolve(res)
@@ -1794,7 +1784,7 @@ sap.ui.define([
 			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
 			let discount = property?.toLowerCase().includes("discount") ? value : nlPrice.Discount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let offerPrice = Number((parseFloat(priceObj.BasePrice) * (1 - discount)).toFixed(2));
+			let offerPrice = Number((parseFloat(priceObj.masterPriceAIP) * (1 - discount)).toFixed(2));
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			const NLPriceConditionType = priceObj.NLPriceConditionType;
@@ -1812,7 +1802,7 @@ sap.ui.define([
 			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
-			let discount = (parseFloat(priceObj.CurrentBasePrice) - parseFloat(offerPrice)) / priceObj.CurrentBasePrice;
+			let discount = (parseFloat(priceObj.masterPriceAIP) - parseFloat(offerPrice)) / priceObj.masterPriceAIP;
 			discount = this.formatter.truncToFourDecimalPlaces(discount);
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
