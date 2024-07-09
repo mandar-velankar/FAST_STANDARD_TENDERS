@@ -148,7 +148,7 @@
 					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.BasePrice}">
 						<form:fields>
 							<Input value="{
-										parts: ['Price0', 'Currency'],
+										parts: ['TWCurrentBasePrice', 'Currency'],
 										type: 'sap.ui.model.type.Currency',
 										formatOptions: {
 											showMeasure: true,
@@ -163,7 +163,7 @@
 					<form:FormElement label="{i18n>PriceConditionTaiwanPricingFragment.InvoicePrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['Price1', 'Currency'],
+										parts: ['CurrentInvoicePrice', 'Currency'],
 										type: 'sap.ui.model.type.Currency',
 										formatOptions: {
 											showMeasure: true,
@@ -179,7 +179,7 @@
 						<form:fields>
 							<Input
 								value="{
-									path: 'Level2Discount1',
+									parts: ['CurrentGeneralDiscount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -190,7 +190,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: ['GeneralDiscount_Amount', 'Currency'],
+									parts: ['CurrentGeneralDiscount_Amount', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
@@ -201,7 +201,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'Level2Discount2',
+									parts: ['CurrentSecondDiscount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -212,7 +212,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['SecondDiscount_Amount', 'Currency'],
+									parts: ['CurrentSecondlDiscount_Amount', 'Currency'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
@@ -223,7 +223,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['Price2', 'Currency'],
+									parts: ['CurrentNetOfferPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -240,7 +240,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: ['AnnualDiscountForBranch', 'Currency'],
+									parts: ['CurrentAnnualDiscount_Amount_Branch', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -257,7 +257,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['Level3Discount1', 'Currency'],
+									parts: ['CurrentAnnualDiscount_Amount_Per_Unit', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -273,7 +273,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['Price3', 'Currency'],
+									parts: ['CurrentNetPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -290,7 +290,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['AwardedPrice', 'Currency'],
+									parts: ['CurrentNegotiationPrice', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -306,7 +306,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalYearlyValueMainCustomer', 'Currency'],
+									parts: ['CurrentTotalYearlyValueMainCustomer', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -322,7 +322,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalYearlyValueBranch', 'Currency'],
+									parts: ['CurrentTotalYearlyValueBranch', 'Currency'],
 									type: 'sap.ui.model.type.Currency',
 									formatOptions: {
 										showMeasure: true,
@@ -339,7 +339,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'TotalDiscountNHI',
+									parts: ['CurrentTotalDiscountNHI', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"/>
@@ -349,7 +349,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									path: 'TotalDiscountInvoice',
+									parts: ['CurrentTotalDiscountInvoice', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"/>

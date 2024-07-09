@@ -789,6 +789,7 @@ sap.ui.define([
 			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
 				MessageToast.show("Tender has been successfully created");
+				this.cancelPendingChanges(["TenderFormView"], "newTenderMsg");
 				this.onCloseTenderCreationDialog();
 				this._showDetail(newTenderCtx.getObject());
 			}
@@ -861,7 +862,7 @@ sap.ui.define([
 				}
 			}
 		},
-		setFilter: function (oEvent) {
+		setFilter: async function (oEvent) {
 			this.orFilters = [];
 			this.andFilters = [];
 
@@ -915,11 +916,16 @@ sap.ui.define([
 			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
-				this.andFilters.push(new Filter({
-					path: "BrandID",
-					operator: FilterOperator.EQ,
-					value1: sBrandId
-				}));
+				const brandsInOffer = await this.stState.getService().getBrandsInOffer(sBrandId, sCountryCode)
+				const filters = [];
+				for(let offerID in brandsInOffer){
+					filters.push(new Filter({
+						path: "OfferID",
+						operator: FilterOperator.EQ,
+						value1: brandsInOffer[offerID]
+					}));
+				}
+				this.andFilters.push(new Filter(filters, false));
 			}
 
 			// Status 

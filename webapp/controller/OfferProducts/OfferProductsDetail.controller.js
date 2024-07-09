@@ -548,6 +548,7 @@ sap.ui.define([
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onPriceWithFOCFormCancelBtnPress: function(event){
@@ -586,6 +587,7 @@ sap.ui.define([
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			
 		},
 
@@ -675,6 +677,7 @@ sap.ui.define([
 			} 
 
 			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		_refreshOfferProductTable: function(){
@@ -828,6 +831,10 @@ sap.ui.define([
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
+
+			if(priceObj.CountryCode !== 'AU'){
+				this.validatePriceWithFOCForm(context, { offerPrice });
+			}
 		},
 
 		/**
@@ -939,6 +946,10 @@ sap.ui.define([
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
+
+			if(priceObj.CountryCode !== 'AU'){
+				this.validatePriceWithFOCForm(context, { offerPrice });
+			}
 		},	
 
 
@@ -965,7 +976,9 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
-			this.validatePriceWithFOCForm(context, { offerPrice });
+			if(priceObj.CountryCode !== 'AU'){
+				this.validatePriceWithFOCForm(context, { offerPrice });
+			}
 		},
 		
 		/**
@@ -991,8 +1004,11 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
+
+			if(priceObj.CountryCode !== 'AU'){
+				this.validatePriceWithFOCForm(context, { offerPrice });
+			}
 			
-			this.validatePriceWithFOCForm(context, { offerPrice });
 		},
 
 		/**
@@ -1148,7 +1164,7 @@ sap.ui.define([
 
 			// Error messages
 			const target = `${context.getPath()}/OfferPrice`;
-			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView"]);
+			const allErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView","PriceConditionDiscountView","PriceConditionPriceView","PriceConditionDiscountWithFOCView"]);
 			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target)); 
 
 			// Rules
@@ -1160,7 +1176,7 @@ sap.ui.define([
 					target: target,
 					processor: this.getView().getModel()
 				}));
-				this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
+				this.setMessageSection(["PriceConditionPriceWithFOCView","PriceConditionDiscountView","PriceConditionPriceView", "PriceConditionDiscountWithFOCView"], "priceCondPrice");
 			}else if(!isOfferPriceHigher && errorMessage){
 				this.oMessageManager.removeMessages(errorMessage);
 				this.removeMessages(errorMessage, "priceCondPrice");
@@ -1199,9 +1215,9 @@ sap.ui.define([
 				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceCondition${conditionType}`,
 				controller: this
 			}).then(function (form) {
-				if (this.sCountryCode === "TW") {
-					this.bindCurrentSectionFields(form, contextData);
-				}
+				// if (this.sCountryCode === "TW") {
+				// 	this.bindCurrentSectionFields(form, contextData);
+				// }
 				this.onPriceConditionLoadSuccess(conditionType, form, contextData);
 				vbox.addItem(form);
 				return form;
@@ -1481,6 +1497,7 @@ sap.ui.define([
 			this.getModel().submitChanges();
 
 			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			// we need to detach the data received event otherwise we will get into a loop
 			if (evt.getSource()) {
 				evt.getSource().detachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);

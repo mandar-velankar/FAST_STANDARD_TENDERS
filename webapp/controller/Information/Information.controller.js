@@ -452,6 +452,7 @@ sap.ui.define([
 		_onSubmitChangesApprovalsSuccess: async function(res){
 			await this._enableApprovalCancelButtons();
 			this.cancelPendingChanges(["OfferProductOfferStatus"], "approvalMsg");
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		/**

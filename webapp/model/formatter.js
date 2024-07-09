@@ -31,7 +31,10 @@ sap.ui.define([
 
 		formatPercentage: function(value){
 			if(!value) return;
-			var oPercentFormat = NumberFormat.getPercentInstance();
+			var oPercentFormat = NumberFormat.getPercentInstance({
+				minFractionDigits: 2,
+				maxFractionDigits: 2
+			});
 			return oPercentFormat.format(value);
 		},
 
