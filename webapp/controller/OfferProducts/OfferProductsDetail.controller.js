@@ -1721,8 +1721,7 @@ sap.ui.define([
 				this.getModel().read("/InstituteInBranchView", {
 					filters: [
 						new Filter("ParentInstituteID", "EQ", parentInstituteId),
-						new Filter("InstituteID", "NE", instituteId),
-						new Filter("CountryCode", "EQ", countryCode)
+						new Filter("InstituteID", "NE", instituteId)
 					],
 					success: function (res) {
 						resolve(res)
