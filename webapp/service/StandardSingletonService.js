@@ -250,14 +250,23 @@ sap.ui.define([
         getEnablementObject: function (status, isProductDeclined, stTenderRoles) {
 
 			const isOverviewTabVisible = !!status;
-			const checkCopyOfferBtn = status === "Quotation Submitted" || status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
+			const checkCopyOfferBtn = status === "Quotation Submitted" || 
+										status === "Results Recorded" || 
+										status === "Delivery Ongoing" || 
+										status === "Outcome Accepted" || 
+										status === "Outcome Partially Accepted" || 
+										status === "Outcome Rejected"? true : false;
 			const isDeliveryTruckingVisible = status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
 
 			const isTenderOfferOverviewVisible = status === "Offer Created" || status === "Offer Approved" || status === "Offer Rejected" ? true : false;
 
 			const isEnabledDeleteOfferBtn = status === "Offer Created" ? true : false;
 
-			const isAwardDetailEnabled = (status === "Quotation Submitted" || status === "Results Recorded") ? true : false;
+			const isAwardDetailEnabled = (status === "Quotation Submitted" || 
+									status === "Results Recorded" || 
+									status === "Outcome Accepted" || 
+									status === "Outcome Partially Accepted" || 
+									status === "Outcome Rejected") ? true : false;
 			const checkOverviewDownloadBtn = (status === "Offer Created" || status === "Awaiting Approval") ? false : true;
 			const checkOverviewSetAsSubmitBtn = (status === "Offer Approved") ? true : false;
 			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
