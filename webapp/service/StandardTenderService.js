@@ -134,7 +134,7 @@ sap.ui.define([
 				this.model.read("/AppConfig", {
 					filters: [
 						new Filter("CountryCode", "EQ", sCountry),
-						new Filter("ApplicationName", "EQ", 'Standard'),
+						new Filter("ApplicationName", "EQ", 'StandardTender'),
 						new Filter("Environment", "EQ", window.location.host.search('dev') > -1 ? 'DEV' : window.location.host.search('qa') > -1 ? 'QA' : window.location.host.search('sbx') > -1 ? 'SBX' : window.location.host.search('prod') > -1 ? 'PRD' : 'LOCL')
 					],
 					success: function (res) {
@@ -187,24 +187,21 @@ sap.ui.define([
 			}
 			return oDistributor;
 		},
-		getBrandsInOffer: async function (brandID, countryCode) {
-			return new Promise((resolve, reject) => {
-					this.model.read("/BrandsInTender", {
-						filters: [
-							new Filter("BRANDID", "EQ", brandID),
-							new Filter("COUNTRYCODE", "EQ", countryCode),
-						],
-						success: function (res) {
-							resolve(res?.results.map(el => el.OFFERID))
-						}
-					});
-				})
-		},
 
-		getNLOfferDistributors: async function (offerID) {
-			const filters = [
-				new Filter("OfferID",FilterOperator.EQ, offerID),
-			]
+		getNLOfferDistributors: async function (offerID, productCode, key) {
+			let filters = []
+
+			if (key === 'DistributorID') {
+				filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("ProductPackID",FilterOperator.EQ, productCode),
+				]
+			}else {
+				filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("AssignedProductCode",FilterOperator.EQ, productCode),
+				]
+			}
 			return new Promise((resolve, reject) => {
 				this.model.read("/NLOfferDistributors", {
 					filters: filters,
@@ -256,5 +253,56 @@ sap.ui.define([
 				});
 			})
 		},
+		getAwardedProduct: async function (offerID, ProductCode) {
+				const filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("ProductCode",FilterOperator.EQ, ProductCode),
+					new Filter("LotID",FilterOperator.EQ, 1)
+				]
+			return new Promise((resolve, reject) => {
+				this.model.read('/AwardedProductFormView', {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results[0]) 
+					}
+				});
+			})
+		},
+		getInstituteInContract: function ({Custom_String_3,InstituteID,CountryCode}) {
+			const InstituteNames = Custom_String_3.split(";")
+			const orFilters = []
+			let andFilters = []
+			let oFilters;
+			if (Custom_String_3) {
+				andFilters = [
+					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
+					new Filter("InstituteID", FilterOperator.NE, InstituteID),
+				]
+				for(let instituteName in InstituteNames){
+					orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.EQ,
+						value1: InstituteNames[instituteName]
+					}));
+				}
+				andFilters.push(new Filter(orFilters, false))
+			 	oFilters = [new Filter(andFilters, true)];
+			}else{
+				andFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, CountryCode ),
+					new Filter("InstituteID", FilterOperator.EQ, InstituteID),
+				]
+				oFilters = [new Filter(andFilters, true)];
+			}
+			const path = Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup';
+			return new Promise((resolve, reject) => {
+				this.model.read(path, {
+					filters: oFilters,
+					success: function (res) {
+						resolve(res?.results)
+					}
+				});
+			})
+		}
     });
 });

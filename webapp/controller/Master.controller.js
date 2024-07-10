@@ -264,10 +264,6 @@ sap.ui.define([
 			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
 			const sorters = [
 				new Sorter({
-					path: 'createdAt', 
-					descending: true
-				}),
-				new Sorter({
 					path: 'TenderID', 
 					descending: true
 				}),

@@ -59,10 +59,10 @@
 		<form:formContainers>
 			<form:FormContainer>
 				<form:formElements>
-					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.AIP}" >
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.AIP}">
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'Currency'],
+										parts: ['masterPriceAIP', 'Currency', 'Region'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}" 
 									enabled="false"
@@ -91,7 +91,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NLPriceConditionType/0/OfferPrice', 'Currency'],
+									parts: ['NLPriceConditionType/0/OfferPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
@@ -122,7 +122,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NLPriceConditionType/1/OfferPrice', 'Currency'],
+									parts: ['NLPriceConditionType/1/OfferPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
@@ -153,7 +153,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NLPriceConditionType/2/OfferPrice', 'Currency'],
+									parts: ['NLPriceConditionType/2/OfferPrice', 'Currency', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
