@@ -123,6 +123,13 @@ sap.ui.define([
 			const result = Math.round(number * factor) / factor;
 			return result;
 		},
+
+		truncToFourDecimalPlaces: function(number) {
+			const factor = 10000; // 10^4 for four decimal places
+			const result = Math.round(number * factor) / factor;
+			return result;
+		},
+		
 		formatRequestedQuantity: function (value, uom) {
 			if (!value && value != 0) return;
 			const numberFormat = NumberFormat.getIntegerInstance({
