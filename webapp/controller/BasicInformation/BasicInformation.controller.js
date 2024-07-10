@@ -274,10 +274,11 @@ sap.ui.define([
 
 			const messages = this.getMessages(["TenderFormView"]);
 			const form = this.byId(`idTenderForm`);
+			const separator = this.countryCode === 'NL' ? ';' : ',';
 			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
-			prev?`${prev},${token.getText()}`:token.getText(),""));
+			prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
