@@ -99,7 +99,7 @@
                         />
                         <Input  
                             value="{
-                                parts:['FreeGoodsOther', ''],
+                                path:'FreeGoodsOther',
                                 type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
                             }" 
                             visible="{= 

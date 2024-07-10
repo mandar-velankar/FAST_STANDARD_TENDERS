@@ -388,7 +388,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: ['Deductions', 'CountryCode'],
+									path: 'Deductions',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -414,7 +414,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['Level2Discount2', 'CountryCode'],
+									path: 'Level2Discount2',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
@@ -520,7 +520,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalDiscountNHI', 'CountryCode'],
+									path: 'TotalDiscountNHI',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false" width="300px"/>
@@ -530,7 +530,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['TotalDiscountInvoice', 'CountryCode'],
+									path: 'TotalDiscountInvoice',
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false" width="300px"/>

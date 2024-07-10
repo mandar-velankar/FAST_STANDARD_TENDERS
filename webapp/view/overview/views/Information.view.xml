@@ -182,8 +182,7 @@
 									parts: [
 										{path: 'REQ_PRICE_UNIT_OFFER_CURRENCY'},
 										{path: 'CURRENCY'},
-										{path: 'Region'},
-										{path: 'COUNTRY_CODE'}
+										{path: 'Region'}
 									],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
@@ -193,27 +192,26 @@
 									parts: [
 										{path: 'REQ_PRICE_PACK_OFFER_CURRENCY'},
 										{path: 'CURRENCY'},
-										{path: 'Region'},
-										{path: 'COUNTRY_CODE'}
+										{path: 'Region'}
 									],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"
 							/>
 							<Text 
 								text = "{
-									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY', 'Region','COUNTRY_CODE'],
+									parts: ['NET_PRICE_UNIT_OFFER_CURRENCY', 'CURRENCY', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"					
 							/>
 							<Text 
 								text = "{
-									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY', 'Region','COUNTRY_CODE'],
+									parts: ['NET_PRICE_PACK_OFFER_CURRENCY', 'CURRENCY', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>
 							<ObjectStatus 
 								text = "{
-									parts: ['NET_SALES_OFFER_CURRENCY', 'CURRENCY', 'Region','COUNTRY_CODE'],
+									parts: ['NET_SALES_OFFER_CURRENCY', 'CURRENCY', 'Region'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>

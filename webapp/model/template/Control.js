@@ -36,8 +36,6 @@ sap.ui.define(["sap/m/Text",
       for (const prop of this.properties) {
         if(prop.getName() === "enabled"){
           props[prop.getName()] = prop.getIsBinding() ? '{= '+prop.getValue()+' && ${ui>/'+this.parentId+'/editMode}}' : prop.getValue();
-        }else if (prop.getName() === 'rows'){
-          props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : +prop.getValue();
         }else{
           if (prop.getIsBinding()) {
             const formatterValueIndex = prop.getValue().search(/.formatter\.(\w+)/g);

@@ -852,8 +852,6 @@ sap.ui.define([
 		onPressAddProductToOutputList: async function (oEvent) {
 			//get input & output list for products
 			let that = this;
-			const table = this.byId("idOfferProductsTable");
-			const tableProducts = table.getItems();
 			const listInput = sap.ui.getCore().byId("idListProductsInput");
 			const listOutput = sap.ui.getCore().byId("idListProductsOutput");
 			let pathProducts = "/OfferProductTable/products";
@@ -938,17 +936,6 @@ sap.ui.define([
 						PRODUCTPACKNAME: product.PRODUCT_NAME,
 						MoleculeName: product.MoleculeName
 					};
-					
-					if (tableProducts.length > 0) {
-						if (products && products.length) {
-							addProduct.SORTER = products[products.length - 1].SORTER + 1; //added as last in the list
-						} else {
-							const sorter = tableProducts[tableProducts.length-1].getBindingContext().getObject().SORTER + 1;
-							addProduct.SORTER = sorter;
-						}
-						products.push(addProduct);
-						continue;
-					}
 
 					if (products && products.length) {
 						addProduct.SORTER = products.length; //added as last in the list
@@ -1419,9 +1406,13 @@ sap.ui.define([
 
 		handleZagisFileUploadComplete: async function(evt) {
 			const response = evt.getParameter("responseRaw") && JSON.parse(evt.getParameter("responseRaw"));
+			const headers = evt.getParameter("headers");
+			const sapMessageObject = headers["sap-message"] && JSON.parse(headers["sap-message"]);
 			const statusCode = evt.getParameter("status");
 
-			if (statusCode === 204) {
+			if(sapMessageObject?.code == 400){
+				MessageBox.error(sapMessageObject.message);
+			}else if (statusCode === 204) {
 				this.onCloseZagisFileUploadDialog();
 				const {productCount} = await this.stState.getService().getOfferProducts(this.offerID);
 				this.getModel('ui').setProperty('/OfferProductTable/count', productCount);

@@ -539,8 +539,6 @@ sap.ui.define([
 						AwardedPrice: this.countryCode === 'TW' ? product.NET_PRICE : product.OFFER_PRICE,
 						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
-						InstituteID: product.InstituteID,
-						Currency: product.CURRENCY
 					},
 					groupId: "AwardedProduct"
 				})

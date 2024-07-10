@@ -5,10 +5,10 @@ sap.ui.define([
 ], function (CompositeType,ValidateException,NumberFormat) {
     "use strict";
 
-    /*const oPercentFormat = NumberFormat.getPercentInstance({
-        minFractionDigits: 2,
-        maxFractionDigits: 2
-    });*/
+    // const oPercentFormat = NumberFormat.getPercentInstance({
+    //     minFractionDigits: 2,
+    //     maxFractionDigits: 2
+    // });
 
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType", {
 
@@ -31,6 +31,7 @@ sap.ui.define([
         parseValue: function(oValue) {
             let floatNum = parseFloat(oValue); 
             return [floatNum/100];
+
         },
 
         validateValue: function(oValue) {
