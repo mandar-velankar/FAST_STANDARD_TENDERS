@@ -768,10 +768,11 @@ sap.ui.define([
 		onCreateNewTender: async function () {
 			
 			const oNewTenderForm = this.byId("idNewTenderForm");
+			const separator = this.countryCode === 'NL' ? ';' : ',';
 			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, oNewTenderForm);
 			this.setNewTenderPendingChanges(oNewTenderForm);
 			this.getModel().setProperty(oNewTenderForm?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
-			prev?`${prev},${token.getText()}`:token.getText(),""));
+			prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
