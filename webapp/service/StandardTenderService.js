@@ -10,23 +10,17 @@ sap.ui.define([
             this.model = model;
         },
         getTender: async function (tenderID) {
-			const sTenderKey = this.model.createKey("/TenderFormView", {
-				TenderID: tenderID
-			});
-			let oTender = this.model.getObject(sTenderKey);
-			if (!oTender) {
-				return new Promise((resolve, reject) => {
-					this.model.read("/TenderFormView", {
-						filters: [
-							new Filter("TenderID", "EQ", tenderID)
-						],
-						success: function (res) {
-							resolve(res?.results[0])
-						}
-					});
-				})
-			}
-			return oTender;
+
+			return new Promise((resolve, reject) => {
+				this.model.read("/TenderFormView", {
+					filters: [
+						new Filter("TenderID", "EQ", tenderID)
+					],
+					success: function (res) {
+						resolve(res?.results[0])
+					}
+				});
+			})
 		},
 		getOffer: async function (offerID) {
 			const sOfferKey = this.model.createKey("/OfferFormView", {
