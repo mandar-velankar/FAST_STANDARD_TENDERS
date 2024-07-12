@@ -297,6 +297,19 @@ sap.ui.define([
 					}
 				});
 			})
+		},
+		getBrandsInOffer: async function (brandID, countryCode) {
+			return new Promise((resolve, reject) => {
+					this.model.read("/BrandsInTender", {
+						filters: [
+							new Filter("BRANDID", "EQ", brandID),
+							new Filter("COUNTRYCODE", "EQ", countryCode),
+						],
+						success: function (res) {
+							resolve(res?.results.map(el => el.OFFERID))
+						}
+					});
+				})
 		}
     });
 });
