@@ -981,8 +981,7 @@ sap.ui.define([
                     new sap.m.Text({text:'{InstituteName}'}),
                 ]
             })
-			const {InstituteID} = this.getView().getBindingContext().getObject()
-			const {Custom_String_3} = await this.stState.getService().getTender(this.tenderId);
+			const {Custom_String_3, InstituteID} = await this.stState.getService().getTender(this.tenderId);
 			const InstituteNames = Custom_String_3.split(";")
 			const orFilters = []
 			let andFilters = []
