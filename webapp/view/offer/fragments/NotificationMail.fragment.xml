@@ -35,7 +35,7 @@
                     <!--<MultiInput id="idTo" width="70%" showValueHelp="false" required="true"/>-->
                     <MultiComboBox id="idTo" width="70%" required="true" 
                                    items="{/NotificationUserList}">
-                                <core:Item key="{UserName}" text="{UserName}"/>
+                                <core:Item key="{UserEmail}" text="{UserName}"/>
                     </MultiComboBox>
 
                     <Label text="Subject" required="true"/>
