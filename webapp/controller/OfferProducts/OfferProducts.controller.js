@@ -15,7 +15,8 @@ sap.ui.define([
 	"sap/m/TableSelectDialog", 
 	"sap/m/Text", 
 	"sap/m/Column",
-	"sap/ui/unified/FileUploaderParameter"
+	"sap/ui/unified/FileUploaderParameter",
+	"sap/ui/core/BusyIndicator"
 ], function (
 		BaseController, 
 		JSONModel, 
@@ -33,7 +34,8 @@ sap.ui.define([
 		TableSelectDialog, 
 		Text, 
 		Column,
-		FileUploaderParameter) {
+		FileUploaderParameter,
+	    BusyIndicator) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -1309,6 +1311,7 @@ sap.ui.define([
 				controller: that,
 				
 			}).then(function (oDialog) {
+				BusyIndicator.show(1);
 				oDialog.setModel(that.getModel())
 				oDialog.setModel(that.getModel('messages'),'messages')
 				oDialog.open();
@@ -1317,14 +1320,14 @@ sap.ui.define([
 			})
 		},
 		onSendNotificationMail: function(evt){
-			const Form = this.byId('SendNotificationMailForm')
-			const context = Form.getBindingContext()
-			let Recipients = this.byId("idTo").getSelectedKeys().join(';')
-			this.getModel().setProperty('Recipients', Recipients, context)
+			const Form = this.byId('SendNotificationMailForm');
+			const context = Form.getBindingContext();
+			let Recipients = this.byId("idTo").getSelectedKeys().join(';');
+			this.getModel().setProperty('Recipients', Recipients, context);
 			this.getModel().submitChanges({
 				success: this.onSendNotificationMailSuccess.bind(this),
 				groupId: "NotificationMail"
-			})
+			});
 		},
 		onCancelNotificationMail: function () {
 				this.cancelPendingChanges(["Outbox"], "notificationMailMsg");
@@ -1341,9 +1344,10 @@ sap.ui.define([
 		},
 		onGetNotificationContentSuccess: function (data) {
 			this.byId('idEditor').setValue(data);
-			this.getModel().resetChanges('/Outbox')
+			this.getModel().resetChanges('/Outbox');
+			BusyIndicator.hide();
 		},
-		onGetNotificationContentError: function () {
+		onGetNotificationContentError: function (error) {
 			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
 		},
 		onSendNotificationMailSuccess: function () {
