@@ -54,7 +54,10 @@
 		<form:formContainers>
 			<form:FormContainer>
 				<form:formElements>
-					<form:FormElement label="{i18n>ContractDuration}" >
+					<form:FormElement>
+						<form:label>
+                            <Label text="{i18n>ContractDuration}" required="true"/>
+                        </form:label>
 						<form:fields>
 							<Select id="idContractDuration"  enabled="{= ${ui>/ContractDuration/editMode} }" selectedKey="{ui>ContractDuration}" items="{NLPriceConditions}" change=".onDateChange">
                                 <core:Item  text="{ContractDuration}" key="{ContractDuration}"/>             
@@ -75,7 +78,8 @@
 								}
 							}" 
 							change=".onDateChange"
-							enabled="{= ${ui>/ContractDuration/editMode} }" />
+							enabled="{= ${ui>/ContractDuration/editMode} }"
+							required="true" />
 						</form:fields>
 					</form:FormElement>
 
