@@ -153,28 +153,6 @@ sap.ui.define([
 			});
 		},
 
-		// _bindHaematologyForm(formName, tenderId, offerId, tabName){
-		// 	const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
-		// 	const form = this.byId(`id${formName}`);
-		// 	let path = "";
-		// 	if (tenderId && offerId && offerId !== "NA") {
-		// 		path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-		// 			TenderID: tenderId,
-		// 			OfferID: offerId
-		// 		});
-		// 	} else {
-		// 		const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-		// 			groupId: "OfferformInfo"
-		// 		});
-		// 		path = newEntryContext.getPath();
-		// 	}
-			
-		// 	form.bindElement({
-		// 		path: path,
-		// 		groupId: "OfferformInfo"
-		// 	});
-		// },
-
 		setPaymentTermFieldVisible: function (form, containerIndex) {
 			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
