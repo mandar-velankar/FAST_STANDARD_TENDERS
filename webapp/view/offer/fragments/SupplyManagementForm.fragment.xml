@@ -1,0 +1,44 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:up="sap.uxap"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.uxap"
+    xmlns:t="sap.ui.table"
+    xmlns:l="sap.ui.layout"
+    xmlns:mvc="sap.ui.core.mvc"
+>
+    <Panel expandable="true" headerText="Supply Management" width="auto" class="sapUiResponsiveMargin">
+		<content>
+            <form:Form
+              formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/SupplyManagement/xmlView/formByName/SupplyManagement/formContainers',templateShareable:true}"
+            >
+              <form:layout>
+                    <form:ResponsiveGridLayout
+                        labelSpanXL="{template>layout/labelSpanXL}"
+                        labelSpanL="{template>layout/labelSpanL}"
+                        labelSpanM="{template>layout/labelSpanM}"
+                        labelSpanS="{template>layout/labelSpanS}"
+                        adjustLabelSpan="{template>layout/adjustLabelSpan}"
+                        emptySpanXL="{template>layout/emptySpanXL}"
+                        emptySpanL="{template>layout/emptySpanL}"
+                        emptySpanM="{template>layout/emptySpanM}"
+                        emptySpanS="{template>layout/emptySpanS}"
+                        columnsXL="{template>layout/columnsXL}"
+                        columnsL="{template>layout/columnsL}"
+                        columnsM="{template>layout/columnsM}"
+                        singleContainerFullSize="{template>layout/singleContainerFullSize}" />
+              </form:layout>
+              <form:FormContainer formElements="{path:'template>formElements',templateShareable:true}">
+					      <form:formElements>
+						      <form:FormElement visible="{template>visible}" label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+							      <!-- <form:fields>
+								    <Input value="{template>control/type}"/>
+							      </form:fields> -->
+						      </form:FormElement>
+					      </form:formElements>
+				      </form:FormContainer>
+            </form:Form>
+		</content>
+	</Panel>
+</core:FragmentDefinition>

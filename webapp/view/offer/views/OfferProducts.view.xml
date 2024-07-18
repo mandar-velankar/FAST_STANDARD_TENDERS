@@ -76,7 +76,13 @@
 			</form:formContainers>
 		</form:Form>
 	</VBox>
-
+    
+	<VBox>
+	    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.ComplianceOfficerForm"/>
+		<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.SupplyManagementForm" />
+		<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.GlobalStrategicMarketingForm" />
+	</VBox>
+	
 	<Table id="idOfferProductsTable" 
 		columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
 		class="sapFDynamicPageAlignContent"

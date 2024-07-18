@@ -261,6 +261,15 @@ sap.ui.define([
 				case "Delivery Tracking":
 					isVisible = enablementModel.getProperty("/Detail/DeliveryTrackingTab/isVisible");
 					break;
+				case "Compliance Officer":
+					isVisible = false;
+					break;
+				case "Supply Management":
+					isVisible = false;
+					break;
+				case "Global Strategic Marketing":
+					isVisible = false;
+					break;			
 				default:
 					break;
 			}
