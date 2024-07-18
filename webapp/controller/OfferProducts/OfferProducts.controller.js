@@ -83,9 +83,20 @@ sap.ui.define([
 				currency: "EUR",
 				minDate: new Date(),
 				isCopiedOffer: false,
+				matchedHaematologyCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-HM$/g)?.[0],
 				OfferForm:{
 					editMode: false
 				},
+				ComplianceOfficer:{
+                    editMode: false
+				},
+				GlobalStrategicMarketing:{
+                    editMode: false
+				},
+				SupplyManagement:{
+                    editMode: false
+				},
+				
 				OfferProductTable:{
 					enableDeleteProductButton: false,
 					editMode: false,
@@ -98,7 +109,13 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			
-			this._bindForm("OfferForm", this.objectId, this.offerID);
+			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab);
+			// specific for haematology countries
+            if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
+                this._bindForm("ComplianceOfficer", this.objectId, this.offerID, "Compliance Officer" );
+			    this._bindForm("GlobalStrategicMarketing", this.objectId, this.offerID, "Global Strategic Marketing");
+			    this._bindForm("SupplyManagement", this.objectId, this.offerID, "Supply Management");
+			}
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
 			
@@ -114,8 +131,8 @@ sap.ui.define([
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
-		_bindForm(formName, tenderId, offerId){
-			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getFormByName(formName).getEntity();
+		_bindForm(formName, tenderId, offerId, tabName){
+			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
 			if (tenderId && offerId && offerId !== "NA") {
@@ -526,7 +543,7 @@ sap.ui.define([
 				 */
 				const tenderId = newOfferCtx.getObject().TenderID;
 				const offerId = newOfferCtx.getObject().OfferID;
-				this._bindForm("OfferForm", tenderId, offerId);
+				this._bindForm("OfferForm", tenderId, offerId, this.selectedTab);
 				this._bindTable("OfferProductsTable", tenderId, offerId);
 				//this.getOwnerComponent().getModel().refresh(true);
 			}
@@ -1242,7 +1259,7 @@ sap.ui.define([
 		},
 
 		refreshOfferTab: function(tenderID, offerID){
-			this._bindForm("OfferForm", tenderID, offerID);
+			this._bindForm("OfferForm", tenderID, offerID, this.selectedTab);
 			this._bindTable("OfferProductsTable", tenderID, offerID);
 			this._bindText("TotalAmountOfferProducts");	
 		},
@@ -1481,6 +1498,30 @@ sap.ui.define([
 
 			return !!cases[title];
 
+		},
+
+		onComplianceofficerEditBtnPress: function(){
+			this.getModel("ui").setProperty("/ComplianceOfficer/editMode", true);
+		},
+
+		onComplianceofficerCancelBtnPress: function(){
+            this.getModel("ui").setProperty("/ComplianceOfficer/editMode", false);
+		},
+
+		onGlobalStrategicMarketingEditBtnPress: function(){
+			this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", true);
+		},
+
+		onGlobalStrategicMarketingCancelBtnPress: function(){
+            this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", false);
+		},
+
+		onSupplyManagementEditBtnPress: function(){
+			this.getModel("ui").setProperty("/SupplyManagement/editMode", true);
+		},
+
+		onSupplyManagementCancelBtnPress: function(){
+			this.getModel("ui").setProperty("/SupplyManagement/editMode", false);
 		}
 	});
 });
