@@ -130,22 +130,30 @@ sap.ui.define([
 				data: viewData 
 			};
 
-			if(!this.views[viewName]){	
-				xmlView && this.getOwnerComponent().runAsOwner(()=>{
-					View.create({
-						viewName: viewName,
-						viewId: `id${xmlView.getName()}`,
-						type: sap.ui.core.mvc.ViewType.XML
-					}).then(view => {
-						this.views[viewName] = view;
-						this.getView().addDependent(this.views[viewName]);
-						this.updateTabView(viewConfig);
-					});
-				});
-			}else{			
-				this.updateTabView(viewConfig)	
+			const hiddenFormTabs = {
+				"ComplianceOfficer": "ComplianceOfficer",
+				"GlobalStrategicMarketing": "GlobalStrategicMarketing",
+				"SupplyManagement": "SupplyManagement"
 			}
-			return iconTabFilter;
+
+			if(!hiddenFormTabs[xmlView.getName()]) {
+				if(!this.views[viewName]){	
+					xmlView && this.getOwnerComponent().runAsOwner(()=>{
+						View.create({
+							viewName: viewName,
+							viewId: `id${xmlView.getName()}`,
+							type: sap.ui.core.mvc.ViewType.XML
+						}).then(view => {
+							this.views[viewName] = view;
+							this.getView().addDependent(this.views[viewName]);
+							this.updateTabView(viewConfig);
+						});
+					});
+				}else{			
+					this.updateTabView(viewConfig)	
+				}
+				return iconTabFilter;
+			}
 
 		},
 		updateTabView:function({viewName,tab,context,data}){
