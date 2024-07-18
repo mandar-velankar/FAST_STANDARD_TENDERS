@@ -41,7 +41,10 @@ sap.ui.define([
 				awardCriteriaMsg: [],
 				overviewTenderFormMsg: [],
 				approvalMsg: [],
-				notificationMailMsg:[]
+				notificationMailMsg:[],
+				complianceOfficerFormMsg: [],
+                supplyManagementFormMsg: [],
+                globalStrategicMarketingFormMsg: []
 			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);

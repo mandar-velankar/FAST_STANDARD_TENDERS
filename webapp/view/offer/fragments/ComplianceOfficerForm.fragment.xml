@@ -11,8 +11,38 @@
     <Panel expandable="true" headerText="Compliance Officer" width="auto" class="sapUiResponsiveMargin">
 		<content>
             <form:Form
-                formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/ComplianceOfficer/xmlView/formByName/Complianceofficer/formContainers',templateShareable:true}"
+                id="idComplianceOfficer"
+                formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/ComplianceOfficer/xmlView/formByName/ComplianceOfficer/formContainers',templateShareable:true}"
                 >
+            <form:toolbar>
+				<Toolbar>
+					<ToolbarSpacer />
+		            <Button
+                        icon="sap-icon://alert"
+                        text="{= ${messages>/complianceOfficerFormMsg}.length }"
+                        visible="{= ${messages>/complianceOfficerFormMsg}.length > 0 &amp;&amp; ${ui>/ComplianceOfficer/editMode}}"
+                        type="Emphasized"
+                        press="onMessagePopoverPress($event, 'complianceOfficerFormMsg')"  
+                    />
+					<Button id="editComplianceOfficerButtonId" icon="sap-icon://edit" text="Edit" press=".onComplianceofficerEditBtnPress" visible="{= !${ui>/ComplianceOfficer/editMode} }" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
+					<Button
+						id="idComplianceOfficerSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onComplianceofficerSaveBtnPress"
+						visible="{= ${ui>/ComplianceOfficer/editMode} }"
+						type="Accept"
+					/>
+					<Button
+						id="idComplianceOfficerCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onComplianceofficerCancelBtnPress"
+						visible="{= ${ui>/ComplianceOfficer/editMode} }"
+						type="Reject"
+					/>
+				</Toolbar>
+			</form:toolbar>
                 <form:layout>
                     <form:ResponsiveGridLayout
                         labelSpanXL="{template>layout/labelSpanXL}"

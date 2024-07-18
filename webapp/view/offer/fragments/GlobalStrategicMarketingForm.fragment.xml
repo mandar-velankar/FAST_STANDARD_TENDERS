@@ -9,10 +9,40 @@
     xmlns:mvc="sap.ui.core.mvc"
 >
     <Panel expandable="true" headerText="Global Strategic Marketing" width="auto" class="sapUiResponsiveMargin">
-		<content>
-            <form:Form
+		  <content>
+        <form:Form
+              id="idGlobalStrategicMarketing"
               formContainers="{path:'template>/detailConfig/countryTemplate/template/tabByName/GlobalStrategicMarketing/xmlView/formByName/GlobalStrategicMarketing/formContainers',templateShareable:true}"
             >
+             <form:toolbar>
+				<Toolbar>
+					<ToolbarSpacer />
+		            <Button
+                        icon="sap-icon://alert"
+                        text="{= ${messages>/globalStrategicMarketingFormMsg}.length }"
+                        visible="{= ${messages>/globalStrategicMarketingFormMsg}.length > 0 &amp;&amp; ${ui>/GlobalStrategicMarketing/editMode}}"
+                        type="Emphasized"
+                        press="onMessagePopoverPress($event, 'globalStrategicMarketingFormMsg')"  
+                    />
+					<Button id="editGlobalStrategicMarketingButtonId" icon="sap-icon://edit" text="Edit" press=".onGlobalStrategicMarketingEditBtnPress" visible="{= !${ui>/GlobalStrategicMarketing/editMode} }" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
+					<Button
+						id="idGlobalStrategicMarketingSaveBtn"
+						icon="sap-icon://save"
+						text="Save"
+						press=".onGlobalStrategicMarketingSaveBtnPress"
+						visible="{= ${ui>/GlobalStrategicMarketing/editMode} }"
+						type="Accept"
+					/>
+					<Button
+						id="idGlobalStrategicMarketingCancelBtn"
+						icon="sap-icon://decline"
+						text="Cancel"
+						press=".onGlobalStrategicMarketingCancelBtnPress"
+						visible="{= ${ui>/GlobalStrategicMarketing/editMode} }"
+						type="Reject"
+					/>
+				</Toolbar>
+			</form:toolbar>
               <form:layout>
                     <form:ResponsiveGridLayout
                         labelSpanXL="{template>layout/labelSpanXL}"
