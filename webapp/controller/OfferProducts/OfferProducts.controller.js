@@ -1502,6 +1502,23 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/ComplianceOfficer/editMode", true);
 		},
 
+		onComplianceOfficerSaveBtnPress: function(){
+			this.getModel().submitChanges({
+				success: this.onComplianceOfficerRequestSuccess.bind(this),
+				groupId: "OfferformInfo"
+			});
+		},
+
+		onComplianceOfficerRequestSuccess: function(){
+            const path = this.byId("idComplianceOfficer").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "complianceOfficerFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Compliance Officer Form updated successfully");
+				this.getModel("ui").setProperty("/ComplianceOfficer/editMode",false);
+			}
+		},
+
 		onComplianceofficerCancelBtnPress: function(){
             this.getModel("ui").setProperty("/ComplianceOfficer/editMode", false);
 		},
@@ -1510,12 +1527,46 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", true);
 		},
 
+		onGlobalStrategicMarketingSaveBtnPress: function(){
+            this.getModel().submitChanges({
+				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
+				groupId: "OfferformInfo"
+			});
+		},
+
+		onGlobalStrategicMarketingRequestSuccess: function(){
+            const path = this.byId("idGlobalStrategicMarketing").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "globalStrategicMarketingFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Global Strategic Marketing Form updated successfully");
+				this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode",false);
+			}
+		},
+
 		onGlobalStrategicMarketingCancelBtnPress: function(){
             this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", false);
 		},
 
 		onSupplyManagementEditBtnPress: function(){
 			this.getModel("ui").setProperty("/SupplyManagement/editMode", true);
+		},
+
+		onSupplyManagementSaveBtnPress: function(){
+            this.getModel().submitChanges({
+				success: this.onSupplyManagementRequestSuccess.bind(this),
+				groupId: "OfferformInfo"
+			});
+		},
+
+		onSupplyManagementRequestSuccess: function(){
+            const path = this.byId("idSupplyManagement").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "supplyManagementFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Supply Management Form updated successfully");
+				this.getModel("ui").setProperty("/SupplyManagement/editMode",false);
+			}
 		},
 
 		onSupplyManagementCancelBtnPress: function(){
