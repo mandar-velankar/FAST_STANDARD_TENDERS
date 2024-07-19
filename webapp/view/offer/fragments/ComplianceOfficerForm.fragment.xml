@@ -29,7 +29,7 @@
 						id="idComplianceOfficerSaveBtn"
 						icon="sap-icon://save"
 						text="Save"
-						press=".onComplianceofficerSaveBtnPress"
+						press=".onComplianceOfficerSaveBtnPress"
 						visible="{= ${ui>/ComplianceOfficer/editMode} }"
 						type="Accept"
 					/>
