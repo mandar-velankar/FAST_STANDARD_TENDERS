@@ -120,10 +120,11 @@ sap.ui.define([
 					UserEmail: "",
 					UserName: "",
 					Sent: false
-				}
+				},
+				groupId: 'PdfEmail',
 			})
 			return new Promise((resolve, reject) => {
-				this.defaultModel.submitChanges();
+				this.defaultModel.submitChanges({groupId: 'PdfEmail'});
 				// selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template.
 				this.byId('idDownloadAttachmentButton')?.setText('Download');
 			}); 
