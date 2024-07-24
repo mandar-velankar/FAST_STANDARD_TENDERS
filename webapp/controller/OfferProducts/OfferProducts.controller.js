@@ -1503,6 +1503,8 @@ sap.ui.define([
 		},
 
 		onComplianceOfficerSaveBtnPress: function(){
+			const form = this.byId(`idComplianceOfficer`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.getModel().submitChanges({
 				success: this.onComplianceOfficerRequestSuccess.bind(this),
 				groupId: "ComplianceOfficerView"
@@ -1528,6 +1530,8 @@ sap.ui.define([
 		},
 
 		onGlobalStrategicMarketingSaveBtnPress: function(){
+			const form = this.byId(`idGlobalStrategicMarketing`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
 				groupId: "GlobalStrategicMarketingView"
@@ -1553,6 +1557,8 @@ sap.ui.define([
 		},
 
 		onSupplyManagementSaveBtnPress: function(){
+			const form = this.byId(`idSupplyManagement`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onSupplyManagementRequestSuccess.bind(this),
 				groupId: "SupplyManagementView"
