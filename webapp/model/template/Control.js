@@ -4,12 +4,13 @@ sap.ui.define(["sap/m/Text",
                "./ControlPoperty", 
                "sap/m/Input", 
                "sap/m/MultiInput",
+               "sap/m/TextArea",
                "sap/m/DatePicker", 
                "./ValueHelp",
                "../../service/StandardSingletonService",
                "sap/ui/model/Filter",
                "../formatter"
-], function (Text, BaseObject, ControlProperty, Input, MultiInput, DatePicker, ValueHelp, StandardSingletonService, Filter, formatter) {
+], function (Text, BaseObject, ControlProperty, Input, MultiInput, TextArea, DatePicker, ValueHelp, StandardSingletonService, Filter, formatter) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (parentId,data) {
@@ -38,7 +39,7 @@ sap.ui.define(["sap/m/Text",
           props[prop.getName()] = prop.getIsBinding() ? '{= '+prop.getValue()+' && ${ui>/'+this.parentId+'/editMode}}' : prop.getValue();
         }else{
           if (prop.getIsBinding()) {
-            const formatterValueIndex = prop.getValue().search(/.formatter\.(\w+)/g);
+            const formatterValueIndex = typeof prop.getValue() === 'string' ? prop.getValue().search(/.formatter\.(\w+)/g) : -1;
             props[prop.getName()] = this.updateBindingObject(prop, formatterValueIndex);  
           }else {
             props[prop.getName()] = prop.getValue();
