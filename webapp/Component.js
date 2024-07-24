@@ -66,7 +66,11 @@ sap.ui.define([
 				"TenderMasterView",
 				"NotificationMail",
 				"NLOfferDistributors",
-				"ContractDuration"
+				"ContractDuration",
+				"PdfEmail",
+				"ComplianceOfficerView",
+				"SupplyManagementView",
+				"GlobalStrategicMarketingView"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -158,6 +162,18 @@ sap.ui.define([
 				},
 				"ContractInfomation": {
 					groupId: "ContractDuration"
+				},
+				"PdfEmail":{
+					groupId: "PdfEmail"
+				},
+				"ComplianceOfficerView": {
+					groupId: "ComplianceOfficerView"
+				},
+				"SupplyManagementView": {
+					groupId: "SupplyManagementView"
+				},
+				"GlobalStrategicMarketingView": {
+					groupId: "GlobalStrategicMarketingView"
 				}
 			});
 		},
