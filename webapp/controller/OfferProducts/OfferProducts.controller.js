@@ -109,12 +109,12 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			
-			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab);
+			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab, "OfferformInfo");
 			// specific for haematology countries
             if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
-                this._bindForm("ComplianceOfficer", this.objectId, this.offerID, "Compliance Officer" );
-			    this._bindForm("GlobalStrategicMarketing", this.objectId, this.offerID, "Global Strategic Marketing");
-			    this._bindForm("SupplyManagement", this.objectId, this.offerID, "Supply Management");
+                this._bindForm("ComplianceOfficer", this.objectId, this.offerID, "Compliance Officer", "ComplianceOfficerView");
+			    this._bindForm("GlobalStrategicMarketing", this.objectId, this.offerID, "Global Strategic Marketing", "GlobalStrategicMarketingView");
+			    this._bindForm("SupplyManagement", this.objectId, this.offerID, "Supply Management", "SupplyManagementView");
 			}
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
@@ -131,7 +131,7 @@ sap.ui.define([
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
-		_bindForm(formName, tenderId, offerId, tabName){
+		_bindForm(formName, tenderId, offerId, tabName, groupID){
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
@@ -142,14 +142,14 @@ sap.ui.define([
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-					groupId: "OfferformInfo"
+					groupId: groupID
 				});
 				path = newEntryContext.getPath();
 			}
 			
 			form.bindElement({
 				path: path,
-				groupId: "OfferformInfo"
+				groupId: groupID
 			});
 		},
 
@@ -1504,6 +1504,25 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/ComplianceOfficer/editMode", true);
 		},
 
+		onComplianceOfficerSaveBtnPress: function(){
+			const form = this.byId(`idComplianceOfficer`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+			this.getModel().submitChanges({
+				success: this.onComplianceOfficerRequestSuccess.bind(this),
+				groupId: "ComplianceOfficerView"
+			});
+		},
+
+		onComplianceOfficerRequestSuccess: function(){
+            const path = this.byId("idComplianceOfficer").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "complianceOfficerFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Compliance Officer Form updated successfully");
+				this.getModel("ui").setProperty("/ComplianceOfficer/editMode",false);
+			}
+		},
+
 		onComplianceofficerCancelBtnPress: function(){
             this.getModel("ui").setProperty("/ComplianceOfficer/editMode", false);
 		},
@@ -1512,12 +1531,50 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", true);
 		},
 
+		onGlobalStrategicMarketingSaveBtnPress: function(){
+			const form = this.byId(`idGlobalStrategicMarketing`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+            this.getModel().submitChanges({
+				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
+				groupId: "GlobalStrategicMarketingView"
+			});
+		},
+
+		onGlobalStrategicMarketingRequestSuccess: function(){
+            const path = this.byId("idGlobalStrategicMarketing").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "globalStrategicMarketingFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Global Strategic Marketing Form updated successfully");
+				this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode",false);
+			}
+		},
+
 		onGlobalStrategicMarketingCancelBtnPress: function(){
             this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", false);
 		},
 
 		onSupplyManagementEditBtnPress: function(){
 			this.getModel("ui").setProperty("/SupplyManagement/editMode", true);
+		},
+
+		onSupplyManagementSaveBtnPress: function(){
+			const form = this.byId(`idSupplyManagement`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+            this.getModel().submitChanges({
+				success: this.onSupplyManagementRequestSuccess.bind(this),
+				groupId: "SupplyManagementView"
+			});
+		},
+
+		onSupplyManagementRequestSuccess: function(){
+            const path = this.byId("idSupplyManagement").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "supplyManagementFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Supply Management Form updated successfully");
+				this.getModel("ui").setProperty("/SupplyManagement/editMode",false);
+			}
 		},
 
 		onSupplyManagementCancelBtnPress: function(){
