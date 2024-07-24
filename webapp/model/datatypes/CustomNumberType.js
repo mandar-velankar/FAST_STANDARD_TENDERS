@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/ui/model/CompositeType",
-    "sap/ui/model/ValidateException"
-], function (CompositeType,ValidateException) {
+    "sap/ui/model/ValidateException",
+    "sap/ui/core/format/NumberFormat"
+], function (CompositeType,ValidateException, NumberFormat) {
     "use strict";
     return CompositeType.extend("com.bayer.tender.statenderapp.model.datatypes.CustomNumberType", {
 
