@@ -109,12 +109,12 @@ sap.ui.define([
 			this.setModel(oModel, "ui");
 
 			
-			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab);
+			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab, "OfferformInfo");
 			// specific for haematology countries
             if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
-                this._bindForm("ComplianceOfficer", this.objectId, this.offerID, "Compliance Officer" );
-			    this._bindForm("GlobalStrategicMarketing", this.objectId, this.offerID, "Global Strategic Marketing");
-			    this._bindForm("SupplyManagement", this.objectId, this.offerID, "Supply Management");
+                this._bindForm("ComplianceOfficer", this.objectId, this.offerID, "Compliance Officer", "ComplianceOfficerView");
+			    this._bindForm("GlobalStrategicMarketing", this.objectId, this.offerID, "Global Strategic Marketing", "GlobalStrategicMarketingView");
+			    this._bindForm("SupplyManagement", this.objectId, this.offerID, "Supply Management", "SupplyManagementView");
 			}
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
@@ -131,7 +131,7 @@ sap.ui.define([
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
-		_bindForm(formName, tenderId, offerId, tabName){
+		_bindForm(formName, tenderId, offerId, tabName, groupID){
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
@@ -142,14 +142,14 @@ sap.ui.define([
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-					groupId: "OfferformInfo"
+					groupId: groupID
 				});
 				path = newEntryContext.getPath();
 			}
 			
 			form.bindElement({
 				path: path,
-				groupId: "OfferformInfo"
+				groupId: groupID
 			});
 		},
 
@@ -1505,7 +1505,7 @@ sap.ui.define([
 		onComplianceOfficerSaveBtnPress: function(){
 			this.getModel().submitChanges({
 				success: this.onComplianceOfficerRequestSuccess.bind(this),
-				groupId: "OfferformInfo"
+				groupId: "ComplianceOfficerView"
 			});
 		},
 
@@ -1530,7 +1530,7 @@ sap.ui.define([
 		onGlobalStrategicMarketingSaveBtnPress: function(){
             this.getModel().submitChanges({
 				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
-				groupId: "OfferformInfo"
+				groupId: "GlobalStrategicMarketingView"
 			});
 		},
 
@@ -1555,7 +1555,7 @@ sap.ui.define([
 		onSupplyManagementSaveBtnPress: function(){
             this.getModel().submitChanges({
 				success: this.onSupplyManagementRequestSuccess.bind(this),
-				groupId: "OfferformInfo"
+				groupId: "SupplyManagementView"
 			});
 		},
 
