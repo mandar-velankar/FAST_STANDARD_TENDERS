@@ -543,7 +543,13 @@ sap.ui.define([
 				 */
 				const tenderId = newOfferCtx.getObject().TenderID;
 				const offerId = newOfferCtx.getObject().OfferID;
-				this._bindForm("OfferForm", tenderId, offerId, this.selectedTab);
+				this._bindForm("OfferForm", tenderId, offerId, this.selectedTab, 'OfferformInfo');
+				// specific for haematology countries
+				if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
+					this._bindForm("ComplianceOfficer", tenderId, offerId, "Compliance Officer", "ComplianceOfficerView");
+					this._bindForm("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "GlobalStrategicMarketingView");
+					this._bindForm("SupplyManagement", tenderId, offerId, "Supply Management", "SupplyManagementView");
+				}
 				this._bindTable("OfferProductsTable", tenderId, offerId);
 				//this.getOwnerComponent().getModel().refresh(true);
 			}
