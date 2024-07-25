@@ -41,6 +41,8 @@ sap.ui.define(["sap/m/Text",
           if (prop.getIsBinding()) {
             const formatterValueIndex = typeof prop.getValue() === 'string' ? prop.getValue().search(/.formatter\.(\w+)/g) : -1;
             props[prop.getName()] = this.updateBindingObject(prop, formatterValueIndex);  
+          }else if (prop.getName() === 'rows'){
+            props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : +prop.getValue();
           }else {
             props[prop.getName()] = prop.getValue();
           }
