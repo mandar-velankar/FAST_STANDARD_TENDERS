@@ -92,9 +92,9 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "Discount with FOC";
 					break;
-				case 'taiwanprice'	:
+				case 'taiwancontractprice'	:
 					stringToReplace	= originalString;
-					replacementString = "Taiwan Price";
+					replacementString = "Taiwan Contract Price";
 					break;
 				case 'taiwandiscount'	:
 					stringToReplace	= originalString;
