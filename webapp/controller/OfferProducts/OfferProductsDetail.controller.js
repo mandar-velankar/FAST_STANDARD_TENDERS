@@ -1208,6 +1208,9 @@ sap.ui.define([
 		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
 		 */
 		loadPriceConditionFragment: function(conditionType, contextData){
+			if (this.sCountryCode === "TW" && conditionType === 'TaiwanContractPrice') {
+				conditionType = "TaiwanPrice";
+			}
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
 			return Fragment.load({
@@ -1250,7 +1253,7 @@ sap.ui.define([
 				"OfferID": offerID,
 				"TenderID": tenderID,
 				"ProductCode": productID,
-				"ConditionType": conditionType
+				"ConditionType": this.sCountryCode === "TW" && conditionType === 'TaiwanPrice' ? "TaiwanContractPrice" : conditionType
 			});
 
 			if (this.sCountryCode === "TW") {
