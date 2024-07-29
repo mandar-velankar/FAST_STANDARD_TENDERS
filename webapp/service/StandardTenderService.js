@@ -310,6 +310,19 @@ sap.ui.define([
 						}
 					});
 				})
+		},
+
+		getComplianceOfficerData: async function (OfferID) {
+			return new Promise((resolve, reject) => {
+					this.model.read("/ComplianceOfficerView", {
+						filters: [
+							new Filter("OfferID", "EQ", OfferID)
+						],
+						success: function (res) {
+							resolve(res?.results[0]);
+						}
+					});
+				})
 		}
     });
 });
