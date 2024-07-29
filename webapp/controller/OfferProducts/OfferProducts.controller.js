@@ -112,9 +112,7 @@ sap.ui.define([
 			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab, "OfferformInfo");
 			// specific for haematology countries
             if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
-                this._bindForm("ComplianceOfficer", this.objectId, this.offerID, "Compliance Officer", "ComplianceOfficerView");
-			    this._bindForm("GlobalStrategicMarketing", this.objectId, this.offerID, "Global Strategic Marketing", "GlobalStrategicMarketingView");
-			    this._bindForm("SupplyManagement", this.objectId, this.offerID, "Supply Management", "SupplyManagementView");
+                this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
@@ -153,6 +151,29 @@ sap.ui.define([
 			});
 		},
 
+		bindAllHaematologyForms: async function (tenderId, offerId) {
+			await this.stState.getService().getComplianceOfficerData(offerId);
+			this._bindHaematologyForms("ComplianceOfficer", tenderId, offerId, "Compliance Officer", "ComplianceOfficerView");
+			this._bindHaematologyForms("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "ComplianceOfficerView");
+			this._bindHaematologyForms("SupplyManagement", tenderId, offerId, "Supply Management", "ComplianceOfficerView");
+		},
+
+		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
+			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
+			const form = this.byId(`id${formName}`);
+			let path = "";
+			if (tenderId && offerId && offerId !== "NA") {
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					TenderID: tenderId,
+					OfferID: offerId
+				});
+			}
+			
+			form.bindElement({
+				path: path,
+				groupId: groupID
+			});
+		},
 		setPaymentTermFieldVisible: function (form, containerIndex) {
 			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
@@ -546,9 +567,7 @@ sap.ui.define([
 				this._bindForm("OfferForm", tenderId, offerId, this.selectedTab, 'OfferformInfo');
 				// specific for haematology countries
 				if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
-					this._bindForm("ComplianceOfficer", tenderId, offerId, "Compliance Officer", "ComplianceOfficerView");
-					this._bindForm("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "GlobalStrategicMarketingView");
-					this._bindForm("SupplyManagement", tenderId, offerId, "Supply Management", "SupplyManagementView");
+					this.bindAllHaematologyForms(tenderId, offerId);
 				}
 				this._bindTable("OfferProductsTable", tenderId, offerId);
 				//this.getOwnerComponent().getModel().refresh(true);
@@ -1526,11 +1545,14 @@ sap.ui.define([
 			if (!hasErrorMessages) {
 				MessageToast.show("Compliance Officer Form updated successfully");
 				this.getModel("ui").setProperty("/ComplianceOfficer/editMode",false);
+				this.onComplianceofficerCancelBtnPress();
+				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
 		},
 
 		onComplianceofficerCancelBtnPress: function(){
             this.getModel("ui").setProperty("/ComplianceOfficer/editMode", false);
+			this.cancelPendingChanges(["ComplianceOfficerView"], "complianceOfficerFormMsg");
 		},
 
 		onGlobalStrategicMarketingEditBtnPress: function(){
@@ -1542,7 +1564,7 @@ sap.ui.define([
 			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
-				groupId: "GlobalStrategicMarketingView"
+				groupId: "ComplianceOfficerView"
 			});
 		},
 
@@ -1553,11 +1575,14 @@ sap.ui.define([
 			if (!hasErrorMessages) {
 				MessageToast.show("Global Strategic Marketing Form updated successfully");
 				this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode",false);
+				this.onGlobalStrategicMarketingCancelBtnPress();
+				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
 		},
 
 		onGlobalStrategicMarketingCancelBtnPress: function(){
             this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", false);
+			this.cancelPendingChanges(["GlobalStrategicMarketingView"], "globalStrategicMarketingFormMsg");
 		},
 
 		onSupplyManagementEditBtnPress: function(){
@@ -1569,7 +1594,7 @@ sap.ui.define([
 			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onSupplyManagementRequestSuccess.bind(this),
-				groupId: "SupplyManagementView"
+				groupId: "ComplianceOfficerView"
 			});
 		},
 
@@ -1580,11 +1605,14 @@ sap.ui.define([
 			if (!hasErrorMessages) {
 				MessageToast.show("Supply Management Form updated successfully");
 				this.getModel("ui").setProperty("/SupplyManagement/editMode",false);
+				this.onSupplyManagementCancelBtnPress();
+				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
 		},
 
 		onSupplyManagementCancelBtnPress: function(){
 			this.getModel("ui").setProperty("/SupplyManagement/editMode", false);
+			this.cancelPendingChanges(["SupplyManagementView"], "supplyManagementFormMsg");
 		}
 	});
 });
