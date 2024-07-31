@@ -177,7 +177,11 @@ sap.ui.define([
 						}
 					});
 			}else{
-				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender)	
+				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender);
+				
+				const offerValidation = await this.stState.getService().getOfferValidation(this.offerId);
+				awardedContractDurationForm.ContractStartDate = offerValidation && offerValidation.Tender_Custom_Date_1;
+
 				instituteInContract.map(function (item) {
 					const oToken = new Token({
 						text: item.InstituteName,
