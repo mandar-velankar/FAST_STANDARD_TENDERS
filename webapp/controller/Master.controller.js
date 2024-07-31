@@ -879,7 +879,9 @@ sap.ui.define([
 			{ path: "VALUE", operator: FilterOperator.BT, value: sSearch, checkDecimals: true },
 			{ path: "STATUS", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "PublicationDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
-			{ path: "BidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  }
+			{ path: "BidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  },
+			{ path: "Custom_Date_1", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
+			{ path: "Custom_String_1", operator: FilterOperator.Contains, value: sSearch }
 			];
 
 			if (sSearch) {
