@@ -700,7 +700,7 @@ sap.ui.define([
 										CountryCode:product.CountryCode, 
 										DistributorID:product.DistributorID, 
 										ActiveProduct:1, 
-										RequestedVolume: 0, 
+										RequestedVolume: this.countryCode === 'NL' ? 1 : 0,
 										OfferID:product.OfferID, 
 										Active:1, 
 										ProductCode:product.ProductCode, 
