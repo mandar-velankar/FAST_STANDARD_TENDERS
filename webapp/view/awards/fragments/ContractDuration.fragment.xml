@@ -78,8 +78,8 @@
 								}
 							}" 
 							change=".onDateChange"
-							enabled="{= ${ui>/ContractDuration/editMode} }"
-							required="true" />
+							enabled="false"
+							/>
 						</form:fields>
 					</form:FormElement>
 

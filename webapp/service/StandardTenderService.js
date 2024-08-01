@@ -323,6 +323,26 @@ sap.ui.define([
 						}
 					});
 				})
+		},
+
+		getOfferValidation: async function (OfferID) {
+			const offerValidationPath = this.model.createKey("/OfferValidation", {
+				OFFERID: OfferID
+			});
+			let offerValidation = this.model.getObject(offerValidationPath);
+			if (!offerValidation) {
+				return new Promise((resolve, reject) => {
+						this.model.read("/OfferValidation", {
+							filters: [
+								new Filter("OFFERID", "EQ", OfferID)
+							],
+							success: function (res) {
+								resolve(res?.results[0]);
+							}
+						});
+				});
+			}
+			return offerValidation;
 		}
     });
 });
