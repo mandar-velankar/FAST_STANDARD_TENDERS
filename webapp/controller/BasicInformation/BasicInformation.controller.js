@@ -296,6 +296,7 @@ sap.ui.define([
 			this.setMessageSection(["TenderFormView"], "basicInfoMsg");
 			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
+			this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 		},
 
 		onTenderFormCancelBtnPress: function(event){
