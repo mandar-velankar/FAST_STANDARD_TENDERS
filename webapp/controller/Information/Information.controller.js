@@ -51,7 +51,8 @@ sap.ui.define([
 				OverviewForm:{
 					editMode: false
 				},
-				enableApprovalButton: false
+				enableApprovalButton: false,
+				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch')
 			});
 			
 			this.setModel(oModel, "ui");
