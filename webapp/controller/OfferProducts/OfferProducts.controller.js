@@ -1342,8 +1342,17 @@ sap.ui.define([
 			return match !== null;
 		},
 
-		handleUpdateOfferProductTable: function () {
-			this.byId('idOfferProductsTable').getBinding("items").refresh();
+		handleUpdateOfferProductTable: async function () {
+			const offerProductTable = this.byId('idOfferProductsTable');
+			const columns = offerProductTable.getColumns();
+			offerProductTable.getBinding("items").refresh();
+
+			columns.forEach(column => {
+				const columnName = column.getAggregation('header').getProperty('text');
+				const columnVisibility = this.OfferProductColumnVisibility(columnName);
+				column.setVisible(columnVisibility);
+			});
+
 		},
 		onOpenNotification: function () {
 			const that = this;
@@ -1507,7 +1516,11 @@ sap.ui.define([
 		},
 
 		OfferProductColumnVisibility: function (title) {
-			const tender = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
+			const obj = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
+			const tenderPath = this.getModel().createKey('/TenderFormView', {
+				TenderID: this.objectId || obj.TenderID
+			});
+			const tender = this.getModel().getObject(tenderPath) || obj;
 			if (!tender || !title) return true;
 			if (tender.CountryCode !== 'NL') return true;
 			const cases = {
