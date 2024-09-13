@@ -118,7 +118,9 @@ sap.ui.define([
 				CompetitorResultsForm:{
 					editMode: false,
 					region: "",
-					selectedItems: []
+					selectedItems: [],
+					countryCode: this.countryCode,
+					currency: "",
 				},
 				ContractInformation: {
 					editMode: false
@@ -380,6 +382,7 @@ sap.ui.define([
 			if (Array.isArray(offerProductValidation) && offerProductValidation.length > 0) {
 				const firstProduct = offerProductValidation[0];
 				this.getModel('ui').setProperty('/CompetitorResultsForm/region', firstProduct.Region);
+				this.getModel('ui').setProperty('/CompetitorResultsForm/currency', firstProduct.CURRENCY);
 			}
 		},
 

@@ -130,7 +130,7 @@
                             </ComboBox>
                             <Input
                                 value="{
-                                    parts: ['AWARDEDPRICE', 'CURRENCY', 'ui>/CompetitorResultsForm/region'],
+                                    parts: ['AWARDEDPRICE', 'ui>/CompetitorResultsForm/currency', 'ui>/CompetitorResultsForm/region','ui>/CompetitorResultsForm/countryCode'],
                                     type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
                                 }"
                                 enabled="{ui>/CompetitorResultsForm/editMode}"
