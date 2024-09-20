@@ -117,7 +117,7 @@ sap.ui.define([
 					TenderID: this.tenderId,
 					OfferID: this.offerId,
 					TenderInstitute: String(selectedTender?.InstituteID),
-					OfferInstitute: this.countryCode === 'NL' ? String(selectedTender?.InstituteID) : String(selectedOffer?.QuotationInstituteID),
+					OfferInstitute: this.countryCode === 'PK' ? String(selectedTender?.QuotationInstituteID) : String(selectedOffer?.InstituteID),
 					UserEmail: "",
 					UserName: "",
 					Sent: false
