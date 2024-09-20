@@ -51,7 +51,8 @@ sap.ui.define([
 				OverviewForm:{
 					editMode: false
 				},
-				enableApprovalButton: false
+				enableApprovalButton: false,
+				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch')
 			});
 			
 			this.setModel(oModel, "ui");
@@ -116,7 +117,7 @@ sap.ui.define([
 					TenderID: this.tenderId,
 					OfferID: this.offerId,
 					TenderInstitute: String(selectedTender?.InstituteID),
-					OfferInstitute: String(selectedOffer?.QuotationInstituteID),
+					OfferInstitute: this.countryCode === 'PK' ? String(selectedTender?.QuotationInstituteID) : String(selectedOffer?.InstituteID),
 					UserEmail: "",
 					UserName: "",
 					Sent: false
