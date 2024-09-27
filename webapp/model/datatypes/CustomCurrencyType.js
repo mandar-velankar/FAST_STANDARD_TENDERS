@@ -26,10 +26,11 @@ sap.ui.define([
         },
 
         parseValue: function(oValue) {
-            // const oCurrencyFormat = NumberFormat.getCurrencyInstance({
-
-            //     });
-            return oValue;
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+                // minFractionDigits: 2,
+                // maxFractionDigits: 2
+            });
+            return oCurrencyFormat.parse(oValue);
 
         },
 
