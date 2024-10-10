@@ -75,7 +75,6 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
 			const selectedOffer = await this.stState.getService().getOffer(offerId);
-
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
@@ -84,6 +83,7 @@ sap.ui.define([
 				minDate: new Date(),
 				isCopiedOffer: false,
 				matchedHaematologyCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-HM$/g)?.[0],
+				matchedConsumerHealthCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-CH$/g)?.[0],
 				OfferForm:{
 					editMode: false
 				},
@@ -1625,6 +1625,23 @@ sap.ui.define([
 		onSupplyManagementCancelBtnPress: function(){
 			this.getModel("ui").setProperty("/SupplyManagement/editMode", false);
 			this.cancelPendingChanges(["SupplyManagementView"], "supplyManagementFormMsg");
-		}
+		},
+		onSendNotificationForMeaCh: function (oEvent) {
+			const url = window.location.href
+			this.defaultModel.callFunction("/sendMEACHNotificationMailTemplate", {
+				method:"POST", 
+				urlParameters: {offerID: this.offerID,tenderId: this.objectId, CountryCode: this.countryCode, url: url},
+				success: this.onSendNotificationMailForMeaChSuccess.bind(this),
+				error: this.onSendNotificationMailForMeaChFail.bind(this)
+			});
+		},
+		onSendNotificationMailForMeaChSuccess: function () {
+			
+			MessageBox.success('Notification mail sent successfully');
+			
+		},
+		onSendNotificationMailForMeaChFail: function(error){
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+		},
 	});
 });

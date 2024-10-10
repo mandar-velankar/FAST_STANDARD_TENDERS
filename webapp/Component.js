@@ -70,7 +70,8 @@ sap.ui.define([
 				"PdfEmail",
 				"ComplianceOfficerView",
 				"GlobalStrategicMarketingView",
-				"SupplyManagementView"
+				"SupplyManagementView",
+				"MEACHNotificationMail"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -174,6 +175,9 @@ sap.ui.define([
 				},
 				"SupplyManagementView": {
 					groupId: "SupplyManagementView"
+				},
+				"MEACHOutbox": {
+					groupId: "MEACHNotificationMail"
 				}
 			});
 		},
