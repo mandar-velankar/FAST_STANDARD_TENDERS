@@ -152,10 +152,9 @@ sap.ui.define([
 		},
 
 		bindAllHaematologyForms: async function (tenderId, offerId) {
-			await this.stState.getService().getComplianceOfficerData(offerId);
 			this._bindHaematologyForms("ComplianceOfficer", tenderId, offerId, "Compliance Officer", "ComplianceOfficerView");
-			this._bindHaematologyForms("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "ComplianceOfficerView");
-			this._bindHaematologyForms("SupplyManagement", tenderId, offerId, "Supply Management", "ComplianceOfficerView");
+			this._bindHaematologyForms("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "GlobalStrategicMarketingView");
+			this._bindHaematologyForms("SupplyManagement", tenderId, offerId, "Supply Management", "SupplyManagementView");
 		},
 
 		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
@@ -1577,7 +1576,7 @@ sap.ui.define([
 			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
-				groupId: "ComplianceOfficerView"
+				groupId: "GlobalStrategicMarketingView"
 			});
 		},
 
@@ -1607,7 +1606,7 @@ sap.ui.define([
 			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onSupplyManagementRequestSuccess.bind(this),
-				groupId: "ComplianceOfficerView"
+				groupId: "SupplyManagementView"
 			});
 		},
 
