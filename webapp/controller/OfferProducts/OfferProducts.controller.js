@@ -1630,7 +1630,12 @@ sap.ui.define([
 			const url = window.location.href
 			this.defaultModel.callFunction("/sendMEACHNotificationMailTemplate", {
 				method:"POST", 
-				urlParameters: {offerID: this.offerID,tenderId: this.objectId, CountryCode: this.countryCode, url: url},
+				urlParameters: {
+					offerID: this.offerID,
+					tenderId: this.objectId,
+					CountryCode: this.countryCode,
+					url: url
+				},
 				success: this.onSendNotificationMailForMeaChSuccess.bind(this),
 				error: this.onSendNotificationMailForMeaChFail.bind(this)
 			});
@@ -1641,7 +1646,8 @@ sap.ui.define([
 			
 		},
 		onSendNotificationMailForMeaChFail: function(error){
-			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+			let errorMessage = error?.message ? error?.message : JSON.parse(error?.responseText)?.error?.message?.value
+			MessageBox.error(errorMessage);
 		},
 	});
 });

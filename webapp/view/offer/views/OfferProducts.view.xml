@@ -22,7 +22,7 @@
 					<Title text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}"/>
 					<ToolbarSpacer />
 					<Button id="notificationButton" text="Send Notification" icon="sap-icon://email" press=".onOpenNotification" visible="{= ${st>/SelectedCountry} === 'NL'}" enabled="{= !!${ui>/OfferProductTable/count}}"/>
-					<Button text="Send Notification" icon="sap-icon://email" press=".onGetNotificationContentForMeaCh" visible="{= ${ui>/matchedConsumerHealthCountryCode}}"/>
+					<Button text="Send Notification" icon="sap-icon://email" press=".onSendNotificationForMeaCh" visible="{= ${ui>/matchedConsumerHealthCountryCode}}" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
 					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<MenuButton 
 						text="Copy Offer" 
