@@ -1626,9 +1626,9 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/SupplyManagement/editMode", false);
 			this.cancelPendingChanges(["SupplyManagementView"], "supplyManagementFormMsg");
 		},
-		onSendNotificationForMeaCh: function (oEvent) {
+		onSendNotificationForHematology: function (oEvent) {
 			const url = window.location.href
-			this.defaultModel.callFunction("/sendMEACHNotificationMailTemplate", {
+			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
 				method:"POST", 
 				urlParameters: {
 					offerID: this.offerID,
@@ -1636,16 +1636,16 @@ sap.ui.define([
 					CountryCode: this.countryCode,
 					url: url
 				},
-				success: this.onSendNotificationMailForMeaChSuccess.bind(this),
-				error: this.onSendNotificationMailForMeaChFail.bind(this)
+				success: this.onSendNotificationMailForHematologySuccess.bind(this),
+				error: this.onSendNotificationMailForHematologyFail.bind(this)
 			});
 		},
-		onSendNotificationMailForMeaChSuccess: function () {
+		onSendNotificationMailForHematologySuccess: function () {
 			
 			MessageBox.success('Notification mail sent successfully');
 			
 		},
-		onSendNotificationMailForMeaChFail: function(error){
+		onSendNotificationMailForHematologyFail: function(error){
 			let errorMessage = error?.message ? error?.message : JSON.parse(error?.responseText)?.error?.message?.value
 			MessageBox.error(errorMessage);
 		},
