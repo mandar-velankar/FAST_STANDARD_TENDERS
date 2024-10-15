@@ -176,7 +176,7 @@ sap.ui.define([
 		setPaymentTermFieldVisible: function (form, containerIndex) {
 			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
-			paymentTermsField.setVisible(false);
+			paymentTermsField && paymentTermsField.setVisible(false);
 		},
 
 		/**
