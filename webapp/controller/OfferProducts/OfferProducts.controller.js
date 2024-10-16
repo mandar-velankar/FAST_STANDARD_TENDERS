@@ -1627,6 +1627,7 @@ sap.ui.define([
 			this.cancelPendingChanges(["SupplyManagementView"], "supplyManagementFormMsg");
 		},
 		onSendNotificationForHematology: function (oEvent) {
+			BusyIndicator.show(1);
 			const url = window.location.href
 			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
 				method:"POST", 
@@ -1641,13 +1642,13 @@ sap.ui.define([
 			});
 		},
 		onSendNotificationMailForHematologySuccess: function () {
-			
 			MessageBox.success('Notification mail sent successfully');
-			
+			BusyIndicator.hide();
 		},
 		onSendNotificationMailForHematologyFail: function(error){
 			let errorMessage = error?.message ? error?.message : JSON.parse(error?.responseText)?.error?.message?.value
 			MessageBox.error(errorMessage);
+			BusyIndicator.hide();
 		},
 	});
 });
