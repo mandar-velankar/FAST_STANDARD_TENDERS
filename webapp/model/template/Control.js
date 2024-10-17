@@ -4,18 +4,20 @@ sap.ui.define(["sap/m/Text",
                "./ControlPoperty", 
                "sap/m/Input", 
                "sap/m/MultiInput",
+               "sap/m/TextArea",
                "sap/m/DatePicker", 
                "./ValueHelp",
                "../../service/StandardSingletonService",
                "sap/ui/model/Filter",
-               "sap/m/TextArea"
-], function (Text, BaseObject, ControlProperty, Input, MultiInput, DatePicker, ValueHelp, StandardSingletonService, Filter,TextArea) {
+               "../formatter"
+], function (Text, BaseObject, ControlProperty, Input, MultiInput, TextArea, DatePicker, ValueHelp, StandardSingletonService, Filter, formatter) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (parentId,data) {
       BaseObject.prototype.constructor.call(this);
       this.properties = [];
       this.propertyByName = {};
+      this.formatter = formatter;
       if (data) {
         this.parentId = parentId;
         this.id = data.ID;
@@ -35,16 +37,45 @@ sap.ui.define(["sap/m/Text",
       for (const prop of this.properties) {
         if(prop.getName() === "enabled"){
           props[prop.getName()] = prop.getIsBinding() ? '{= '+prop.getValue()+' && ${ui>/'+this.parentId+'/editMode}}' : prop.getValue();
-        }else if (prop.getName() === 'rows'){
-          props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : +prop.getValue();
         }else{
-          props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : prop.getValue();
+          if (prop.getIsBinding()) {
+            const formatterValueIndex = typeof prop.getValue() === 'string' ? prop.getValue().search(/.formatter\.(\w+)/g) : -1;
+            props[prop.getName()] = this.updateBindingObject(prop, formatterValueIndex);  
+          }else if (prop.getName() === 'rows'){
+            props[prop.getName()] = prop.getIsBinding() ? `{${prop.getValue()}}` : +prop.getValue();
+          }else {
+            props[prop.getName()] = prop.getValue();
+          }
         }
-        
-
       }
       return props;
     },
+
+    /**
+     * Updates a binding object based on the given path and formatter value index.
+     * @param {string} path - The path to update, which may contain formatting.
+     * @param {number} formatterValueIndex - The index of the formatter value to bind.
+     * @returns {Object|string} Returns the updated binding object if formatterValueIndex is greater than -1,
+     *                          otherwise returns the original path string.
+    */
+    updateBindingObject: function (prop, formatterValueIndex) {
+      const path = `{${prop.getValue()}}`; //wraps initial value into quotes and brackets to correctly parse to JSON object 
+      if (formatterValueIndex > -1) {
+          const replacedJSONString = path
+              .replace(/(\w+)\s*:/g, '"$1":') // Convert keys without quotes to keys with quotes.
+              .replace(/'/g, '"'); // Convert single quotes to double quotes for valid JSON.
+          
+          const parsedBindingObject = JSON.parse(replacedJSONString); // Parse the JSON string into an object.
+          
+          // Bind formatter function from this.formatter based on formatterValueIndex.
+          parsedBindingObject.formatter = this.formatter[replacedJSONString.match(/.formatter\.(\w+)/)[1]].bind(this.formatter);
+          
+          return parsedBindingObject;
+      } else {
+          return path; // Return the original path string if formatterValueIndex is not valid.
+      }
+    },
+
     getControlPath: function () {
       return `sap/m/${this.type}`;
     },

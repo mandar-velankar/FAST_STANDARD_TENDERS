@@ -1,0 +1,60 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:l="sap.ui.layout" xmlns:form="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:rtx="sap.ui.richtexteditor" > 
+
+    <Dialog title="Send Notification Mail" stretch="true" id="SendNotificationMailDialog">
+        <buttons>
+                    <Button
+                        icon="sap-icon://alert"
+                        text="{= ${messages>/notificationMailMsg}.length }"
+                        visible="{= ${messages>/notificationMailMsg}.length > 0}"
+                        type="Emphasized"
+                        press="onMessagePopoverPress($event, 'notificationMailMsg')" 
+				    />
+                    <Button text="Send" press="onSendNotificationMail" />
+                    <Button text="Cancel" press="onCancelNotificationMail" />
+        </buttons> 
+
+			<form:SimpleForm editable="true" 
+                            maxContainerCols="1" 
+                            layout="ResponsiveGridLayout"  
+                            labelSpanL="1" 
+                            labelSpanM="1"
+                            emptySpanL="0" 
+                            emptySpanM="0" 
+                            columnsL="1" 
+                            columnsM="1" 
+                            class="editableForm" 
+                            visible="true"
+                            id="SendNotificationMailForm">           
+				<form:content >
+					<core:Title/>
+
+                   <Label text="From" required="true"/>
+                   <MultiInput id="idFrom" width="70%" showValueHelp="false" required="true" enabled="false"/>
+
+                    <Label text="To" required="true"/>
+                    <!--<MultiInput id="idTo" width="70%" showValueHelp="false" required="true"/>-->
+                    <MultiComboBox id="idTo" width="70%" required="true" 
+                                   items="{/NotificationUserList}">
+                                <core:Item key="{UserEmail}" text="{UserName}"/>
+                    </MultiComboBox>
+
+                    <Label text="Subject" required="true"/>
+                    <Input id="idSubject" required="true" value="{Subject}"/>
+
+                   <Label text="Content" required="true"/>
+                   <rtx:RichTextEditor id="idEditor" 
+                                       editorType="TinyMCE5"
+                                       value="{MailBody}" 
+                                       height="800px"
+                                       customToolbar="true"
+                                       showGroupFont="true"
+                                       showGroupFontStyle="true"
+                                       showGroupLink="true"
+                                       showGroupStructure="true"
+                                       showGroupTextAlign="true"
+                                       showGroupUndo="true"
+                                       />
+                </form:content>
+		</form:SimpleForm>
+   	</Dialog>	
+</core:FragmentDefinition>

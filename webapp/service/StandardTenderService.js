@@ -10,23 +10,17 @@ sap.ui.define([
             this.model = model;
         },
         getTender: async function (tenderID) {
-			const sTenderKey = this.model.createKey("/TenderFormView", {
-				TenderID: tenderID
-			});
-			let oTender = this.model.getObject(sTenderKey);
-			if (!oTender) {
-				return new Promise((resolve, reject) => {
-					this.model.read("/TenderFormView", {
-						filters: [
-							new Filter("TenderID", "EQ", tenderID)
-						],
-						success: function (res) {
-							resolve(res?.results[0])
-						}
-					});
-				})
-			}
-			return oTender;
+
+			return new Promise((resolve, reject) => {
+				this.model.read("/TenderFormView", {
+					filters: [
+						new Filter("TenderID", "EQ", tenderID)
+					],
+					success: function (res) {
+						resolve(res?.results[0])
+					}
+				});
+			})
 		},
 		getOffer: async function (offerID) {
 			const sOfferKey = this.model.createKey("/OfferFormView", {
@@ -62,7 +56,23 @@ sap.ui.define([
 					});
 				})
 		},
-
+		getOfferProducts: async function (offerID) {
+			return new Promise((resolve, reject) => {
+					this.model.read("/OfferProductsTableView", {
+						filters: [
+							new Filter("OfferID", "EQ", offerID),
+							new Filter("Active", "EQ", 1),
+							new Filter("LotID", "EQ", 1),
+						],
+						success: function (res) {
+							resolve({
+								products: res?.results,
+								productCount: res?.results.length
+							}) 
+						}
+					});
+				})
+		},
 		getProductSKU: async function (countryCode, productCode) {
 			const sOfferProductKey = this.model.createKey("/PT_TMSKUPRDPCK", {
 				CountryCode: countryCode,
@@ -118,7 +128,7 @@ sap.ui.define([
 				this.model.read("/AppConfig", {
 					filters: [
 						new Filter("CountryCode", "EQ", sCountry),
-						new Filter("ApplicationName", "EQ", 'Standard'),
+						new Filter("ApplicationName", "EQ", 'StandardTender'),
 						new Filter("Environment", "EQ", window.location.host.search('dev') > -1 ? 'DEV' : window.location.host.search('qa') > -1 ? 'QA' : window.location.host.search('sbx') > -1 ? 'SBX' : window.location.host.search('prod') > -1 ? 'PRD' : 'LOCL')
 					],
 					success: function (res) {
@@ -171,6 +181,123 @@ sap.ui.define([
 			}
 			return oDistributor;
 		},
+
+		getNLOfferDistributors: async function (offerID, productCode, key) {
+			let filters = []
+
+			if (key === 'DistributorID') {
+				filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("ProductPackID",FilterOperator.EQ, productCode),
+				]
+			}else {
+				filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("AssignedProductCode",FilterOperator.EQ, productCode),
+				]
+			}
+			return new Promise((resolve, reject) => {
+				this.model.read("/NLOfferDistributors", {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results) 
+					}
+				});
+			})
+		},
+
+		getInstituteBrandProducts: async function (offer) {
+			const filters = [
+				new Filter("COUNTRY_CODE",FilterOperator.EQ, offer.CountryCode),
+				new Filter("INSTITUTE_ID",FilterOperator.EQ, offer.InstituteID),
+				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offer.DistributorID),
+				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
+			]
+			offer.Division !== 'All' && filters.push(new Filter("DIVISION",FilterOperator.EQ, offer.Division));
+			return new Promise((resolve, reject) => {
+				this.model.read("/InstituteDistributorBrandProduct", {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results) 
+					}
+				});
+			})
+		},
+
+		deleteNLOfferDistributors: async function (ID) {
+			const path = this.model.createKey("/NLOfferDistributors", {
+				ID: ID
+			});
+			return new Promise((resolve, reject) => {
+				this.model.remove(path);
+			})
+		},
+
+		getAwardedContractDurations: async function (offerID, ProductCode) {
+			const filters = [
+				new Filter("OfferID",FilterOperator.EQ, offerID),
+				new Filter("ProductCode",FilterOperator.EQ, ProductCode)
+			]
+			return new Promise((resolve, reject) => {
+				this.model.read("/ContractInfomation", {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results) 
+					}
+				});
+			})
+		},
+		getAwardedProduct: async function (offerID, ProductCode) {
+				const filters = [
+					new Filter("OfferID",FilterOperator.EQ, offerID),
+					new Filter("ProductCode",FilterOperator.EQ, ProductCode),
+					new Filter("LotID",FilterOperator.EQ, 1)
+				]
+			return new Promise((resolve, reject) => {
+				this.model.read('/AwardedProductFormView', {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results[0]) 
+					}
+				});
+			})
+		},
+		getInstituteInContract: function ({Custom_String_3,InstituteID,CountryCode}) {
+			const InstituteNames = Custom_String_3.split(";")
+			const orFilters = []
+			let andFilters = []
+			let oFilters;
+			if (Custom_String_3) {
+				andFilters = [
+					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
+					new Filter("InstituteID", FilterOperator.NE, InstituteID),
+				]
+				for(let instituteName in InstituteNames){
+					orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.EQ,
+						value1: InstituteNames[instituteName]
+					}));
+				}
+				andFilters.push(new Filter(orFilters, false))
+			 	oFilters = [new Filter(andFilters, true)];
+			}else{
+				andFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, CountryCode ),
+					new Filter("InstituteID", FilterOperator.EQ, InstituteID),
+				]
+				oFilters = [new Filter(andFilters, true)];
+			}
+			const path = Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup';
+			return new Promise((resolve, reject) => {
+				this.model.read(path, {
+					filters: oFilters,
+					success: function (res) {
+						resolve(res?.results)
+					}
+				});
+			})
+		},
 		getBrandsInOffer: async function (brandID, countryCode) {
 			return new Promise((resolve, reject) => {
 					this.model.read("/BrandsInTender", {
@@ -184,5 +311,38 @@ sap.ui.define([
 					});
 				})
 		},
+
+		getComplianceOfficerData: async function (OfferID) {
+			return new Promise((resolve, reject) => {
+					this.model.read("/ComplianceOfficerView", {
+						filters: [
+							new Filter("OfferID", "EQ", OfferID)
+						],
+						success: function (res) {
+							resolve(res?.results[0]);
+						}
+					});
+				})
+		},
+
+		getOfferValidation: async function (OfferID) {
+			const offerValidationPath = this.model.createKey("/OfferValidation", {
+				OFFERID: OfferID
+			});
+			let offerValidation = this.model.getObject(offerValidationPath);
+			if (!offerValidation) {
+				return new Promise((resolve, reject) => {
+						this.model.read("/OfferValidation", {
+							filters: [
+								new Filter("OFFERID", "EQ", OfferID)
+							],
+							success: function (res) {
+								resolve(res?.results[0]);
+							}
+						});
+				});
+			}
+			return offerValidation;
+		}
     });
 });

@@ -112,7 +112,7 @@ sap.ui.define([
 			const countryCode = StandardSingletonService.getCountryCode();
 			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
 			const path = ctx.getPath();
-
+			const stModel = originalInputField.getModel('st');
 			originalInputField.getModel().setProperty(`${path}/InstituteID`, undefined);
 			originalInputField.getModel().setProperty(`${path}/InstituteName`, undefined);
 
@@ -140,6 +140,15 @@ sap.ui.define([
 					.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
 					.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0].removeAllTokens();
 					break
+				case "NL": 
+					const institutesInGroup = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institutes In Group");
+					const bBuyingGroupSelected =  selectedItem.ChannelName === "Buying Group";
+					!bBuyingGroupSelected && originalInputField.getModel().setProperty(`${path}/Custom_String_3`, '');
+					!bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
+					institutesInGroup.setVisible(true);
+					break
 				default:
 					break;
 			}
@@ -149,7 +158,7 @@ sap.ui.define([
 			const countryCode = StandardSingletonService.getCountryCode();
 			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
 			const path = ctx.getPath();
-
+			const defaultModel = originalInputField.getModel();
 
 
 			switch (countryCode) {
@@ -165,6 +174,19 @@ sap.ui.define([
 					}
 					
 					break;
+				case "NL":
+					let institutesInGroup = await StandardSingletonService.getInstitutesInGroup(selectedItem, countryCode, defaultModel);
+					const institutesInGroupField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Institutes In Group");
+					institutesInGroupField.setVisible(!!institutesInGroup);
+					defaultModel.setProperty(`${path}/Custom_String_3`, institutesInGroup);
+					institutesInGroupField.getFields()[0].removeAllTokens();
+					for(const value of institutesInGroup.split(";")){
+						institutesInGroupField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
+						
+					break;
 				default:
 					break;
 			}
@@ -174,11 +196,30 @@ sap.ui.define([
 			return new Promise((resolve, reject) => {
 				originalInputField.getModel().read('/InstituteInBranchView', {
 					filters: [
-						new Filter("InstituteName", "NE", selectedItem.InstituteName),
-						new Filter("InstituteID", "EQ", selectedItem.InstituteID)
+						new Filter("ParentInstituteID", "EQ", selectedItem.ParentInstituteID),
+						new Filter("InstituteID", "NE", selectedItem.InstituteID)
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc},${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
+
+		getInstitutesInGroup: async function (selectedItem, countryCode, defaultModel) {
+			return new Promise((resolve, reject) => {
+				defaultModel.read('/InstitutesInGroup', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("ParentInstituteID", "EQ", selectedItem?.InstituteID),
+						new Filter("InstituteID", "NE", selectedItem?.InstituteID),
+					],
+					success: function (res) {
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
 					},
 
 					error: function (err) {
@@ -206,21 +247,32 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status, isProductDeclined) {
+        getEnablementObject: function (status, isProductDeclined, stTenderRoles) {
 
 			const isOverviewTabVisible = !!status;
-			const checkCopyOfferBtn = status === "Quotation Submitted" || status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
+			const checkCopyOfferBtn = status === "Quotation Submitted" || 
+										status === "Results Recorded" || 
+										status === "Delivery Ongoing" || 
+										status === "Outcome Accepted" || 
+										status === "Outcome Partially Accepted" || 
+										status === "Outcome Rejected"? true : false;
 			const isDeliveryTruckingVisible = status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
 
 			const isTenderOfferOverviewVisible = status === "Offer Created" || status === "Offer Approved" || status === "Offer Rejected" ? true : false;
 
 			const isEnabledDeleteOfferBtn = status === "Offer Created" ? true : false;
 
-			const isAwardDetailEnabled = (status === "Quotation Submitted" || status === "Results Recorded") ? true : false;
+			const isAwardDetailEnabled = (status === "Quotation Submitted" || 
+									status === "Results Recorded" || 
+									status === "Outcome Accepted" || 
+									status === "Outcome Partially Accepted" || 
+									status === "Outcome Rejected") ? true : false;
 			const checkOverviewDownloadBtn = (status === "Offer Created" || status === "Awaiting Approval") ? false : true;
 			const checkOverviewSetAsSubmitBtn = (status === "Offer Approved") ? true : false;
 			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
 			const isCancelApprovalBtnEnabled = (status === "Awaiting Approval") ? true : false;
+
+			const isSendNotificationEnabledForHematology = status === "Offer Created";
 
 			return {
 				Detail: {
@@ -239,14 +291,15 @@ sap.ui.define([
 							editMode: isTenderOfferOverviewVisible,
 							enableCreateOffer: true,
 							enableDeleteOffer: isEnabledDeleteOfferBtn,
-							enableCopyOffer: checkCopyOfferBtn
+							enableCopyOffer: checkCopyOfferBtn,
+							enableSendNotificationHematology: isSendNotificationEnabledForHematology
 						},
 						OfferProductTable:{
 							editMode: isTenderOfferOverviewVisible,
 						},
 					},
 					OverviewTab: {
-						isVisible: isOverviewTabVisible,
+						isVisible: isOverviewTabVisible && !stTenderRoles.LimitedPricingTabAccess,
 						enableDownload: checkOverviewDownloadBtn,
 						enableSetAsSubmited: checkOverviewSetAsSubmitBtn,
 						OverviewForm: {
@@ -258,10 +311,10 @@ sap.ui.define([
 						}
 					},
 					AwardTab: {
-						isVisible: checkCopyOfferBtn,
+						isVisible: checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess,
 					},
 					DeliveryTrackingTab: {
-						isVisible: isDeliveryTruckingVisible,
+						isVisible: isDeliveryTruckingVisible && !stTenderRoles.LimitedPricingTabAccess,
 					}
 				},
 				OfferProductDetail: {
@@ -269,9 +322,11 @@ sap.ui.define([
 						editMode: isTenderOfferOverviewVisible
 					},
 					OfferPricingInfo:{
+						isVisible: !stTenderRoles.LimitedPricingTabAccess,
 						editMode: isTenderOfferOverviewVisible && !isProductDeclined 
 					},
 					OfferProductFOC:{
+						isVisible: !stTenderRoles.LimitedPricingTabAccess,
 						editMode: isTenderOfferOverviewVisible && !isProductDeclined
 					},
 				},

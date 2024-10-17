@@ -5,7 +5,13 @@ sap.ui.define([
 	"sap/m/library",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator) {
+	"sap/ui/core/Fragment",
+	"sap/m/Token",
+	"sap/ui/core/Item",
+	"sap/m/MessageBox",
+	"sap/ui/model/Sorter",
+	"sap/ui/core/BusyIndicator",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Fragment, Token, Item, MessageBox, Sorter, BusyIndicator) {
 	"use strict";
 
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.AwardedProducts.AwardedProductsDetail", {
@@ -27,6 +33,7 @@ sap.ui.define([
 			const messagesModel = new JSONModel({
 				awardedProduct: [],
 				competitorResults: [],
+				contractInformation: []
 			})
 
 			this.getRouter().getRoute("awardProductsDetail").attachPatternMatched(this._onObjectMatched, this);
@@ -111,9 +118,26 @@ sap.ui.define([
 				CompetitorResultsForm:{
 					editMode: false,
 					region: "",
-					selectedItems: []
+					selectedItems: [],
+					countryCode: this.countryCode,
+					currency: "",
 				},
-				enableDeleteProductButton: false
+				ContractInformation: {
+					editMode: false
+				},
+				ContractDuration: {
+					editMode: false
+				},
+				enableDeleteProductButton: false,
+				brandProducts: [],
+				ContractDurationForm: {
+					OfferID: this.offerId,
+					ProductCode: this.productId,
+					InstituteName: "", 
+					ContractDuration: "", 
+					ContractStartDate: "", 
+					ContractEndDate: "",
+				}
 			});
 	
 			this.setModel(uiModel, "ui");
@@ -123,10 +147,57 @@ sap.ui.define([
 				ProductCode: this.productId,
 				LotID: "1"
 			});
-			
+			const awardedProduct = await this.stState.getService().getAwardedProduct(this.offerId, this.productId)
+			this.bindContractDurationSelect(awardedProduct)
 			this._bindView(awardedProductPath);
 			this.bindForm(awardedProductPath);
 			this.bindTable(this.offerId, this.productId);
+			this.setInitialWholeSalerMultiInputTokens();
+			await this.getAwardedContractDurations()
+		},
+
+		getAwardedContractDurations: async function(){
+            const result = await this.stState.getService().getAwardedContractDurations(this.offerId, this.productId)
+			const multiInput = this.byId("idAwardedInstituteGroupMultiSelect")
+			let awardedContractDurationForm = {}; 
+			const InstituteGroupTokens = [];
+			const tender = await this.stState.getService().getTender(this.tenderId);
+			if (result.length > 0) {
+					result.map(function (item) {
+						const oToken = new Token({
+							text: item.InstituteName,
+							key: item.InstituteID
+						});
+						InstituteGroupTokens.push(oToken);
+						awardedContractDurationForm = {
+							OfferID: item.OfferID,
+							ProductCode: item.ProductCode,
+							InstituteName: "", 
+							ContractDuration: item.ContractDuration, 
+							ContractStartDate: item.ContractStartDate, 
+							ContractEndDate: item.ContractEndDate,
+						}
+					});
+			}else{
+				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender);
+				
+				const offerValidation = await this.stState.getService().getOfferValidation(this.offerId);
+				awardedContractDurationForm.ContractStartDate = offerValidation && offerValidation.Tender_Custom_Date_1;
+
+				instituteInContract.map(function (item) {
+					const oToken = new Token({
+						text: item.InstituteName,
+						key: item.InstituteID
+					});
+					InstituteGroupTokens.push(oToken);
+				})
+			}
+			this.getModel("ui").setProperty("/ContractDurationForm", awardedContractDurationForm)
+			
+            multiInput.removeAllTokens();			
+
+			multiInput.setTokens(InstituteGroupTokens);	
+			this.bindContractDurationSelectionForm(this.offerId, this.productId)
 		},
 		
 		getCompetitorResults: async function (offerId, productCode) {
@@ -311,6 +382,7 @@ sap.ui.define([
 			if (Array.isArray(offerProductValidation) && offerProductValidation.length > 0) {
 				const firstProduct = offerProductValidation[0];
 				this.getModel('ui').setProperty('/CompetitorResultsForm/region', firstProduct.Region);
+				this.getModel('ui').setProperty('/CompetitorResultsForm/currency', firstProduct.CURRENCY);
 			}
 		},
 
@@ -426,7 +498,6 @@ sap.ui.define([
 				this.cancelPendingChanges(['CompetitorResultsTableView'], 'competitorResults');
 				this.getModel('ui').setProperty('/CompetitorResultsForm/editMode', false);
 				this.byId('idCompetitorResultTable').getBinding('items').refresh();
-				this.bindTable(this.offerId, this.productId);
 			}
 			this.byId('idCompetitorResultTable').setBusy(false);
 		},
@@ -503,8 +574,8 @@ sap.ui.define([
 					this.defaultModel.setProperty(`${path}/AWARDEDCOMPANY`, value, context);
 					this.defaultModel.setProperty(`${path}/AWARDEDPRODUCT`, '', context);
 					this.filterAwardedProducts(event.getSource(), value);
-					// const masterCompetitors = await this.getMasterCompetitors(value);
-					// this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
+					const masterCompetitors = await this.getMasterCompetitors(value);
+					this.defaultModel.setProperty(`${path}/Custom_String_1`, masterCompetitors?.ID || null, context) //PlaceHolder field used for MasterCompetitors upsert operation
 					this.defaultModel.setProperty(`${path}/Custom_String_2`, this.countryCode, context) //MasterCompetitors field used for MasterCompetitors upsert operation
 					break;
 				case "AwardedProduct":
@@ -558,5 +629,536 @@ sap.ui.define([
 				});
 			});
 		},
+
+		onButtonContractInformationFormEditPress: function(event){
+			this.getModel("ui").setProperty('/ContractInformation/editMode', true);
+		},	
+
+		onButtonContractInformationFormAcceptPress: function(event){
+			this.getModel("ui").setProperty('/ContractInformation/editMode', false);
+		},
+
+		onMultiInputWholesalersValueHelpRequest:  function(event){
+			const wholeSalersMultiInput = event.getSource();
+			this.getDistributorAssignementDialog().then(this.onDistributorAssignementDialogLoaded.bind(this,wholeSalersMultiInput));
+		},
+
+		getDistributorAssignementDialog: function(){
+			const view = this.getView();
+			if (!this.dialogDistributorAssignement) {
+				this.dialogDistributorAssignement = Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.awards.fragments.ContractInformation_WholesalersProducts",
+					controller: this
+				}).then(function (dialog) {
+					// connect dialog to the root view of this component (models, lifecycle)
+					view.addDependent(dialog);
+					return dialog;
+				});
+			}
+			return this.dialogDistributorAssignement;	
+		},
+
+		/**
+		 * Called when the price condition FOC dialog is loaded.
+		 * This method is resuing the binding template from the view.
+		 * More info see: https://answers.sap.com/questions/11405563/getting-the-item-template-of-a-mtable.html
+		 * 
+		 * @param {sap.m.MultiInput} multiInput - The multi-input control.
+		 * @param {sap.m.Dialog} dialog - The dialog control.
+		 * @returns {void}
+		 */
+		onDistributorAssignementDialogLoaded: function(multiInput, dialog){
+			dialog.open();
+			this.getNLOfferDistributors();
+		},
+
+		getNLOfferDistributors: async function () {
+			let wholesalersListMultiInput = this.byId("idContractInformationWholesalersMultiInput");
+			let productListMultiInput = this.byId("idContractInformationProductsMultiInput");
+
+			await this.getUniqueDistributors(undefined, wholesalersListMultiInput, 'DistributorID');
+			await this.getUniqueDistributors(undefined, productListMultiInput, 'ProductPackID');
+		},
+
+		getUniqueDistributors: async function (initialWholesalerMultiInput, multiInput, key) {
+			const input = await this.stState.getService().getNLOfferDistributors(this.offerId, this.productId, key);
+			const uniqValues = new Map();
+			input.forEach(item => {
+				uniqValues.set(item[key], item);
+			});
+			let result = Array.from(uniqValues.values());
+			result.length == 0 && key === 'ProductPackID' && this.setSelectedProductToken(this.offerId, this.productId);
+			result = result.map(item => {
+				return this.setSelectedTokens(initialWholesalerMultiInput, multiInput, item, key);
+			});
+		},
+
+		setInitialWholeSalerMultiInputTokens: async function () {
+			let initialWholesalerMultiInput = this.byId("idWholesarlersMultiInput");
+			initialWholesalerMultiInput.removeAllTokens();
+			this.getUniqueDistributors(initialWholesalerMultiInput, undefined, 'DistributorID');
+		},
+
+		setSelectedTokens: function (initialWholesalerMultiInput, multiInput, item, key) {
+			if (key === 'DistributorID') {
+				initialWholesalerMultiInput?.addToken(new Token({
+					text: item.DistributorName,
+					key: item.DistributorID,
+					editable: false
+				}));
+				multiInput?.addToken(new Token({
+					text: item.DistributorName,
+					key: item.DistributorID
+				}));
+			}else {
+				multiInput?.addToken(new Token({
+					text: item.ProductPackName,
+					key: item.ProductPackID
+				}));
+			}
+		},
+
+		onButtonCancelWholesalersPress: async function(event){
+			
+			const dialog = await this.getDistributorAssignementDialog();
+			if(this.getModel().hasPendingChanges()){
+				this.getModel().resetChanges(null, false, true);
+			}
+			this.resetMultiInputTokens();
+			this.setInitialWholeSalerMultiInputTokens();
+			dialog.close(); 
+		},
+
+		resetMultiInputTokens: function () {
+			let initialWholesalerMultiInput = this.byId("idWholesarlersMultiInput");
+			let wholesalersListMultiInput = this.byId("idContractInformationWholesalersMultiInput");
+			let productListMultiInput = this.byId("idContractInformationProductsMultiInput");
+
+			initialWholesalerMultiInput.removeAllTokens();
+			wholesalersListMultiInput.removeAllTokens();
+			productListMultiInput.removeAllTokens();
+			productListMultiInput.setSelectedItem(null);
+		},
+
+		onProductNameInputValueHelpRequest: function(event){
+			const view = this.getView();
+			const controller = this;
+			// create value help dialog
+			if (!this.dialogSelectBrandProducts) {
+				this.dialogSelectBrandProducts = sap.ui.core.Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.awards.fragments.ContractInformation_SelectBrandProducts",
+					controller: this
+				}).then(function (valueHelpDialog) {
+					view.addDependent(valueHelpDialog);
+					return valueHelpDialog;
+				});
+			}
+
+			// open value help dialog
+			this.dialogSelectBrandProducts.then(function (valueHelpDialog) {
+				controller.getProductBrands();
+				valueHelpDialog.setRememberSelections(true);
+				valueHelpDialog.open();
+				controller.bindProductsTable();
+			});
+		},
+
+		bindWholesalersTable: function () {
+			const wholesalersTable = this.byId("idSelectWholesalersDialog");
+			const template = wholesalersTable.getBindingInfo("items").template
+			wholesalersTable.bindItems({
+				path: "/MasterDistributors",
+				filters: [
+					new Filter("CountryCode",FilterOperator.EQ, 'NL'),
+					new Filter("DistributorID",FilterOperator.NE, 100000226)
+				],
+				template: template,
+				events: {
+					dataReceived: this.handleProductDistributorsValueHelpUpdateFinished.bind('Distributor', this)
+				}
+			});
+		},
+
+		bindProductsTable: function () {
+			const productsTable = this.byId("idSelectProductBrandDialog");
+			const template = productsTable.getBindingInfo("items").template
+			productsTable.bindItems({
+				path: "ui>/brandProducts",
+				template: template,
+				events: {
+					dataReceived: this.handleProductDistributorsValueHelpUpdateFinished.bind('Product', this)
+				}
+			});
+		},
+
+		getProductBrands: async function (productName) {
+			const offerFormViewPath = this.defaultModel.createKey("/OfferFormView", {OfferID: this.offerId});
+			let offerFormViewObject = this.defaultModel.getProperty(offerFormViewPath);
+			if(!offerFormViewObject){
+				offerFormViewObject	= await this.getOfferFormView(this.offerId);
+			}
+			const {products} = await this.stState.getService().getOfferProducts(offerFormViewObject.OfferID);
+			const instituteBrandProducts = await this.stState.getService().getInstituteBrandProducts(offerFormViewObject, productName);
+			const filteredInstituteBrandProducts = instituteBrandProducts.filter(item => {
+				const itemIndex = products.findIndex(pr => pr.ProductCode == item.PRODUCT_ID);
+				if (itemIndex > -1) return item;
+			});
+			this.getModel('ui').setProperty('/brandProducts', filteredInstituteBrandProducts);
+		},
+
+
+		handleProductBrandsValueHelpConfirm: function (event) {
+			const contexts = event.getParameter('selectedContexts');
+			const productBrandList = this.byId("idContractInformationProductsMultiInput");
+			let productBrandTokens = [];
+
+			//push the selected brand products 
+			contexts.map(function (oContext) {
+				const oToken = new Token({
+					text: oContext.getObject().PRODUCT_NAME,
+					key: oContext.getObject().PRODUCT_ID
+				});
+				productBrandTokens.push(oToken);
+			});
+
+			//add the array of tokens to the multi input
+			productBrandList.setTokens(productBrandTokens);	
+		},
+
+		handleProductDistributorsValueHelpUpdateFinished: function(event, key){
+			try{
+				const distributorMultiInputTokens = this.byId("idContractInformationWholesalersMultiInput").getTokens();
+				const productBrandMultiInputTokens = this.byId("idContractInformationProductsMultiInput").getTokens();
+				const distributorListDialog = this.byId("idSelectWholesalersDialog");
+				const productBrandListDialog = this.byId('idSelectProductBrandDialog');
+
+				if (key === 'Distributor') {
+					distributorMultiInputTokens.forEach(selectedItem => {
+						distributorListDialog?.getItems()?.find(item => item.getBindingContext().getObject().DistributorID == selectedItem.getProperty('key'))?.setSelected(true)
+					})
+				}else {
+					productBrandMultiInputTokens.forEach(selectedItem => {
+						productBrandListDialog?.getItems()?.find(item => item.getBindingContext('ui').getObject().PRODUCT_ID == selectedItem.getProperty('key'))?.setSelected(true)
+					})
+				}
+			}
+			catch(error){
+			  console.error(error);
+			}
+	
+		  },
+
+		onWholesalersInputValueHelpRequest: function(event){
+			const view = this.getView();
+			const controller = this;
+			// create value help dialog
+			if (!this.dialogSelectWholesalers) {
+				this.dialogSelectWholesalers = sap.ui.core.Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.awards.fragments.ContractInformation_SelectWholesalers",
+					controller: this
+				}).then(function (valueHelpDialog) {
+					view.addDependent(valueHelpDialog);
+					return valueHelpDialog;
+				});
+			}
+
+			// open value help dialog
+			this.dialogSelectWholesalers.then(function (valueHelpDialog) {
+				valueHelpDialog.setRememberSelections(true);
+				valueHelpDialog.open();
+				controller.bindWholesalersTable();
+			});
+		},
+
+		handleWholesalersValueHelpConfirm: function (event) {
+			const contexts = event.getParameter('selectedContexts');
+			const wholesalersList = this.byId("idContractInformationWholesalersMultiInput");
+			let wholesalersTokens = [];
+
+			//push the selected brand products 
+			contexts.map(function (oContext) {
+				const oToken = new Token({
+					text: oContext.getObject().DistributorName,
+					key: oContext.getObject().DistributorID
+				});
+				wholesalersTokens.push(oToken);
+			});
+
+			//add the array of tokens to the multi input
+			wholesalersList.setTokens(wholesalersTokens);	
+		},
+
+		setSelectedProductToken: async function (offerID, productCode) {
+			const brandProductMultiInput = this.byId("idContractInformationProductsMultiInput");
+			const selectedProduct = await this.stState.getService().getOfferProduct(offerID, productCode);
+			let productBrandTokens = [];
+			const oToken = new Token({
+				text: selectedProduct.PRODUCTPACKNAME,
+				key: selectedProduct.ProductCode
+			});
+			const item = new Item({
+				text: selectedProduct.PRODUCTPACKNAME,
+				key: selectedProduct.ProductCode
+			});
+			productBrandTokens.push(oToken);
+			brandProductMultiInput.setTokens(productBrandTokens);
+			brandProductMultiInput.setSelectedItem(item);
+		},
+
+		handleProductBrandsWholesalersValueHelpSearch: function (event, path) {
+			const searchValue = event.getParameter('value');
+			const oFilter = [
+				new Filter(path, FilterOperator.Contains, searchValue)
+			]
+			event.getSource().getBinding("items").filter(new Filter(oFilter));
+		},
+
+		onButtonApplyWholesalersProductsPress: async function () {
+			try {
+				BusyIndicator.show(0);
+				// const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
+				const wholesalersListTokens = this.byId("idContractInformationWholesalersMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
+				const brandProductMultiInputTokens = this.byId("idContractInformationProductsMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
+
+				const pendingChange = {
+					OfferID: this.offerId,
+					DistributorName: wholesalersListTokens,
+					ProductPackName: brandProductMultiInputTokens,
+					AssignedProductCode: this.productId
+				};
+				this.getModel().createEntry('/NLOfferDistributors', {
+					properties: pendingChange,
+					groupId: "NLOfferDistributors"
+				});
+				
+				
+				this.getModel().submitChanges({
+					success: this.onSubmitChangesNLDistributorSuccess.bind(this),
+					groupId: "NLOfferDistributors"
+				});
+			} catch (error) {
+				MessageBox.error(response?.error?.message?.value);
+				BusyIndicator.hide();
+			}
+		},
+
+		onSubmitChangesNLDistributorSuccess: async function (event) {
+			const errStatus = event?.__batchResponses?.[0]?.response?.statusCode;
+			const errMessage = event?.__batchResponses?.[0]?.response?.body;
+			let dialog = await this.getDistributorAssignementDialog();
+			if (errStatus == 403) {
+				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
+				BusyIndicator.hide();
+			}else {
+				this.resetMultiInputTokens();
+				this.setInitialWholeSalerMultiInputTokens();
+				dialog.close();
+				MessageBox.success('Wholesalers were saved successfully');
+				BusyIndicator.hide();
+			}
+		},
+
+		onOpenAwardedInstituteGroup: async function(){
+			if (!this._AwardedInstituteGroupFragment) {
+                this._AwardedInstituteGroupFragment = Fragment.load({
+                    id: this.getView().getId(),
+                    name: "com.bayer.tender.statenderapp.view.awards.fragments.AwardedInstituteGroup",
+                    controller: this,
+                }).then(async function(oFragment) {
+                    this._AwardedInstituteGroupFragment = oFragment;
+					// oFragment.setRememberSelections(true);
+                    this._AwardedInstituteGroupFragment.setModel(this.getView().getModel());
+                    this.getView().addDependent(oFragment);
+                    this._AwardedInstituteGroupFragment.open();
+					await this.bindAwardedInstituteGroupTable();
+                }.bind(this));
+            } else {
+				await this.bindAwardedInstituteGroupTable();
+                this._AwardedInstituteGroupFragment.open();
+            }
+		},
+
+		bindAwardedInstituteGroupTable: async function(){
+			const list = this.byId("idAwardedInstituteGroupDialog");
+            const template = new sap.m.ColumnListItem({
+                cells:[
+                    new sap.m.Text({text:'{InstituteName}'}),
+                ]
+            })
+			const {Custom_String_3, InstituteID} = await this.stState.getService().getTender(this.tenderId);
+			const InstituteNames = Custom_String_3.split(";")
+			const orFilters = []
+			let andFilters = []
+			let oFilters;
+			
+			if (Custom_String_3) {
+				andFilters = [
+					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
+					new Filter("InstituteID", FilterOperator.NE, InstituteID),
+				]
+				for(let instituteName in InstituteNames){
+					orFilters.push(new Filter({
+						path: "InstituteName",
+						operator: FilterOperator.EQ,
+						value1: InstituteNames[instituteName]
+					}));
+				}
+				andFilters.push(new Filter(orFilters, false))
+			 	oFilters = [new Filter(andFilters, true)];
+			}else{
+				andFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, this.countryCode ),
+					new Filter("InstituteID", FilterOperator.EQ, InstituteID),
+				]
+				oFilters = [new Filter(andFilters, true)];
+			}
+            list.bindItems({
+				path: Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup',
+				template: template,
+				filters: oFilters,
+				events:{
+					dataReceived: this.handleAwardedInstituteGroupValueHelpUpdateFinished.bind(this)
+				}
+			});	
+		},
+
+		handleAwardedInstituteGroupValueHelpSearch: function(oEvent){
+            const searchValue = oEvent.getParameter('value');
+			const oFilter = [
+				new Filter("InstituteName", FilterOperator.Contains, searchValue)
+			]
+			oEvent.getSource().getBinding("items").filter(new Filter(oFilter));
+		},
+
+		handleAwardedInstituteGroupValueHelpUpdateFinished: function(){
+            try{
+				const InstituteGroupMultiInputTokens = this.byId("idAwardedInstituteGroupMultiSelect").getTokens();
+				const InstituteGroupListDialog = this.byId("idAwardedInstituteGroupDialog");
+
+				InstituteGroupMultiInputTokens.forEach(selectedItem => {
+					InstituteGroupListDialog?.getItems()?.find(item => item.getBindingContext().getObject().InstituteID == selectedItem.getProperty('key'))?.setSelected(true)
+				})
+			}
+			catch(error){
+			  console.error(error);
+			}
+		},
+
+		handleAwardedInstituteGroupHelpCancelPress: function () {
+			const list = this.byId("idAwardedInstituteGroupDialog");
+			list.unbindElement()
+		},
+
+		handleAwardedInstituteGroupHelpConfirm: function(oEvent){
+			const contexts = oEvent.getParameter('selectedContexts');
+			const InstituteGroupList = this.byId("idAwardedInstituteGroupMultiSelect");
+			let InstituteGroupTokens = [];
+
+			contexts.map(function (oContext) {
+				const oToken = new Token({
+					text: oContext.getObject().InstituteName,
+					key: oContext.getObject().InstituteID
+				});
+				InstituteGroupTokens.push(oToken);
+			});
+
+			InstituteGroupList.setTokens(InstituteGroupTokens);	
+		},
+
+		onDateChange: function() {
+			const form = this.byId('idContractDurationForm') 
+			const context = form.getBindingContext('ui')
+            const startDate = this.byId('idContractStartDate').getDateValue();
+            const durationSelect = this.byId("idContractDuration").getSelectedKey();
+			const endDate = new Date(startDate);
+			endDate.setDate(endDate.getDate() + 1);
+			const formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + parseInt(durationSelect)));
+			
+			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
+			context.getModel().refresh()
+        },
+
+        onSavehandleAwardedContractDuration: function(){
+            try {
+                this.getModel("appView").setProperty('/busy', true);
+                const form = this.byId("idContractDurationForm");
+                const contractDurationValue = this.byId("idContractDuration").getSelectedKey();
+                const obj = form.getBindingContext("ui").getObject();
+                const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
+                
+                obj.InstituteName = InstituteGroupIds;            
+                obj.ContractDuration = contractDurationValue;
+                obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate);
+                obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate);
+                obj.OfferID = this.offerId;
+                obj.ProductCode = this.productId;
+                
+                this.getModel().createEntry('/ContractInfomation', {
+                    properties: obj,
+                    groupId: "ContractDuration"
+                });
+
+                this.getModel().submitChanges({
+                    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
+                    groupId: "ContractDuration"
+                });
+            } catch (error) {
+                MessageBox.error(error.message);
+                this.getModel("appView").setProperty('/busy', false);
+            }
+        },
+
+
+		onSubmitChangesAwardedContractDurationSuccess: async function (event) {
+			const errStatus = event?.__batchResponses?.[0]?.response?.statusCode;
+			const errMessage = event?.__batchResponses?.[0]?.response?.body;
+			if (errStatus == 403) {
+				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
+				this.getModel("appView").setProperty('/busy', false);
+			}else {
+				await this.getAwardedContractDurations()
+				MessageBox.success('Contract Duration was saved successfully');
+				this.getModel("appView").setProperty('/busy', false);
+				this.getModel("ui").setProperty('/ContractDuration/editMode', false);
+			}
+			this.getModel().resetChanges();
+		},
+
+		bindContractDurationSelectionForm: function(){
+            const form = this.getView().byId('idContractDurationForm');
+            
+            form.bindElement({
+				path: "ui>/ContractDurationForm",
+			});
+
+		},
+
+        bindContractDurationSelect: function(awardedProduct){
+			const select = this.byId("idContractDuration")
+            const template = select.getBindingInfo('items').template.clone()
+			select.bindItems({
+				path: "/NLPriceConditions",
+				template: template,
+				filters: [    
+					new Filter("PriceCondition_ID" ,FilterOperator.EQ, awardedProduct.priceconditionID),
+				],
+				sorter: new Sorter({
+					path: 'ContractDuration',
+					descending: false
+				})
+		    })
+		},
+		
+		onAwardedContractDurationFormEditBtnPress: function(){
+			this.getModel("ui").setProperty('/ContractDuration/editMode', true);
+		},
+
+		onAwardedContractDurationFormCancelBtnPress: async function(){
+			this.getModel("ui").setProperty('/ContractDuration/editMode', false);
+			await this.getAwardedContractDurations()
+		}
     });
 });

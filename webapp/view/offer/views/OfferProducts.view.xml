@@ -21,6 +21,8 @@
 				<Toolbar>
 					<Title text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}"/>
 					<ToolbarSpacer />
+					<Button id="notificationButton" text="Send Notification" icon="sap-icon://email" press=".onOpenNotification" visible="{= ${st>/SelectedCountry} === 'NL'}" enabled="{= !!${ui>/OfferProductTable/count}}"/>
+					<Button text="Send Notification" icon="sap-icon://email" press=".onSendNotificationForHematology" visible="{= ${ui>/matchedHaematologyCountryCode}}" enabled="{= ${em>/Detail/OfferTab/OfferForm/enableSendNotificationHematology}}"/>
 					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<MenuButton 
 						text="Copy Offer" 
@@ -65,7 +67,7 @@
 			<form:formContainers>
 				<form:FormContainer formElements="{path:'template>formElements',templateShareable:true}">
 					<form:formElements>
-						<form:FormElement label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
+						<form:FormElement visible="{template>visible}" label="{= ${appView>/language} === 'en' ? ${template>label} : ${template>labelLocale} !== null ? ${template>labelLocale} : ${template>label}}" fields="{path:'template>controls',factory:'.fieldsFactory',templateShareable:true}">
 							<!-- <form:fields>
 								<Input value="{template>control/type}"/>
 							</form:fields> -->
@@ -75,7 +77,13 @@
 			</form:formContainers>
 		</form:Form>
 	</VBox>
-
+    
+	<VBox visible="{ui>/matchedHaematologyCountryCode}">
+	    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.ComplianceOfficerForm"/>
+		<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.SupplyManagementForm" />
+		<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.GlobalStrategicMarketingForm" />
+	</VBox>
+	
 	<Table id="idOfferProductsTable" 
 		columns="{path:'template>xmlView/tableByName/OfferProductsTable/columns'}"
 		class="sapFDynamicPageAlignContent"
@@ -89,6 +97,7 @@
 					<ToolbarSpacer />
 				<Button id="AddOfferProductBtnId" text="Add Product" icon="sap-icon://add" press=".onOpenAddOfferProductDialog" visible="{= ${ui>/OfferProductTable/editMode} }"/>
 				<Button id="DeleteProductButtonId" text="Delete Product" icon="sap-icon://delete" press="onDeleteOfferProductBtnPress" visible="{= ${ui>/OfferProductTable/editMode} }" enabled="{= ${ui>/OfferProductTable/enableDeleteProductButton}}"/>
+				<Button text="{i18n>importZagisFile}" press=".onOpenUploadZagisFileDialog" visible="{= !${ui>/OfferProductTable/editMode} &amp;&amp; ${st>/SelectedCountry} === 'NL'}" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode} &amp;&amp; ${ui>/OfferProductTable/source} === 'Zagis'}"/>
 				<Button id="editOfferProductButtonId" icon="sap-icon://edit" text="Edit" press=".onOfferProductTableEditBtnPress" visible="{= !${ui>/OfferProductTable/editMode} }" enabled="{= ${em>/Detail/OfferTab/OfferForm/editMode}}"/>
 				<!--<Button
 					id="idOfferProductTableSaveBtn"
@@ -108,7 +117,10 @@
 			</OverflowToolbar>
 		</headerToolbar>
 		<columns>
-			<Column>
+			<Column visible="{
+				parts: ['template>title'],
+				formatter: '.OfferProductColumnVisibility'
+			}">
 				<Text text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}" />
 			</Column>
 		</columns>

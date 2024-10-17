@@ -1,0 +1,25 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+>   
+    <Dialog id = "idUploadZagisFileDialog" title="Upload File" contentWidth="100px" contentHeight="100px">
+        <u:FileUploader
+            id="idZagisFileUploader"
+            name="fileUpload"
+            fileType="xlsx"
+            multiple="false"
+            sendXHR="true"
+            uploadUrl="/v2/sta_tender/ZagisUploadFile"
+            uploadComplete="handleZagisFileUploadComplete"
+            useMultipart="false"
+            class = "sapUiMediumMarginBegin sapUiMediumMarginTop"
+            
+        />
+        <buttons>
+            <Button text="Upload" type="Emphasized" press=".onHandleUploadZagisFilePress" />
+            <Button text = "Close" press=".onCloseZagisFileUploadDialog"/>
+        </buttons>
+    </Dialog>
+    
+</core:FragmentDefinition>

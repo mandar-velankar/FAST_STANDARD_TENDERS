@@ -27,7 +27,8 @@ sap.ui.define(["sap/ui/base/Object"], function (Object) {
                                             "Control": {
                                                 $expand: "Properties"
                                             }
-                                        }
+                                        },
+                                        $orderby:"Rank"
                                     }
                                 }
                             },

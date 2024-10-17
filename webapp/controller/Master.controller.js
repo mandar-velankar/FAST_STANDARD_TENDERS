@@ -111,8 +111,10 @@ sap.ui.define([
 			const sCountryCode = this.getModel("st").getProperty("/SelectedCountry") || oEvent?.getParameter("data")?.results[0]?.CountryCode || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CountryCode"); // we default to first country in the list
 			const userFullName = oEvent?.getParameter("data")?.results[0]?.UserName || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserName")
 			const userID = oEvent?.getParameter("data")?.results[0]?.CWID || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("CWID")
+			const userEmail = oEvent?.getParameter("data")?.results[0]?.UserEmail || oEvent.getParameter("selectedItem")?.getBindingContext()?.getProperty("UserEmail")
 			this.getModel("st").setProperty("/UserFullName", userFullName);
 			this.getModel("st").setProperty("/UserID", userID);
+			this.getModel("st").setProperty("/UserEmail", userEmail);
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.countryCode = sCountryCode;
 			// set filter which is needed later on
@@ -262,10 +264,6 @@ sap.ui.define([
 			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
 			const sorters = [
 				new Sorter({
-					path: 'createdAt', 
-					descending: true
-				}),
-				new Sorter({
 					path: 'TenderID', 
 					descending: true
 				}),
@@ -304,14 +302,15 @@ sap.ui.define([
 		 * and using publish function of EventBus in order to trigger handleStatusChange function in Detail controller every time when receive tenders
 		 */
 
-		publishSelectedOfferStatus: function (res) {
+		publishSelectedOfferStatus: async function (res) {
 			const hash = this.getRouter().getHashChanger().getHash();
 			const offerId = hash.split("/")[4];
 			const offers = res.getParameter("data")?.results;
 			const selectedOffer = offers.find(offer => offer.OfferID === offerId);
+			const OfferStatus = await this.stState.getOfferStatus(offerId);
 			if (selectedOffer) {
 				this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
-					offerStatus: selectedOffer?.STATUS
+					offerStatus: OfferStatus?.STATUS
 				});
 			}
 		},
@@ -689,12 +688,16 @@ sap.ui.define([
 			const userFullName = this.getModel("st").getProperty("/UserFullName");
 			const today = new Date();
 			const nextDate = new Date(today);
+			const classificationObj = {
+				'TW':'Tender',
+				'NL':'Price Request'
+			}
 			nextDate.setDate(today.getDate() + 1);
 			this.getModel().setProperty(`${sElemBindingPath}/TenderID`, nextTenderID);
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
-			this.getModel().setProperty(`${sElemBindingPath}/Classification`, this.countryCode === 'TW' ? 'Tender': '');
+			this.getModel().setProperty(`${sElemBindingPath}/Classification`,classificationObj[this.countryCode]? classificationObj[this.countryCode]: '');
 			if(this.countryCode === 'TW'){
 				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
 				this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, nextDate);
@@ -765,10 +768,11 @@ sap.ui.define([
 		onCreateNewTender: async function () {
 			
 			const oNewTenderForm = this.byId("idNewTenderForm");
+			const separator = this.countryCode === 'NL' ? ';' : ',';
 			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, oNewTenderForm);
 			this.setNewTenderPendingChanges(oNewTenderForm);
 			this.getModel().setProperty(oNewTenderForm?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
-			prev?`${prev},${token.getText()}`:token.getText(),""));
+			prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
 			this.getModel().submitChanges({
 				success: this._onSubmitChangesSuccess.bind(this),
 				error: this._onSubmitChangesFail.bind(this),
@@ -876,7 +880,9 @@ sap.ui.define([
 			{ path: "VALUE", operator: FilterOperator.BT, value: sSearch, checkDecimals: true },
 			{ path: "STATUS", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "PublicationDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
-			{ path: "BidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  }
+			{ path: "BidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  },
+			{ path: "Custom_Date_1", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
+			{ path: "Custom_String_1", operator: FilterOperator.Contains, value: sSearch }
 			];
 
 			if (sSearch) {
@@ -930,7 +936,7 @@ sap.ui.define([
 			const oSelectStatus = this.byId("idSlctStatus");
 			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
 			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
-			if (sStatus && !sStatus.toLowerCase().includes('all')) {
+			if (sStatus && sStatus.toLowerCase() !== 'all') {
 				this.andFilters.push(new Filter({
 					path: "STATUS",
 					operator: FilterOperator.Contains,
@@ -992,6 +998,10 @@ sap.ui.define([
 
 		handleUpdateMasterTable: function () {
 			this.byId('genericMasterTable').getBinding("items").refresh();
+		},
+		onDownloadExtractOffers: function () {
+			const url = "/v2/sta_tender/ExtractNLHistoricalInformation(templateId=1)/content";
+			URLHelper.redirect(url, true);
 		}
 	});
 

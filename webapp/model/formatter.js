@@ -100,6 +100,14 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "Taiwan Discount";
 					break;
+				case 'nldiscount'	:
+					stringToReplace	= originalString;
+					replacementString = "NL Discount";
+					break;
+				case 'nlprice'	:
+					stringToReplace	= originalString;
+					replacementString = "NL Price";
+					break;
 				default:
 					return originalString;
 			}
@@ -123,6 +131,17 @@ sap.ui.define([
 			const factor = 10000; // 10^4 for four decimal places
 			const result = Math.round(number * factor) / factor;
 			return result;
-		}
+		},
+		
+		formatRequestedQuantity: function (value, uom) {
+			if (!value && value != 0) return;
+			const numberFormat = NumberFormat.getIntegerInstance({
+				maxFractionDigits: 0,
+				minFractionDigits: 0, 
+				groupingEnabled: true, 
+				groupingSeparator: ','
+			});
+			return `${numberFormat.format(value)} ${uom}`;
+		}	
 	};
 });

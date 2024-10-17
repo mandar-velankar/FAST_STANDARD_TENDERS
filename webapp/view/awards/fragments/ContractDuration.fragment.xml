@@ -1,0 +1,110 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        expandable="true"
+        headerText="{i18n>ContractDuration}"
+    >
+        <form:Form
+		    id="idContractDurationForm"
+		    editable="true"       
+	    >
+		<form:toolbar>
+			<Toolbar>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onAwardedContractDurationFormEditBtnPress"
+					visible="{= !${ui>/ContractDuration/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onSavehandleAwardedContractDuration"
+					visible="{= ${ui>/ContractDuration/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onAwardedContractDurationFormCancelBtnPress"
+					visible="{= ${ui>/ContractDuration/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement>
+						<form:label>
+                            <Label text="{i18n>ContractDuration}" required="true"/>
+                        </form:label>
+						<form:fields>
+							<Select id="idContractDuration"  enabled="{= ${ui>/ContractDuration/editMode} }" selectedKey="{ui>ContractDuration}" items="{NLPriceConditions}" change=".onDateChange">
+                                <core:Item  text="{ContractDuration}" key="{ContractDuration}"/>             
+                            </Select>
+						</form:fields>
+					</form:FormElement>
+
+                    <form:FormElement label="{i18n>ContractStartDate}" >
+						<form:fields>
+							<DatePicker 
+								id="idContractStartDate"
+								value="{
+								path: 'ui>ContractStartDate',
+								type: 'sap.ui.model.type.Date', 
+								formatOptions: { 
+									pattern: 'dd.MM.yyyy', 
+									UTC:true
+								}
+							}" 
+							change=".onDateChange"
+							enabled="false"
+							/>
+						</form:fields>
+					</form:FormElement>
+
+                    <form:FormElement label="{i18n>ContractEndDate}" >
+						<form:fields>
+							<DatePicker value="{
+								path: 'ui>ContractEndDate',
+								type: 'sap.ui.model.type.Date', 
+								formatOptions: { 
+									pattern: 'dd.MM.yyyy', 
+									UTC:true
+								}	
+							}"   enabled="false" />
+						</form:fields>
+					</form:FormElement>
+
+                    <form:FormElement label="{i18n>InstitutesInContract}" >
+						<form:fields>
+							<MultiInput id="idAwardedInstituteGroupMultiSelect"   enabled="{= ${ui>/ContractDuration/editMode} }"  valueHelpOnly="true" valueHelpRequest=".onOpenAwardedInstituteGroup"/>
+						</form:fields>
+					</form:FormElement>
+					
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+    </Panel>
+</core:FragmentDefinition>

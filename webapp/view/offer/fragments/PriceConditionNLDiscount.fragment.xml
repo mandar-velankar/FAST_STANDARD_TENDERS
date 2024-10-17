@@ -1,0 +1,168 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>
+	<!-- FORM WITH Pricing DATA -->
+	<form:Form
+		id="idPricingForm"
+		editable="true"
+	>
+		<form:toolbar>
+			<Toolbar>
+				<Title text="{i18n>PriceConditionNLPricingFragment.NLDiscountTitle}"/>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/priceCondPrice}.length }"
+					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'priceCondPrice')" 
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onPricingFormEditBtnPress"
+					visible="{= !${ui>/PricingForm/editMode} }"
+					enabled="{= ${ui>/PricingForm/hasOfferProductDetailsSaved} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onNetherlandsPricingFormSaveBtnPress"
+					visible="{= ${ui>/PricingForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onNetherLandsPricingFormCancelBtnPress"
+					visible="{= ${ui>/PricingForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+		<form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+		<form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.AIP}">
+						<form:fields>
+							<Input value="{
+										parts: ['masterPriceAIP', 'Currency', 'Region', 'CountryCode'],
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+									}" 
+									enabled="false"
+									class="sapUiSmallMarginBottom"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${Custom_Integer_1}}">
+						<form:fields>
+							<Input value="{Custom_Integer_1}"   
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" visible="{= !!${Custom_Integer_1}}">
+						<form:fields>
+							<Input
+								value="{
+									parts: ['NLPriceConditionType/0/Discount', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'NLDiscount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" visible="{= !!${Custom_Integer_1}}">
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NLPriceConditionType/0/OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'NLDiscount')"
+								class="sapUiSmallMarginBottom"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${Custom_Integer_2}}">
+						<form:fields>
+							<Input value="{Custom_Integer_2}"   
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" visible="{= !!${Custom_Integer_2}}">
+						<form:fields>
+							<Input
+								value="{
+									parts: ['NLPriceConditionType/1/Discount', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'NLDiscount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" visible="{= !!${Custom_Integer_2}}">
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NLPriceConditionType/1/OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'NLDiscount')"
+								class="sapUiSmallMarginBottom"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.ContractDuration}" visible="{= !!${Custom_Integer_3}}">
+						<form:fields>
+							<Input value="{Custom_Integer_3}"   
+									enabled="false"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.Discount}" visible="{= !!${Custom_Integer_3}}">
+						<form:fields>
+							<Input
+								value="{
+									parts: ['NLPriceConditionType/2/Discount', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" 
+								enabled="{ui>/PricingForm/editMode}"
+								liveChange=".onPricingFormLiveChange($event, 'NLDiscount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.OfferPrice}" visible="{= !!${Custom_Integer_3}}">
+						<form:fields>
+							<Input 
+								value="{
+									parts: ['NLPriceConditionType/2/OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false"
+								liveChange=".onPricingFormLiveChange($event, 'NLDiscount')"
+							/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+</core:FragmentDefinition>

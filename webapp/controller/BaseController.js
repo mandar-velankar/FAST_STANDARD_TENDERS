@@ -228,8 +228,8 @@ sap.ui.define([
 		 * @param {string} offerStatus - The status that influences the visibility of tabs.
 		 */
 
-		updateVisibilityOfTabs: function (iconTabBar, offerStatus, productKeys) {
-			this.updateEnablementModel(offerStatus, productKeys);
+		updateVisibilityOfTabs: function (iconTabBar, offerStatus, productKeys, stTenderRoles) {
+			this.updateEnablementModel(offerStatus, productKeys, stTenderRoles);
 			if (!iconTabBar) return;
 			const tabs = iconTabBar.getAggregation("items");
 			tabs.forEach(tab => {
@@ -244,6 +244,7 @@ sap.ui.define([
 			let isVisible = "";
 			switch (tabName) {
 				case "Tender":
+				case "Price Request":
 				case "價格要求":
 					isVisible = enablementModel.getProperty("/Detail/TenderTab/isVisible");
 					break;
@@ -262,15 +263,24 @@ sap.ui.define([
 				case "Delivery Tracking":
 					isVisible = enablementModel.getProperty("/Detail/DeliveryTrackingTab/isVisible");
 					break;
+				case "Compliance Officer":
+					isVisible = false;
+					break;
+				case "Supply Management":
+					isVisible = false;
+					break;
+				case "Global Strategic Marketing":
+					isVisible = false;
+					break;			
 				default:
 					break;
 			}
 			return isVisible;
 		},
 
-		updateEnablementModel: async function (offerStatus, productKeys) {
+		updateEnablementModel: async function (offerStatus, productKeys, stTenderRoles) {
 			const isProductDeclined = await this.checkIsProductInactive(productKeys);
-			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined);
+			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles);
 			const enablementModel = new JSONModel(obj);
 			this.getOwnerComponent().setModel(enablementModel, 'em');
 		},
