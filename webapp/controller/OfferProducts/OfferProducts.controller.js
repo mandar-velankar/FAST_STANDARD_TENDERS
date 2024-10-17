@@ -75,7 +75,6 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
 			const selectedOffer = await this.stState.getService().getOffer(offerId);
-
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
@@ -84,6 +83,7 @@ sap.ui.define([
 				minDate: new Date(),
 				isCopiedOffer: false,
 				matchedHaematologyCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-HM$/g)?.[0],
+				matchedConsumerHealthCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-CH$/g)?.[0],
 				OfferForm:{
 					editMode: false
 				},
@@ -152,10 +152,9 @@ sap.ui.define([
 		},
 
 		bindAllHaematologyForms: async function (tenderId, offerId) {
-			await this.stState.getService().getComplianceOfficerData(offerId);
 			this._bindHaematologyForms("ComplianceOfficer", tenderId, offerId, "Compliance Officer", "ComplianceOfficerView");
-			this._bindHaematologyForms("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "ComplianceOfficerView");
-			this._bindHaematologyForms("SupplyManagement", tenderId, offerId, "Supply Management", "ComplianceOfficerView");
+			this._bindHaematologyForms("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "GlobalStrategicMarketingView");
+			this._bindHaematologyForms("SupplyManagement", tenderId, offerId, "Supply Management", "SupplyManagementView");
 		},
 
 		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
@@ -177,7 +176,7 @@ sap.ui.define([
 		setPaymentTermFieldVisible: function (form, containerIndex) {
 			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
-			paymentTermsField.setVisible(false);
+			paymentTermsField && paymentTermsField.setVisible(false);
 		},
 
 		/**
@@ -1577,7 +1576,7 @@ sap.ui.define([
 			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
-				groupId: "ComplianceOfficerView"
+				groupId: "GlobalStrategicMarketingView"
 			});
 		},
 
@@ -1607,7 +1606,7 @@ sap.ui.define([
 			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
             this.getModel().submitChanges({
 				success: this.onSupplyManagementRequestSuccess.bind(this),
-				groupId: "ComplianceOfficerView"
+				groupId: "SupplyManagementView"
 			});
 		},
 
@@ -1626,6 +1625,30 @@ sap.ui.define([
 		onSupplyManagementCancelBtnPress: function(){
 			this.getModel("ui").setProperty("/SupplyManagement/editMode", false);
 			this.cancelPendingChanges(["SupplyManagementView"], "supplyManagementFormMsg");
-		}
+		},
+		onSendNotificationForHematology: function (oEvent) {
+			BusyIndicator.show(1);
+			const url = window.location.href
+			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
+				method:"POST", 
+				urlParameters: {
+					offerID: this.offerID,
+					tenderId: this.objectId,
+					CountryCode: this.countryCode,
+					url: url
+				},
+				success: this.onSendNotificationMailForHematologySuccess.bind(this),
+				error: this.onSendNotificationMailForHematologyFail.bind(this)
+			});
+		},
+		onSendNotificationMailForHematologySuccess: function () {
+			MessageBox.success('Notification mail sent successfully');
+			BusyIndicator.hide();
+		},
+		onSendNotificationMailForHematologyFail: function(error){
+			let errorMessage = error?.message ? error?.message : JSON.parse(error?.responseText)?.error?.message?.value
+			MessageBox.error(errorMessage);
+			BusyIndicator.hide();
+		},
 	});
 });

@@ -272,6 +272,8 @@ sap.ui.define([
 			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
 			const isCancelApprovalBtnEnabled = (status === "Awaiting Approval") ? true : false;
 
+			const isSendNotificationEnabledForHematology = status === "Offer Created";
+
 			return {
 				Detail: {
 					TenderTab: {
@@ -289,7 +291,8 @@ sap.ui.define([
 							editMode: isTenderOfferOverviewVisible,
 							enableCreateOffer: true,
 							enableDeleteOffer: isEnabledDeleteOfferBtn,
-							enableCopyOffer: checkCopyOfferBtn
+							enableCopyOffer: checkCopyOfferBtn,
+							enableSendNotificationHematology: isSendNotificationEnabledForHematology
 						},
 						OfferProductTable:{
 							editMode: isTenderOfferOverviewVisible,
