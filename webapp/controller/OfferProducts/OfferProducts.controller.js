@@ -1472,6 +1472,7 @@ sap.ui.define([
 			}else {
 				MessageBox.error(response?.error?.message?.value)
 			}
+			this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 		},
 
 		onHandleUploadZagisFilePress: async function () {
