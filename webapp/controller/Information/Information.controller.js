@@ -51,7 +51,8 @@ sap.ui.define([
 				OverviewForm:{
 					editMode: false
 				},
-				enableApprovalButton: false
+				enableApprovalButton: false,
+				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch')
 			});
 			
 			this.setModel(oModel, "ui");
@@ -116,14 +117,15 @@ sap.ui.define([
 					TenderID: this.tenderId,
 					OfferID: this.offerId,
 					TenderInstitute: String(selectedTender?.InstituteID),
-					OfferInstitute: String(selectedOffer?.QuotationInstituteID),
+					OfferInstitute: this.countryCode === 'PK' ? String(selectedTender?.QuotationInstituteID) : String(selectedOffer?.InstituteID),
 					UserEmail: "",
 					UserName: "",
 					Sent: false
-				}
+				},
+				groupId: 'PdfEmail',
 			})
 			return new Promise((resolve, reject) => {
-				this.defaultModel.submitChanges();
+				this.defaultModel.submitChanges({groupId: 'PdfEmail'});
 				// selecting one of the templates will overwrite the text of the main "download" button with the description of the selected template.
 				this.byId('idDownloadAttachmentButton')?.setText('Download');
 			}); 
@@ -539,8 +541,6 @@ sap.ui.define([
 						AwardedPrice: this.countryCode === 'TW' ? product.NET_PRICE : product.OFFER_PRICE,
 						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
-						InstituteID: product.InstituteID,
-						Currency: product.CURRENCY
 					},
 					groupId: "AwardedProduct"
 				})

@@ -19,7 +19,7 @@
 			</form:title>
 			<form:toolbar>
 				<Toolbar>
-					<Title text="{i18n>TenderandOfferDetails}" />
+					<Title text="{= ${st>/SelectedCountry} === 'NL'? ${i18n>NLTenderandOfferDetails}: ${i18n>TenderandOfferDetails}}" />
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"
@@ -64,7 +64,7 @@
 									<MenuItem text="{ui>name}" press=".onDownloadWord"/>
 								</items>
 							</MenuItem>
-							<MenuItem id="btnPDFDownload" text="Email PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0 &amp;&amp; ${st>/SelectedCountry} === 'PK'}" items="{ui>/WordTemplateCountry}">
+							<MenuItem id="btnPDFDownload" text="Email PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0 &amp;&amp; (${st>/SelectedCountry} === 'PK' || ${st>/SelectedCountry} === 'NL' || isCHCountrySelected)}" items="{ui>/WordTemplateCountry}">
 								<items>
 									<MenuItem text="{ui>name}" press=".onDownloadPdf"/>
 								</items>
@@ -136,20 +136,29 @@
 					<Column>
 						<Label text="{i18n>Qty}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>UnitPrice}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>PackPrice}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>NetPriceperUnit}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>NetPriceperPack}" wrapping="true"/>
 					</Column>
-					<Column>
+					<Column visible="{= ${st>/SelectedCountry} !== 'NL'}">
 						<Label text="{i18n>TotalAmount}" wrapping="true"/>
+					</Column>
+					<Column visible="{= ${st>/SelectedCountry} === 'NL' &amp;&amp; !!${Custom_Integer_1}}">
+						<Label text="Price (Duration {Custom_Integer_1})" wrapping="true"/>
+					</Column>
+					<Column visible="{= ${st>/SelectedCountry} === 'NL' &amp;&amp; !!${Custom_Integer_2}}">
+						<Label text="Price (Duration {Custom_Integer_2})" wrapping="true"/>
+					</Column>
+					<Column visible="{= ${st>/SelectedCountry} === 'NL' &amp;&amp; !!${Custom_Integer_3}}">
+						<Label text="Price (Duration {Custom_Integer_3})" wrapping="true"/>
 					</Column>
 				</columns>
 				<items>
@@ -205,6 +214,24 @@
 							<ObjectStatus 
 								text = "{
 									parts: ['NET_SALES_OFFER_CURRENCY', 'CURRENCY', 'Region','COUNTRY_CODE'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
+							/>
+							<Text 
+								text = "{
+									parts: ['OfferPrice_1', 'CURRENCY', 'Region','COUNTRY_CODE'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
+							/>
+							<Text 
+								text = "{
+									parts: ['OfferPrice_2', 'CURRENCY', 'Region','COUNTRY_CODE'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}"						
+							/>
+							<Text 
+								text = "{
+									parts: ['OfferPrice_3', 'CURRENCY', 'Region','COUNTRY_CODE'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}"						
 							/>					

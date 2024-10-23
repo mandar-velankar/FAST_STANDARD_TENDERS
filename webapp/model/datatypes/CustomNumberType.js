@@ -20,12 +20,12 @@ sap.ui.define([
         },
 
         parseValue: function(number) {
-           return [number];
+            return [number];
         },
 
         validateValue: function(number) {
 
-            // if(!(/^\+?[0-9]\d*$/.test(number[0]))) {
+            // if(!(/^\+?[0-9]\d*$/.test(number))) {
             //     throw new ValidateException("Not a valid number");
             // }
         }

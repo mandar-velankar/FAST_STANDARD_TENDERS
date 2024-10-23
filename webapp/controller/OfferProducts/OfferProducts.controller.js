@@ -14,7 +14,9 @@ sap.ui.define([
 	"sap/ui/model/Sorter",
 	"sap/m/TableSelectDialog", 
 	"sap/m/Text", 
-	"sap/m/Column"
+	"sap/m/Column",
+	"sap/ui/unified/FileUploaderParameter",
+	"sap/ui/core/BusyIndicator"
 ], function (
 		BaseController, 
 		JSONModel, 
@@ -31,7 +33,9 @@ sap.ui.define([
 		Sorter, 
 		TableSelectDialog, 
 		Text, 
-		Column) {
+		Column,
+		FileUploaderParameter,
+	    BusyIndicator) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -69,7 +73,8 @@ sap.ui.define([
 			this.countryCode = countryCode;
 			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
-
+			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
+			const selectedOffer = await this.stState.getService().getOffer(offerId);
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
@@ -77,23 +82,41 @@ sap.ui.define([
 				currency: "EUR",
 				minDate: new Date(),
 				isCopiedOffer: false,
+				matchedHaematologyCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-HM$/g)?.[0],
+				matchedConsumerHealthCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-CH$/g)?.[0],
 				OfferForm:{
 					editMode: false
 				},
+				ComplianceOfficer:{
+                    editMode: false
+				},
+				GlobalStrategicMarketing:{
+                    editMode: false
+				},
+				SupplyManagement:{
+                    editMode: false
+				},
+				
 				OfferProductTable:{
 					enableDeleteProductButton: false,
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
-				}
-				
+					count: productCount,
+					source: selectedOffer?.Custom_String_1
+				}			
 			});
 	
 			this.setModel(oModel, "ui");
 
 			
-			this._bindForm("OfferForm", this.objectId, this.offerID);
+			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab, "OfferformInfo");
+			// specific for haematology countries
+            if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
+                this.bindAllHaematologyForms(this.objectId, this.offerID);
+			}
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
 			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
+			
 		},
 		_onObjectMatched: async function (oEvent) {
 			this.offerID = oEvent.getParameter("arguments").offerId;
@@ -106,8 +129,8 @@ sap.ui.define([
 		 * FYI: the form ID in the View is a concatination of "id" + formName
 		 * @param {*} formName FormName - The form name must exactly match the form name configured in the ui template configuration table in the DB
 		 */
-		_bindForm(formName, tenderId, offerId){
-			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(this.selectedTab).getXMLView().getFormByName(formName).getEntity();
+		_bindForm(formName, tenderId, offerId, tabName, groupID){
+			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
 			let path = "";
 			if (tenderId && offerId && offerId !== "NA") {
@@ -117,21 +140,43 @@ sap.ui.define([
 				});
 			} else {
 				const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
-					groupId: "OfferformInfo"
+					groupId: groupID
 				});
 				path = newEntryContext.getPath();
 			}
 			
 			form.bindElement({
 				path: path,
-				groupId: "OfferformInfo"
+				groupId: groupID
 			});
 		},
 
-		setPaymentTermFieldVisible: function (form) {
-			const paymentTermsField = form.getAggregation("formContainers")[1]
+		bindAllHaematologyForms: async function (tenderId, offerId) {
+			this._bindHaematologyForms("ComplianceOfficer", tenderId, offerId, "Compliance Officer", "ComplianceOfficerView");
+			this._bindHaematologyForms("GlobalStrategicMarketing", tenderId, offerId, "Global Strategic Marketing", "GlobalStrategicMarketingView");
+			this._bindHaematologyForms("SupplyManagement", tenderId, offerId, "Supply Management", "SupplyManagementView");
+		},
+
+		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
+			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
+			const form = this.byId(`id${formName}`);
+			let path = "";
+			if (tenderId && offerId && offerId !== "NA") {
+				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+					TenderID: tenderId,
+					OfferID: offerId
+				});
+			}
+			
+			form.bindElement({
+				path: path,
+				groupId: groupID
+			});
+		},
+		setPaymentTermFieldVisible: function (form, containerIndex) {
+			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
-			paymentTermsField.setVisible(false);
+			paymentTermsField && paymentTermsField.setVisible(false);
 		},
 
 		/**
@@ -232,7 +277,7 @@ sap.ui.define([
 			else{
 				oAddOfferProductButton.setEnabled(false);
 			}
-
+			
 		},
 
 		onOfferProductTableSaveBtnPress: function(event){
@@ -270,6 +315,7 @@ sap.ui.define([
 					subtitle: 'Products added successfully',
 					counter: 1
 				});
+				this.byId('notificationButton').setEnabled(true)
 			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
 		},
@@ -298,6 +344,7 @@ sap.ui.define([
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
+			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
 			//this.getModel().refresh();
 		},
 		onOfferFormCancelBtnPress: function(event){
@@ -352,9 +399,12 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
-			this.getModel().setProperty(`${sElemBindingPath}/Division`, "");
+			this.getModel().setProperty(`${sElemBindingPath}/Division`, this.countryCode === 'NL' ? 'All' : "");
+			this.countryCode.toLowerCase().includes('hm') && this.getModel().setProperty(`${sElemBindingPath}/Custom_Date_3`,tender.AwardDate)
+			
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
-			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form);}
+			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form,1);}
+			if(this.countryCode.toLowerCase().includes('hm')){this.setPaymentTermFieldVisible(form,2);}
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
 		},
@@ -383,7 +433,7 @@ sap.ui.define([
 			const oNewOfferForm = this.byId("idNewOfferForm");
 			const nextOfferID = await this._getNextOfferID(this.objectId);
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
-			if(selectedTender.Region === 'MEA'){
+			if(selectedTender.Region === 'MEA' || this.countryCode.toLowerCase().includes('hm')){
 				if(selectedTender.TenderChannel === 'Direct'){
 					const institute = await this.stState.getService().getInstitute(selectedTender.ParentInstituteID, this.countryCode);
 					paymentTerm = institute.PaymentTerms;
@@ -450,11 +500,14 @@ sap.ui.define([
 			newOfferObj.InternalBidDueDate = oBoundContext.getObject().InternalBidDueDate;
 			newOfferObj.OfferDueDate = oBoundContext.getObject().OfferDueDate;
 			newOfferObj.SellingCompany = oBoundContext.getObject().SellingCompany;
-			newOfferObj.Division = oBoundContext.getObject().Division;
+			newOfferObj.Division = this.countryCode === 'NL' ? 'All' : oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 			newOfferObj.DistributorComments = this.productScope;
 			if(region === 'MEA'){
 				newOfferObj.Custom_String_1 = paymentTerm;
+			}
+			if(this.countryCode.toLowerCase().includes('hm')){
+				newOfferObj.Custom_String_4 = paymentTerm
 			}
 			
 
@@ -510,7 +563,11 @@ sap.ui.define([
 				 */
 				const tenderId = newOfferCtx.getObject().TenderID;
 				const offerId = newOfferCtx.getObject().OfferID;
-				this._bindForm("OfferForm", tenderId, offerId);
+				this._bindForm("OfferForm", tenderId, offerId, this.selectedTab, 'OfferformInfo');
+				// specific for haematology countries
+				if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
+					this.bindAllHaematologyForms(tenderId, offerId);
+				}
 				this._bindTable("OfferProductsTable", tenderId, offerId);
 				//this.getOwnerComponent().getModel().refresh(true);
 			}
@@ -642,7 +699,7 @@ sap.ui.define([
 										CountryCode:product.CountryCode, 
 										DistributorID:product.DistributorID, 
 										ActiveProduct:1, 
-										RequestedVolume: 0, 
+										RequestedVolume: this.countryCode === 'NL' ? 1 : 0,
 										OfferID:product.OfferID, 
 										Active:1, 
 										ProductCode:product.ProductCode, 
@@ -838,8 +895,6 @@ sap.ui.define([
 		onPressAddProductToOutputList: async function (oEvent) {
 			//get input & output list for products
 			let that = this;
-			const table = this.byId("idOfferProductsTable");
-			const tableProducts = table.getItems();
 			const listInput = sap.ui.getCore().byId("idListProductsInput");
 			const listOutput = sap.ui.getCore().byId("idListProductsOutput");
 			let pathProducts = "/OfferProductTable/products";
@@ -924,17 +979,6 @@ sap.ui.define([
 						PRODUCTPACKNAME: product.PRODUCT_NAME,
 						MoleculeName: product.MoleculeName
 					};
-					
-					if (tableProducts.length > 0) {
-						if (products && products.length) {
-							addProduct.SORTER = products[products.length - 1].SORTER + 1; //added as last in the list
-						} else {
-							const sorter = tableProducts[tableProducts.length-1].getBindingContext().getObject().SORTER + 1;
-							addProduct.SORTER = sorter;
-						}
-						products.push(addProduct);
-						continue;
-					}
 
 					if (products && products.length) {
 						addProduct.SORTER = products.length; //added as last in the list
@@ -1041,12 +1085,13 @@ sap.ui.define([
 		},
 		
 		getCountryBrands: async function (countryCode, division, userInfo) {
+			const filters = [
+				new Filter("COUNTRY_CODE", "EQ", countryCode),
+			];
+			division !== "All" && filters.push(new Filter("DIVISION", "EQ", division));
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CountryBrands", {
-					filters: [
-						new Filter("COUNTRY_CODE", "EQ", countryCode),
-						new Filter("DIVISION", "EQ", division)
-					],
+					filters,
 					success: function (res) {
 						resolve(res)
 					}
@@ -1073,16 +1118,17 @@ sap.ui.define([
 		},
 
 		getInstituteDistributorBrandProducts: async function (countryCode, instituteId, distributorId, sellingCompany, channel, division) {
+			const filters = [
+				new Filter("COUNTRY_CODE", "EQ", countryCode),
+				new Filter("INSTITUTE_ID", "EQ", instituteId),
+				new Filter("DISTRIBUTOR_ID", "EQ", distributorId),
+				new Filter("LEGAL_ENTITY_CODE", "EQ", sellingCompany),
+				new Filter("CHANNEL", "EQ", channel),
+			]
+			division !== "All" && filters.push(new Filter("DIVISION", "EQ", division));
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/InstituteDistributorBrandProduct", {
-					filters: [
-						new Filter("COUNTRY_CODE", "EQ", countryCode),
-						new Filter("INSTITUTE_ID", "EQ", instituteId),
-						new Filter("DISTRIBUTOR_ID", "EQ", distributorId),
-						new Filter("DIVISION", "EQ", division),
-						new Filter("LEGAL_ENTITY_CODE", "EQ", sellingCompany),
-						new Filter("CHANNEL", "EQ", channel),
-					],
+					filters,
 					success: function (res) {
 						resolve(res)
 					}
@@ -1237,7 +1283,7 @@ sap.ui.define([
 		},
 
 		refreshOfferTab: function(tenderID, offerID){
-			this._bindForm("OfferForm", tenderID, offerID);
+			this._bindForm("OfferForm", tenderID, offerID, this.selectedTab);
 			this._bindTable("OfferProductsTable", tenderID, offerID);
 			this._bindText("TotalAmountOfferProducts");	
 		},
@@ -1295,8 +1341,314 @@ sap.ui.define([
 			return match !== null;
 		},
 
-		handleUpdateOfferProductTable: function () {
-			this.byId('idOfferProductsTable').getBinding("items").refresh();
-		}
+		handleUpdateOfferProductTable: async function () {
+			const offerProductTable = this.byId('idOfferProductsTable');
+			const columns = offerProductTable.getColumns();
+			offerProductTable.getBinding("items").refresh();
+
+			columns.forEach(column => {
+				const columnName = column.getAggregation('header').getProperty('text');
+				const columnVisibility = this.OfferProductColumnVisibility(columnName);
+				column.setVisible(columnVisibility);
+			});
+
+		},
+		onOpenNotification: function () {
+			const that = this;
+			
+			 Fragment.load({
+				id: that.getView().getId(),
+				name: "com.bayer.tender.statenderapp.view.offer.fragments.NotificationMail",
+				controller: that,
+				
+			}).then(function (oDialog) {
+				BusyIndicator.show(1);
+				oDialog.setModel(that.getModel())
+				oDialog.setModel(that.getModel('messages'),'messages')
+				oDialog.open();
+				that.onGetNotificationContent()
+				that.NotificationMailFormBinding()
+			})
+		},
+		onSendNotificationMail: function(evt){
+			const Form = this.byId('SendNotificationMailForm');
+			const context = Form.getBindingContext();
+			let Recipients = this.byId("idTo").getSelectedKeys().join(';');
+			this.getModel().setProperty('Recipients', Recipients, context);
+			this.getModel().submitChanges({
+				success: this.onSendNotificationMailSuccess.bind(this),
+				groupId: "NotificationMail"
+			});
+		},
+		onCancelNotificationMail: function () {
+				this.cancelPendingChanges(["Outbox"], "notificationMailMsg");
+				this.byId("SendNotificationMailDialog").destroy();
+		},
+		onGetNotificationContent: function () {
+			const url = window.location.href
+			this.defaultModel.callFunction("/getNotificationMailTemplate", {
+				method:"GET", 
+				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
+				success: this.onGetNotificationContentSuccess.bind(this),
+				error: this.onGetNotificationContentError.bind(this)
+			});
+		},
+		onGetNotificationContentSuccess: function (data) {
+			this.byId('idEditor').setValue(data);
+			this.getModel().resetChanges('/Outbox');
+			BusyIndicator.hide();
+		},
+		onGetNotificationContentError: function (error) {
+			MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+			BusyIndicator.hide();
+		},
+		onSendNotificationMailSuccess: function () {
+			
+			const hasErrorMessages = this.getMessages(["Outbox"]).length > 0;
+			this.setMessageSection(["Outbox"], "notificationMailMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Successfully notified");
+				this.onCancelNotificationMail();
+			}
+		},
+		NotificationMailFormBinding: function () {
+			const Form = this.byId('SendNotificationMailForm')
+			let oSender = this.byId("idFrom");
+			let userEmail = this.stState.getProperty("/UserEmail")
+			oSender.setTokens([
+				new Token({text: userEmail, key: userEmail}),
+			]);
+			let notificationObj = {
+				CountryCode: this.countryCode,
+				TenderID: this.objectId,
+				OfferID: this.offerID,
+				Sender: userEmail,
+				Recipients: '',
+				Subject:`Action Required: Price Details Input for Offer ID ${this.offerID}`,
+				MailBody: this.byId('idEditor').getValue(),
+				Sent: false			
+			}
+			
+			const NotificationPendingChenges = this.getModel().createEntry("/Outbox", {
+				properties: notificationObj,
+				groupId: "NotificationMail"
+			})
+			
+			const path = NotificationPendingChenges.getPath()
+			Form.bindElement({path, groupId: "NotificationMail"})
+		},
+
+		onOpenUploadZagisFileDialog: function () {
+			if (!this.byId("idUploadZagisFileDialog")) {
+				Fragment.load({
+					id: this.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.ZagisFileUpload",
+					controller: this
+				}).then(function (oDialog) {
+					// connect dialog to the root view of this component (models, lifecycle)
+					this.getView().addDependent(oDialog);
+					oDialog.addStyleClass(this.getOwnerComponent().getContentDensityClass());
+					oDialog.open();
+				}.bind(this));
+			} else {
+				this.byId("idUploadZagisFileDialog").open();
+			}
+		},
+	  
+		onCloseZagisFileUploadDialog: function () {
+			this.byId("idUploadZagisFileDialog").close();
+		},
+
+		handleZagisFileUploadComplete: async function(evt) {
+			const response = evt.getParameter("responseRaw") && JSON.parse(evt.getParameter("responseRaw"));
+			const headers = evt.getParameter("headers");
+			const sapMessageObject = headers["sap-message"] && JSON.parse(headers["sap-message"]);
+			const statusCode = evt.getParameter("status");
+
+			if(sapMessageObject?.code == 400){
+				MessageBox.error(sapMessageObject.message);
+			}else if (statusCode === 204) {
+				this.onCloseZagisFileUploadDialog();
+				const {productCount} = await this.stState.getService().getOfferProducts(this.offerID);
+				this.getModel('ui').setProperty('/OfferProductTable/count', productCount);
+				this.byId("idOfferProductsTable").getBinding('items').refresh();
+				MessageBox.success("Zagis File imported successfully");
+			}else {
+				MessageBox.error(response?.error?.message?.value)
+			}
+		},
+
+		onHandleUploadZagisFilePress: async function () {
+			const oFileUploader = this.byId("idZagisFileUploader");
+			const zagisOfferID = await this.createZagisFileEntry(this.offerID);
+			oFileUploader.setUploadUrl(`/v2/sta_tender/ZagisUploadFile(OfferID='${zagisOfferID}')/content`);
+			oFileUploader.setHttpRequestMethod('PUT');
+			//setting X-CSRF-Token if it is not set upload process will fail for deployed application
+			if(window.location.host.search('port8080') === -1) {
+				oFileUploader.removeAllHeaderParameters()
+				const csrfToken = this.getOwnerComponent().getModel().getSecurityToken();
+				const headerParam = new FileUploaderParameter();
+				headerParam.setName('x-csrf-token');
+				headerParam.setValue(csrfToken);
+				oFileUploader.addHeaderParameter(headerParam);
+			}
+			oFileUploader.checkFileReadable().then(function() {
+				oFileUploader.upload();
+			}, function(error) {
+				MessageToast.show("The file cannot be read. It may have changed.");
+			}).then(function() {
+				oFileUploader.clear();
+			});
+		},
+
+		createZagisFileEntry: async function (offerID) {
+			return new Promise((resolve, reject) => {
+				this.getModel().create("/ZagisUploadFile", {
+					OfferID: offerID
+				}, {
+					success: (response) => {
+						resolve(response.OfferID);
+					}
+				});
+
+			})
+		},
+
+		OfferProductColumnVisibility: function (title) {
+			const obj = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
+			const tenderPath = this.getModel().createKey('/TenderFormView', {
+				TenderID: this.objectId || obj.TenderID
+			});
+			const tender = this.getModel().getObject(tenderPath) || obj;
+			if (!tender || !title) return true;
+			if (tender.CountryCode !== 'NL') return true;
+			const cases = {
+				'Contract Duration 1': tender.Custom_Integer_1,
+				'Contract Duration 2': tender.Custom_Integer_2,
+				'Contract Duration 3': tender.Custom_Integer_3,
+				'Price 1': tender.Custom_Integer_1,
+				'Price 2': tender.Custom_Integer_2,
+				'Price 3': tender.Custom_Integer_3,
+			}
+			if (!cases.hasOwnProperty(title)) return true;
+
+
+			return !!cases[title];
+
+		},
+
+		onComplianceofficerEditBtnPress: function(){
+			this.getModel("ui").setProperty("/ComplianceOfficer/editMode", true);
+		},
+
+		onComplianceOfficerSaveBtnPress: function(){
+			const form = this.byId(`idComplianceOfficer`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+			this.getModel().submitChanges({
+				success: this.onComplianceOfficerRequestSuccess.bind(this),
+				groupId: "ComplianceOfficerView"
+			});
+		},
+
+		onComplianceOfficerRequestSuccess: function(){
+            const path = this.byId("idComplianceOfficer").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "complianceOfficerFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Compliance Officer Form updated successfully");
+				this.getModel("ui").setProperty("/ComplianceOfficer/editMode",false);
+				this.onComplianceofficerCancelBtnPress();
+				this.bindAllHaematologyForms(this.objectId, this.offerID);
+			}
+		},
+
+		onComplianceofficerCancelBtnPress: function(){
+            this.getModel("ui").setProperty("/ComplianceOfficer/editMode", false);
+			this.cancelPendingChanges(["ComplianceOfficerView"], "complianceOfficerFormMsg");
+		},
+
+		onGlobalStrategicMarketingEditBtnPress: function(){
+			this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", true);
+		},
+
+		onGlobalStrategicMarketingSaveBtnPress: function(){
+			const form = this.byId(`idGlobalStrategicMarketing`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+            this.getModel().submitChanges({
+				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
+				groupId: "GlobalStrategicMarketingView"
+			});
+		},
+
+		onGlobalStrategicMarketingRequestSuccess: function(){
+            const path = this.byId("idGlobalStrategicMarketing").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "globalStrategicMarketingFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Global Strategic Marketing Form updated successfully");
+				this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode",false);
+				this.onGlobalStrategicMarketingCancelBtnPress();
+				this.bindAllHaematologyForms(this.objectId, this.offerID);
+			}
+		},
+
+		onGlobalStrategicMarketingCancelBtnPress: function(){
+            this.getModel("ui").setProperty("/GlobalStrategicMarketing/editMode", false);
+			this.cancelPendingChanges(["GlobalStrategicMarketingView"], "globalStrategicMarketingFormMsg");
+		},
+
+		onSupplyManagementEditBtnPress: function(){
+			this.getModel("ui").setProperty("/SupplyManagement/editMode", true);
+		},
+
+		onSupplyManagementSaveBtnPress: function(){
+			const form = this.byId(`idSupplyManagement`);
+			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+            this.getModel().submitChanges({
+				success: this.onSupplyManagementRequestSuccess.bind(this),
+				groupId: "SupplyManagementView"
+			});
+		},
+
+		onSupplyManagementRequestSuccess: function(){
+            const path = this.byId("idSupplyManagement").getBindingContext().getPath();
+			const hasErrorMessages = this.getMessages([path]).length > 0;
+			this.setMessageSection([path], "supplyManagementFormMsg");
+			if (!hasErrorMessages) {
+				MessageToast.show("Supply Management Form updated successfully");
+				this.getModel("ui").setProperty("/SupplyManagement/editMode",false);
+				this.onSupplyManagementCancelBtnPress();
+				this.bindAllHaematologyForms(this.objectId, this.offerID);
+			}
+		},
+
+		onSupplyManagementCancelBtnPress: function(){
+			this.getModel("ui").setProperty("/SupplyManagement/editMode", false);
+			this.cancelPendingChanges(["SupplyManagementView"], "supplyManagementFormMsg");
+		},
+		onSendNotificationForHematology: function (oEvent) {
+			BusyIndicator.show(1);
+			const url = window.location.href
+			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
+				method:"POST", 
+				urlParameters: {
+					offerID: this.offerID,
+					tenderId: this.objectId,
+					CountryCode: this.countryCode,
+					url: url
+				},
+				success: this.onSendNotificationMailForHematologySuccess.bind(this),
+				error: this.onSendNotificationMailForHematologyFail.bind(this)
+			});
+		},
+		onSendNotificationMailForHematologySuccess: function () {
+			MessageBox.success('Notification mail sent successfully');
+			BusyIndicator.hide();
+		},
+		onSendNotificationMailForHematologyFail: function(error){
+			let errorMessage = error?.message ? error?.message : JSON.parse(error?.responseText)?.error?.message?.value
+			MessageBox.error(errorMessage);
+			BusyIndicator.hide();
+		},
 	});
 });

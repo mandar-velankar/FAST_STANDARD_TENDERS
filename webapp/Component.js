@@ -63,7 +63,15 @@ sap.ui.define([
 				"Approvals",
 				"Competitors",
 				"Deliveries",
-				"TenderMasterView"
+				"TenderMasterView",
+				"NotificationMail",
+				"NLOfferDistributors",
+				"ContractDuration",
+				"PdfEmail",
+				"ComplianceOfficerView",
+				"GlobalStrategicMarketingView",
+				"SupplyManagementView",
+				"MEACHNotificationMail"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -114,6 +122,12 @@ sap.ui.define([
 				"PriceConditionTaiwanDiscountView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionNLPriceView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionNLDiscountView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
@@ -140,6 +154,30 @@ sap.ui.define([
 				},
 				"TenderMasterView": {
 					groupId: "TenderMasterView"
+				},
+				"Outbox":{
+					groupId: "NotificationMail"
+				},
+				"NLOfferDistributors": {
+					groupId: "NLOfferDistributors"
+				},
+				"ContractInfomation": {
+					groupId: "ContractDuration"
+				},
+				"PdfEmail":{
+					groupId: "PdfEmail"
+				},
+				"ComplianceOfficerView": {
+					groupId: "ComplianceOfficerView"
+				},
+				"GlobalStrategicMarketingView": {
+					groupId: "GlobalStrategicMarketingView"
+				},
+				"SupplyManagementView": {
+					groupId: "SupplyManagementView"
+				},
+				"MEACHOutbox": {
+					groupId: "MEACHNotificationMail"
 				}
 			});
 		},

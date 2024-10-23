@@ -18,7 +18,7 @@
 		<f:title>
 			<f:DynamicPageTitle>
 				<f:heading>
-					<Title text="Tenders"/>
+					<Title text ="{= ${st>/SelectedCountry} === 'NL'? 'Price Requests' :'Tenders'}"/>
 				</f:heading>
 			</f:DynamicPageTitle>
 		</f:title>
@@ -86,9 +86,10 @@
 
 					<ToolbarSpacer/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
-					<Button text = "New Tender" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+					<Button text ="{= ${st>/SelectedCountry} === 'NL'? 'New Price Request' :'New Tender'}" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
 					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
 					<Button icon="sap-icon://download" text="Download CSV" press=".onDownloadZuelligExtractCSV" visible="{= ${accessControl>/standardtenderAccess/ZuelligExtract}}"/>
+					<Button icon="sap-icon://download" text="Extract Offers" press=".onDownloadExtractOffers" visible="{= ${st>/SelectedCountry} === 'NL'}"/>
 					<Select id = "idlanguageChange" change=".onLanguageChange">
 						<core:Item key="EN" text="English" />
 						<core:Item key="LOCAL" text="Local" />

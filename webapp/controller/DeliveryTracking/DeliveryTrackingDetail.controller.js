@@ -174,11 +174,7 @@ sap.ui.define([
 			const deliveryTrackingTable = this.byId("idDeliveryTrackingTable");
 			const tender = await this.stState.getService().getTender(this.tenderId);
 			const sku = await this.stState.getService().getProductSKU(this.countryCode, this.productCode);
-			const awardedProductPath = this.getModel().createKey('/AwardedProducts', {
-				OfferID: this.offerId,
-				ProductCode: this.productCode
-			});
-			const awardedProduct = this.getModel().getProperty(awardedProductPath);
+
 			const context = this.defaultModel.createEntry("/DeliveryTrackingDetailView", {
 				properties: {
 					TenderID: this.tenderId,
@@ -186,8 +182,7 @@ sap.ui.define([
 					ProductCode: this.productCode,
 					CountryCode: this.countryCode,
 					InstituteID: tender.InstituteID,
-					SKUCode: sku?.SKUCode,
-					Currency: awardedProduct.Currency
+					SKUCode: sku?.SKUCode
 				},
 				groupId: "Deliveries"
 			});

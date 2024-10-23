@@ -19,16 +19,18 @@ sap.ui.define([
             const oCurrencyFormat = NumberFormat.getCurrencyInstance({
                     minFractionDigits: parts[2] === 'MEA' ? 3 : parts[3]?.includes('HM') ? 4 : 2,
                     maxFractionDigits: parts[2] === 'MEA' ? 3 : parts[3]?.includes('HM') ? 4 : 2,
+                    groupingSeparator: parts[3] === 'NL' ? "." : ",",
+                    decimalSeparator: parts[3] === 'NL' ? "," : "."
                 });
 			return `${oCurrencyFormat.format(Number(parts[0] ?? 0))} ${parts[1] ?? ''}` ;
         },
 
         parseValue: function(oValue) {
             const oCurrencyFormat = NumberFormat.getCurrencyInstance({
-                    // minFractionDigits: 2,
-                    // maxFractionDigits: 2
-                });
-            return oCurrencyFormat.parse(oValue.replace(",","."));
+                // minFractionDigits: 2,
+                // maxFractionDigits: 2
+            });
+            return oCurrencyFormat.parse(oValue);
 
         },
 

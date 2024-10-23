@@ -40,7 +40,11 @@ sap.ui.define([
 				offerProductsMsg: [],
 				awardCriteriaMsg: [],
 				overviewTenderFormMsg: [],
-				approvalMsg: []
+				approvalMsg: [],
+				notificationMailMsg:[],
+				complianceOfficerFormMsg: [],
+                supplyManagementFormMsg: [],
+                globalStrategicMarketingFormMsg: []
 			})
 			this.getRouter().getRoute("object").attachPatternMatched(this._onObjectMatched, this);
 			this.getRouter().getRoute("objectDetailOffer").attachPatternMatched(this._onObjectMatched, this);
@@ -58,7 +62,8 @@ sap.ui.define([
 		},
 
 		handleStatusChange: function(channel, event, data) {
-			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus, {OfferID: this.sOfferId, ProductCode: this.productId});
+			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
+			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 		},
 
 		/* =========================================================== */
@@ -103,7 +108,7 @@ sap.ui.define([
 			const xmlView = tab.getXMLView();
 			const viewFolder = tab.title.toLowerCase().split(" ").join("");
 			const language = this.getModel("appView").getProperty("/language");
-			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder}.views.${xmlView.getName()}`;
+			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder === "pricerequest"? "tender" : viewFolder}.views.${xmlView.getName()}`;
 			const viewData = {
 				objectId:this.sObjectId,
 				offerId:this.sOfferId,
@@ -125,22 +130,30 @@ sap.ui.define([
 				data: viewData 
 			};
 
-			if(!this.views[viewName]){	
-				xmlView && this.getOwnerComponent().runAsOwner(()=>{
-					View.create({
-						viewName: viewName,
-						viewId: `id${xmlView.getName()}`,
-						type: sap.ui.core.mvc.ViewType.XML
-					}).then(view => {
-						this.views[viewName] = view;
-						this.getView().addDependent(this.views[viewName]);
-						this.updateTabView(viewConfig);
-					});
-				});
-			}else{			
-				this.updateTabView(viewConfig)	
+			const hiddenFormTabs = {
+				"ComplianceOfficer": "ComplianceOfficer",
+				"GlobalStrategicMarketing": "GlobalStrategicMarketing",
+				"SupplyManagement": "SupplyManagement"
 			}
-			return iconTabFilter;
+
+			if(!hiddenFormTabs[xmlView.getName()]) {
+				if(!this.views[viewName]){	
+					xmlView && this.getOwnerComponent().runAsOwner(()=>{
+						View.create({
+							viewName: viewName,
+							viewId: `id${xmlView.getName()}`,
+							type: sap.ui.core.mvc.ViewType.XML
+						}).then(view => {
+							this.views[viewName] = view;
+							this.getView().addDependent(this.views[viewName]);
+							this.updateTabView(viewConfig);
+						});
+					});
+				}else{			
+					this.updateTabView(viewConfig)	
+				}
+				return iconTabFilter;
+			}
 
 		},
 		updateTabView:function({viewName,tab,context,data}){
@@ -190,12 +203,13 @@ sap.ui.define([
 				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
 				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+				const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
 				!this.selectedOfferHasBinding() && this._bindView();
-				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId});
+				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 			}.bind(this));
 		},
 
@@ -357,7 +371,7 @@ sap.ui.define([
 		onTabSelect: function (event) {
 			let hash = this.getRouter().getHashChanger().getHash();
 			const offerId = this.sOfferId || this.getModel("st").getProperty("/SelectedTender/OfferID") || "NA";
-			const selectedTabKey = event.getParameter("key").toLowerCase();
+			const selectedTabKey = event.getParameter("key").toLowerCase() === 'price request'? 'tender': event.getParameter("key").toLowerCase();
 			this.changeHash({selectedTabKey, hash, offerId});
 		},
 		changeHash: function ({selectedTabKey, hash, offerId}) {

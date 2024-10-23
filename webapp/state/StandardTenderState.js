@@ -9,7 +9,7 @@ sap.ui.define(
         return JSONModel.extend("com.bayer.tender.statenderapp.state.StandardTenderState", {
             constructor: function (url) {
                 JSONModel.prototype.constructor.call(this, {
-                    SelectedPriceConditionType: "Price"
+                    SelectedPriceConditionType: "Price",
                 });
                 this.url = url;
                 const model = new ODataModel({

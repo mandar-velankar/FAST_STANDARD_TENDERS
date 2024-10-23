@@ -38,7 +38,8 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
 
-			if(this.selectedTab !== "Tender") return; // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
+			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request") return;
+			 // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
 
 			this.defaultModel = this.getOwnerComponent().getModel();
 			this.stState = this.getOwnerComponent().getModel("st");
@@ -97,16 +98,19 @@ sap.ui.define([
 				groupId: "Basicinfo",
 				events: {
 					change: () => {
+						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
+						}else if (this.countryCode === "NL") {
+							this.setInstitutesinGroupFieldVisible(form, cs);
 						}
 
-						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
-						multiInputCustomField.control?.removeAllTokens();
-						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						if(cs){
-							for(const value of cs.split(",")){
+							const separator = this.countryCode === "NL" ? ";" : ",";
+							for(const value of cs.split(separator)){
 
 								multiInputCustomField.control?.addToken(new Token({key: value, text:value}));
 
@@ -115,16 +119,19 @@ sap.ui.define([
 					},
 
 					dataReceived: () => {
+						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
+						}else if (this.countryCode === "NL") {
+							this.setInstitutesinGroupFieldVisible(form, cs);
 						}
 
-						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
-						multiInputCustomField.control?.removeAllTokens();
-						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						if(cs){
-							for(const value of cs.split(",")){
+							const separator = this.countryCode === "NL" ? ";" : ",";
+							for(const value of cs.split(separator)){
 
 								multiInputCustomField.control?.addToken(new Token({key: value, text:value}));
 
@@ -163,7 +170,7 @@ sap.ui.define([
 				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
+						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分支機構"){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
@@ -172,11 +179,33 @@ sap.ui.define([
 			return instituteInBranch;
 		},
 
+		getInstituteInGroupField: function (form){
+			const formContainers = form.getAggregation("formContainers");
+			let institutesInGroup;
+			formContainers.forEach(forContainer => {
+				if(forContainer.getAggregation("title") === 'Institute & Type'){
+					const formElements = forContainer.getAggregation("formElements");
+					formElements.forEach(formElement => {
+						if(formElement.getAggregation("label") === 'Institutes In Group'){
+							institutesInGroup = formElement.getAggregation("fields")[0];
+						}
+					});
+				};
+			});
+			return institutesInGroup;
+		},
+
 		getMultiInputCustomField: function (countryCode, form) {
 			if (countryCode === "TW") {
 				return {
 					customFieldName: "Custom_String_3",
 					control: this.getInstituteInBranchCustomString(form)
+				}
+			}
+			if (countryCode === "NL") {
+				return {
+					customFieldName: "Custom_String_3",
+					control: this.getInstituteInGroupField(form)
 				}
 			}
 			return {
@@ -195,6 +224,15 @@ sap.ui.define([
 			}else {
 				regionsField.setVisible(false);
 			}
+		},
+
+		setInstitutesinGroupFieldVisible: function (form, cs) {
+			const path = form?.getElementBinding()?.getBoundContext().getPath();
+			const institutesInGroup = form.getAggregation("formContainers")
+				.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+				.find(el => el.getAggregation("label") === "Institutes In Group");
+
+			institutesInGroup.setVisible(!!cs);
 		},
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
@@ -236,10 +274,11 @@ sap.ui.define([
 
 			const messages = this.getMessages(["TenderFormView"]);
 			const form = this.byId(`idTenderForm`);
+			const separator = this.countryCode === 'NL' ? ';' : ',';
 			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
-			prev?`${prev},${token.getText()}`:token.getText(),""));
+			prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
@@ -257,6 +296,7 @@ sap.ui.define([
 			this.setMessageSection(["TenderFormView"], "basicInfoMsg");
 			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
+			this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 		},
 
 		onTenderFormCancelBtnPress: function(event){

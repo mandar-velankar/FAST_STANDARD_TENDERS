@@ -176,7 +176,7 @@ sap.ui.define([
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
-			countryCode === 'TW' && await this.getTaiwanInstituteInBranch(selectedTender);
+			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -401,6 +401,7 @@ sap.ui.define([
 		},
 
 		_onSubmitChangesSuccessProductForm: function(res){
+			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 			this.refreshPricingForm();
 			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
@@ -408,7 +409,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
-				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId});
+				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 			}
 			
@@ -673,8 +674,8 @@ sap.ui.define([
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 				this.cancelPendingChanges(["idOfferPrice", "PriceConditionPriceView","PriceConditionDiscountView"], "priceCondPrice");
-			}
-			
+			} 
+
 			this._refreshOfferProductTable();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
@@ -802,6 +803,12 @@ sap.ui.define([
 					break;
 				case "taiwanprice":
 					this.calculateTaiwanPriceConditionType({property, value, context});
+					break;
+				case "nldiscount":
+					this.calculateNetherlandsDiscountConditionType({property, value, context});
+					break;
+				case "nlprice":
+					this.calculateNetherlandsPriceConditionType({property, value, context});
 					break;
 			}
 		},
@@ -1212,6 +1219,9 @@ sap.ui.define([
 		 * @returns {Promise<object>} A promise that resolves with the loaded price condition form.
 		 */
 		loadPriceConditionFragment: function(conditionType, contextData){
+			if (this.sCountryCode === "TW" && conditionType === 'TaiwanContractPrice') {
+				conditionType = "TaiwanPrice";
+			}
 			const vbox = this.byId("idPriceConditionVbox");
 			vbox.destroyItems();
 			return Fragment.load({
@@ -1254,7 +1264,7 @@ sap.ui.define([
 				"OfferID": offerID,
 				"TenderID": tenderID,
 				"ProductCode": productID,
-				"ConditionType": conditionType
+				"ConditionType": this.sCountryCode === "TW" && conditionType === 'TaiwanPrice' ? "TaiwanContractPrice" : conditionType
 			});
 
 			if (this.sCountryCode === "TW") {
@@ -1601,9 +1611,9 @@ sap.ui.define([
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, this.sCountryCode),
 				new Filter("INSTITUTE_ID",FilterOperator.EQ, offerFormViewObject.InstituteID),
 				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offerFormViewObject.DistributorID),
-				new Filter("DIVISION",FilterOperator.EQ, offerFormViewObject.Division),
 				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
 			]
+			offerFormViewObject.Division !== 'All' && orFilters.push(new Filter("DIVISION",FilterOperator.EQ, offerFormViewObject.Division)),
 			binding.filter(orFilters);
 		},
 
@@ -1737,12 +1747,12 @@ sap.ui.define([
 			});
 		},
 
-		getTaiwanInstituteInBranch: async function({InstituteID, InstituteName}){
+		getTaiwanInstituteInBranch: async function(instituteId, parentInstituteId, countryCode){
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/InstituteInBranchView", {
 					filters: [
-						new Filter("InstituteName", "NE", InstituteName),
-						new Filter("InstituteID", "EQ", InstituteID)
+						new Filter("ParentInstituteID", "EQ", parentInstituteId),
+						new Filter("InstituteID", "NE", instituteId)
 					],
 					success: function (res) {
 						resolve(res)
@@ -1751,6 +1761,86 @@ sap.ui.define([
 			}).then(data => {
 				this.getModel("ui").setProperty("/PricingForm/instituteInBranch", data.results.length > 0);
 			})
+		},
+
+		onNetherLandsPricingFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionNLPriceView", "PriceConditionNLDiscountView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
+		onNetherlandsPricingFormSaveBtnPress: function(event){
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idOfferPrice")?.getProperty("value");
+			// this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesNetherlandsPriceSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesNetherlandsPriceSuccess: function(event){
+			const hasErrorMessages =  this.getMessages(["PriceConditionNLPriceView", "PriceConditionNLDiscountView"]).length > 0;
+			this.setMessageSection(["PriceConditionNLPriceView", "PriceConditionNLDiscountView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionNLPriceView", 
+				"PriceConditionNLDiscountView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["idOfferPrice", "PriceConditionNLPriceView", "PriceConditionNLDiscountView"], "priceCondPrice");
+			} 
+			this._refreshOfferProductTable();
+			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+		},
+
+		calculateNetherlandsDiscountConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			const objPath = context.getPath();
+			if(!property) return;
+			const pathIndex = property.split('/')[1];
+			const nlPrice = priceObj.NLPriceConditionType[pathIndex];
+			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
+			let discount = property?.toLowerCase().includes("discount") ? value : nlPrice.Discount;
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let offerPrice = Number((parseFloat(priceObj.masterPriceAIP) * (1 - discount)).toFixed(2));
+			let netPrice = offerPrice * (1 - deductions);
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
+			const NLPriceConditionType = priceObj.NLPriceConditionType;
+			NLPriceConditionType[pathIndex].OfferPrice = offerPrice;
+			NLPriceConditionType[pathIndex].NetPrice = netPrice;
+			NLPriceConditionType[pathIndex].ContractDuration = contractDuration;
+			context.getModel().setProperty(`NLPriceConditionType`, NLPriceConditionType, context);
+		},
+
+		calculateNetherlandsPriceConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			const objPath = context.getPath();
+			if(!property) return;
+			const pathIndex = property.split('/')[1];
+			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
+			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
+			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
+			let discount = (parseFloat(priceObj.masterPriceAIP) - parseFloat(offerPrice)) / priceObj.masterPriceAIP;
+			discount = this.formatter.truncToFourDecimalPlaces(discount);
+			let netPrice = offerPrice * (1 - deductions);
+			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
+			const NLPriceConditionType = priceObj.NLPriceConditionType;
+			NLPriceConditionType[pathIndex].Discount = discount;
+			NLPriceConditionType[pathIndex].NetPrice = netPrice;
+			NLPriceConditionType[pathIndex].ContractDuration = contractDuration;
+			context.getModel().setProperty(`NLPriceConditionType`, NLPriceConditionType, context);
 		}
     });
 });
