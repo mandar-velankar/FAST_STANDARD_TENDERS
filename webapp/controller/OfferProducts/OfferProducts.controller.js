@@ -391,11 +391,16 @@ sap.ui.define([
 				groupId: "NewOffer"
 			});
 
+			const divisions = {
+				"NL": "All",
+				"PL": "Radiology"
+			}
+
 			const sElemBindingPath = form.getElementBinding().getPath();
 			this.getModel().setProperty(`${sElemBindingPath}/InternalBidDueDate`, null);
 			this.getModel().setProperty(`${sElemBindingPath}/OfferDueDate`, tender.BidDueDate);
 			this.getModel().setProperty(`${sElemBindingPath}/InstituteID`, tender.InstituteID);
-			this.getModel().setProperty(`${sElemBindingPath}/Division`, this.countryCode === 'NL' ? 'All' : "");
+			this.getModel().setProperty(`${sElemBindingPath}/Division`, divisions[this.countryCode] ? divisions[this.countryCode] : "");
 			this.countryCode.toLowerCase().includes('hm') && this.getModel().setProperty(`${sElemBindingPath}/Custom_Date_3`,tender.AwardDate)
 			
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
