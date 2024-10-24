@@ -277,7 +277,10 @@
 							<Text text="{ui>FOCProductName}"/>
 							<Text text="{ui>ADD_INCLUDE}"/>
 							<Text text="{ui>Type}"/>
-							<Text text="{ui>Bonus}"/>
+							<Text text="{
+                                    path: 'ui>Bonus',
+                                    formatter: '.formatter.formatBonus'
+                                }" />
 							<Text 
 								text ="{
 									path: 'ui>MinOrderQty',
