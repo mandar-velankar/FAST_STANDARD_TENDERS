@@ -160,14 +160,10 @@ sap.ui.define([
 		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
-			let path = "";
-			if (tenderId && offerId && offerId !== "NA") {
-				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-					TenderID: tenderId,
-					OfferID: offerId
-				});
-			}
-			
+			let path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+				TenderID: tenderId,
+				OfferID: offerId
+			});
 			form.bindElement({
 				path: path,
 				groupId: groupID
