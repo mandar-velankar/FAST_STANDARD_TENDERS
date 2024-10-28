@@ -182,7 +182,7 @@ sap.ui.define([
 			return oDistributor;
 		},
 
-		getNLOfferDistributors: async function (offerID, productCode, key) {
+		getAwardedOfferDistributors: async function (offerID, productCode, key) {
 			let filters = []
 
 			if (key === 'DistributorID') {
@@ -197,7 +197,7 @@ sap.ui.define([
 				]
 			}
 			return new Promise((resolve, reject) => {
-				this.model.read("/NLOfferDistributors", {
+				this.model.read("/AwardedOfferDistributors", {
 					filters: filters,
 					success: function (res) {
 						resolve(res?.results) 
@@ -221,15 +221,6 @@ sap.ui.define([
 						resolve(res?.results) 
 					}
 				});
-			})
-		},
-
-		deleteNLOfferDistributors: async function (ID) {
-			const path = this.model.createKey("/NLOfferDistributors", {
-				ID: ID
-			});
-			return new Promise((resolve, reject) => {
-				this.model.remove(path);
 			})
 		},
 
