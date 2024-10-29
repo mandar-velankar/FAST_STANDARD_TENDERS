@@ -1381,7 +1381,7 @@ sap.ui.define([
 				this.byId("SendNotificationMailDialog").destroy();
 		},
 		onGetNotificationContent: function () {
-			const url = window.location.href
+			const url = this._getNotificationOfferURL();
 			this.defaultModel.callFunction("/getNotificationMailTemplate", {
 				method:"GET", 
 				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
@@ -1624,7 +1624,7 @@ sap.ui.define([
 		},
 		onSendNotificationForHematology: function (oEvent) {
 			BusyIndicator.show(1);
-			const url = window.location.href
+			const url = this._getNotificationOfferURL();
 			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
 				method:"POST", 
 				urlParameters: {
@@ -1646,5 +1646,15 @@ sap.ui.define([
 			MessageBox.error(errorMessage);
 			BusyIndicator.hide();
 		},
+
+		_getNotificationOfferURL: function () {
+			let url = window.location.href;
+
+			if (url.search('index.html') == -1) {
+				url = url.split('#').join('index.html#')
+			}
+
+			return url;
+		}
 	});
 });
