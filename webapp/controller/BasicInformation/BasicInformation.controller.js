@@ -261,6 +261,7 @@ sap.ui.define([
 		},
 
 		onTenderFormEditBtnPress: async function(event){
+			this.cancelPendingChanges(["TenderFormView"], "basicInfoMsg");	
 			if (this.countryCode === "TW") {
 				const parentInstituteID = await this.getParentInstituteID(this.countryCode, this.selectedTender.InstituteID);
 				const path = this.getModel().createKey("/TenderFormView", {

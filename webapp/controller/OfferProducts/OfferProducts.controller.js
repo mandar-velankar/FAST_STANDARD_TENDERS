@@ -1340,7 +1340,7 @@ sap.ui.define([
 		handleUpdateOfferProductTable: async function () {
 			const offerProductTable = this.byId('idOfferProductsTable');
 			const columns = offerProductTable.getColumns();
-			offerProductTable.getBinding("items").refresh();
+			offerProductTable.getBinding("items")?.refresh();
 
 			columns.forEach(column => {
 				const columnName = column.getAggregation('header').getProperty('text');
