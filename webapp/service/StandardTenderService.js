@@ -211,7 +211,7 @@ sap.ui.define([
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, offer.CountryCode),
 				new Filter("INSTITUTE_ID",FilterOperator.EQ, offer.InstituteID),
 				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offer.DistributorID),
-				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
+				new Filter("CHANNEL",FilterOperator.EQ, offer.Channel)	
 			]
 			offer.Division !== 'All' && filters.push(new Filter("DIVISION",FilterOperator.EQ, offer.Division));
 			return new Promise((resolve, reject) => {
