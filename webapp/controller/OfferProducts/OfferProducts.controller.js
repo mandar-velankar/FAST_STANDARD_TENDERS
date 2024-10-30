@@ -160,14 +160,10 @@ sap.ui.define([
 		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
-			let path = "";
-			if (tenderId && offerId && offerId !== "NA") {
-				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-					TenderID: tenderId,
-					OfferID: offerId
-				});
-			}
-			
+			let path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+				TenderID: tenderId,
+				OfferID: offerId
+			});
 			form.bindElement({
 				path: path,
 				groupId: groupID
@@ -1344,7 +1340,7 @@ sap.ui.define([
 		handleUpdateOfferProductTable: async function () {
 			const offerProductTable = this.byId('idOfferProductsTable');
 			const columns = offerProductTable.getColumns();
-			offerProductTable.getBinding("items").refresh();
+			offerProductTable.getBinding("items")?.refresh();
 
 			columns.forEach(column => {
 				const columnName = column.getAggregation('header').getProperty('text');
@@ -1385,7 +1381,7 @@ sap.ui.define([
 				this.byId("SendNotificationMailDialog").destroy();
 		},
 		onGetNotificationContent: function () {
-			const url = window.location.href
+			const url = this._getNotificationOfferURL();
 			this.defaultModel.callFunction("/getNotificationMailTemplate", {
 				method:"GET", 
 				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
@@ -1628,7 +1624,7 @@ sap.ui.define([
 		},
 		onSendNotificationForHematology: function (oEvent) {
 			BusyIndicator.show(1);
-			const url = window.location.href
+			const url = this._getNotificationOfferURL();
 			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
 				method:"POST", 
 				urlParameters: {
@@ -1650,5 +1646,15 @@ sap.ui.define([
 			MessageBox.error(errorMessage);
 			BusyIndicator.hide();
 		},
+
+		_getNotificationOfferURL: function () {
+			let url = window.location.href;
+
+			if (url.search('index.html') == -1) {
+				url = url.split('#').join('index.html#')
+			}
+
+			return url;
+		}
 	});
 });

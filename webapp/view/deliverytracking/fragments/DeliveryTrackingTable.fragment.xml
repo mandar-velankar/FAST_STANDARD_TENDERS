@@ -106,13 +106,22 @@
                                 'path':'ActualDeliveryDate',
                                 'type':'sap.ui.model.type.Date',
                                 'formatOptions': {
-                                    pattern: 'dd-MM-yyyy',
+                                    pattern: 'dd.MM.yyyy',
                                     UTC:true
                                 }
                             }"
                         />
                          <Input
-                            value="{ActualDeliveryQuantity}"
+                            value="{
+                                path: 'ActualDeliveryQuantity',
+                                type: 'sap.ui.model.type.Integer',
+                                formatOptions: {
+                                    maxFractionDigits: 0,
+                                    minFractionDigits: 0,
+                                    groupingEnabled:true,
+                                    groupingSeparator: ','
+                                }
+                            }"
                             enabled="{ui>/DeliveryTrackingForm/editMode}"
                         />
                         <Select
