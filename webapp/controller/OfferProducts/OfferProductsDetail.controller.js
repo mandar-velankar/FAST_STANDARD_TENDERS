@@ -49,7 +49,9 @@ sap.ui.define([
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
 				priceCondFoc: [],
-				offerProductDetailMsg: []
+				offerProductDetailMsg: [],
+				priceCondSpecial: [],
+				priceCondWithMaximumPrice: []
 			});
 			this.setModel(messagesModel, "messages");
 			
