@@ -334,6 +334,18 @@ sap.ui.define([
 				});
 			}
 			return offerValidation;
-		}
+		},
+		getUserInfo: async function(cwid){
+			return new Promise((resolve, reject) => {
+				this.model.read("/Users", {
+					filters: [
+						new Filter("UserID", "EQ", cwid)
+					],
+					success: function (res) {
+						resolve(res?.results[0])
+					}
+				});
+			})
+		},
     });
 });

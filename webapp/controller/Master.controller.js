@@ -101,7 +101,15 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 
-			const oModel = this.getOwnerComponent().getModel();
+			const oModel = new JSONModel({
+				busy: false,
+				delay: 0,
+				TenderForm:{
+					editMode: true	
+				}
+			});
+	
+			this.setModel(oModel, "ui");
 
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
@@ -132,6 +140,8 @@ sap.ui.define([
 			this._bindProductScopeItems(sCountryCode);
 			this.onLanguageChange();
 			// this.setFilter(oEvent);
+			const userInfo = await this.stState.getService().getUserInfo(userID);
+			this.getModel("st").setProperty("/UserInfo", userInfo);
 		},
 
 		onProductScopesReceived: async function (oEvent) {
@@ -671,8 +681,10 @@ sap.ui.define([
 				this.byId("idCreateTenderDialog").open();
 			}
 		},
+
 		_bindCreateTenderForm: async function () {
 			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
+			const userInfo = this.getModel("st").getProperty("/UserInfo");
 			const form = this.byId("idNewTenderForm");
 			const newEntryContext = this.getOwnerComponent().getModel().createEntry(`/${entity}`, {
 				groupId: "NewTender"
@@ -701,6 +713,9 @@ sap.ui.define([
 			if(this.countryCode === 'TW'){
 				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
 				this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, nextDate);
+			}
+			if (userInfo?.Role === 'KAM' && this.countryCode === 'PL') {
+				this.getModel().setProperty(`${sElemBindingPath}/Custom_String_1`, userInfo.UserName);
 			}
 		},
 		onCloseTenderCreationDialog: function () {
