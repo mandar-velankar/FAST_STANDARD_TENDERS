@@ -1,4 +1,4 @@
-sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "./Tab", "./Form"], function (ODataModel, BaseObject, Table, Tab, Form) {
+sap.ui.define(["sap/ui/model/odata/v2/ODataModel", "../BaseObject", "./Table", "./Tab", "./Form", "./ValueHelp"], function (ODataModel, BaseObject, Table, Tab, Form, ValueHelp) {
   const Template = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Template", {
     constructor: function (data) {
       BaseObject.prototype.constructor.call(this);
