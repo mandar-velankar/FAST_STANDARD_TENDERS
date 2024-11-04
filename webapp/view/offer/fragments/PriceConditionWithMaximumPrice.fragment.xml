@@ -65,7 +65,8 @@
 										parts: ['CurrentBasePrice', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
-									enabled="false"/>
+									enabled="{= ${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM'}"
+									 />
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.MaximumWholesalerMargin}" >
@@ -74,7 +75,7 @@
 										parts: ['BasePrice', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
-									enabled="false"/>
+									enabled="{= ${st>/UserInfo/Role} === 'Tender Manager'}" />
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.SpecialPrice}" >
@@ -84,11 +85,11 @@
 									parts: [ 'Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
-								enabled="false"
+								enabled="false" 
 							/>
 						</form:fields>
 					</form:FormElement>
-                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.COGS}" >
+                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.COGS}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
 						<form:fields>
 							<Input
 								value="{
@@ -99,7 +100,7 @@
 							/>
 						</form:fields>
 					</form:FormElement>
-                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.Margin}" >
+                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.Margin}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
 						<form:fields>
 							<Input
 								value="{

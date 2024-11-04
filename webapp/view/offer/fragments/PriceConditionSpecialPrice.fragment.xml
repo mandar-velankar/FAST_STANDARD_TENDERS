@@ -65,10 +65,10 @@
 										parts: ['CurrentBasePrice', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
-									enabled="false"/>
+									enabled="{= ${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM'}"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.COGS}" >
+					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.COGS}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
 						<form:fields>
 							<Input value="{
 										parts: ['BasePrice', 'Currency', 'Region', 'CountryCode'],
@@ -77,7 +77,7 @@
 									enabled="false"/>
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.Margin}" >
+					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.Margin}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
 						<form:fields>
 							<Input
 								value="{

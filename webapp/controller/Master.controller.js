@@ -683,6 +683,7 @@ sap.ui.define([
 		},
 
 		_bindCreateTenderForm: async function () {
+			debugger
 			const entity = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const userInfo = this.getModel("st").getProperty("/UserInfo");
 			const form = this.byId("idNewTenderForm");
