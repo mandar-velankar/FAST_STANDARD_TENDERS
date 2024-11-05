@@ -108,6 +108,14 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "NL Price";
 					break;
+				case 'specialprice'	:
+					stringToReplace	= originalString;
+					replacementString = "Special";
+					break;
+				case 'withmaximumprice'	:
+					stringToReplace	= originalString;
+					replacementString = "With Maximum Price";
+					break;
 				default:
 					return originalString;
 			}

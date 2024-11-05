@@ -65,7 +65,7 @@ sap.ui.define([
 				"Deliveries",
 				"TenderMasterView",
 				"NotificationMail",
-				"NLOfferDistributors",
+				"AwardedOfferDistributors",
 				"ContractDuration",
 				"PdfEmail",
 				"ComplianceOfficerView",
@@ -158,8 +158,8 @@ sap.ui.define([
 				"Outbox":{
 					groupId: "NotificationMail"
 				},
-				"NLOfferDistributors": {
-					groupId: "NLOfferDistributors"
+				"AwardedOfferDistributors": {
+					groupId: "AwardedOfferDistributors"
 				},
 				"ContractInfomation": {
 					groupId: "ContractDuration"

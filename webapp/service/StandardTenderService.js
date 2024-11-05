@@ -182,7 +182,7 @@ sap.ui.define([
 			return oDistributor;
 		},
 
-		getNLOfferDistributors: async function (offerID, productCode, key) {
+		getAwardedOfferDistributors: async function (offerID, productCode, key) {
 			let filters = []
 
 			if (key === 'DistributorID') {
@@ -197,7 +197,7 @@ sap.ui.define([
 				]
 			}
 			return new Promise((resolve, reject) => {
-				this.model.read("/NLOfferDistributors", {
+				this.model.read("/AwardedOfferDistributors", {
 					filters: filters,
 					success: function (res) {
 						resolve(res?.results) 
@@ -211,7 +211,7 @@ sap.ui.define([
 				new Filter("COUNTRY_CODE",FilterOperator.EQ, offer.CountryCode),
 				new Filter("INSTITUTE_ID",FilterOperator.EQ, offer.InstituteID),
 				new Filter("DISTRIBUTOR_ID",FilterOperator.EQ, offer.DistributorID),
-				new Filter("CHANNEL",FilterOperator.EQ, 'Direct')	
+				new Filter("CHANNEL",FilterOperator.EQ, offer.Channel)	
 			]
 			offer.Division !== 'All' && filters.push(new Filter("DIVISION",FilterOperator.EQ, offer.Division));
 			return new Promise((resolve, reject) => {
@@ -221,15 +221,6 @@ sap.ui.define([
 						resolve(res?.results) 
 					}
 				});
-			})
-		},
-
-		deleteNLOfferDistributors: async function (ID) {
-			const path = this.model.createKey("/NLOfferDistributors", {
-				ID: ID
-			});
-			return new Promise((resolve, reject) => {
-				this.model.remove(path);
 			})
 		},
 
@@ -343,6 +334,18 @@ sap.ui.define([
 				});
 			}
 			return offerValidation;
-		}
+		},
+		getUserInfo: async function(cwid){
+			return new Promise((resolve, reject) => {
+				this.model.read("/Users", {
+					filters: [
+						new Filter("UserID", "EQ", cwid)
+					],
+					success: function (res) {
+						resolve(res?.results[0])
+					}
+				});
+			})
+		},
     });
 });
