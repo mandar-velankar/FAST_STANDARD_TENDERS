@@ -812,6 +812,12 @@ sap.ui.define([
 				case "nlprice":
 					this.calculateNetherlandsPriceConditionType({property, value, context});
 					break;
+				case "specialprice":
+					this.calculatePolandSpecialPriceConditionType({property, value, context});
+					break;
+				case "withmaximumprice":
+					this.calculatePolandWithMaximumPriceConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -1807,6 +1813,17 @@ sap.ui.define([
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
+		onPolandPricingFormCancelBtnPress: function () {
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
 		calculateNetherlandsDiscountConditionType: function ({property, value, context}) {
 			const priceObj = context.getObject();
 			const objPath = context.getPath();
@@ -1843,6 +1860,33 @@ sap.ui.define([
 			NLPriceConditionType[pathIndex].NetPrice = netPrice;
 			NLPriceConditionType[pathIndex].ContractDuration = contractDuration;
 			context.getModel().setProperty(`NLPriceConditionType`, NLPriceConditionType, context);
+		},
+
+		calculatePolandSpecialPriceConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			const objPath = context.getPath();
+			if(!property) return;
+			const pathIndex = property.split('/')[1];
+			let specialPrice = property?.toLowerCase().includes("specialprice") ? parseFloat(value).toFixed(2) : Number(priceObj.SpecialPrice);
+			let cogs = priceObj.COGS;
+			let margin = !!parseFloat(specialPrice) ? (specialPrice - cogs) / specialPrice : 0;
+			
+			context.getModel().setProperty('Margin', margin, context);
+		},
+
+		calculatePolandWithMaximumPriceConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			const objPath = context.getPath();
+			if(!property) return;
+			const pathIndex = property.split('/')[1];
+			let maximumPrice = property?.toLowerCase().includes("price1") ? parseFloat(value).toFixed(2) : Number(priceObj.Price1);
+			let maximumWholesalerMargin = property?.toLowerCase().includes("level2discount1") ? parseFloat(value) : priceObj.Level2Discount1;
+			let cogs = priceObj.COGS;
+			let specialPrice = parseFloat(maximumPrice * (1 - maximumWholesalerMargin));
+			let margin = !!specialPrice ? (specialPrice - cogs) / specialPrice : 0;
+			
+			context.getModel().setProperty('SpecialPrice', specialPrice, context);
+			context.getModel().setProperty('Margin', margin, context);
 		}
     });
 });

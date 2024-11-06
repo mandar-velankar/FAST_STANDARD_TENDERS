@@ -35,7 +35,7 @@
 				<Button
 					icon="sap-icon://decline"
 					text="Cancel"
-					press=".onPricingFormCancelBtnPress"
+					press=".onPolandPricingFormCancelBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 			</Toolbar>
@@ -62,16 +62,17 @@
 					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.SpecialPrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency', 'Region', 'CountryCode'],
+										parts: ['SpecialPrice', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
-									enabled="{= ${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM'}"/>
+									liveChange=".onPricingFormLiveChange($event, 'SpecialPrice')"
+									enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; (${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM')}"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.COGS}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'Currency', 'Region', 'CountryCode'],
+										parts: ['COGS', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
 									enabled="false"/>
@@ -81,7 +82,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: [ 'Discount', 'CountryCode'],
+									parts: [ 'Margin', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
