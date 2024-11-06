@@ -69,19 +69,24 @@ sap.ui.define([
 			this.tenderID = tenderID;
 		},
 
-        onChangeOutcome: function (event, StandardSingletonService) {
-            const source = event.getSource();
-            const reasonItemBinding = source.getParent().getParent().getAggregation("formElements")
-				.find(el => el.getAggregation("label") === "Reason" || el.getAggregation("label") === "得標或失敗原因")
-				.getAggregation("fields")[0].getBinding("items");
-				
-            this.setOutcome(source.getSelectedKey());
-            reasonItemBinding.aApplicationFilters = []
-            const orFilters = [
-				new Filter("Outcome",FilterOperator.EQ, source.getSelectedKey())
-			]
-            reasonItemBinding.filter(orFilters);
-        },
+		onChangeOutcome: function (event, StandardSingletonService) {
+			const source = event.getSource();
+			const formElements = source.getParent().getParent().getAggregation("formElements");
+		
+			const reasonElement = formElements.find(el => 
+				el.getAggregation("label") === "Reason" || el.getAggregation("label") === "得標或失敗原因"
+			);
+		
+			if (reasonElement) {
+				const reasonItemBinding = reasonElement.getAggregation("fields")[0].getBinding("items");
+		
+				reasonItemBinding.aApplicationFilters = [];
+				const orFilters = [new Filter("Outcome", FilterOperator.EQ, source.getSelectedKey())];
+				reasonItemBinding.filter(orFilters);
+			}
+			this.setOutcome(source.getSelectedKey());
+		},
+		
 
         onChangeSample: function (event) {
             const source = event.getSource();
