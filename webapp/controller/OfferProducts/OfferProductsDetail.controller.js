@@ -267,9 +267,9 @@ sap.ui.define([
 			//default filters
 			const oFilters = [
 				new Filter("CountryCode", FilterOperator.EQ, countryCode),
-				new Filter("ProductCode", FilterOperator.EQ, productCode),
 			];
 
+			countryCode !== 'PL' && oFilters.push(new Filter("ProductCode", FilterOperator.EQ, productCode));
 
 			if (instituteCheckBox.getSelected()) {
 				oFilters.push(new Filter("INSTITUTE_ID", FilterOperator.EQ, InstituteID));
