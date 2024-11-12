@@ -128,6 +128,12 @@ sap.ui.define([
 				"PriceConditionNLDiscountView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionSpecialPriceView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionWithMaximumPriceView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
