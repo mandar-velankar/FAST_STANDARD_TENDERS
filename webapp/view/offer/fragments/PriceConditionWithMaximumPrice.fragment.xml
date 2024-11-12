@@ -29,13 +29,13 @@
 				<Button
 					icon="sap-icon://save"
 					text="Save"
-					press=".onPricingFormSaveBtnPress"
+					press=".onPolandPricingFormSaveBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 				<Button
 					icon="sap-icon://decline"
 					text="Cancel"
-					press=".onPricingFormCancelBtnPress"
+					press=".onPolandPricingFormCancelBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
 			</Toolbar>
@@ -62,48 +62,51 @@
 					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.MaximumPrice}" >
 						<form:fields>
 							<Input value="{
-										parts: ['CurrentBasePrice', 'Currency', 'Region', 'CountryCode'],
+										parts: ['Price1', 'Currency', 'Region', 'CountryCode'],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
-									enabled="false"/>
+									liveChange=".onPricingFormLiveChange($event, 'WithMaximumPrice')"
+									enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM'}"
+									 />
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.MaximumWholesalerMargin}" >
 						<form:fields>
 							<Input value="{
-										parts: ['BasePrice', 'Currency', 'Region', 'CountryCode'],
-										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+										parts: ['Level2Discount1', 'CountryCode'],
+										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'	
 									}"  
-									enabled="false"/>
+									liveChange=".onPricingFormLiveChange($event, 'WithMaximumPrice')"
+									enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${st>/UserInfo/Role} === 'Tender Manager'}" />
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.SpecialPrice}" >
 						<form:fields>
 							<Input
 								value="{
-									parts: [ 'Discount', 'CountryCode'],
-									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+									parts: ['SpecialPrice', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
+								}" 
+								enabled="false" 
+							/>
+						</form:fields>
+					</form:FormElement>
+                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.COGS}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
+						<form:fields>
+							<Input
+								value="{
+									parts: ['COGS', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" 
 								enabled="false"
 							/>
 						</form:fields>
 					</form:FormElement>
-                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.COGS}" >
+                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.Margin}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
 						<form:fields>
 							<Input
 								value="{
-									parts: [ 'Discount', 'CountryCode'],
-									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
-								}" 
-								enabled="false"
-							/>
-						</form:fields>
-					</form:FormElement>
-                    <form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.Margin}" >
-						<form:fields>
-							<Input
-								value="{
-									parts: [ 'Discount', 'CountryCode'],
+									parts: [ 'Margin', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="false"
