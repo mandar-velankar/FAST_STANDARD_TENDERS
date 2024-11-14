@@ -1077,13 +1077,13 @@ sap.ui.define([
 			const form = this.byId('idContractDurationForm') 
 			const context = form.getBindingContext('ui')
             const startDate = this.byId('idContractStartDate').getDateValue();
-            const durationSelect = this.byId("idContractDuration").getSelectedKey();
 			const endDate = new Date(startDate);
-			endDate.setMonth(endDate.getMonth() + parseInt(durationSelect));
-			endDate.setDate(1);
-			endDate.setDate(endDate.getDate() - 1);
+            const durationSelect = parseInt(this.byId("idContractDuration").getSelectedKey(), 10);
+			endDate.setDate(0);
+			let formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + durationSelect));
+			formettedEndDate.setDate(formettedEndDate.getDate() + 1);
 			
-			context.getModel().setProperty("ContractEndDate", endDate, context);
+			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
 			context.getModel().refresh()
         },
 
