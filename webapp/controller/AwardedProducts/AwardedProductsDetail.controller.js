@@ -911,7 +911,12 @@ sap.ui.define([
 		handleProductBrandsWholesalersValueHelpSearch: function (event, path) {
 			const searchValue = event.getParameter('value');
 			const oFilter = [
-				new Filter(path, FilterOperator.Contains, searchValue)
+				new Filter({
+					path: path, 
+					operator: FilterOperator.Contains, 
+					value1: searchValue, 
+					caseSensitive: false
+				})
 			]
 			event.getSource().getBinding("items").filter(new Filter(oFilter));
 		},
