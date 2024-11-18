@@ -66,7 +66,7 @@
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 									}"  
 									liveChange=".onPricingFormLiveChange($event, 'SpecialPrice')"
-									enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; (${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM')}"/>
+									enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; (${st>/UserInfo/Role} === 'Tender Manager' || ${st>/UserInfo/Role} === 'KAM' || ${st>/UserInfo/Role} === 'Sales Manager')}"/>
 						</form:fields>
 					</form:FormElement>
 					<form:FormElement label="{i18n>PriceConditionSpecialPriceFragment.COGS}" visible="{= ${st>/UserInfo/Role} === 'Tender Manager'}">
