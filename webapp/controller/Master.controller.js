@@ -1002,12 +1002,13 @@ sap.ui.define([
 			}
 			const oCountrySelectedItem = this.byId("idSlctCountry").getSelectedItem();
 			const sCountryCode = oCountrySelectedItem?.getKey();
-			language = (sCountryCode === 'TW') ? 'TW' : (sCountryCode === 'PL') ? 'PL' : 'EN';			
+			language = language === 'EN' ? 'EN' : (sCountryCode === 'TW') ? 'TW' : (sCountryCode === 'PL') ? 'PL' : 'EN';			
 			let config = sap.ui.getCore().getConfiguration();
 			config.setLanguage(language.toLowerCase());
 			this.getModel("appView").setProperty("/language", language.toLowerCase());
 			// Update the Select control
 			const oSelect = this.byId("idlanguageChange");
+			(language === 'TW' || language === 'PL') ? language = "LOCAL" : language = "EN";
 			oSelect.setSelectedKey(language);
 		},
 
