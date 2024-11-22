@@ -1002,7 +1002,7 @@ sap.ui.define([
 			}
 			const oCountrySelectedItem = this.byId("idSlctCountry").getSelectedItem();
 			const sCountryCode = oCountrySelectedItem?.getKey();
-			language = language === 'EN' ? 'EN' : (sCountryCode === 'TW') ? 'TW' : (sCountryCode === 'PL') ? 'PL' : 'EN';			
+			language = language.toLowerCase() === 'en' ? 'EN' : (sCountryCode === 'TW') ? 'TW' : (sCountryCode === 'PL') ? 'PL' : 'EN';			
 			let config = sap.ui.getCore().getConfiguration();
 			config.setLanguage(language.toLowerCase());
 			this.getModel("appView").setProperty("/language", language.toLowerCase());
