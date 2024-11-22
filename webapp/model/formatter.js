@@ -164,6 +164,13 @@ sap.ui.define([
                 var formattedNumber = oNumberFormat.format(parseFloat(numberPart));
                 return unitPart ? formattedNumber + " " + unitPart : formattedNumber;
             }
+        },
+		formatInternalBidDueDateDatePickerMinDate: function (today, OfferDueDate) {
+            if (today >= OfferDueDate) {
+                return OfferDueDate;
+            }else {
+                return today;
+            }
         }
 	};
 });
