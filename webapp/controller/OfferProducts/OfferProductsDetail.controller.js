@@ -411,6 +411,7 @@ sap.ui.define([
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
 				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
+				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			}
 			
 		},
