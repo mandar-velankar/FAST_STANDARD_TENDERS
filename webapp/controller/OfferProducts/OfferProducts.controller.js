@@ -314,6 +314,7 @@ sap.ui.define([
 				this.byId('notificationButton').setEnabled(true)
 			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		_onSubmitChangesOfferProductFail: function (error) {},
@@ -339,10 +340,20 @@ sap.ui.define([
 			//if(!this.validateOffer()) return; //error
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
-			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
-			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
+			this.defaultModel.submitChanges({
+				success: this._onSubmitChangesOfferSuccess.bind(this),
+				error: this._onSubmitChangesFail.bind(this),
+				groupId: "OfferformInfo"
+			}); //no error - save
 			//this.getModel().refresh();
 		},
+
+		_onSubmitChangesOfferSuccess: function () {
+			const form = this.byId(`idOfferForm`);
+			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+		},
+
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.getModel("ui").setProperty('/isCopiedOffer', false);	
@@ -708,7 +719,9 @@ sap.ui.define([
 										MinInvoiceAmount:0,
 										UoM: 'Pack',
 										SubmittedOn: new Date().toISOString(),
-										SubmittedBy: userId
+										SubmittedBy: userId,
+										SUPPLY_UPDATE: 0,
+										PAYMENT_UPDATE: 0
 									}
 					});
 					const newItem = table.getBindingInfo("items").template.clone();
@@ -1556,6 +1569,7 @@ sap.ui.define([
 				this.onComplianceofficerCancelBtnPress();
 				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onComplianceofficerCancelBtnPress: function(){
@@ -1586,6 +1600,7 @@ sap.ui.define([
 				this.onGlobalStrategicMarketingCancelBtnPress();
 				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onGlobalStrategicMarketingCancelBtnPress: function(){
@@ -1616,6 +1631,7 @@ sap.ui.define([
 				this.onSupplyManagementCancelBtnPress();
 				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onSupplyManagementCancelBtnPress: function(){
