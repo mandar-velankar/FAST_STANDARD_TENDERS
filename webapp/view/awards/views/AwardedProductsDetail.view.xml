@@ -64,7 +64,7 @@
 				<m:VBox>
 					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.awards.fragments.CompetitorResultsTable" type="XML"/>
 				</m:VBox>
-                <m:VBox visible="{= ${st>/SelectedCountry} === 'NL'}">
+                <m:VBox visible="{= ${st>/SelectedCountry} === 'NL' || ${st>/SelectedCountry} === 'PL'}">
 					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.awards.fragments.ContractInformation" type="XML"/>
 				</m:VBox>
                 <m:VBox visible="{= ${st>/SelectedCountry} === 'NL'}">

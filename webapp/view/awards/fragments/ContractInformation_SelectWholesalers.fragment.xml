@@ -13,18 +13,6 @@
 		updateFinished=".handleProductDistributorsValueHelpUpdateFinished($event, 'Distributor')"
 		items="{
 			path: '/MasterDistributors',
-			filters: [
-				{
-					path: 'CountryCode',
-					operator: 'EQ',
-					value1: 'NL'
-        		},
-				{
-					path: 'DistributorID',
-					operator: 'NE',
-					value1: '100000226'
-        		}
-			],
 			sorter: {path: 'DistributorName'},
 			events: {
 				dataReceived: '.handleProductDistributorsValueHelpUpdateFinished($event, Distributor)'

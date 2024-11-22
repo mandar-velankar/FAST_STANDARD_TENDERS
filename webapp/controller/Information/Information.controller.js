@@ -346,7 +346,7 @@ sap.ui.define([
 
 			//enable / disable buttons
 			this.byId("btnCancelApproval").setEnabled(offerStatus.STATUS === "Awaiting Approval" ? true : false);
-			this.byId("btnSendApproval").setEnabled(offerStatus.STATUS !== "Awaiting Approval" && offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded" && offerStatus.STATUS !== "In FOC Negotiation" && offerStatus.STATUS !== "Appeal in Progress" && offerStatus.STATUS !== "Delivery Ongoing" ? true : false);
+			this.byId("btnSendApproval").setEnabled(offerStatus.STATUS === 'Offer Created' && offerStatus.STATUS !== "Awaiting Approval" && offerStatus.STATUS !== "Quotation Submitted" && offerStatus.STATUS !== "Results Recorded" && offerStatus.STATUS !== "In FOC Negotiation" && offerStatus.STATUS !== "Appeal in Progress" && offerStatus.STATUS !== "Delivery Ongoing" ? true : false);
 		},
 
 		_showApprovalsPricingError: async function(){

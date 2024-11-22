@@ -49,7 +49,9 @@ sap.ui.define([
 			const messagesModel = new JSONModel({
 				priceCondPrice: [],
 				priceCondFoc: [],
-				offerProductDetailMsg: []
+				offerProductDetailMsg: [],
+				priceCondSpecial: [],
+				priceCondWithMaximumPrice: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -265,9 +267,9 @@ sap.ui.define([
 			//default filters
 			const oFilters = [
 				new Filter("CountryCode", FilterOperator.EQ, countryCode),
-				new Filter("ProductCode", FilterOperator.EQ, productCode),
 			];
 
+			countryCode !== 'PL' && oFilters.push(new Filter("ProductCode", FilterOperator.EQ, productCode));
 
 			if (instituteCheckBox.getSelected()) {
 				oFilters.push(new Filter("INSTITUTE_ID", FilterOperator.EQ, InstituteID));
@@ -811,6 +813,12 @@ sap.ui.define([
 				case "nlprice":
 					this.calculateNetherlandsPriceConditionType({property, value, context});
 					break;
+				case "specialprice":
+					this.calculatePolandSpecialPriceConditionType({property, value, context});
+					break;
+				case "withmaximumprice":
+					this.calculatePolandWithMaximumPriceConditionType({property, value, context});
+					break;
 			}
 		},
 
@@ -1345,7 +1353,11 @@ sap.ui.define([
 					"PriceConditionDiscountWithFOCView",
 					"PriceConditionPriceWithFOCView",
 					"PriceConditionTaiwanPriceView",
-					"PriceConditionTaiwanDiscountView"
+					"PriceConditionTaiwanDiscountView",
+					"PriceConditionNLPriceView",
+					"PriceConditionNLDiscountView",
+					"PriceConditionSpecialPriceView",
+					"PriceConditionWithMaximumPriceView"
 				], 
 				"priceCondPrice"
 			);
@@ -1810,6 +1822,48 @@ sap.ui.define([
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
+		onPolandPricingFormSaveBtnPress: function (event) {
+			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
+			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
+			 * thus below is the temporary solution until we find a permanent fix
+			*/
+			const form = this.byId(`idPricingForm`);
+			let value = this.byId("idOfferPrice")?.getProperty("value");
+			// this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesPolandPriceSuccess.bind(this),
+				groupId: "PricingForm"
+			}); 
+		},
+
+		_onSubmitChangesPolandPriceSuccess: function () {
+			const hasErrorMessages =  this.getMessages(["PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"]).length > 0;
+			this.setMessageSection(["PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionSpecialPriceView", 
+				"PriceConditionWithMaximumPriceView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["idOfferPrice", "PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"], "priceCondPrice");
+			} 
+			this._refreshOfferProductTable();
+			this.refreshPricingForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+		},
+
+		onPolandPricingFormCancelBtnPress: function () {
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["idOfferPrice", "PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"], "priceCondPrice");
+
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
 		calculateNetherlandsDiscountConditionType: function ({property, value, context}) {
 			const priceObj = context.getObject();
 			const objPath = context.getPath();
@@ -1846,6 +1900,33 @@ sap.ui.define([
 			NLPriceConditionType[pathIndex].NetPrice = netPrice;
 			NLPriceConditionType[pathIndex].ContractDuration = contractDuration;
 			context.getModel().setProperty(`NLPriceConditionType`, NLPriceConditionType, context);
+		},
+
+		calculatePolandSpecialPriceConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			const objPath = context.getPath();
+			if(!property) return;
+			const pathIndex = property.split('/')[1];
+			let specialPrice = property?.toLowerCase().includes("specialprice") ? parseFloat(value).toFixed(2) : Number(priceObj.SpecialPrice);
+			let cogs = priceObj.COGS;
+			let margin = !!parseFloat(specialPrice) ? (specialPrice - cogs) / specialPrice : 0;
+			
+			context.getModel().setProperty('Margin', margin, context);
+		},
+
+		calculatePolandWithMaximumPriceConditionType: function ({property, value, context}) {
+			const priceObj = context.getObject();
+			const objPath = context.getPath();
+			if(!property) return;
+			const pathIndex = property.split('/')[1];
+			let maximumPrice = property?.toLowerCase().includes("price1") ? parseFloat(value).toFixed(2) : Number(priceObj.Price1);
+			let maximumWholesalerMargin = property?.toLowerCase().includes("level2discount1") ? parseFloat(value) : priceObj.Level2Discount1;
+			let cogs = priceObj.COGS;
+			let specialPrice = parseFloat(maximumPrice * (1 - maximumWholesalerMargin));
+			let margin = !!specialPrice ? (specialPrice - cogs) / specialPrice : 0;
+			
+			context.getModel().setProperty('SpecialPrice', specialPrice, context);
+			context.getModel().setProperty('Margin', margin, context);
 		}
     });
 });
