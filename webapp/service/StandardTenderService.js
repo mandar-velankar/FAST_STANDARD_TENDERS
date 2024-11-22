@@ -346,7 +346,7 @@ sap.ui.define([
 		},
 
 		resetOfferApprovalSent: async function (OfferID) {
-			const path = this.model.createKey("/OfferFormView", {
+			const path = this.model.createKey("/PT_TMOFRS", {
 				OfferID: OfferID
 			});
 			return new Promise((resolve, reject) => {
