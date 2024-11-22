@@ -246,18 +246,22 @@ sap.ui.define([
 				case "Tender":
 				case "Price Request":
 				case "價格要求":
+				case "Przetarg":
 					isVisible = enablementModel.getProperty("/Detail/TenderTab/isVisible");
 					break;
 				case "Offer":
 				case "提供":
+				case "Oferta":
 					isVisible = enablementModel.getProperty("/Detail/OfferTab/isVisible");
 					break;
 				case "Overview":
 				case "概述":
+				case "Przegląd":
 					isVisible = enablementModel.getProperty("/Detail/OverviewTab/isVisible");
 					break;
 				case "Awards":
 				case "獎項":
+				case "Wynik postępowania":
 					isVisible = enablementModel.getProperty("/Detail/AwardTab/isVisible");
 					break;
 				case "Delivery Tracking":
