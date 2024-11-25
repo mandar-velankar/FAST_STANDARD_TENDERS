@@ -865,9 +865,9 @@ sap.ui.define([
 			const tableConfig = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable();
 			if (tableConfig.hasColumn(path)) {
 				if(parseDate){
-					value = this.formatter.parseDate(value, "yyyy-MM-dd");
+					value = this.formatter.parseDate(value, "dd.MM.yyyy");
 				}
-				if (!checkDecimals || /^[0-9]*[.]?[0-9]+$/.test(value)) {
+				if (value && !checkDecimals || /^[0-9]*[.]?[0-9]+$/.test(value)) {
 					this.orFilters.push(new Filter({
 						path: path,
 						operator: operator,
@@ -894,8 +894,12 @@ sap.ui.define([
 			{ path: "OfferID", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "VALUE", operator: FilterOperator.BT, value: sSearch, checkDecimals: true },
 			{ path: "STATUS", operator: FilterOperator.Contains, value: sSearch },
+			{ path: "Offer_Custom_String_1", operator: FilterOperator.Contains, value: sSearch },
 			{ path: "PublicationDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
 			{ path: "BidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  },
+			{ path: "InternalBidDueDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  },
+			{ path: "ExpiryDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  },
+			{ path: "EffectiveDate", operator: FilterOperator.EQ, value: sSearch, parseDate: true  },
 			{ path: "Custom_Date_1", operator: FilterOperator.EQ, value: sSearch, parseDate: true },
 			{ path: "Custom_String_1", operator: FilterOperator.Contains, value: sSearch }
 			];
