@@ -209,17 +209,25 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/OverviewForm/editMode', true);
 		},
 		onOverviewTenderFormSaveBtnPress: function(event){
-			
-			this.setMessageSection(["OfferValidation"], "overviewTenderFormMsg");
+			if (this.getTargets(["OfferValidation"]).length > 0) {
+				this.setMessageSection(["OfferValidation"], "overviewTenderFormMsg");
 
-			this.defaultModel.submitChanges({
-				success: this.onOverviewTenderFormSuccess.bind(this),
-				groupId: "OverviewForm"
-			}); 
+				this.defaultModel.submitChanges({
+					success: this.onOverviewTenderFormSuccess.bind(this),
+					groupId: "OverviewForm"
+				}); 
+			}else {
+				this.onOverviewTenderFormCancelBtnPress();
+			}
 		},
 		onOverviewTenderFormSuccess: function(res){
 			const hasErrorMessages = this.getMessages(["OfferValidation"]).length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/OverviewForm/editMode', false);
+			if (!hasErrorMessages) {
+				this.getModel("ui").setProperty('/OverviewForm/editMode', false);
+				this.stState.getService().resetOfferApprovalSent(this.offerId).then((data) => {
+					this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+				});
+			}
 		},
 
 		onOverviewTenderFormCancelBtnPress: function(event){

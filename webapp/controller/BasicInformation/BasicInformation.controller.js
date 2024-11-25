@@ -273,20 +273,23 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/TenderForm/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
-
-			const messages = this.getMessages(["TenderFormView"]);
-			const form = this.byId(`idTenderForm`);
-			const separator = this.countryCode === 'NL' ? ';' : ',';
-			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
-			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
-			prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
-			this.defaultModel.submitChanges({
-				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesTenderFormSuccess.bind(this),
-				groupId: "Basicinfo"
-			}); 
+			if (this.getTargets(["TenderFormView"]).length > 0) {
+				const messages = this.getMessages(["TenderFormView"]);
+				const form = this.byId(`idTenderForm`);
+				const separator = this.countryCode === 'NL' ? ';' : ',';
+				let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+				this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
+				prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
+				this.defaultModel.submitChanges({
+					error: this._onSubmitChangesFail.bind(this),
+					success: this._onSubmitChangesTenderFormSuccess.bind(this),
+					groupId: "Basicinfo"
+				}); 
+			}else {
+				this.onTenderFormCancelBtnPress();
+			}
 		},
 
 		_onSubmitChangesFail: function(error){

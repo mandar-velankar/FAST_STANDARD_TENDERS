@@ -359,6 +359,17 @@ sap.ui.define([
 					},
 				});
 			});
-		}
+		},
+
+		getPriceCondition: function (path) {
+			return new Promise((resolve, reject) => {
+				this.model.read(path,
+				{
+					success: function (res) {
+						resolve(res); // Resolve the promise on success
+					},
+				});
+			});
+		} 
     });
 });

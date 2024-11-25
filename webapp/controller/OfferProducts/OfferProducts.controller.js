@@ -334,18 +334,22 @@ sap.ui.define([
 			}
 		},
 		onOfferFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			this.getModel("ui").setProperty('/isCopiedOffer', false);
-			const form = this.byId(`idOfferForm`);
-			//if(!this.validateOffer()) return; //error
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
-			this.defaultModel.submitChanges({
-				success: this._onSubmitChangesOfferSuccess.bind(this),
-				error: this._onSubmitChangesFail.bind(this),
-				groupId: "OfferformInfo"
-			}); //no error - save
-			//this.getModel().refresh();
+			if (this.getTargets(["OfferFormView"]).length > 0) {
+				this.getModel("ui").setProperty('/OfferForm/editMode', false);
+				this.getModel("ui").setProperty('/isCopiedOffer', false);
+				const form = this.byId(`idOfferForm`);
+				//if(!this.validateOffer()) return; //error
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
+				this.defaultModel.submitChanges({
+					success: this._onSubmitChangesOfferSuccess.bind(this),
+					error: this._onSubmitChangesFail.bind(this),
+					groupId: "OfferformInfo"
+				}); //no error - save
+				//this.getModel().refresh();
+			}else {
+				this.onOfferFormCancelBtnPress();
+			}
 		},
 
 		_onSubmitChangesOfferSuccess: function () {
@@ -1551,12 +1555,16 @@ sap.ui.define([
 		},
 
 		onComplianceOfficerSaveBtnPress: function(){
-			const form = this.byId(`idComplianceOfficer`);
-			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-			this.getModel().submitChanges({
-				success: this.onComplianceOfficerRequestSuccess.bind(this),
-				groupId: "ComplianceOfficerView"
-			});
+			if (this.getTargets(["ComplianceOfficerView"]).length > 0) {
+				const form = this.byId(`idComplianceOfficer`);
+				this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.getModel().submitChanges({
+					success: this.onComplianceOfficerRequestSuccess.bind(this),
+					groupId: "ComplianceOfficerView"
+				});
+			}else {
+				this.onComplianceofficerCancelBtnPress();
+			}
 		},
 
 		onComplianceOfficerRequestSuccess: function(){
@@ -1582,12 +1590,16 @@ sap.ui.define([
 		},
 
 		onGlobalStrategicMarketingSaveBtnPress: function(){
-			const form = this.byId(`idGlobalStrategicMarketing`);
-			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-            this.getModel().submitChanges({
-				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
-				groupId: "GlobalStrategicMarketingView"
-			});
+			if (this.getTargets(["GlobalStrategicMarketingView"]).length > 0) {
+				const form = this.byId(`idGlobalStrategicMarketing`);
+				this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.getModel().submitChanges({
+					success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
+					groupId: "GlobalStrategicMarketingView"
+				});
+			}else {
+				this.onGlobalStrategicMarketingCancelBtnPress();
+			}
 		},
 
 		onGlobalStrategicMarketingRequestSuccess: function(){
@@ -1613,12 +1625,16 @@ sap.ui.define([
 		},
 
 		onSupplyManagementSaveBtnPress: function(){
-			const form = this.byId(`idSupplyManagement`);
-			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-            this.getModel().submitChanges({
-				success: this.onSupplyManagementRequestSuccess.bind(this),
-				groupId: "SupplyManagementView"
-			});
+			if (this.getTargets(["SupplyManagementView"]).length > 0) {
+				const form = this.byId(`idSupplyManagement`);
+				this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.getModel().submitChanges({
+					success: this.onSupplyManagementRequestSuccess.bind(this),
+					groupId: "SupplyManagementView"
+				});
+			}else {
+				this.onSupplyManagementCancelBtnPress();
+			}
 		},
 
 		onSupplyManagementRequestSuccess: function(){
