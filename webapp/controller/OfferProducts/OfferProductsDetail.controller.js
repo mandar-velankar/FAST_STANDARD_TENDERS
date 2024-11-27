@@ -844,7 +844,7 @@ sap.ui.define([
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice });
 			}
 		},
@@ -962,7 +962,7 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice });
 			}
 		},	
@@ -994,7 +994,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice });
 			}
 		},
@@ -1024,7 +1024,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice });
 			}
 			
