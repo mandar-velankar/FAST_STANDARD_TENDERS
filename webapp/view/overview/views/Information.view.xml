@@ -244,6 +244,7 @@
 				id="idProductFOCInformationTable" 
 				mode="SingleSelectMaster"
 				items="{path : 'ui>/StandardTenderFOCInformation'}"
+				visible="{= ${st>/SelectedCountry} !== 'PL'}"
 			>
 			<headerToolbar>
 			<OverflowToolbar>

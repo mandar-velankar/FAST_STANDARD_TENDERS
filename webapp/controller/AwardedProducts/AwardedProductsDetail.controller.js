@@ -153,7 +153,7 @@ sap.ui.define([
 			this.bindForm(awardedProductPath);
 			this.bindTable(this.offerId, this.productId);
 			this.setInitialWholeSalerMultiInputTokens();
-			await this.getAwardedContractDurations()
+			this.countryCode == 'NL' && await this.getAwardedContractDurations()
 		},
 
 		getAwardedContractDurations: async function(){
@@ -670,10 +670,10 @@ sap.ui.define([
 		 */
 		onDistributorAssignementDialogLoaded: function(multiInput, dialog){
 			dialog.open();
-			this.getNLOfferDistributors();
+			this.getAwardedOfferDistributors();
 		},
 
-		getNLOfferDistributors: async function () {
+		getAwardedOfferDistributors: async function () {
 			let wholesalersListMultiInput = this.byId("idContractInformationWholesalersMultiInput");
 			let productListMultiInput = this.byId("idContractInformationProductsMultiInput");
 
@@ -682,7 +682,7 @@ sap.ui.define([
 		},
 
 		getUniqueDistributors: async function (initialWholesalerMultiInput, multiInput, key) {
-			const input = await this.stState.getService().getNLOfferDistributors(this.offerId, this.productId, key);
+			const input = await this.stState.getService().getAwardedOfferDistributors(this.offerId, this.productId, key);
 			const uniqValues = new Map();
 			input.forEach(item => {
 				uniqValues.set(item[key], item);
@@ -771,8 +771,8 @@ sap.ui.define([
 			wholesalersTable.bindItems({
 				path: "/MasterDistributors",
 				filters: [
-					new Filter("CountryCode",FilterOperator.EQ, 'NL'),
-					new Filter("DistributorID",FilterOperator.NE, 100000226)
+					new Filter("CountryCode",FilterOperator.EQ, this.countryCode),
+					new Filter("DistributorID",FilterOperator.NE, this.countryCode == 'NL' ? 100000226 : 100000340)
 				],
 				template: template,
 				events: {
@@ -911,7 +911,12 @@ sap.ui.define([
 		handleProductBrandsWholesalersValueHelpSearch: function (event, path) {
 			const searchValue = event.getParameter('value');
 			const oFilter = [
-				new Filter(path, FilterOperator.Contains, searchValue)
+				new Filter({
+					path: path, 
+					operator: FilterOperator.Contains, 
+					value1: searchValue, 
+					caseSensitive: false
+				})
 			]
 			event.getSource().getBinding("items").filter(new Filter(oFilter));
 		},
@@ -919,25 +924,25 @@ sap.ui.define([
 		onButtonApplyWholesalersProductsPress: async function () {
 			try {
 				BusyIndicator.show(0);
-				// const NLOfferDistributors = await this.stState.getService().getNLOfferDistributors(this.offerId);
 				const wholesalersListTokens = this.byId("idContractInformationWholesalersMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
 				const brandProductMultiInputTokens = this.byId("idContractInformationProductsMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
 
 				const pendingChange = {
 					OfferID: this.offerId,
+					CountryCode: this.countryCode,
 					DistributorName: wholesalersListTokens,
 					ProductPackName: brandProductMultiInputTokens,
 					AssignedProductCode: this.productId
 				};
-				this.getModel().createEntry('/NLOfferDistributors', {
+				this.getModel().createEntry('/AwardedOfferDistributors', {
 					properties: pendingChange,
-					groupId: "NLOfferDistributors"
+					groupId: "AwardedOfferDistributors"
 				});
 				
 				
 				this.getModel().submitChanges({
 					success: this.onSubmitChangesNLDistributorSuccess.bind(this),
-					groupId: "NLOfferDistributors"
+					groupId: "AwardedOfferDistributors"
 				});
 			} catch (error) {
 				MessageBox.error(response?.error?.message?.value);
@@ -1072,10 +1077,11 @@ sap.ui.define([
 			const form = this.byId('idContractDurationForm') 
 			const context = form.getBindingContext('ui')
             const startDate = this.byId('idContractStartDate').getDateValue();
-            const durationSelect = this.byId("idContractDuration").getSelectedKey();
 			const endDate = new Date(startDate);
-			endDate.setDate(endDate.getDate() + 1);
-			const formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + parseInt(durationSelect)));
+            const durationSelect = parseInt(this.byId("idContractDuration").getSelectedKey(), 10);
+			endDate.setDate(0);
+			let formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + durationSelect));
+			formettedEndDate.setDate(formettedEndDate.getDate() + 1);
 			
 			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
 			context.getModel().refresh()

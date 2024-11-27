@@ -28,7 +28,15 @@
                         text="{i18n>OfferHistoryCurrentInstitute}"
                         selected="true"
                         select=".onHistoryFilterCheck"
+                        visible="{= ${st>/SelectedCountry} !== 'PL'}"
                     />
+                    <HBox visible="{= ${st>/SelectedCountry} === 'PL'}">
+                        <Text 
+                            text="Institute Name: " 
+                            class='sapUiTinyMarginEnd'
+                        />
+                        <Text text=" {InstituteName}"/>
+                    </HBox>
                     <CheckBox
                         id="wonCheckId"
                         text="{i18n>OfferHistoryWon}"

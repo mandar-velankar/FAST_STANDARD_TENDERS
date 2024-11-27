@@ -65,7 +65,7 @@ sap.ui.define([
 				"Deliveries",
 				"TenderMasterView",
 				"NotificationMail",
-				"NLOfferDistributors",
+				"AwardedOfferDistributors",
 				"ContractDuration",
 				"PdfEmail",
 				"ComplianceOfficerView",
@@ -128,6 +128,12 @@ sap.ui.define([
 				"PriceConditionNLDiscountView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionSpecialPriceView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionWithMaximumPriceView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
@@ -158,8 +164,8 @@ sap.ui.define([
 				"Outbox":{
 					groupId: "NotificationMail"
 				},
-				"NLOfferDistributors": {
-					groupId: "NLOfferDistributors"
+				"AwardedOfferDistributors": {
+					groupId: "AwardedOfferDistributors"
 				},
 				"ContractInfomation": {
 					groupId: "ContractDuration"
