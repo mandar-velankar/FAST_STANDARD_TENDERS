@@ -35,6 +35,7 @@ sap.ui.define([
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			
 			this.objectId = objectId;
+			this.offerId = offerId;
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
 
@@ -297,7 +298,11 @@ sap.ui.define([
 			this.setMessageSection(["TenderFormView"], "basicInfoMsg");
 			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
-			this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
+
+			this.stState.getService().resetOfferApprovalSent(this.offerId).then((data) => {
+				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
+				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			});
 		},
 
 		onTenderFormCancelBtnPress: function(event){
