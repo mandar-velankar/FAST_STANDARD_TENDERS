@@ -21,6 +21,7 @@
                         text="Edit"
                         press=".onButtonContractInformationFormEditPress"
                         visible="{= !${ui>/ContractInformation/editMode} }"
+                        enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
                     />
                     <Button
                         icon="sap-icon://accept"

@@ -404,6 +404,7 @@ sap.ui.define([
 
 		_onSubmitChangesSuccessProductForm: function(res){
 			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
+			const UserInfo = this.stState.getProperty('/UserInfo');
 			this.refreshPricingForm();
 			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
@@ -411,7 +412,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
-				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
+				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 			}
 			
