@@ -52,7 +52,8 @@ sap.ui.define([
 					editMode: false
 				},
 				enableApprovalButton: false,
-				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch')
+				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch'),
+				continuedRevisedOffer: !!this.offerId.match(/-[^-]*[CR]/)
 			});
 			
 			this.setModel(oModel, "ui");
