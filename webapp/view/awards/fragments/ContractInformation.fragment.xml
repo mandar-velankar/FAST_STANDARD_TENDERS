@@ -16,6 +16,12 @@
                 <Toolbar>
                     <ToolbarSpacer />
                     <Button
+                        icon="sap-icon://save"
+                        text="Save"
+                        press=".onSavehandleAwardedWholesalers"
+                        visible="{= ${ui>/ContractInformation/editMode}}"
+                    />
+                    <Button
                         id="idContractInformationEditbtn"
                         icon="sap-icon://edit"
                         text="Edit"
@@ -63,6 +69,67 @@
 							</MultiInput>
 						</form:fields>
 					</form:FormElement>	
+                    </form:formElements>
+                </form:FormContainer>
+            </form:formContainers>
+        </form:Form>
+
+        <form:Form
+            id="idContractDates"
+            editable="true"
+            visible="{= ${st>/SelectedCountry} === 'PL'}"
+        >
+            <form:layout>
+                <form:ResponsiveGridLayout
+                    labelSpanXL="3"
+                    labelSpanL="3"
+                    labelSpanM="3"
+                    labelSpanS="12"
+                    adjustLabelSpan="false"
+                    emptySpanXL="4"
+                    emptySpanL="4"
+                    emptySpanM="4"
+                    emptySpanS="0"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1"
+                    singleContainerFullSize="false"
+                />
+            </form:layout>
+            <form:formContainers>
+                <form:FormContainer>
+                    <form:formElements>
+                       <form:FormElement label="{i18n>ContractStartDate}">
+                            <form:fields>            
+                                <DatePicker 
+                                    value="{
+                                        path :'ui>ContractStartDate', 
+                                        type: 'sap.ui.model.type.Date', 
+                                        formatOptions: { 
+                                            pattern: 'dd.MM.yyyy', 
+                                            UTC:true
+                                        }
+                                    }" 
+                                    enabled="{ui>/ContractInformation/editMode}"
+                                />
+                            </form:fields>
+					    </form:FormElement>	
+                        <form:FormElement label="{i18n>ContractEndDate}">
+                            <form:fields>            
+                                <DatePicker 
+                                    value="{
+                                        path :'ui>ContractEndDate', 
+                                        type: 'sap.ui.model.type.Date', 
+                                        formatOptions: { 
+                                            pattern: 'dd.MM.yyyy', 
+                                            UTC:true
+                                        }
+                                    }" 
+                                    minDate="{ui>ContractStartDate}"
+                                    enabled="{ui>/ContractInformation/editMode}"
+                                />
+                            </form:fields>
+					    </form:FormElement>	
                     </form:formElements>
                 </form:FormContainer>
             </form:formContainers>
