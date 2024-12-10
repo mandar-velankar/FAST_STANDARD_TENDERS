@@ -20,6 +20,7 @@
 					text="Edit"
 					press=".onAwardedContractDurationFormEditBtnPress"
 					visible="{= !${ui>/ContractDuration/editMode} }"
+					enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
 				/>
 				<Button
 					icon="sap-icon://save"

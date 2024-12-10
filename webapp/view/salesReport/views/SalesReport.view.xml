@@ -1,0 +1,184 @@
+<mvc:View
+	controllerName="com.bayer.tender.statenderapp.controller.SalesReport.SalesReport"
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	<f:DynamicPage
+		preserveHeaderStateOnScroll="true"
+		toggleHeaderOnTitleClick="false">
+		
+		<!-- DynamicPage Title -->
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text ="{i18n>SalesReport}"/>
+				</f:heading>
+			</f:DynamicPageTitle>
+		</f:title>
+
+
+		<f:content>
+			<VBox >
+				<OverflowToolbar height="8rem" class="sapFDynamicPageAlignContent">
+					<HBox width="100%" alignItems="Start">
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Country"
+									labelFor="idSalesReportCountry"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportCountry" 
+								>
+									<core:Item key="PL" text="Poland"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="TenderID"
+									labelFor="idSalesReportTenderID"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportTenderID" 
+								>
+									<core:Item key="PL-24-1001" text="PL-24-1001"/>
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Wholesaler"
+									labelFor="idSalesReportWholesaler"
+									class="sapUiSmallMarginEnd"
+									width="5rem"	
+								/>
+								<Select 
+									id="idSalesReportWholesaler" 
+								>
+									<core:Item key="100000307" text="WARPHARMLOGIS"/>
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Brand"
+									labelFor="idSalesReportBrand"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportBrand" 
+								>
+									<core:Item key="0811B20105" text="Xarelto"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Product"
+									labelFor="idSalesReportProduct"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportProduct" 
+								>
+									<core:Item key="208757" text="XARELTO 20 MG TAFI BLI X 28"/>
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="KAM Territory"
+									labelFor="idSalesReportKAMTerritory"
+									class="sapUiSmallMarginEnd"	
+									width="7rem"
+								/>
+								<Select 
+									id="idSalesReportKAMTerritory" 
+								>
+									<core:Item key="All" text="All"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Institute Type"
+									labelFor="idSalesReportInstituteType"
+									class="sapUiSmallMarginEnd"	
+									width="7rem"
+								/>
+								<Select 
+									id="idSalesReportInstituteType" 
+								>
+									<core:Item key="All" text="All"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Institute"
+									labelFor="idSalesReportInstitute"
+									class="sapUiSmallMarginEnd"	
+									width="7rem"
+								/>
+								<Select 
+									id="idSalesReportInstitute" 
+								>
+									<core:Item key="All" text="All"/>
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="From"
+									labelFor="idSalesReportFromDate"
+									class="sapUiSmallMarginEnd"	
+								/>
+								<DatePicker 
+									id="idSalesReportFromDate" 
+								/>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="To"
+									labelFor="idSalesReportToDate"
+									class="sapUiSmallMarginEnd"	
+								/>
+								<DatePicker 
+									id="idSalesReportToDate" 
+								/>
+							</HBox>
+						</VBox>
+					</HBox>
+				</OverflowToolbar>
+
+				<Panel expanded="true" expandable="true" headerText="Overview">
+					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.salesReport.fragments.Overview" type="XML"/>
+				</Panel>
+
+				<Panel expanded="true" expandable="true" headerText="Sales Details">
+					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.salesReport.fragments.SalesDetails" type="XML"/>
+				</Panel>
+			</VBox>
+		</f:content>
+	</f:DynamicPage>
+</mvc:View>

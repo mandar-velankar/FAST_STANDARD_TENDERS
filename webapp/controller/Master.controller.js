@@ -1022,6 +1022,13 @@ sap.ui.define([
 		onDownloadExtractOffers: function () {
 			const url = "/v2/sta_tender/ExtractNLHistoricalInformation(templateId=1)/content";
 			URLHelper.redirect(url, true);
+		},
+
+		onOpenSalesReportScreen: function () {
+			var bReplace = !Device.system.phone;
+			this.getRouter().navTo("salesReport", {
+				layout: "OneColumn"
+			}, bReplace);
 		}
 	});
 
