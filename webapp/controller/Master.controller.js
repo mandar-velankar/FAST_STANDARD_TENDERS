@@ -1024,8 +1024,11 @@ sap.ui.define([
 			URLHelper.redirect(url, true);
 		},
 
-		onOpenPolandSalesReportScreen: function () {
-			
+		onOpenSalesReportScreen: function () {
+			var bReplace = !Device.system.phone;
+			this.getRouter().navTo("salesReport", {
+				layout: "OneColumn"
+			}, bReplace);
 		}
 	});
 

@@ -1,0 +1,58 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+    xmlns:tree="sap.ui.table"
+>   
+	
+
+    <VBox >
+        <tree:TreeTable 
+            id="idSalesOverviewTable"
+            rows="{ui>/rows}"
+            selectionMode="None"
+            fixedRowCount="1"
+        >
+            <tree:columns>
+                <tree:Column>
+                    <Label text="" />
+                    <tree:template>
+                        <Text text="{ui>ProductPackName}" />
+                    </tree:template>
+                </tree:Column>
+                <tree:Column>
+                    <Label text="Minimum Price" />
+                    <tree:template>
+                        <Text text="{ui>MinPrice}" />
+                    </tree:template>
+                </tree:Column>
+                <tree:Column>
+                    <Label text="Average Price" />
+                    <tree:template>
+                        <Text text="{ui>AveragePrice}" />
+                    </tree:template>
+                </tree:Column>
+                <tree:Column>
+                    <Label text="Maximum Price" />
+                    <tree:template>
+                        <Text text="{ui>MaxPrice}" />
+                    </tree:template>
+                </tree:Column>
+                <tree:Column>
+                    <Label text="Quantity Sold" />
+                    <tree:template>
+                        <Text text="{ui>QuantitySold}" />
+                    </tree:template>
+                </tree:Column>
+                <tree:Column>
+                    <Label text="Total Sales" />
+                    <tree:template>
+                        <Text text="{ui>TotalSales}" />
+                    </tree:template>
+                </tree:Column>
+            </tree:columns>
+        </tree:TreeTable>
+
+	</VBox>
+
+</core:FragmentDefinition>
