@@ -1,0 +1,96 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:form="sap.ui.layout.form" 
+>   
+	
+
+    <VBox >
+		<Table 
+			id="idSalesDetailTable" 
+		>
+		<headerToolbar>
+			<!-- <OverflowToolbar>
+					<Title text="{i18n>ProductInformation}" />
+			</OverflowToolbar> -->
+		</headerToolbar>
+			<columns>
+				<Column>
+					<Label text="OfferID" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="Wholesaler Name" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="Institute" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="Customer ID" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="Date" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="Brand" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="Product" wrapping="true"/>
+				</Column>
+				<Column>
+					<Label text="EAN Number" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Quantity [Units]" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Quantity [ML]" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="List Price" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Special Price" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Wholesaler Purchased Amount" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Net Sales" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Contract Product Volume" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Used Brand Volume" wrapping="true"/>
+				</Column>
+				<Column >
+					<Label text="Contract Brand Usage" wrapping="true"/>
+				</Column>
+			</columns>
+			<items>
+				<ColumnListItem>
+					<cells>
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+						<Text text=""/>	
+					</cells>
+				</ColumnListItem>
+			</items>
+		</Table>
+	</VBox>
+
+</core:FragmentDefinition>

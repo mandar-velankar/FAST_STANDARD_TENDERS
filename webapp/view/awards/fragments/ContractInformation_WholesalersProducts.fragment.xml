@@ -7,7 +7,7 @@
 	<Dialog title="{i18n>ContractInformationFragment.AssignDistributor}" contentWidth="550px">
 		<buttons>
 			<Button 
-                text="Save" 
+                text="Apply" 
                 press=".onButtonApplyWholesalersProductsPress" 
             />
 			<Button 
