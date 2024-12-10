@@ -89,9 +89,17 @@
                         }">
                     </Text> 
                     <HBox>
-                        <Input 
-                            type="Number" 
-                            value="{path:'FreeGoodsOther'}" 
+                        <Input  
+                            value="{
+                                    path:'FreeGoodsOther',
+                                    type: 'sap.ui.model.type.Float',
+										formatOptions: {
+											maxFractionDigits: 0,
+                                            minFractionDigits: 0, 
+                                            groupingEnabled: true, 
+                                            groupingSeparator: ','
+										}
+                                    }" 
                             visible="{= 
                                 ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
                                 ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false 
@@ -107,9 +115,17 @@
                             }"
                         /> 
                     </HBox>
-                    <Input 
-                        type="Number" 
-                        value="{path:'FreeGoodsOther_Step'}" 
+                    <Input
+                        value="{
+                                path:'FreeGoodsOther_Step',
+                                type: 'sap.ui.model.type.Integer',
+									formatOptions: { 
+										maxFractionDigits: 0,
+										minFractionDigits: 0, 
+										groupingEnabled: true, 
+										groupingSeparator: ','
+									}
+                                }" 
                         enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
                     />
                     <Button 

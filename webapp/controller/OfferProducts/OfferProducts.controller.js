@@ -160,14 +160,10 @@ sap.ui.define([
 		_bindHaematologyForms: async function(formName, tenderId, offerId, tabName, groupID){
 			const entity = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab(tabName).getXMLView().getFormByName(formName).getEntity();
 			const form = this.byId(`id${formName}`);
-			let path = "";
-			if (tenderId && offerId && offerId !== "NA") {
-				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
-					TenderID: tenderId,
-					OfferID: offerId
-				});
-			}
-			
+			let path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
+				TenderID: tenderId,
+				OfferID: offerId
+			});
 			form.bindElement({
 				path: path,
 				groupId: groupID
@@ -318,6 +314,7 @@ sap.ui.define([
 				this.byId('notificationButton').setEnabled(true)
 			}
 			this.showMessageCompositeView("Offer Products Created", messages, "Success");
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		_onSubmitChangesOfferProductFail: function (error) {},
@@ -337,16 +334,30 @@ sap.ui.define([
 			}
 		},
 		onOfferFormSaveBtnPress: function(event){
-			this.getModel("ui").setProperty('/OfferForm/editMode', false);
-			this.getModel("ui").setProperty('/isCopiedOffer', false);
-			const form = this.byId(`idOfferForm`);
-			//if(!this.validateOffer()) return; //error
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
-			this.defaultModel.submitChanges({groupId: "OfferformInfo"}); //no error - save
-			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
-			//this.getModel().refresh();
+			if (this.getTargets(["OfferFormView"]).length > 0) {
+				this.getModel("ui").setProperty('/OfferForm/editMode', false);
+				this.getModel("ui").setProperty('/isCopiedOffer', false);
+				const form = this.byId(`idOfferForm`);
+				//if(!this.validateOffer()) return; //error
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/APPROVALS_SENT", 0); //for mandatory field check in sta-service
+				this.defaultModel.submitChanges({
+					success: this._onSubmitChangesOfferSuccess.bind(this),
+					error: this._onSubmitChangesFail.bind(this),
+					groupId: "OfferformInfo"
+				}); //no error - save
+				//this.getModel().refresh();
+			}else {
+				this.onOfferFormCancelBtnPress();
+			}
 		},
+
+		_onSubmitChangesOfferSuccess: function () {
+			const form = this.byId(`idOfferForm`);
+			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+		},
+
 		onOfferFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/OfferForm/editMode', false);
 			this.getModel("ui").setProperty('/isCopiedOffer', false);	
@@ -717,7 +728,9 @@ sap.ui.define([
 										MinInvoiceAmount:0,
 										UoM: 'Pack',
 										SubmittedOn: new Date().toISOString(),
-										SubmittedBy: userId
+										SubmittedBy: userId,
+										SUPPLY_UPDATE: 0,
+										PAYMENT_UPDATE: 0
 									}
 					});
 					const newItem = table.getBindingInfo("items").template.clone();
@@ -1390,7 +1403,7 @@ sap.ui.define([
 				this.byId("SendNotificationMailDialog").destroy();
 		},
 		onGetNotificationContent: function () {
-			const url = window.location.href
+			const url = this._getNotificationOfferURL();
 			this.defaultModel.callFunction("/getNotificationMailTemplate", {
 				method:"GET", 
 				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
@@ -1548,12 +1561,16 @@ sap.ui.define([
 		},
 
 		onComplianceOfficerSaveBtnPress: function(){
-			const form = this.byId(`idComplianceOfficer`);
-			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-			this.getModel().submitChanges({
-				success: this.onComplianceOfficerRequestSuccess.bind(this),
-				groupId: "ComplianceOfficerView"
-			});
+			if (this.getTargets(["ComplianceOfficerView"]).length > 0) {
+				const form = this.byId(`idComplianceOfficer`);
+				this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.getModel().submitChanges({
+					success: this.onComplianceOfficerRequestSuccess.bind(this),
+					groupId: "ComplianceOfficerView"
+				});
+			}else {
+				this.onComplianceofficerCancelBtnPress();
+			}
 		},
 
 		onComplianceOfficerRequestSuccess: function(){
@@ -1566,6 +1583,7 @@ sap.ui.define([
 				this.onComplianceofficerCancelBtnPress();
 				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onComplianceofficerCancelBtnPress: function(){
@@ -1578,12 +1596,16 @@ sap.ui.define([
 		},
 
 		onGlobalStrategicMarketingSaveBtnPress: function(){
-			const form = this.byId(`idGlobalStrategicMarketing`);
-			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-            this.getModel().submitChanges({
-				success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
-				groupId: "GlobalStrategicMarketingView"
-			});
+			if (this.getTargets(["GlobalStrategicMarketingView"]).length > 0) {
+				const form = this.byId(`idGlobalStrategicMarketing`);
+				this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.getModel().submitChanges({
+					success: this.onGlobalStrategicMarketingRequestSuccess.bind(this),
+					groupId: "GlobalStrategicMarketingView"
+				});
+			}else {
+				this.onGlobalStrategicMarketingCancelBtnPress();
+			}
 		},
 
 		onGlobalStrategicMarketingRequestSuccess: function(){
@@ -1596,6 +1618,7 @@ sap.ui.define([
 				this.onGlobalStrategicMarketingCancelBtnPress();
 				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onGlobalStrategicMarketingCancelBtnPress: function(){
@@ -1608,12 +1631,16 @@ sap.ui.define([
 		},
 
 		onSupplyManagementSaveBtnPress: function(){
-			const form = this.byId(`idSupplyManagement`);
-			this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
-            this.getModel().submitChanges({
-				success: this.onSupplyManagementRequestSuccess.bind(this),
-				groupId: "SupplyManagementView"
-			});
+			if (this.getTargets(["SupplyManagementView"]).length > 0) {
+				const form = this.byId(`idSupplyManagement`);
+				this.getModel().setProperty(form?.getBindingContext()?.getPath() + "/DistributorComments", this.productScope); //for mandatory field check in sta-service
+				this.getModel().submitChanges({
+					success: this.onSupplyManagementRequestSuccess.bind(this),
+					groupId: "SupplyManagementView"
+				});
+			}else {
+				this.onSupplyManagementCancelBtnPress();
+			}
 		},
 
 		onSupplyManagementRequestSuccess: function(){
@@ -1626,6 +1653,7 @@ sap.ui.define([
 				this.onSupplyManagementCancelBtnPress();
 				this.bindAllHaematologyForms(this.objectId, this.offerID);
 			}
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
 
 		onSupplyManagementCancelBtnPress: function(){
@@ -1634,7 +1662,7 @@ sap.ui.define([
 		},
 		onSendNotificationForHematology: function (oEvent) {
 			BusyIndicator.show(1);
-			const url = window.location.href
+			const url = this._getNotificationOfferURL();
 			this.defaultModel.callFunction("/sendHematologyNotificationMailTemplate", {
 				method:"POST", 
 				urlParameters: {
@@ -1656,5 +1684,15 @@ sap.ui.define([
 			MessageBox.error(errorMessage);
 			BusyIndicator.hide();
 		},
+
+		_getNotificationOfferURL: function () {
+			let url = window.location.href;
+
+			if (url.search('index.html') == -1) {
+				url = url.split('#').join('index.html#')
+			}
+
+			return url;
+		}
 	});
 });

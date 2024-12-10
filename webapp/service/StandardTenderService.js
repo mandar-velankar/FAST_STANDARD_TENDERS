@@ -335,6 +335,23 @@ sap.ui.define([
 			}
 			return offerValidation;
 		},
+
+		resetOfferApprovalSent: async function (OfferID) {
+			const path = this.model.createKey("/PT_TMOFRS", {
+				OfferID: OfferID
+			});
+			return new Promise((resolve, reject) => {
+				this.model.update(path, {
+					APPROVALS_SENT: 0
+				},
+				{
+					success: function (res) {
+						resolve(res); // Resolve the promise on success
+					},
+				});
+			});
+		},
+		
 		getUserInfo: async function(cwid){
 			return new Promise((resolve, reject) => {
 				this.model.read("/Users", {
@@ -347,5 +364,16 @@ sap.ui.define([
 				});
 			})
 		},
+
+		getPriceCondition: function (path) {
+			return new Promise((resolve, reject) => {
+				this.model.read(path,
+				{
+					success: function (res) {
+						resolve(res); // Resolve the promise on success
+					},
+				});
+			});
+		} 
     });
 });

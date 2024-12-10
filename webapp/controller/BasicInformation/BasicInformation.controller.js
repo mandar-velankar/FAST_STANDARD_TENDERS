@@ -35,6 +35,7 @@ sap.ui.define([
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			
 			this.objectId = objectId;
+			this.offerId = offerId;
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
 
@@ -170,7 +171,7 @@ sap.ui.define([
 				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
+						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分支機構"){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
@@ -272,20 +273,23 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/TenderForm/editMode', true);
 		},
 		onTenderFormSaveBtnPress: function(event){
-
-			const messages = this.getMessages(["TenderFormView"]);
-			const form = this.byId(`idTenderForm`);
-			const separator = this.countryCode === 'NL' ? ';' : ',';
-			let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
-			this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
-			prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
-			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
-			this.defaultModel.submitChanges({
-				error: this._onSubmitChangesFail.bind(this),
-				success: this._onSubmitChangesTenderFormSuccess.bind(this),
-				groupId: "Basicinfo"
-			}); 
+			if (this.getTargets(["TenderFormView"]).length > 0) {
+				const messages = this.getMessages(["TenderFormView"]);
+				const form = this.byId(`idTenderForm`);
+				const separator = this.countryCode === 'NL' ? ';' : ',';
+				let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
+				this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
+				prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
+				this.defaultModel.submitChanges({
+					error: this._onSubmitChangesFail.bind(this),
+					success: this._onSubmitChangesTenderFormSuccess.bind(this),
+					groupId: "Basicinfo"
+				}); 
+			}else {
+				this.onTenderFormCancelBtnPress();
+			}
 		},
 
 		_onSubmitChangesFail: function(error){
@@ -297,7 +301,11 @@ sap.ui.define([
 			this.setMessageSection(["TenderFormView"], "basicInfoMsg");
 			const hasErrorMessages = messages.length > 0;
 			!hasErrorMessages && this.getModel("ui").setProperty('/TenderForm/editMode', false);
-			this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
+
+			this.stState.getService().resetOfferApprovalSent(this.offerId).then((data) => {
+				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
+				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			});
 		},
 
 		onTenderFormCancelBtnPress: function(event){

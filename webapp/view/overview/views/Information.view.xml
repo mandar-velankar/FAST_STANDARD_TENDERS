@@ -64,7 +64,7 @@
 									<MenuItem text="{ui>name}" press=".onDownloadWord"/>
 								</items>
 							</MenuItem>
-							<MenuItem id="btnPDFDownload" text="Email PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0 &amp;&amp; (${st>/SelectedCountry} === 'PK' || ${st>/SelectedCountry} === 'NL')}" items="{ui>/WordTemplateCountry}">
+							<MenuItem id="btnPDFDownload" text="Email PDF" icon="sap-icon://pdf-attachment" visible="{= ${ui>/WordTemplateCountry/length} > 0 &amp;&amp; (${st>/SelectedCountry} === 'PK' || ${st>/SelectedCountry} === 'NL' || isCHCountrySelected)}" items="{ui>/WordTemplateCountry}">
 								<items>
 									<MenuItem text="{ui>name}" press=".onDownloadPdf"/>
 								</items>
@@ -278,7 +278,10 @@
 							<Text text="{ui>FOCProductName}"/>
 							<Text text="{ui>ADD_INCLUDE}"/>
 							<Text text="{ui>Type}"/>
-							<Text text="{ui>Bonus}"/>
+							<Text text="{
+                                    path: 'ui>Bonus',
+                                    formatter: '.formatter.formatBonus'
+                                }" />
 							<Text 
 								text ="{
 									path: 'ui>MinOrderQty',

@@ -150,6 +150,35 @@ sap.ui.define([
 				groupingSeparator: ','
 			});
 			return `${numberFormat.format(value)} ${uom}`;
-		}	
+		},
+		
+		formatBonus: function (bonus) {
+            if (!bonus) {
+                return "";
+            }
+            var oNumberFormat = sap.ui.core.format.NumberFormat.getFloatInstance({
+                maxFractionDigits: 0,
+                minFractionDigits: 0,
+                groupingEnabled: true,
+                groupingSeparator: ",",
+                decimalSeparator: "."
+            });
+            // Remove '%' if it exists, format the number, and add '%' back if needed
+            if (bonus.includes("%")) {
+                var value = parseFloat(bonus.replace("%", ""));
+                return oNumberFormat.format(value) + "%";
+            } else {
+                var [numberPart, unitPart] = bonus.split(" ");
+                var formattedNumber = oNumberFormat.format(parseFloat(numberPart));
+                return unitPart ? formattedNumber + " " + unitPart : formattedNumber;
+            }
+        },
+		formatInternalBidDueDateDatePickerMinDate: function (today, OfferDueDate) {
+            if (today >= OfferDueDate) {
+                return OfferDueDate;
+            }else {
+                return today;
+            }
+        }
 	};
 });

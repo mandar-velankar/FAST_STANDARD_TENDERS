@@ -51,7 +51,8 @@ sap.ui.define([
 				OverviewForm:{
 					editMode: false
 				},
-				enableApprovalButton: false
+				enableApprovalButton: false,
+				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch')
 			});
 			
 			this.setModel(oModel, "ui");
@@ -116,7 +117,7 @@ sap.ui.define([
 					TenderID: this.tenderId,
 					OfferID: this.offerId,
 					TenderInstitute: String(selectedTender?.InstituteID),
-					OfferInstitute: this.countryCode === 'NL' ? String(selectedTender?.InstituteID) : String(selectedOffer?.QuotationInstituteID),
+					OfferInstitute: this.countryCode === 'PK' ? String(selectedTender?.QuotationInstituteID) : String(selectedOffer?.InstituteID),
 					UserEmail: "",
 					UserName: "",
 					Sent: false
@@ -208,17 +209,25 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/OverviewForm/editMode', true);
 		},
 		onOverviewTenderFormSaveBtnPress: function(event){
-			
-			this.setMessageSection(["OfferValidation"], "overviewTenderFormMsg");
+			if (this.getTargets(["OfferValidation"]).length > 0) {
+				this.setMessageSection(["OfferValidation"], "overviewTenderFormMsg");
 
-			this.defaultModel.submitChanges({
-				success: this.onOverviewTenderFormSuccess.bind(this),
-				groupId: "OverviewForm"
-			}); 
+				this.defaultModel.submitChanges({
+					success: this.onOverviewTenderFormSuccess.bind(this),
+					groupId: "OverviewForm"
+				}); 
+			}else {
+				this.onOverviewTenderFormCancelBtnPress();
+			}
 		},
 		onOverviewTenderFormSuccess: function(res){
 			const hasErrorMessages = this.getMessages(["OfferValidation"]).length > 0;
-			!hasErrorMessages && this.getModel("ui").setProperty('/OverviewForm/editMode', false);
+			if (!hasErrorMessages) {
+				this.getModel("ui").setProperty('/OverviewForm/editMode', false);
+				this.stState.getService().resetOfferApprovalSent(this.offerId).then((data) => {
+					this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+				});
+			}
 		},
 
 		onOverviewTenderFormCancelBtnPress: function(event){
