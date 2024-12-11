@@ -10,13 +10,16 @@ sap.ui.define([
             if(!parts){
                 return "";
             }
+            const countryGroupingSeparators = {
+                'PL': ' '
+            }
             const oCurrencyFormat = NumberFormat.getIntegerInstance({
                 maxFractionDigits: 0,
                 minFractionDigits: 0,
                 groupingEnabled:true,
-                groupingSeparator: ','
+                groupingSeparator: countryGroupingSeparators[parts[1]] ? countryGroupingSeparators[parts[1]] : ","
             });
-            return parts[2] === 'MEA' || (parts[2] !== 'MEA' && parts[1]?.toLowerCase()?.includes('hm')) ? oCurrencyFormat.format(Number(parts[0] ?? 0)) : parts[0] ;
+            return parts[2] === 'MEA' || (parts[2] !== 'MEA' && parts[1]?.toLowerCase()?.includes('hm'))|| parts[1] === 'PL' ? oCurrencyFormat.format(Number(parts[0] ?? 0)) : parts[0] ;
         },
 
         parseValue: function(number) {
