@@ -14,37 +14,37 @@
             fixedRowCount="1"
         >
             <tree:columns>
-                <tree:Column>
+                <tree:Column sortProperty="BrandName">
                     <Label text="" />
                     <tree:template>
                         <Text text="{ui>ProductPackName}" />
                     </tree:template>
                 </tree:Column>
-                <tree:Column>
+                <tree:Column sortProperty="MinPrice">
                     <Label text="Minimum Price" />
                     <tree:template>
                         <Text text="{ui>MinPrice}" />
                     </tree:template>
                 </tree:Column>
-                <tree:Column>
+                <tree:Column sortProperty="AvgPrice">
                     <Label text="Average Price" />
                     <tree:template>
                         <Text text="{ui>AveragePrice}" />
                     </tree:template>
                 </tree:Column>
-                <tree:Column>
+                <tree:Column sortProperty="MaxPrice">
                     <Label text="Maximum Price" />
                     <tree:template>
                         <Text text="{ui>MaxPrice}" />
                     </tree:template>
                 </tree:Column>
-                <tree:Column>
+                <tree:Column sortProperty="QuantitySold">
                     <Label text="Quantity Sold" />
                     <tree:template>
                         <Text text="{ui>QuantitySold}" />
                     </tree:template>
                 </tree:Column>
-                <tree:Column>
+                <tree:Column sortProperty="TotalSales">
                     <Label text="Total Sales" />
                     <tree:template>
                         <Text text="{ui>TotalSales}" />
