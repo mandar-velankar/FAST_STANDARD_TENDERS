@@ -37,8 +37,22 @@
 								/>
 								<Select 
 									id="idSalesReportCountry" 
+									selectedKey="{st>/SelectedCountry}"
+									items="{ 
+										path: '/UserCountries', 
+										parameters: {
+											expand: 'Country'
+										},
+										sorter: { 
+											path: 'Country/CountryName' 
+										},
+										events: {
+											dataReceived: '.onCountriesReceived'
+										}
+									}"
+									change=".onCountriesReceived"
 								>
-									<core:Item key="PL" text="Poland"/>
+									<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
 								</Select>
 							</HBox>
 							<HBox alignItems="Center" justifyContent="Start">
@@ -49,9 +63,11 @@
 									width="5rem"
 								/>
 								<Select 
-									id="idSalesReportTenderID" 
+									id="idSalesReportTenderID"
+									selectedKey="{st>/SelectedTenderId}"
+									change=".setFilter"
 								>
-									<core:Item key="PL-24-1001" text="PL-24-1001"/>
+									<core:Item key="{TenderID}" text="{TenderID}"/>
 								</Select>
 							</HBox>
 						</VBox>
@@ -66,8 +82,10 @@
 								/>
 								<Select 
 									id="idSalesReportWholesaler" 
+									selectedKey="{st>/SelectedWholesaler}"
+									change=".setFilter"
 								>
-									<core:Item key="100000307" text="WARPHARMLOGIS"/>
+									<core:Item text="{DistributorName}" key="{DistributorID}" />
 								</Select>
 							</HBox>
 						</VBox>
@@ -82,8 +100,10 @@
 								/>
 								<Select 
 									id="idSalesReportBrand" 
+									selectedKey="{st>/SelectedBrandID}"
+									change=".bindCountryBrandProducts"
 								>
-									<core:Item key="0811B20105" text="Xarelto"/>
+									<core:Item text="{BRANDNAME}" key="{BRANDID}" />
 								</Select>
 							</HBox>
 							<HBox alignItems="Center" justifyContent="Start">
@@ -94,9 +114,11 @@
 									width="5rem"
 								/>
 								<Select 
-									id="idSalesReportProduct" 
+									id="idSalesReportProduct"
+									selectedKey="{st>/SelectedProductId}"
+									change=".setFilter"
 								>
-									<core:Item key="208757" text="XARELTO 20 MG TAFI BLI X 28"/>
+									<core:Item key="{PRODUCT_ID}" text="{PRODUCT_NAME}"/>
 								</Select>
 							</HBox>
 						</VBox>
@@ -110,9 +132,11 @@
 									width="7rem"
 								/>
 								<Select 
-									id="idSalesReportKAMTerritory" 
+									id="idSalesReportKAMTerritory"
+									selectedKey="{st>/SelectedTerritory}"
+									change=".onTerritoryChange"
 								>
-									<core:Item key="All" text="All"/>
+									<core:Item key="{Territory}" text="{Territory}"/>
 								</Select>
 							</HBox>
 							<HBox alignItems="Center" justifyContent="Start">
@@ -123,9 +147,11 @@
 									width="7rem"
 								/>
 								<Select 
-									id="idSalesReportInstituteType" 
+									id="idSalesReportInstituteType"
+									selectedKey="{st>/SelectedInstituteType}"
+									change=".onInstituteTypeChange" 
 								>
-									<core:Item key="All" text="All"/>
+									<core:Item key="{InstituteType}" text="{InstituteType}"/>
 								</Select>
 							</HBox>
 							<HBox alignItems="Center" justifyContent="Start">
@@ -137,8 +163,10 @@
 								/>
 								<Select 
 									id="idSalesReportInstitute" 
+									selectedKey="{st>/SelectedInstitute}"
+									change=".setFilter"
 								>
-									<core:Item key="All" text="All"/>
+									<core:Item key="{InstituteID}" text="{InstituteName}"/>
 								</Select>
 							</HBox>
 						</VBox>
@@ -152,6 +180,15 @@
 								/>
 								<DatePicker 
 									id="idSalesReportFromDate" 
+									change=".setFilter" width="150px"
+									value = "{
+										path: 'st>/dateFrom',
+										type: 'sap.ui.model.type.Date',
+										formatOptions: { 
+											pattern: 'dd-MM-yyyy',
+											UTC: false
+										}
+                        			}"
 								/>
 							</HBox>
 						</VBox>
@@ -165,6 +202,17 @@
 								/>
 								<DatePicker 
 									id="idSalesReportToDate" 
+									change=".setFilter" width="150px"
+									minDate="{st>/dateFrom}"
+									enabled="{= !!${st>/dateFrom}}"
+									value = "{
+										path: 'st>/dateTo',
+										type: 'sap.ui.model.type.Date',
+										formatOptions: { 
+											pattern: 'dd-MM-yyyy',
+											UTC: false
+										}
+									}"
 								/>
 							</HBox>
 						</VBox>
