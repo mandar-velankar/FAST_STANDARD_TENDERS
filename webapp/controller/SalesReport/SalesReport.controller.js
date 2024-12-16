@@ -70,35 +70,16 @@ sap.ui.define([
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
 
-			const oModel = new JSONModel({
-				busy: false,
-				delay: 0,
-				rows: [
-					{
-						ProductPackName: "Brand",
-					},
-					{
-						ProductPackName: "Magnevist",
-						MinPrice: 10,
-						AveragePrice: 15,
-						MaxPrice: 20,
-						QuantitySold: 100,
-						TotalSales: 1500
-					},
-					{
-						ProductPackName: "Ultravist",
-						MinPrice: 12,
-						AveragePrice: 18,
-						MaxPrice: 22,
-						QuantitySold: 120,
-						TotalSales: 2160
-					}
-				]
-			});
-	
-			this.setModel(oModel, "ui");
-
 			this.stState = this.getOwnerComponent().getModel("st");
+		},
+		formatValue: function (Price, Currency, Region, CountryCode) {
+			if (Price === null) {
+				return ""
+			}else{
+				const currencyType =  this.getView().getController().customTypes.currency
+				return  new currencyType().getModelFormat().format([Price, Currency, Region, CountryCode])
+			}
+			
 		}
 	});
 

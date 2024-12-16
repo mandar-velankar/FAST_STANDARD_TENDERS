@@ -4,12 +4,10 @@
 	xmlns:form="sap.ui.layout.form" 
     xmlns:tree="sap.ui.table"
 >   
-	
-
     <VBox >
-        <tree:TreeTable 
+        <tree:Table 
             id="idSalesOverviewTable"
-            rows="{ui>/rows}"
+            rows="{/OverviewSectionView}"
             selectionMode="None"
             fixedRowCount="1"
         >
@@ -17,41 +15,56 @@
                 <tree:Column sortProperty="BrandName">
                     <Label text="" />
                     <tree:template>
-                        <Text text="{ui>ProductPackName}" />
+                        <Text text="{BrandName}" />
                     </tree:template>
                 </tree:Column>
                 <tree:Column sortProperty="MinPrice">
                     <Label text="Minimum Price" />
                     <tree:template>
-                        <Text text="{ui>MinPrice}" />
+                        <Text text="{
+								parts: ['MinPrice', 'Currency','Region', 'CountryCode'],
+								formatter: '.formatValue'
+							}"/>
                     </tree:template>
                 </tree:Column>
                 <tree:Column sortProperty="AvgPrice">
                     <Label text="Average Price" />
                     <tree:template>
-                        <Text text="{ui>AveragePrice}" />
+                        <Text text="{
+								parts: ['AvgPrice', 'Currency','Region', 'CountryCode'],
+								formatter: '.formatValue'
+							}"/>
                     </tree:template>
                 </tree:Column>
                 <tree:Column sortProperty="MaxPrice">
                     <Label text="Maximum Price" />
                     <tree:template>
-                        <Text text="{ui>MaxPrice}" />
+                        <Text text="{
+								parts: ['MaxPrice', 'Currency','Region', 'CountryCode'],
+								formatter: '.formatValue'
+							}"/>
                     </tree:template>
                 </tree:Column>
                 <tree:Column sortProperty="QuantitySold">
                     <Label text="Quantity Sold" />
                     <tree:template>
-                        <Text text="{ui>QuantitySold}" />
+                        <Text text="{
+								parts: ['QuantitySold', 'CountryCode'],
+								formatter: '.formatValue'
+							}"/>
                     </tree:template>
                 </tree:Column>
                 <tree:Column sortProperty="TotalSales">
                     <Label text="Total Sales" />
                     <tree:template>
-                        <Text text="{ui>TotalSales}" />
+                        <Text text="{
+								parts: ['TotalSales', 'Currency','Region', 'CountryCode'],
+								formatter: '.formatValue'
+							}"/>
                     </tree:template>
                 </tree:Column>
             </tree:columns>
-        </tree:TreeTable>
+        </tree:Table>
 
 	</VBox>
 
