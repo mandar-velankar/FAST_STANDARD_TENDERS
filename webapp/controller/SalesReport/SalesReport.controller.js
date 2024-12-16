@@ -515,6 +515,40 @@ sap.ui.define([
 			}
 			
 		},
+
+		onDownloadSalesReportExtract: async function () {
+			const templateId = await this.stState.getService().getTemplateIDByName("Sales Report");
+			const CountryCode = this.stState.getProperty("/SelectedCountry");
+			const TenderID = this.stState.getProperty("/SelectedTenderId");
+			const DistributorID = this.stState.getProperty("/SelectedWholesaler");
+			const BrandID = this.stState.getProperty("/SelectedBrandID");
+			const ProductPackID = this.stState.getProperty("/SelectedProductId");
+			const KAM_Territory = this.stState.getProperty("/SelectedTerritory");
+			const InstituteType = this.stState.getProperty("/SelectedInstituteType");
+			const InstituteID = this.stState.getProperty("/SelectedInstitute");
+			const DateFrom = this.byId("idSalesReportFromDate").getDateValue();
+			const DateTo = this.byId("idSalesReportToDate").getDateValue();
+			const selectedDateFrom = new CustomDateType().getModelFormat().format(DateFrom);
+            const selectedDateTo = new CustomDateType().getModelFormat().format(DateTo);
+
+			const path = this.getModel().createKey("/ExtractPolandSalesReport", {
+				templateId: templateId,
+				TenderID: TenderID,
+				CountryCode: CountryCode,
+				DistributorID: DistributorID,
+				BrandID: BrandID,
+				ProductPackID: ProductPackID,
+				KAM_Territory: KAM_Territory,
+				InstituteType: InstituteType,
+				InstituteID: InstituteID,
+				DateFrom: selectedDateFrom,
+				DateTo: selectedDateTo
+			});
+
+			const url = `/v2/sta_tender${path}/content`;
+			URLHelper.redirect(url, true);
+		}
+
 				
 	});
 

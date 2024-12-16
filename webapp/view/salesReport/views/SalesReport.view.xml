@@ -216,6 +216,8 @@
 								/>
 							</HBox>
 						</VBox>
+						<ToolbarSpacer />
+						<Button press=".onDownloadSalesReportExtract" text="Download" />
 					</HBox>
 				</OverflowToolbar>
 

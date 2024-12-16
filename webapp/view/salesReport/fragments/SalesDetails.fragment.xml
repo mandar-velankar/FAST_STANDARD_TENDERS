@@ -119,8 +119,8 @@
 								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
 							}"/>
 					<Text text="{
-								parts: ['BrandContractVolume', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+								parts: ['ContractBrandUsage', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 							}"/>
 				</cells>
 				</ColumnListItem>
