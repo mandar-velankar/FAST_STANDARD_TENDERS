@@ -178,7 +178,7 @@
 								</Select>
 							</HBox>
 						</VBox>
-
+						<ToolbarSpacer />
 						<VBox class="sapUiSmallMarginEnd">
 							<HBox alignItems="Center" justifyContent="Start">
 								<Label
@@ -189,7 +189,7 @@
 								/>
 								<DatePicker 
 									id="idSalesReportFromDate" 
-									change=".setFilter" width="150px"
+									change=".setFilter" width="100px"
 									value = "{
 										path: 'st>/dateFrom',
 										type: 'sap.ui.model.type.Date',
@@ -200,8 +200,6 @@
                         			}"
 								/>
 							</HBox>
-						</VBox>
-						<VBox class="sapUiSmallMarginEnd">
 							<HBox alignItems="Center" justifyContent="Start">
 								<Label
 									text="To"
@@ -211,7 +209,7 @@
 								/>
 								<DatePicker 
 									id="idSalesReportToDate" 
-									change=".setFilter" width="150px"
+									change=".setFilter" width="100px"
 									minDate="{st>/dateFrom}"
 									enabled="{= !!${st>/dateFrom}}"
 									value = "{
@@ -225,7 +223,6 @@
 								/>
 							</HBox>
 						</VBox>
-						<ToolbarSpacer />
 						<Button press=".onDownloadSalesReportExtract" text="Download" />
 					</HBox>
 				</OverflowToolbar>
