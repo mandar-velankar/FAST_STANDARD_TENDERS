@@ -51,7 +51,7 @@
 										}
 									}"
 									change=".onCountriesReceived"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
 								</Select>
@@ -67,7 +67,7 @@
 									id="idSalesReportTenderID"
 									selectedKey="{st>/SelectedTenderId}"
 									change=".setFilter"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item key="{TenderID}" text="{TenderID}"/>
 								</Select>
@@ -86,7 +86,7 @@
 									id="idSalesReportWholesaler" 
 									selectedKey="{st>/SelectedWholesaler}"
 									change=".setFilter"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item text="{DistributorName}" key="{DistributorID}" />
 								</Select>
@@ -105,7 +105,7 @@
 									id="idSalesReportBrand" 
 									selectedKey="{st>/SelectedBrandID}"
 									change=".bindCountryBrandProducts"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item text="{BRANDNAME}" key="{BRANDID}" />
 								</Select>
@@ -121,7 +121,7 @@
 									id="idSalesReportProduct"
 									selectedKey="{st>/SelectedProductId}"
 									change=".setFilter"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item key="{PRODUCT_ID}" text="{PRODUCT_NAME}"/>
 								</Select>
@@ -140,7 +140,7 @@
 									id="idSalesReportKAMTerritory"
 									selectedKey="{st>/SelectedTerritory}"
 									change=".onTerritoryChange"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item key="{Territory}" text="{Territory}"/>
 								</Select>
@@ -156,7 +156,7 @@
 									id="idSalesReportInstituteType"
 									selectedKey="{st>/SelectedInstituteType}"
 									change=".onInstituteTypeChange"
-									width="12rem" 
+									width="8rem" 
 								>
 									<core:Item key="{InstituteType}" text="{InstituteType}"/>
 								</Select>
@@ -172,13 +172,12 @@
 									id="idSalesReportInstitute" 
 									selectedKey="{st>/SelectedInstitute}"
 									change=".setFilter"
-									width="12rem"
+									width="8rem"
 								>
 									<core:Item key="{InstituteID}" text="{InstituteName}"/>
 								</Select>
 							</HBox>
 						</VBox>
-						<ToolbarSpacer />
 						<VBox class="sapUiSmallMarginEnd">
 							<HBox alignItems="Center" justifyContent="Start">
 								<Label
@@ -189,7 +188,7 @@
 								/>
 								<DatePicker 
 									id="idSalesReportFromDate" 
-									change=".setFilter" width="100px"
+									change=".setFilter" width="8rem"
 									value = "{
 										path: 'st>/dateFrom',
 										type: 'sap.ui.model.type.Date',
@@ -209,7 +208,7 @@
 								/>
 								<DatePicker 
 									id="idSalesReportToDate" 
-									change=".setFilter" width="100px"
+									change=".setFilter" width="8rem"
 									minDate="{st>/dateFrom}"
 									enabled="{= !!${st>/dateFrom}}"
 									value = "{
