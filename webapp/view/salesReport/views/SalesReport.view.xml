@@ -27,7 +27,7 @@
 			<VBox >
 				<OverflowToolbar height="8rem" class="sapFDynamicPageAlignContent">
 					<HBox width="100%" alignItems="Start">
-						<VBox class="sapUiMediumMarginEnd">
+						<VBox class="sapUiSmallMarginEnd">
 							<HBox alignItems="Center" justifyContent="Start">
 								<Label
 									text="Country"
@@ -51,6 +51,7 @@
 										}
 									}"
 									change=".onCountriesReceived"
+									width="12rem"
 								>
 									<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
 								</Select>
@@ -66,6 +67,7 @@
 									id="idSalesReportTenderID"
 									selectedKey="{st>/SelectedTenderId}"
 									change=".setFilter"
+									width="12rem"
 								>
 									<core:Item key="{TenderID}" text="{TenderID}"/>
 								</Select>
@@ -84,6 +86,7 @@
 									id="idSalesReportWholesaler" 
 									selectedKey="{st>/SelectedWholesaler}"
 									change=".setFilter"
+									width="12rem"
 								>
 									<core:Item text="{DistributorName}" key="{DistributorID}" />
 								</Select>
@@ -102,6 +105,7 @@
 									id="idSalesReportBrand" 
 									selectedKey="{st>/SelectedBrandID}"
 									change=".bindCountryBrandProducts"
+									width="12rem"
 								>
 									<core:Item text="{BRANDNAME}" key="{BRANDID}" />
 								</Select>
@@ -117,6 +121,7 @@
 									id="idSalesReportProduct"
 									selectedKey="{st>/SelectedProductId}"
 									change=".setFilter"
+									width="12rem"
 								>
 									<core:Item key="{PRODUCT_ID}" text="{PRODUCT_NAME}"/>
 								</Select>
@@ -135,6 +140,7 @@
 									id="idSalesReportKAMTerritory"
 									selectedKey="{st>/SelectedTerritory}"
 									change=".onTerritoryChange"
+									width="12rem"
 								>
 									<core:Item key="{Territory}" text="{Territory}"/>
 								</Select>
@@ -149,7 +155,8 @@
 								<Select 
 									id="idSalesReportInstituteType"
 									selectedKey="{st>/SelectedInstituteType}"
-									change=".onInstituteTypeChange" 
+									change=".onInstituteTypeChange"
+									width="12rem" 
 								>
 									<core:Item key="{InstituteType}" text="{InstituteType}"/>
 								</Select>
@@ -165,18 +172,20 @@
 									id="idSalesReportInstitute" 
 									selectedKey="{st>/SelectedInstitute}"
 									change=".setFilter"
+									width="12rem"
 								>
 									<core:Item key="{InstituteID}" text="{InstituteName}"/>
 								</Select>
 							</HBox>
 						</VBox>
 
-						<VBox class="sapUiMediumMarginEnd">
+						<VBox class="sapUiSmallMarginEnd">
 							<HBox alignItems="Center" justifyContent="Start">
 								<Label
 									text="From"
 									labelFor="idSalesReportFromDate"
 									class="sapUiSmallMarginEnd"	
+									width="2rem"
 								/>
 								<DatePicker 
 									id="idSalesReportFromDate" 
@@ -192,13 +201,13 @@
 								/>
 							</HBox>
 						</VBox>
-
-						<VBox class="sapUiMediumMarginEnd">
+						<VBox class="sapUiSmallMarginEnd">
 							<HBox alignItems="Center" justifyContent="Start">
 								<Label
 									text="To"
 									labelFor="idSalesReportToDate"
 									class="sapUiSmallMarginEnd"	
+									width="2rem"
 								/>
 								<DatePicker 
 									id="idSalesReportToDate" 
