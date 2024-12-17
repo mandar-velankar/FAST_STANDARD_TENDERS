@@ -84,8 +84,8 @@ sap.ui.define([
 			this.getModel("st").setProperty("/UserEmail", userEmail);
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.countryCode = sCountryCode;
-
-			this.bindTenderIds(sCountryCode);
+			this.userId = userID;
+			this.bindTenderIds();
 			this.bindWholesalers(sCountryCode);
 			this.bindCountryBrands(sCountryCode);
 			this.bindUserTerritories(sCountryCode);
@@ -94,29 +94,63 @@ sap.ui.define([
 			this.getModel("st").setProperty("/UserInfo", userInfo);
 		},
 
-		bindTenderIds: function (sCountryCode) {
+		bindTenderIds: function () {
 			const oSelectTenderIDs = this.byId("idSalesReportTenderID");
-			const controller = this; 
+			const controller = this;
+			const selectedBrand = this.byId("idSalesReportBrand").getSelectedKey();
+			const selectedProduct = this.byId("idSalesReportProduct").getSelectedKey();
+			const selectedInstituteType = this.byId("idSalesReportInstituteType").getSelectedKey();
+			const selectedInstitute = this.byId("idSalesReportInstitute").getSelectedKey();
+
+			// Build filters dynamically based on selections
+			const filters = [new Filter('createdBy', FilterOperator.EQ, this.userId)];
+
+			if (selectedBrand && !selectedBrand.toLowerCase().includes("all")) {
+				filters.push(new Filter("BrandId", FilterOperator.EQ, selectedBrand));
+			}
+			if (selectedProduct && !selectedProduct.toLowerCase().includes("all")) {
+				filters.push(new Filter("ProductPackID", FilterOperator.EQ, selectedProduct));
+			}
+			if (selectedInstituteType && !selectedInstituteType.toLowerCase().includes("all")) {
+				filters.push(new Filter("InstituteType", FilterOperator.EQ, selectedInstituteType));
+			}
+			if (selectedInstitute && !selectedInstitute.toLowerCase().includes("all")) {
+				filters.push(new Filter("InstituteID", FilterOperator.EQ, selectedInstitute));
+			}
+
 			oSelectTenderIDs?.bindItems({
-				path: "/PT_TMTEND",
-				filters: [
-					new Filter("CountryCode", FilterOperator.EQ, sCountryCode),
-					new Filter("Active", FilterOperator.EQ, 1)
-				],
+				path: "/SalesReportTenderView",
+				filters: filters,
 				sorter: new Sorter({
 					path: 'TenderID',
 					descending: false
 				}),
-				template: new sap.ui.core.Item({
+				template: new Item({
 					key: "{TenderID}",
 					text: "{TenderID}"
 				}),
 				templateShareable: true,
 				events: {
                     dataReceived: function(event) {
-                        let data = event.getParameter("data").results || [];
+                        let items = event.getParameter("data").results || [];
+
+						// Add "All" option to the items array
+						items.unshift({
+							TenderID: "All",
+							CountryCode: this.countryCode
+						});
+
+						// Manually set the filtered data back to the list control
+                        oSelectTenderIDs.destroyItems();
+                        items.forEach(item => {
+                            oSelectTenderIDs.addItem(new Item({
+                                key: item.TenderID,
+                                text: item.TenderID
+                            }));
+                        });
 
                         controller.stState.setProperty('/SelectedTenderId', "All");
+						controller.onFilter();
                     }
                 }
 			});
@@ -161,7 +195,7 @@ sap.ui.define([
                     path: 'BRANDNAME',
                     descending: false
                 }),
-                template: new sap.ui.core.Item({
+                template: new Item({
                     key: "{BRANDID}",
                     text: "{BRANDNAME}"
                 }),
@@ -194,7 +228,7 @@ sap.ui.define([
                     path: 'PRODUCT_NAME',
                     descending: false
                 }),
-                template: new sap.ui.core.Item({
+                template: new Item({
                     key: "{PRODUCT_ID}",
                     text: "{PRODUCT_NAME}"
                 }),
@@ -221,6 +255,7 @@ sap.ui.define([
 
 						// Default selection to "All"
 						controller.stState.setProperty('/SelectedProductId', "All_Products");
+						controller.bindTenderIds();
 						controller.onFilter();
                     }
                 }
@@ -236,7 +271,11 @@ sap.ui.define([
             territoryList.bindItems({
                 path: "/SalesReportInstitutesView",
                 filters: filters,
-                template: new sap.ui.core.Item({
+				sorter: new Sorter({
+                    path: 'Territory',
+                    descending: false
+                }),
+                template: new Item({
                     key: "{Territory}",
                     text: "{Territory}"
                 }),
@@ -360,6 +399,7 @@ sap.ui.define([
 			);
 		
 			this.bindInstitute(filteredData);
+			this.bindTenderIds();
 			
 			controller.onFilter();
 		},

@@ -120,7 +120,7 @@
 								<Select 
 									id="idSalesReportProduct"
 									selectedKey="{st>/SelectedProductId}"
-									change=".setFilter"
+									change=".bindTenderIds"
 									width="8rem"
 								>
 									<core:Item key="{PRODUCT_ID}" text="{PRODUCT_NAME}"/>
@@ -171,7 +171,7 @@
 								<Select 
 									id="idSalesReportInstitute" 
 									selectedKey="{st>/SelectedInstitute}"
-									change=".setFilter"
+									change=".bindTenderIds"
 									width="8rem"
 								>
 									<core:Item key="{InstituteID}" text="{InstituteName}"/>
