@@ -7,7 +7,12 @@
     <VBox >
         <tree:Table 
             id="idSalesOverviewTable"
-            rows="{/OverviewSectionView}"
+            rows="{
+                path: '/OverviewSectionView', 
+                events: {
+                    dataReceived: '.onOverviewSectionViewReceived'
+                }
+            }"
             selectionMode="None"
             fixedRowCount="1"
         >
@@ -50,7 +55,7 @@
                     <tree:template>
                         <Text text="{
 								parts: ['QuantitySold', 'CountryCode'],
-								formatter: '.formatValue'
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
 							}"/>
                     </tree:template>
                 </tree:Column>

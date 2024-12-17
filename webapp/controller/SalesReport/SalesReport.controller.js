@@ -373,6 +373,8 @@ sap.ui.define([
 			this.andFilters = [];
             const salesDetailTable = this.byId('idSalesDetailTable');
             const binding = salesDetailTable.getBinding('items');
+			const salesOverviewTable = this.byId('idSalesOverviewTable');
+			const overviewBinding = salesOverviewTable.getBinding('rows');
             const stState = this.stState;
             const dateFrom = this.byId("idSalesReportFromDate").getDateValue();
             const dateTo = this.byId("idSalesReportToDate").getDateValue();
@@ -501,8 +503,10 @@ sap.ui.define([
 				const oFilters = new Filter(this.andFilters, true);
 				//Binding to table with the filters and the sorters
 				binding?.filter(oFilters);
+				overviewBinding?.filter(oFilters)
 			} else {
 				binding?.filter();
+				overviewBinding?.filter()
 			}
         },
 
@@ -547,8 +551,16 @@ sap.ui.define([
 
 			const url = `/v2/sta_tender${path}/content`;
 			URLHelper.redirect(url, true);
+		},
+		onOverviewSectionViewReceived: function (oEvent) {
+			var oTable = this.byId("idSalesOverviewTable");
+			var oBinding = oTable.getBinding("rows");
+			var aRows = oBinding.getContexts();
+			
+			var iRowCount = aRows.length;
+		
+			oTable.setVisibleRowCount(iRowCount);
 		}
-
 				
 	});
 
