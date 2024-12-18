@@ -282,8 +282,13 @@ sap.ui.define([
                 templateShareable: true,
                 events: {
                     dataReceived: function(data) { 
-                        const items = (data.getParameter('data')?.results || [])
-                    .filter(item => item.Territory && item.Territory.trim() !== "");
+                        const salesReportInstituteData = (data.getParameter('data')?.results || [])
+							.filter(item => item.Territory && item.Territory.trim() !== "");
+
+						controller.stState.setProperty("/SalesReportInstitutesView", salesReportInstituteData);
+
+						const items = salesReportInstituteData.filter((value, index, self) => 
+							self.findIndex(v => v.Territory === value.Territory) === index);
 
 						// Add "All" option to the items array
 						items.unshift({
@@ -302,7 +307,6 @@ sap.ui.define([
 
 						// Default selection to "All"
 						controller.stState.setProperty('/SelectedTerritory', "All");
-						controller.stState.setProperty("/SalesReportInstitutesView", items);
 
 						controller.bindInstituteType(items);
                 		controller.bindInstitute(items);
