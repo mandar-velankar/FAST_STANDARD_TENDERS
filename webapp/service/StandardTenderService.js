@@ -374,6 +374,19 @@ sap.ui.define([
 					},
 				});
 			});
-		} 
+		},
+		getTemplateIDByName: function (name) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/ExcelTemplate",
+				{
+					filters: [
+						new Filter ("name", FilterOperator.EQ, name)
+					],
+					success: function (res) {
+						resolve(res?.results?.[0]?.templateId); // Resolve the promise on success
+					},
+				});
+			});
+        },
     });
 });
