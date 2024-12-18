@@ -1203,7 +1203,6 @@ sap.ui.define([
 					this.getModel("ui").setProperty('/ContractDuration/editMode', false);
 				}else if (this.countryCode == 'PL') {
 					await this.getPolandAwardedContractInformation();
-					MessageBox.success('Wholesalers were saved successfully');
 					this.getModel("ui").setProperty('/ContractInformation/editMode', false);
 				}
 				

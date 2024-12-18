@@ -7,7 +7,9 @@
 
     <VBox >
 		<Table 
-			id="idSalesDetailTable" 
+			id="idSalesDetailTable"
+			items="{/SalesReportView}"
+			growing="true"
 		>
 		<headerToolbar>
 			<!-- <OverflowToolbar>
@@ -68,26 +70,59 @@
 				</Column>
 			</columns>
 			<items>
-				<ColumnListItem>
-					<cells>
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-						<Text text=""/>	
-					</cells>
+				<ColumnListItem >
+					 <cells>
+					<Text text="{OfferID}" />
+					<Text text="{DistributorName}" />
+					<Text text="{MainInstituteName}" />
+					<Text text="{External_InstituteId}" />
+					<Text text="{
+									path: 'FilePeriod',
+									type: 'sap.ui.model.type.Date',
+									formatOptions: { 
+										pattern: 'dd-MM-yyyy'
+									}
+								}" />
+					<Text text="{BrandName}" />
+					<Text text="{PRODUCTPACKNAME}" />
+					<Text text="{EANNumber}" />
+					<Text text="{
+								parts: ['Quantity', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+							}"/>
+					<Text text="{
+								parts: ['QuantityMl', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+							}"/>
+					<Text text="{
+								parts: ['WholesalerPurchasePrice', 'Currency','Region', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+							}"/>
+					<Text text="{
+								parts: ['WholesalerContractPrice', 'Currency','Region', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+							}"/>
+					<Text text="{
+								parts: ['WholesalerPurchaseAmount', 'Currency','Region', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+							}"/>
+					<Text text="{
+								parts: ['NetSales', 'Currency','Region', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+							}"/>
+					<Text text="{
+								parts: ['RequestedVolume', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+							}"/>
+					<Text text="{
+								parts: ['BrandUsedVolume', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+							}"/>
+					<Text text="{
+								parts: ['ContractBrandUsage', 'CountryCode'],
+								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+							}"/>
+				</cells>
 				</ColumnListItem>
 			</items>
 		</Table>
