@@ -14,31 +14,31 @@
 			visibleRowCount="10"
 		>
 			<tree:columns>
-				<tree:Column sortProperty="OfferID">
+				<tree:Column sortProperty="OfferID" width="10rem">
 					<Label text="OfferID" wrapping="true"/>
 					<tree:template>
 						<Text text="{OfferID}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="DistributorName">
+				<tree:Column sortProperty="DistributorName" width="15rem">
 					<Label text="Wholesaler Name" wrapping="true"/>
 					<tree:template>
 						<Text text="{DistributorName}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="MainInstituteName">
+				<tree:Column sortProperty="MainInstituteName" width="18rem">
 					<Label text="Institute" wrapping="true"/>
 					<tree:template>
 						<Text text="{MainInstituteName}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="External_InstituteId">
+				<tree:Column sortProperty="External_InstituteId" width="15rem">
 					<Label text="Customer ID" wrapping="true"/>
 					<tree:template>
 						<Text text="{External_InstituteId}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="FilePeriod">
+				<tree:Column sortProperty="FilePeriod" width="15rem">
 					<Label text="Date" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -50,25 +50,25 @@
 						}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="BrandName">
+				<tree:Column sortProperty="BrandName" width="15rem">
 					<Label text="Brand" wrapping="true"/>
 					<tree:template>
 						<Text text="{BrandName}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="PRODUCTPACKNAME">
+				<tree:Column sortProperty="PRODUCTPACKNAME" width="20rem">
 					<Label text="Product" wrapping="true"/>
 					<tree:template>
 						<Text text="{PRODUCTPACKNAME}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="EANNumber">
+				<tree:Column sortProperty="EANNumber" width="15rem">
 					<Label text="EAN Number" wrapping="true"/>
 					<tree:template>
 						<Text text="{EANNumber}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="Quantity">
+				<tree:Column sortProperty="Quantity" width="15rem">
 					<Label text="Quantity [Units]" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -77,7 +77,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="QuantityMl">
+				<tree:Column sortProperty="QuantityMl" width="15rem">
 					<Label text="Quantity [ML]" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -86,7 +86,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="WholesalerPurchasePrice">
+				<tree:Column sortProperty="WholesalerPurchasePrice" width="15rem">
 					<Label text="List Price" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -95,7 +95,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="WholesalerContractPrice">
+				<tree:Column sortProperty="WholesalerContractPrice" width="15rem">
 					<Label text="Special Price" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -104,7 +104,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="WholesalerPurchaseAmount">
+				<tree:Column sortProperty="WholesalerPurchaseAmount" width="15rem">
 					<Label text="Wholesaler Purchased Amount" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -113,7 +113,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="NetSales">
+				<tree:Column sortProperty="NetSales" width="15rem">
 					<Label text="Net Sales" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -122,7 +122,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="RequestedVolume">
+				<tree:Column sortProperty="RequestedVolume" width="15rem">
 					<Label text="Contract Product Volume" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -131,7 +131,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="BrandUsedVolume">
+				<tree:Column sortProperty="BrandUsedVolume" width="15rem">
 					<Label text="Used Brand Volume" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -140,7 +140,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="ContractBrandUsage">
+				<tree:Column sortProperty="ContractBrandUsage"  width="15rem">
 					<Label text="Contract Brand Usage" wrapping="true"/>
 					<tree:template>
 						<Text text="{
