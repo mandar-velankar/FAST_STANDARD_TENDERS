@@ -2,130 +2,155 @@
 	xmlns="sap.m" 
 	xmlns:core="sap.ui.core" 
 	xmlns:form="sap.ui.layout.form" 
+	xmlns:tree="sap.ui.table"
 >   
 	
 
     <VBox >
-		<Table 
+		<tree:Table 
 			id="idSalesDetailTable"
-			items="{/SalesReportView}"
-			growing="true"
+			rows="{/SalesReportView}"
+			selectionMode="None"
+			visibleRowCount="10"
 		>
-		<headerToolbar>
-			<!-- <OverflowToolbar>
-					<Title text="{i18n>ProductInformation}" />
-			</OverflowToolbar> -->
-		</headerToolbar>
-			<columns>
-				<Column>
+			<tree:columns>
+				<tree:Column sortProperty="OfferID" width="10rem">
 					<Label text="OfferID" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{OfferID}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="DistributorName" width="15rem">
 					<Label text="Wholesaler Name" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{DistributorName}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="MainInstituteName" width="18rem">
 					<Label text="Institute" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{MainInstituteName}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="External_InstituteId" width="15rem">
 					<Label text="Customer ID" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{External_InstituteId}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="FilePeriod" width="15rem">
 					<Label text="Date" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{
+							path: 'FilePeriod',
+							type: 'sap.ui.model.type.Date',
+							formatOptions: { 
+								pattern: 'dd-MM-yyyy'
+							}
+						}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="BrandName" width="15rem">
 					<Label text="Brand" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{BrandName}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="PRODUCTPACKNAME" width="20rem">
 					<Label text="Product" wrapping="true"/>
-				</Column>
-				<Column>
+					<tree:template>
+						<Text text="{PRODUCTPACKNAME}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="EANNumber" width="15rem">
 					<Label text="EAN Number" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{EANNumber}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="Quantity" width="15rem">
 					<Label text="Quantity [Units]" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['Quantity', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="QuantityMl" width="15rem">
 					<Label text="Quantity [ML]" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['QuantityMl', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="WholesalerPurchasePrice" width="15rem">
 					<Label text="List Price" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['WholesalerPurchasePrice', 'Currency','Region', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="WholesalerContractPrice" width="15rem">
 					<Label text="Special Price" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['WholesalerContractPrice', 'Currency','Region', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="WholesalerPurchaseAmount" width="15rem">
 					<Label text="Wholesaler Purchased Amount" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['WholesalerPurchaseAmount', 'Currency','Region', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="NetSales" width="15rem">
 					<Label text="Net Sales" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['NetSales', 'Currency','Region', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="RequestedVolume" width="15rem">
 					<Label text="Contract Product Volume" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['RequestedVolume', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="BrandUsedVolume" width="15rem">
 					<Label text="Used Brand Volume" wrapping="true"/>
-				</Column>
-				<Column >
+					<tree:template>
+						<Text text="{
+							parts: ['BrandUsedVolume', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="ContractBrandUsage"  width="15rem">
 					<Label text="Contract Brand Usage" wrapping="true"/>
-				</Column>
-			</columns>
-			<items>
-				<ColumnListItem >
-					 <cells>
-					<Text text="{OfferID}" />
-					<Text text="{DistributorName}" />
-					<Text text="{MainInstituteName}" />
-					<Text text="{External_InstituteId}" />
-					<Text text="{
-									path: 'FilePeriod',
-									type: 'sap.ui.model.type.Date',
-									formatOptions: { 
-										pattern: 'dd-MM-yyyy'
-									}
-								}" />
-					<Text text="{BrandName}" />
-					<Text text="{PRODUCTPACKNAME}" />
-					<Text text="{EANNumber}" />
-					<Text text="{
-								parts: ['Quantity', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-							}"/>
-					<Text text="{
-								parts: ['QuantityMl', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-							}"/>
-					<Text text="{
-								parts: ['WholesalerPurchasePrice', 'Currency','Region', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
-							}"/>
-					<Text text="{
-								parts: ['WholesalerContractPrice', 'Currency','Region', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
-							}"/>
-					<Text text="{
-								parts: ['WholesalerPurchaseAmount', 'Currency','Region', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
-							}"/>
-					<Text text="{
-								parts: ['NetSales', 'Currency','Region', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
-							}"/>
-					<Text text="{
-								parts: ['RequestedVolume', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-							}"/>
-					<Text text="{
-								parts: ['BrandUsedVolume', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-							}"/>
-					<Text text="{
-								parts: ['ContractBrandUsage', 'CountryCode'],
-								type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
-							}"/>
-				</cells>
-				</ColumnListItem>
-			</items>
-		</Table>
+					<tree:template>
+						<Text text="{
+							parts: ['ContractBrandUsage', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+			</tree:columns>
+		</tree:Table>
 	</VBox>
 
 </core:FragmentDefinition>

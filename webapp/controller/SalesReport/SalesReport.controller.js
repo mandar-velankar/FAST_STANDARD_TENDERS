@@ -416,7 +416,7 @@ sap.ui.define([
             this.orFilters = [];
 			this.andFilters = [];
             const salesDetailTable = this.byId('idSalesDetailTable');
-            const binding = salesDetailTable.getBinding('items');
+            const binding = salesDetailTable.getBinding('rows');
 			const salesOverviewTable = this.byId('idSalesOverviewTable');
 			const overviewBinding = salesOverviewTable.getBinding('rows');
             const stState = this.stState;
