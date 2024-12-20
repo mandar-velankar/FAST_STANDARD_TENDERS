@@ -321,6 +321,17 @@ sap.ui.define([
 				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
 				new Filter("ConditionType",FilterOperator.NE, 'FOC')	
 			]
+
+			oSelectedTender.InstituteType === 'Public' && orFilters.push(
+				new Filter({
+					filters: [
+						new Filter("InstituteType",FilterOperator.EQ, oSelectedTender.InstituteType),
+						new Filter("InstituteType",FilterOperator.EQ, null)
+					],
+					and: false
+				})
+			);
+
 			oPriceCondBinding.filter(orFilters);
 		},
 	
