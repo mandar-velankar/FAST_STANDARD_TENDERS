@@ -180,10 +180,11 @@ sap.ui.define([
 					});
 			}else{
 				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender);
-				
+				const parentInst = await this.stState.getService().getInstitute(instituteInContract?.[0].ParentInstituteID, this.countryCode);
+
 				const offerValidation = await this.stState.getService().getOfferValidation(this.offerId);
 				awardedContractDurationForm.ContractStartDate = offerValidation && offerValidation.Tender_Custom_Date_1;
-
+				parentInst && instituteInContract.unshift(parentInst);
 				instituteInContract.map(function (item) {
 					const oToken = new Token({
 						text: item.InstituteName,
@@ -1038,13 +1039,34 @@ sap.ui.define([
 			oEvent.getSource().getBinding("items").filter(new Filter(oFilter));
 		},
 
-		handleAwardedInstituteGroupValueHelpUpdateFinished: function(){
+		handleAwardedInstituteGroupValueHelpUpdateFinished: async function(event){
             try{
 				const InstituteGroupMultiInputTokens = this.byId("idAwardedInstituteGroupMultiSelect").getTokens();
 				const InstituteGroupListDialog = this.byId("idAwardedInstituteGroupDialog");
 
+				const items = event.getParameter("data")?.results;
+				if (items && items.length > 0 && items[0].ParentInstituteID) {
+					const parentInst = await this.stState.getService().getInstitute(items?.[0].ParentInstituteID, this.countryCode);
+					InstituteGroupListDialog.addItem(new sap.m.ColumnListItem({
+						cells: [
+							new sap.m.Text({
+								text: parentInst.InstituteName,
+								customData: [
+									new sap.ui.core.CustomData({
+										key: "InstituteID",
+										value: parentInst.InstituteID
+									})
+								]
+							}),
+						]
+					}));
+				}
+
 				InstituteGroupMultiInputTokens.forEach(selectedItem => {
-					InstituteGroupListDialog?.getItems()?.find(item => item.getBindingContext().getObject().InstituteID == selectedItem.getProperty('key'))?.setSelected(true)
+					InstituteGroupListDialog?.getItems()?.find(item =>  item.getBindingContext().getPath().includes('InstitutesInGroup') || 
+																		item.getBindingContext().getPath().includes('PT_TMINST') ? 
+																	item.getBindingContext().getObject().InstituteID == selectedItem.getProperty('key') : 
+																	item.getCells()[0].getAggregation('customData')[0].getProperty('value')).setSelected(true)
 				})
 			}
 			catch(error){
@@ -1058,16 +1080,29 @@ sap.ui.define([
 		},
 
 		handleAwardedInstituteGroupHelpConfirm: function(oEvent){
-			const contexts = oEvent.getParameter('selectedContexts');
+			const selectedItems = oEvent.getParameter('selectedItems');
 			const InstituteGroupList = this.byId("idAwardedInstituteGroupMultiSelect");
-			let InstituteGroupTokens = [];
 
-			contexts.map(function (oContext) {
-				const oToken = new Token({
-					text: oContext.getObject().InstituteName,
-					key: oContext.getObject().InstituteID
+			let InstituteGroupTokens = selectedItems.map(function (item) {
+				const hasBindingContext = item.getBindingContext().getPath().includes('InstitutesInGroup') || 
+											item.getBindingContext().getPath().includes('PT_TMINST');
+				const obj = {
+					InstituteName: "",
+					InstituteID: "",
+				};
+
+				if (hasBindingContext) {
+					obj.InstituteName = item.getBindingContext().getObject().InstituteName;
+					obj.InstituteID = item.getBindingContext().getObject().InstituteID;
+				}else {
+					obj.InstituteName = item.getCells()[0].getProperty('text');
+					obj.InstituteID = item.getCells()[0].getAggregation('customData')[0].getProperty('value');
+				}
+
+				return new Token({
+					text: obj.InstituteName,
+					key: obj.InstituteID
 				});
-				InstituteGroupTokens.push(oToken);
 			});
 
 			InstituteGroupList.setTokens(InstituteGroupTokens);	
