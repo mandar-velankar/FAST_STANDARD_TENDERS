@@ -388,5 +388,18 @@ sap.ui.define([
 				});
 			});
         },
+		getQuotationInfo: function (offerID) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/PT_TMQUTO",
+				{
+					filters: [
+						new Filter ("OfferID", FilterOperator.EQ, offerID)
+					],
+					success: function (res) {
+						resolve(res?.results?.[0]);
+					},
+				});
+			});
+        },
     });
 });

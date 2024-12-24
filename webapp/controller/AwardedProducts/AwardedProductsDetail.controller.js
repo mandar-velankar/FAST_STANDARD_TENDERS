@@ -292,13 +292,23 @@ sap.ui.define([
 			this.unbindCompetitorResultForm();
 		},
 
-		bindPolandContractDatesForm: function(){
-            const form = this.getView().byId('idContractDates');
-            
-            form.bindElement({
+		bindPolandContractDatesForm: async function() {
+			const form = this.getView().byId('idContractDates');
+			const { EffectiveDate, ExpiryDate } = await this.stState.getService().getQuotationInfo(this.offerId);
+			const uiModel = this.getModel("ui");
+		
+			const currentStartDate = uiModel.getProperty("/ContractDurationForm/ContractStartDate");
+			const currentEndDate = uiModel.getProperty("/ContractDurationForm/ContractEndDate");
+		
+			const newStartDate = currentStartDate? currentStartDate : EffectiveDate;
+			const newEndDate = currentEndDate? currentEndDate : ExpiryDate;
+		
+			uiModel.setProperty("/ContractDurationForm/ContractStartDate", newStartDate);
+			uiModel.setProperty("/ContractDurationForm/ContractEndDate", newEndDate);
+		
+			form.bindElement({
 				path: "ui>/ContractDurationForm",
 			});
-
 		},
 
 		onDataReceived: function(event) {
@@ -1143,10 +1153,12 @@ sap.ui.define([
 		savePolandContractDateInformation: function () {
 			const form = this.byId("idContractDates");
 			const obj = form.getBindingContext("ui").getObject();
-			
+			const uiModel = this.getModel("ui");
+			const ContractStartDate = uiModel.getProperty("/ContractDurationForm/ContractStartDate");
+			const ContractEndDate = uiModel.getProperty("/ContractDurationForm/ContractEndDate");
 			const data = {
-				ContractStartDate: obj.ContractStartDate,
-				ContractEndDate: obj.ContractEndDate
+				ContractStartDate: ContractStartDate,
+				ContractEndDate: ContractEndDate,
 			}
 
 			return this.mappedContractInformations(this.countryCode, data);
