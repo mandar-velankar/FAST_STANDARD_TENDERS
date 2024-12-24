@@ -167,11 +167,15 @@ sap.ui.define([
 		getInstituteInBranchCustomString: function (form){
 			const formContainers = form.getAggregation("formContainers");
 			let instituteInBranch;
+
+			const tenderInstituteTypeContainer = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab("Tender").getXMLView().getFormByName("TenderForm").getFormContainerByName("Institute & Type");
+			const InstituteInBranchConfigField = tenderInstituteTypeContainer.getFormElementByName("Institute In Branch");
+
 			formContainers.forEach(forContainer => {
-				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
+				if(forContainer.getAggregation("title") === tenderInstituteTypeContainer?.title || forContainer.getAggregation("title") === tenderInstituteTypeContainer?.titleLocale){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分支機構"){
+						if(formElement.getAggregation("label") === InstituteInBranchConfigField?.label || formElement.getAggregation("label") === InstituteInBranchConfigField?.labelLocale){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
@@ -314,9 +318,13 @@ sap.ui.define([
 
 			if (this.countryCode === "TW") {
 				const tenderForm = this.byId("idTenderForm");
+
+				const tenderInstituteTypeContainer = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab("Tender").getXMLView().getFormByName("TenderForm").getFormContainerByName("Institute & Type");
+				const InstituteInBranchConfigField = tenderInstituteTypeContainer.getFormElementByName("Institute In Branch");
+
 				const instInBranchField = tenderForm.getAggregation("formContainers")
-						.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
-						.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0];
+						.find(el => el.getAggregation("title") === tenderInstituteTypeContainer?.title || el.getAggregation("title") === tenderInstituteTypeContainer?.titleLocale).getAggregation("formElements")
+						.find(el => el.getAggregation("label") === InstituteInBranchConfigField?.label || el.getAggregation("label") === InstituteInBranchConfigField?.labelLocale).getFields()[0];
 				const obj = tenderForm.getBindingContext().getObject();
 				instInBranchField.removeAllTokens();
 				for(const value of obj.Custom_String_3.split(",")){
