@@ -92,7 +92,7 @@
 									pattern: 'dd.MM.yyyy', 
 									UTC:true
 								}	
-							}"   enabled="false" />
+							}"   enabled="{= ${ui>/ContractDuration/editMode}}" />
 						</form:fields>
 					</form:FormElement>
 
