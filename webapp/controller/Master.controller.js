@@ -709,6 +709,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
+			this.getModel().setProperty(`${sElemBindingPath}/createdAt`, today);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`,classificationObj[this.countryCode]? classificationObj[this.countryCode]: '');
 			if(this.countryCode === 'TW'){
 				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
