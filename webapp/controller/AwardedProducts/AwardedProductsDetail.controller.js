@@ -177,6 +177,8 @@ sap.ui.define([
 			let awardedContractDurationForm = {}; 
 			const InstituteGroupTokens = [];
 			const tender = await this.stState.getService().getTender(this.tenderId);
+			const institutesInContractOverview = this.byId("idInstitutesInContractOverview");
+			let overviewInstitutesContracts = "";
 			if (result.length > 0) {
 					result.map(function (item) {
 						const oToken = new Token({
@@ -192,6 +194,8 @@ sap.ui.define([
 							ContractStartDate: item.ContractStartDate, 
 							ContractEndDate: item.ContractEndDate,
 						}
+
+						overviewInstitutesContracts += `${item.InstituteName},\n`;
 					});
 			}else{
 				const instituteInContract =  await this.stState.getService().getInstituteInContract(tender);
@@ -206,8 +210,13 @@ sap.ui.define([
 						key: item.InstituteID
 					});
 					InstituteGroupTokens.push(oToken);
+
+					overviewInstitutesContracts += `${item.InstituteName},\n`;
 				})
 			}
+			institutesInContractOverview.setValue(overviewInstitutesContracts);
+			institutesInContractOverview.setRows(result.length);
+
 			this.getModel("ui").setProperty("/ContractDurationForm", awardedContractDurationForm)
 			
             multiInput.removeAllTokens();			
@@ -1101,6 +1110,8 @@ sap.ui.define([
 		handleAwardedInstituteGroupHelpConfirm: function(oEvent){
 			const selectedItems = oEvent.getParameter('selectedItems');
 			const InstituteGroupList = this.byId("idAwardedInstituteGroupMultiSelect");
+			const institutesInContractOverview = this.byId("idInstitutesInContractOverview");
+			let overviewInstitutesContracts = "";
 
 			let InstituteGroupTokens = selectedItems.map(function (item) {
 				const hasBindingContext = item.getBindingContext().getPath().includes('InstitutesInGroup') || 
@@ -1118,12 +1129,16 @@ sap.ui.define([
 					obj.InstituteID = item.getCells()[0].getAggregation('customData')[0].getProperty('value');
 				}
 
+				overviewInstitutesContracts += `${obj.InstituteName},\n`;
+
 				return new Token({
 					text: obj.InstituteName,
 					key: obj.InstituteID
 				});
 			});
 
+			institutesInContractOverview.setValue(overviewInstitutesContracts);
+			institutesInContractOverview.setRows(InstituteGroupTokens.length);
 			InstituteGroupList.setTokens(InstituteGroupTokens);	
 		},
 
