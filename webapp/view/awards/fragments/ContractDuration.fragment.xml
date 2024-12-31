@@ -102,6 +102,11 @@
 							<MultiInput id="idAwardedInstituteGroupMultiSelect"   enabled="{= ${ui>/ContractDuration/editMode} }"  valueHelpOnly="true" valueHelpRequest=".onOpenAwardedInstituteGroup"/>
 						</form:fields>
 					</form:FormElement>
+					<form:FormElement label=" ">
+						<form:fields>
+							<TextArea id="idInstitutesInContractOverview" enabled="false"></TextArea>
+						</form:fields>
+					</form:FormElement>
 					
 				</form:formElements>
 			</form:FormContainer>
