@@ -65,7 +65,7 @@ sap.ui.define([
 			this.oRouter = this.oOwnerComponent.getRouter();
 
 			this.defaultModel = this.getOwnerComponent().getModel();
-			
+			await this.setVisibleWithMaxPrice()
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.objectId = objectId;
@@ -356,6 +356,8 @@ sap.ui.define([
 			const form = this.byId(`idOfferForm`);
 			this.countryCode === 'NL' && this.getModel('ui').setProperty('/OfferProductTable/source', form?.getBindingContext()?.getObject().Custom_String_1);
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			this.getOwnerComponent().getEventBus().publish("PriceConditionFormChannel", "UpdatePriceConditionForm");
+			this.handleUpdateOfferProductTable()
 		},
 
 		onOfferFormCancelBtnPress: function(event){
@@ -1693,6 +1695,13 @@ sap.ui.define([
 			}
 
 			return url;
-		}
+		},
+		setVisibleWithMaxPrice: async function () {
+			const userInfo = await this.getUserInfo(this.getModel("st").getProperty("/UserID"));
+			const userRole = userInfo.results[0].Role
+			const form = this.byId(`idOfferForm`);
+			const formElement = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			formElement.setVisible(userRole === 'Tender Manager')
+		},
 	});
 });

@@ -26,7 +26,7 @@ sap.ui.define([
 			this.oDynamicPage = this.byId("idProductForm");
 
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
-
+			this.getOwnerComponent().getEventBus().subscribe("PriceConditionFormChannel", "UpdatePriceConditionForm", this.handleUpdatePriceConditionForm, this);
 			// /*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
 			// this.setModel(this.paState.getModel(), "pa");
 
@@ -2002,6 +2002,12 @@ sap.ui.define([
 			
 			context.getModel().setProperty('SpecialPrice', specialPrice, context);
 			context.getModel().setProperty('Margin', margin, context);
+		},
+		handleUpdatePriceConditionForm: function () {
+			let oContext = this.byId('idPricingForm').getBindingContext();
+			let sPath = oContext.getPath();
+			let oModel = this.getModel();
+				oModel.read(sPath);
 		}
     });
 });
