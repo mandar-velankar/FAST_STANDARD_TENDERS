@@ -1922,6 +1922,7 @@ sap.ui.define([
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 				this.cancelPendingChanges(["idOfferPrice", "PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"], "priceCondPrice");
+				this.getOwnerComponent().getEventBus().publish("OfferFormViewChannel", "updateOfferForm");
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
