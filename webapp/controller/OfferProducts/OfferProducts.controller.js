@@ -1714,7 +1714,7 @@ sap.ui.define([
 					],
 					success: function (res) {
 						let priceCondition = res?.results.filter(el => el.hasPriceCondition == true);
-						const allWithMaximumPrice  = priceCondition.every(el => el.ConditionType === 'WithMaximumPrice');
+						const allWithMaximumPrice  = priceCondition.some(el => el.ConditionType === 'WithMaximumPrice');
 						resolve(allWithMaximumPrice);
 					},
 					error: function (err) {
