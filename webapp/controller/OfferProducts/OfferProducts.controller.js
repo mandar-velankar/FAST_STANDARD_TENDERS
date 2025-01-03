@@ -56,6 +56,7 @@ sap.ui.define([
 			const oModel = this.getOwnerComponent().getModel();
 
 			this.getOwnerComponent().getEventBus().subscribe("OfferProductsTableChannel", "updateOfferProductsTable", this.handleUpdateOfferProductTable, this);
+			this.getOwnerComponent().getEventBus().subscribe("OfferFormViewChannel", "updateOfferForm", this.setVisibleWithMaxPrice, this);
 		},
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			// get state data
@@ -65,7 +66,7 @@ sap.ui.define([
 			this.oRouter = this.oOwnerComponent.getRouter();
 
 			this.defaultModel = this.getOwnerComponent().getModel();
-			await this.setVisibleWithMaxPrice()
+			
 			//this.getView().getBindingContext("template"); // get current tab data
 			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.objectId = objectId;
@@ -108,7 +109,7 @@ sap.ui.define([
 	
 			this.setModel(oModel, "ui");
 
-			
+			await this.setVisibleWithMaxPrice();
 			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab, "OfferformInfo");
 			// specific for haematology countries
             if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
@@ -173,6 +174,11 @@ sap.ui.define([
 			const paymentTermsField = form.getAggregation("formContainers")[containerIndex]
 			.getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Terms");
 			paymentTermsField && paymentTermsField.setVisible(false);
+		},
+
+		setVisibleWithMaxPriceNewOffer: async function (form) {
+			const maxWholesalerMarginField = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			maxWholesalerMarginField && maxWholesalerMarginField.setVisible(false);
 		},
 
 		/**
@@ -422,6 +428,7 @@ sap.ui.define([
 			
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
 			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form,1);}
+			if(this.countryCode === 'PL'){this.setVisibleWithMaxPriceNewOffer(form);}
 			if(this.countryCode.toLowerCase().includes('hm')){this.setPaymentTermFieldVisible(form,2);}
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
@@ -1696,12 +1703,32 @@ sap.ui.define([
 
 			return url;
 		},
-		setVisibleWithMaxPrice: async function () {
+		setVisibleWithMaxPrice: async function () {			
+			let form = this.byId(`idOfferForm`);
 			const userInfo = await this.getUserInfo(this.getModel("st").getProperty("/UserID"));
-			const userRole = userInfo.results[0].Role
-			const form = this.byId(`idOfferForm`);
-			const formElement = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
-			formElement.setVisible(userRole === 'Tender Manager')
+			const userRole = userInfo.results[0].Role;
+			const allWithMaximumPrice = await this.getSavedPriceConditionType();
+			const maxWholesalerMarginField = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			maxWholesalerMarginField && maxWholesalerMarginField.setVisible((userRole === 'Tender Manager') && allWithMaximumPrice);
 		},
+
+		getSavedPriceConditionType: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/StandardTenderPriceConditionView", {
+					filters: [
+						new Filter("OfferID", "EQ", this.offerID)
+					],
+					success: function (res) {
+						let priceCondition = res?.results.filter(el => el.hasPriceCondition == true);
+						const allWithMaximumPrice  = priceCondition.some(el => el.ConditionType === 'WithMaximumPrice');
+						resolve(allWithMaximumPrice);
+					},
+					error: function (err) {
+						reject(err)
+					}
+				})
+			})
+		},
+
 	});
 });
