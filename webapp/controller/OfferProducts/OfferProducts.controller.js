@@ -176,6 +176,11 @@ sap.ui.define([
 			paymentTermsField && paymentTermsField.setVisible(false);
 		},
 
+		setVisibleWithMaxPriceNewOffer: async function (form) {
+			const maxWholesalerMarginField = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			maxWholesalerMarginField && maxWholesalerMarginField.setVisible(false);
+		},
+
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
 		 * FYI: the table ID in the View is a concatination of "id" + tableName
@@ -423,6 +428,7 @@ sap.ui.define([
 			
 			const selectedTender = await this.stState.getService().getTender(this.objectId);
 			if(selectedTender.Region === 'MEA'){this.setPaymentTermFieldVisible(form,1);}
+			if(this.countryCode === 'PL'){this.setVisibleWithMaxPriceNewOffer(form);}
 			if(this.countryCode.toLowerCase().includes('hm')){this.setPaymentTermFieldVisible(form,2);}
 
 			this.getModel("ui").setProperty('/OfferForm/editMode', true);
@@ -1698,12 +1704,12 @@ sap.ui.define([
 			return url;
 		},
 		setVisibleWithMaxPrice: async function () {			
-			const form = this.byId(`idOfferForm`);
+			let form = this.byId(`idOfferForm`);
 			const userInfo = await this.getUserInfo(this.getModel("st").getProperty("/UserID"));
 			const userRole = userInfo.results[0].Role;
 			const allWithMaximumPrice = await this.getSavedPriceConditionType();
-			const formElement = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
-			formElement.setVisible((userRole === 'Tender Manager') && allWithMaximumPrice);
+			const maxWholesalerMarginField = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			maxWholesalerMarginField && maxWholesalerMarginField.setVisible((userRole === 'Tender Manager') && allWithMaximumPrice);
 		},
 
 		getSavedPriceConditionType: async function () {
