@@ -939,8 +939,9 @@ sap.ui.define([
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
 				const brandsInOffer = await this.stState.getService().getBrandsInOffer(sBrandId, sCountryCode)
+				const filteredBrandsInOffer = sCountryCode === 'TW' ? brandsInOffer.filter(offerID => !offerID.includes('HIST')) : brandsInOffer;
 				const filters = [];
-				for(let offerID in brandsInOffer){
+				for(let offerID in filteredBrandsInOffer){
 					filters.push(new Filter({
 						path: "OfferID",
 						operator: FilterOperator.EQ,
