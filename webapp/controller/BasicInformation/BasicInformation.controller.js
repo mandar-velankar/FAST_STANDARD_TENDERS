@@ -102,11 +102,16 @@ sap.ui.define([
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						const classification = form?.getElementBinding()?.getBoundContext()?.getProperty("Classification");
 						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
 						}else if (this.countryCode === "NL") {
 							this.setInstitutesinGroupFieldVisible(form, cs);
+						}
+
+						if(this.countryCode === "ES" && classification){
+							this.applyClassificationLogic(classification, form);
 						}
 
 						if(cs){
@@ -123,11 +128,16 @@ sap.ui.define([
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						const classification = form?.getElementBinding()?.getBoundContext()?.getProperty("Classification");
 						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
 						}else if (this.countryCode === "NL") {
 							this.setInstitutesinGroupFieldVisible(form, cs);
+						}
+
+						if(this.countryCode === "ES" && classification){
+							this.applyClassificationLogic(classification, form);
 						}
 
 						if(cs){
@@ -234,6 +244,47 @@ sap.ui.define([
 				.find(el => el.getAggregation("label") === "Institutes In Group");
 
 			institutesInGroup.setVisible(!!cs);
+		},
+
+		applyClassificationLogic: function (classification, form) {
+			const formContainers = form.getAggregation("formContainers");
+		
+			// Find Timeline Section
+			const timelineContainer = formContainers.find(container => container.getAggregation("title") === "Timeline");
+		
+			// Find Institute & Type Section
+			const instituteTypeContainer = formContainers.find(container => container.getAggregation("title") === "Institute & Type");
+		
+			// Get all form elements from the sections
+			const timelineElements = timelineContainer.getAggregation("formElements");
+			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
+		
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Effective Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Expiry Date");
+		
+			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
+			const tenderType2Element = instituteTypeElements.find(el =>	el.getAggregation("label") === "Tender Type 2");
+		
+			// Apply logic based on classification
+			if (classification === 'Commercial Agreement') {
+				timelineElements.forEach(el => {
+					el.setVisible(false);
+				});
+				effectiveDateElement.setVisible(true);
+				expiryDateElement.setVisible(true);
+		
+				tenderTypeElement.setVisible(false);
+				tenderType2Element.setVisible(false);
+			} else if (classification === 'Tender') {
+				timelineElements.forEach(el => {
+					el.setVisible(true);
+				});
+				effectiveDateElement.setVisible(false);
+				expiryDateElement.setVisible(false);
+		
+				tenderTypeElement.setVisible(true);
+				tenderType2Element.setVisible(true);
+			}
 		},
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.

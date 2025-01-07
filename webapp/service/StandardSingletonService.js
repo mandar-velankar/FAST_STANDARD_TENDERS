@@ -96,6 +96,56 @@ sap.ui.define([
             }     
         },
 
+		onChangeClassification: function (event, StandardSingletonService) {
+			const countryCode = StandardSingletonService.CountryCode;
+			if (countryCode !== 'ES') {
+				return;
+			}
+		
+			const selectedClassification = event.getValue();
+			const formContainers = event.getParent().getParent().getParent().getAggregation("formContainers");
+		
+			// Find Timeline Section
+			const timelineContainer = formContainers.find(container => container.getAggregation("title") === "Timeline");
+		
+			// Find Institute & Type Section
+			const instituteTypeContainer = formContainers.find(container => container.getAggregation("title") === "Institute & Type");
+		
+			// Get all form elements from the sections
+			const timelineElements = timelineContainer.getAggregation("formElements");
+			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
+		
+			// Find specific elements (Effective Date, Expiry Date, Tender Types)
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Effective Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Expiry Date");
+		
+			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
+			const tenderType2Element = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type 2");
+		
+			if (selectedClassification === 'Commercial Agreement') {
+				// Show only EffectiveDate and ExpiryDate in Timeline
+				timelineElements.forEach(el => {
+					el.setVisible(false);
+				});
+				effectiveDateElement.setVisible(true);
+				expiryDateElement.setVisible(true);
+		
+				tenderTypeElement.setVisible(false);
+				tenderType2Element.setVisible(false);
+			} else if (selectedClassification === 'Tender') {
+				// Show all fields in Timeline except EffectiveDate/ExpiryDate
+				timelineElements.forEach(el => {
+					el.setVisible(true);
+				});
+				effectiveDateElement.setVisible(false);
+				expiryDateElement.setVisible(false);
+		
+				tenderTypeElement.setVisible(true);
+				tenderType2Element.setVisible(true);
+			}
+		},
+		
+
 		onChangeQuotationInstitute: function (originalInputField, selectedItem, StandardSingletonService) {
             const paymentTermsBinding = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")[2].getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Term")?.getAggregation("fields")[0].getBinding("items");
             const parentInstituteID = StandardSingletonService.getParentInstituteID();
