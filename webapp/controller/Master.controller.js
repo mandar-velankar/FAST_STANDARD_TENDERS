@@ -754,11 +754,15 @@ sap.ui.define([
 		getInstituteInBranchCustomString: function (form){
 			const formContainers = form.getAggregation("formContainers");
 			let instituteInBranch;
+
+			const tenderInstituteTypeContainer = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab("Tender").getXMLView().getFormByName("TenderForm").getFormContainerByName("Institute & Type");
+			const InstituteInBranchConfigField = tenderInstituteTypeContainer.getFormElementByName("Institute In Branch");
+
 			formContainers.forEach(forContainer => {
-				if(forContainer.getAggregation("title") === 'Institute & Type' || forContainer.getAggregation("title") === "機構及類型"){
+				if(forContainer.getAggregation("title") === tenderInstituteTypeContainer?.title || forContainer.getAggregation("title") === tenderInstituteTypeContainer?.titleLocale){
 					const formElements = forContainer.getAggregation("formElements");
 					formElements.forEach(formElement => {
-						if(formElement.getAggregation("label") === 'Institute In Branch' || formElement.getAggregation("label") === "分院研究所"){
+						if(formElement.getAggregation("label") === InstituteInBranchConfigField?.label || formElement.getAggregation("label") === InstituteInBranchConfigField?.labelLocale){
 							instituteInBranch = formElement.getAggregation("fields")[0];
 						}
 					});
@@ -939,8 +943,9 @@ sap.ui.define([
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
 				const brandsInOffer = await this.stState.getService().getBrandsInOffer(sBrandId, sCountryCode)
+				const filteredBrandsInOffer = sCountryCode === 'TW' ? brandsInOffer.filter(offerID => !offerID.includes('HIST')) : brandsInOffer;
 				const filters = [];
-				for(let offerID in brandsInOffer){
+				for(let offerID in filteredBrandsInOffer){
 					filters.push(new Filter({
 						path: "OfferID",
 						operator: FilterOperator.EQ,
