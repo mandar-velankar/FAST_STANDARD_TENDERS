@@ -112,6 +112,7 @@ sap.ui.define([
 
 						if(this.countryCode === "ES" && classification){
 							this.applyClassificationLogic(classification, form);
+							this.setRegionsFieldVisible(form, instituteType);
 						}
 
 						if(cs){
@@ -138,6 +139,7 @@ sap.ui.define([
 
 						if(this.countryCode === "ES" && classification){
 							this.applyClassificationLogic(classification, form);
+							this.setRegionsFieldVisible(form, instituteType);
 						}
 
 						if(cs){
@@ -362,17 +364,35 @@ sap.ui.define([
 		onTenderFormCancelBtnPress: function(event){
 			this.cancelPendingChanges(["TenderFormView"], "basicInfoMsg");	
 			this.getModel("ui").setProperty('/TenderForm/editMode', false);
+			const tenderForm = this.byId("idTenderForm");
+			const obj = tenderForm.getBindingContext().getObject();
 
 			if (this.countryCode === "TW") {
-				const tenderForm = this.byId("idTenderForm");
 				const instInBranchField = tenderForm.getAggregation("formContainers")
 						.find(el => el.getAggregation("title") === "Institute & Type" || el.getAggregation("title") === "機構及類型").getAggregation("formElements")
 						.find(el => el.getAggregation("label") === "Institute In Branch" || el.getAggregation("label") === "分院研究所").getFields()[0];
-				const obj = tenderForm.getBindingContext().getObject();
+				
 				instInBranchField.removeAllTokens();
 				for(const value of obj.Custom_String_3.split(",")){
 					instInBranchField.addToken(new Token({key: value, text:value}));
 				}
+			}
+
+			if (this.countryCode === "GB" || this.countryCode === "ES") {
+				const regionsMultiSelectField = tenderForm.getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+				if (obj.InstituteType === "Region(s)") {
+					regionsMultiSelectField && regionsMultiSelectField.setVisible(true);
+					regionsMultiSelectField.getFields()[0].removeAllTokens();
+					for(const value of obj.Custom_String_2.split(",")){
+						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
+				}else {
+					regionsMultiSelectField && regionsMultiSelectField.setVisible(false);
+				}
+				
 			}
 		},
 		

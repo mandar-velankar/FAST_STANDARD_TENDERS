@@ -204,6 +204,16 @@ sap.ui.define([
 					!bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
 					institutesInGroup.setVisible(true);
 					break
+				case "ES": 
+					const regionsMultiSelectField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+					regionsMultiSelectField.setVisible(selectedItem.ChannelName === "Region(s)");
+
+					// originalInputField.getModel().setProperty(`${path}/State`, undefined);
+					regionsMultiSelectField.getFields()[0].removeAllTokens()
+					break;
 				default:
 					break;
 			}
@@ -242,6 +252,17 @@ sap.ui.define([
 					}
 						
 					break;
+				case "ES": 
+				const instituteRegion = await StandardSingletonService.getRegionByID(selectedItem, countryCode, defaultModel);
+				const regionsMultiSelectField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+					regionsMultiSelectField.getFields()[0].removeAllTokens();
+
+					for(const value of instituteRegion.split(",")){
+						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
+					break;
 				default:
 					break;
 			}
@@ -275,6 +296,24 @@ sap.ui.define([
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
+
+		getRegionByID: async function (selectedItem, countryCode, defaultModel) {
+			return new Promise((resolve, reject) => {
+				defaultModel.read('/CountryRegionsTableView', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("ID", "EQ", selectedItem?.RegionID),
+					],
+					success: function (res) {
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.Name}` : `${acc}${curr.Name}`, ''))
 					},
 
 					error: function (err) {
