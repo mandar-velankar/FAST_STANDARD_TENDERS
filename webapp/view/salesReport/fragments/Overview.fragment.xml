@@ -8,7 +8,7 @@
         <tree:Table 
             id="idSalesOverviewTable"
             rows="{
-                path: '/OverviewSectionView'
+                path: '/OverviewSectionsView'
             }"
             selectionMode="None"
             visibleRowCount="5"
