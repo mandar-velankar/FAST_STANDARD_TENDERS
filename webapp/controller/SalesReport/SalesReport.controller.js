@@ -85,25 +85,31 @@ sap.ui.define([
 			this.getView().getModel('st').setProperty("/SelectedCountry", sCountryCode);
 			this.countryCode = sCountryCode;
 			this.userId = userID;
+			const userInfo = await this.stState.getService().getUserInfo(this.userId);
+			this.getModel("st").setProperty("/UserInfo", userInfo);
 			this.bindTenderIds();
 			this.bindWholesalers(sCountryCode);
 			this.bindCountryBrands(sCountryCode);
 			this.bindUserTerritories(sCountryCode);
 			this.onFilter();
-			const userInfo = await this.stState.getService().getUserInfo(userID);
-			this.getModel("st").setProperty("/UserInfo", userInfo);
 		},
 
 		bindTenderIds: function () {
 			const oSelectTenderIDs = this.byId("idSalesReportTenderID");
+			const userInfo = this.getModel("st").getProperty("/UserInfo");
 			const controller = this;
 			const selectedBrand = this.byId("idSalesReportBrand").getSelectedKey();
 			const selectedProduct = this.byId("idSalesReportProduct").getSelectedKey();
 			const selectedInstituteType = this.byId("idSalesReportInstituteType").getSelectedKey();
 			const selectedInstitute = this.byId("idSalesReportInstitute").getSelectedKey();
+			const filters = [];
 
-			// Build filters dynamically based on selections
-			const filters = [new Filter('createdBy', FilterOperator.EQ, this.userId)];
+			 // Role-based filtering logic
+			 const isKAM = userInfo.Role === 'KAM';
+		 
+			if (isKAM) {
+				filters.push(new Filter('createdBy', FilterOperator.EQ, this.userId));
+			}
 
 			if (selectedBrand && !selectedBrand.toLowerCase().includes("all")) {
 				filters.push(new Filter("BrandId", FilterOperator.EQ, selectedBrand));
