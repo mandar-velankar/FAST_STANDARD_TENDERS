@@ -9,7 +9,7 @@
     <VBox >
 		<tree:Table 
 			id="idSalesDetailTable"
-			rows="{/SalesReportView}"
+			rows="{/SalesReportsView}"
 			selectionMode="None"
 			visibleRowCount="10"
 		>
@@ -113,11 +113,11 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="NetSales" width="15rem">
+				<tree:Column sortProperty="TotalSales" width="15rem">
 					<Label text="Net Sales" wrapping="true"/>
 					<tree:template>
 						<Text text="{
-							parts: ['NetSales', 'Currency','Region', 'CountryCode'],
+							parts: ['TotalSales', 'Currency','Region', 'CountryCode'],
 							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 						}"/>
 					</tree:template>
