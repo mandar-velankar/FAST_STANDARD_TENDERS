@@ -469,6 +469,7 @@ sap.ui.define([
 
 		deleteTender: function(event){
 			//this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
+			this.getModel().resetChanges([`/TenderFormView('${this.sObjectId}')`]);
 			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/Active", 0);
 			this.defaultModel.setProperty(`/TenderFormView('${this.sObjectId}')` + "/ExternalID", this.sProductScope); //for mandatory field check in sta-service
 			this.defaultModel.submitChanges({
@@ -484,7 +485,7 @@ sap.ui.define([
 
 		_onSubmitChangesTenderFormSuccess: function(res){
 			this.getOwnerComponent().getModel().read("/TenderMasterView");
-			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.filter();
+			// this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.filter(); // not needed because it overwrites already exising filters
 			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.refresh(true);
 		},
 	});
