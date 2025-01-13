@@ -1998,7 +1998,7 @@ sap.ui.define([
 			let maximumPrice = property?.toLowerCase().includes("price1") ? parseFloat(value).toFixed(2) : Number(priceObj.Price1);
 			let maximumWholesalerMargin = property?.toLowerCase().includes("level2discount1") ? parseFloat(value) : priceObj.Level2Discount1;
 			let cogs = priceObj.COGS;
-			let specialPrice = parseFloat(maximumPrice * (1 - maximumWholesalerMargin));
+			let specialPrice = parseFloat(maximumPrice / (1 + maximumWholesalerMargin));
 			let margin = !!specialPrice ? (specialPrice - cogs) / specialPrice : 0;
 			
 			context.getModel().setProperty('SpecialPrice', specialPrice, context);
