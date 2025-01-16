@@ -75,6 +75,8 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
 			const selectedOffer = await this.stState.getService().getOffer(offerId);
+			this.tenderName = selectedOffer?.TenderName;
+			this.division = selectedOffer?.Division;
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
@@ -1388,8 +1390,43 @@ sap.ui.define([
 				oDialog.open();
 				that.onGetNotificationContent()
 				that.NotificationMailFormBinding()
+				that.updateRecipientBinding(this.countryCode)
 			})
 		},
+
+		updateRecipientBinding: function (country) {
+			const multiComboBox = this.byId("idTo");
+			let bindingPath, keyField, textField, filters=[];
+		
+			// Determine the binding path based on the country
+			switch (country) {
+				case "NL":
+					bindingPath = "/NotificationUserList";
+					keyField = "UserEmail";
+            		textField = "UserName";
+					break;
+				case "ES":
+					bindingPath = "/ApproverList";
+					keyField = "ApproverEmailID";
+            		textField = "ApproverName";
+					// filters for CountryCode and Division
+					filters.push(new Filter("CountryCode", FilterOperator.EQ, 'ES'));
+					filters.push(new Filter("Division", FilterOperator.EQ, this.division));
+					filters.push(new Filter("ApproverType", FilterOperator.EQ, 'EmailKAM'));
+					break;
+			}
+		
+			// Update the binding dynamically
+			multiComboBox.bindItems({
+				path: bindingPath,
+				filters: filters,
+				template: new Item({
+					key: `{${keyField}}`,
+					text: `{${textField}}`
+				})
+			});
+		},
+		
 		onSendNotificationMail: function(evt){
 			const Form = this.byId('SendNotificationMailForm');
 			const context = Form.getBindingContext();
@@ -1406,9 +1443,10 @@ sap.ui.define([
 		},
 		onGetNotificationContent: function () {
 			const url = this._getNotificationOfferURL();
+			let templateId = this.countryCode === 'NL' ? 'NLNotificationMailTemplate' : 'ESNotificationMailTemplate';
 			this.defaultModel.callFunction("/getNotificationMailTemplate", {
 				method:"GET", 
-				urlParameters: {"offerID": this.offerID, templateId: 'NLNotificationMailTemplate', 'url': url},
+				urlParameters: {"offerID": this.offerID, templateId: templateId, 'url': url},
 				success: this.onGetNotificationContentSuccess.bind(this),
 				error: this.onGetNotificationContentError.bind(this)
 			});
@@ -1434,6 +1472,7 @@ sap.ui.define([
 		NotificationMailFormBinding: function () {
 			const Form = this.byId('SendNotificationMailForm')
 			let oSender = this.byId("idFrom");
+			let subject = this.countryCode === 'NL' ? `Action Required: Price Details Input for Offer ID ${this.offerID}` : `Notification for offer ${this.tenderName}`;
 			let userEmail = this.stState.getProperty("/UserEmail")
 			oSender.setTokens([
 				new Token({text: userEmail, key: userEmail}),
@@ -1444,7 +1483,7 @@ sap.ui.define([
 				OfferID: this.offerID,
 				Sender: userEmail,
 				Recipients: '',
-				Subject:`Action Required: Price Details Input for Offer ID ${this.offerID}`,
+				Subject: subject,
 				MailBody: this.byId('idEditor').getValue(),
 				Sent: false			
 			}
