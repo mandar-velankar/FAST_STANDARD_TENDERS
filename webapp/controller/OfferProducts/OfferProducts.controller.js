@@ -1701,7 +1701,7 @@ sap.ui.define([
 			const userRole = userInfo.results[0].Role
 			const form = this.byId(`idOfferForm`);
 			const formElement = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
-			formElement.setVisible(userRole === 'Tender Manager')
+			formElement && formElement.setVisible(userRole === 'Tender Manager')
 		},
 	});
 });
