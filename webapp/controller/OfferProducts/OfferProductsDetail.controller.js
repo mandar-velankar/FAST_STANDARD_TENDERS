@@ -179,6 +179,7 @@ sap.ui.define([
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
 			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+			countryCode === 'ES' && await this.setSpainMaxPriceFieldVisibility();
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
@@ -2009,6 +2010,18 @@ sap.ui.define([
 			let sPath = oContext.getPath();
 			let oModel = this.getModel();
 				oModel.read(sPath);
+		},
+
+		setSpainMaxPriceFieldVisibility: async function () {
+			const form = this.byId("idProductForm");
+			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+			const maxPriceField = form.getAggregation("formContainers")
+			.find(el => el.getAggregation("title") === "Product Info1").getAggregation("formElements")
+			.find(el => el.getAggregation("label") === "Max Price");
+
+			if (selectedTender) {
+				maxPriceField && maxPriceField.setVisible(selectedTender.Classification === "Tender")
+			}
 		}
     });
 });
