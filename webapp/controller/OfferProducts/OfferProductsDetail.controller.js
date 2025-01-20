@@ -2014,13 +2014,20 @@ sap.ui.define([
 
 		setSpainMaxPriceFieldVisibility: async function () {
 			const form = this.byId("idProductForm");
+			const ctx = form.getBindingContext();
+			if (!ctx) return;
+			const bindingObject = ctx.getObject();
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
-			const maxPriceField = form.getAggregation("formContainers")
-			.find(el => el.getAggregation("title") === "Product Info1").getAggregation("formElements")
+			const maxPriceField = form.getAggregation("formContainers")?.[0].getAggregation("formElements")
 			.find(el => el.getAggregation("label") === "Max Price");
 
 			if (selectedTender) {
-				maxPriceField && maxPriceField.setVisible(selectedTender.Classification === "Tender")
+				const isClassificationTender = selectedTender.Classification === "Tender";
+				maxPriceField && maxPriceField.setVisible(isClassificationTender);
+
+				if (!isClassificationTender && !bindingObject.MaxPrice) {
+					ctx.getModel().setProperty("MaxPrice", 0, ctx);
+				}
 			}
 		}
     });

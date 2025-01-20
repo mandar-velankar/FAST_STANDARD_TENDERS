@@ -21,7 +21,7 @@
 				<Toolbar>
 					<Title text="{= ${appView>/language} === 'en' ? ${template>title} : ${template>titleLocale} !== null ? ${template>titleLocale} : ${template>title}}"/>
 					<ToolbarSpacer />
-					<Button id="notificationButton" text="Send Notification" icon="sap-icon://email" press=".onOpenNotification" visible="{= ${st>/SelectedCountry} === 'NL'}" enabled="{= !!${ui>/OfferProductTable/count}}"/>
+					<Button id="notificationButton" text="Send Notification" icon="sap-icon://email" press=".onOpenNotification" visible="{= ${st>/SelectedCountry} === 'NL' || ${st>/SelectedCountry} === 'ES'}" enabled="{= !!${ui>/OfferProductTable/count}}"/>
 					<Button text="Send Notification" icon="sap-icon://email" press=".onSendNotificationForHematology" visible="{= ${ui>/matchedHaematologyCountryCode}}" enabled="{= ${em>/Detail/OfferTab/OfferForm/enableSendNotificationHematology}}"/>
 					<Button text="New Offer" icon="sap-icon://add" press=".onOpenCreateOfferDialog" visible="{= !${ui>/OfferForm/editMode} }"/>
 					<MenuButton 

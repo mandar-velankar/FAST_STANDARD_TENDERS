@@ -43,7 +43,7 @@
 
                    <Label text="Content" required="true"/>
                    <rtx:RichTextEditor id="idEditor" 
-                                       editorType="TinyMCE5"
+                                       editorType="TinyMCE"
                                        value="{MailBody}" 
                                        height="800px"
                                        customToolbar="true"
