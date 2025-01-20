@@ -138,7 +138,14 @@ sap.ui.define([
 				templateShareable: true,
 				events: {
                     dataReceived: function(event) {
-                        let items = event.getParameter("data").results || [];
+                        let itemsData = event.getParameter("data").results || [];
+
+						const items = itemsData.reduce((acc, current) => {
+							if (!acc.some(item => item.TenderID === current.TenderID)) {
+								acc.push(current);
+							}
+							return acc;
+						}, []);
 
 						// Add "All" option to the items array
 						items.unshift({
