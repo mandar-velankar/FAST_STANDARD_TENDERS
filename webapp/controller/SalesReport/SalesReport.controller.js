@@ -138,7 +138,14 @@ sap.ui.define([
 				templateShareable: true,
 				events: {
                     dataReceived: function(event) {
-                        let items = event.getParameter("data").results || [];
+                        let itemsData = event.getParameter("data").results || [];
+
+						const items = itemsData.reduce((acc, current) => {
+							if (!acc.some(item => item.TenderID === current.TenderID)) {
+								acc.push(current);
+							}
+							return acc;
+						}, []);
 
 						// Add "All" option to the items array
 						items.unshift({
@@ -446,12 +453,21 @@ sap.ui.define([
 			// Tender ID Filter
 			const tenderSelectedItem = this.byId("idSalesReportTenderID")?.getSelectedItem();
 			const tenderID = tenderSelectedItem?.getKey();
-			if (tenderID && !tenderID.toLowerCase().includes("all")) {
-				this.andFilters.push(new Filter({
-					path: "TenderID",
-					operator: FilterOperator.EQ,
-					value1: tenderID
-				}));
+			if(tenderID){
+				if (tenderID.toLowerCase() === 'no related tender') {
+					this.andFilters.push(new Filter({
+						path: "OfferID",
+						operator: FilterOperator.EQ,
+						value1: null
+					}));
+				} else if (!tenderID.toLowerCase().includes("all")) {
+					// Add filter for a specific TenderID if not "All"
+					this.andFilters.push(new Filter({
+						path: "TenderID",
+						operator: FilterOperator.EQ,
+						value1: tenderID
+					}));
+				}
 			}
 		
 			// Wholesaler Filter
