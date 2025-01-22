@@ -10,11 +10,10 @@
             rows="{
                 path: '/OverviewSectionsView'
             }"
-            selectionMode="None"
-            visibleRowCount="5"
-        >
+            selectionMode="None"   
+            visibleRowCount="8" >
             <tree:columns>
-                <tree:Column sortProperty="BrandName">
+                <tree:Column sortProperty="BrandName" filterProperty="BrandName">
                     <Label text="BRAND" />
                     <tree:template>
                         <Text text="{BrandName}" />
