@@ -11,7 +11,8 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"sap/m/Token",
 	"sap/m/ColumnListItem",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem) {
+	"sap/ui/model/Sorter",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -185,6 +186,10 @@ sap.ui.define([
 		getSavedPriceConditionType: async function () {
 			const controller = this;
 			return new Promise((resolve, reject) => {
+				const countryDefaultPriceConditionType = {
+					"NL": "NLPrice"
+				};
+
 				this.getModel().read("/StandardTenderPriceConditionView", {
 					filters: [
 						new Filter("OfferID", "EQ", this.offerId),
@@ -193,7 +198,7 @@ sap.ui.define([
 					],
 					success: function (res) {
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
-						priceCondition = priceCondition ? priceCondition : res?.results.find(el => el.isMain == true);
+						priceCondition = priceCondition ? priceCondition : res?.results.find(el => countryDefaultPriceConditionType[controller.sCountryCode] ? el.isMain == true && el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : el.isMain == true);
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
