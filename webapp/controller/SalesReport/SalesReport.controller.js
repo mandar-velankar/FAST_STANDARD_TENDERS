@@ -87,14 +87,14 @@ sap.ui.define([
 			this.userId = userID;
 			const userInfo = await this.stState.getService().getUserInfo(this.userId);
 			this.getModel("st").setProperty("/UserInfo", userInfo);
-			this.bindTenderIds();
+			await this.bindTenderIds();
 			this.bindWholesalers(sCountryCode);
 			this.bindCountryBrands(sCountryCode);
 			this.bindUserTerritories(sCountryCode);
 			this.onFilter();
 		},
 
-		bindTenderIds: function () {
+		bindTenderIds: async function () {
 			const oSelectTenderIDs = this.byId("idSalesReportTenderID");
 			const userInfo = this.getModel("st").getProperty("/UserInfo");
 			const controller = this;
@@ -124,49 +124,105 @@ sap.ui.define([
 				filters.push(new Filter("InstituteID", FilterOperator.EQ, selectedInstitute));
 			}
 
-			oSelectTenderIDs?.bindItems({
-				path: "/SalesReportTenderView",
-				filters: filters,
-				sorter: new Sorter({
-					path: 'TenderID',
-					descending: false
-				}),
-				template: new Item({
-					key: "{TenderID}",
-					text: "{TenderID}"
-				}),
-				templateShareable: true,
-				events: {
-                    dataReceived: function(event) {
-                        let itemsData = event.getParameter("data").results || [];
+			// oSelectTenderIDs?.bindItems({
+			// 	path: "/SalesReportTenderView",
+			// 	filters: filters,
+			// 	sorter: new Sorter({
+			// 		path: 'TenderID',
+			// 		descending: false
+			// 	}),
+			// 	template: new Item({
+			// 		key: "{TenderID}",
+			// 		text: "{TenderID}"
+			// 	}),
+			// 	templateShareable: true,
+			// 	events: {
+            //         dataReceived: function(event) {
+            //             let itemsData = event.getParameter("data").results || [];
 
-						const items = itemsData.reduce((acc, current) => {
-							if (!acc.some(item => item.TenderID === current.TenderID)) {
-								acc.push(current);
-							}
-							return acc;
-						}, []);
+			// 			const items = itemsData.reduce((acc, current) => {
+			// 				if (!acc.some(item => item.TenderID === current.TenderID)) {
+			// 					acc.push(current);
+			// 				}
+			// 				return acc;
+			// 			}, []);
 
-						// Add "All" option to the items array
-						items.unshift({
-							TenderID: "All",
-							CountryCode: this.countryCode
-						});
+			// 			// Add "All" option to the items array
+			// 			items.unshift({
+			// 				TenderID: "All",
+			// 				CountryCode: this.countryCode
+			// 			});
 
-						// Manually set the filtered data back to the list control
-                        oSelectTenderIDs.destroyItems();
-                        items.forEach(item => {
-                            oSelectTenderIDs.addItem(new Item({
-                                key: item.TenderID,
-                                text: item.TenderID
-                            }));
-                        });
+			// 			// Manually set the filtered data back to the list control
+            //             oSelectTenderIDs.destroyItems();
+            //             items.forEach(item => {
+            //                 oSelectTenderIDs.addItem(new Item({
+            //                     key: item.TenderID,
+            //                     text: item.TenderID
+            //                 }));
+            //             });
 
-                        controller.stState.setProperty('/SelectedTenderId', "All");
-						controller.onFilter();
-                    }
-                }
-			});
+            //             controller.stState.setProperty('/SelectedTenderId', "All");
+			// 			controller.onFilter();
+            //         }
+            //     }
+			// });
+			  // Pagination logic
+			  let allItems = [];
+			  let skip = 0;
+			  const pageSize = 5000;
+			  let hasMoreData = true;
+		  
+			  while (hasMoreData) {
+				  await new Promise((resolve, reject) => {
+					  this.getModel().read("/SalesReportTenderView", {
+						  filters: filters,
+						  urlParameters: {
+							  $skip: skip,
+							  $top: pageSize,
+							  $orderby: "TenderID asc"
+						  },
+						  success: function (data) {
+							  const items = data.results || [];
+							  if (items.length === 0) {
+								  hasMoreData = false;
+							  } else {
+								  allItems = [...allItems, ...items];
+								  skip += pageSize;
+							  }
+							  resolve();
+						  },
+						  error: function (err) {
+							  hasMoreData = false;
+							  reject(err);
+						  }
+					  });
+				  });
+			  }
+		  
+			  // Deduplicate items by TenderID
+			  const uniqueItems = allItems.reduce((acc, current) => {
+				  if (!acc.some(item => item.TenderID === current.TenderID)) {
+					  acc.push(current);
+				  }
+				  return acc;
+			  }, []);
+		  
+			  // Add "All" option to the items array
+			  uniqueItems.unshift({ TenderID: "All" });
+		  
+			  // Bind the dropdown with the fetched data
+			  oSelectTenderIDs.destroyItems();
+			  uniqueItems.forEach(item => {
+				  oSelectTenderIDs.addItem(new Item({
+					  key: item.TenderID,
+					  text: item.TenderID
+				  }));
+			  });
+		  
+			  // Set the default selected value
+			  this.getModel("st").setProperty('/SelectedTenderId', "All");
+			  this.onFilter();
 		},
 
 		bindWholesalers: function (countryCode) {
