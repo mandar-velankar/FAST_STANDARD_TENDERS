@@ -10,6 +10,9 @@
 
 	<!--<f:DynamicPage id="idAwardedProducts" toggleHeaderOnTitleClick="false">
 		<f:content>-->
+			<Panel >
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.awards.fragments.Award_FAST_Contract" type="XML"/>
+			</Panel>
 			<Table 
 				id="idAwardedProducts" 
 				items = "{
