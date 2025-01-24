@@ -1,0 +1,31 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <HBox justifyContent="SpaceBetween">
+        <HBox >
+            <MenuButton 
+                text="{i18n>BankGuarantee}" 
+                class="sapUiMediumMarginEnd"
+                >
+                <menu>
+                    <Menu>
+                        <MenuItem text="Final" />
+                        <MenuItem text="Additional" />
+                    </Menu>
+                </menu>
+            </MenuButton>
+            <Button enabled="{= ${st>/AllAwardProductsHaveOutcome}}" text="{i18n>CreateAllFASTContracts}"/>
+        </HBox>
+        <MenuButton 
+            text="{i18n>SetAllProductWonLost}" 
+            enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
+            >
+            <menu>
+                <Menu>
+                    <MenuItem text="Won" />
+                    <MenuItem text="Lost" />
+                </Menu>
+            </menu>
+        </MenuButton>
+    </HBox>
+</core:FragmentDefinition>

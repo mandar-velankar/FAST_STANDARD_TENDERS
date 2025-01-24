@@ -101,9 +101,22 @@ sap.ui.define([
 					path: 'SORTER',
 					descending: false
 				}),
-				template: template
+				template: template,
+				events: {
+					dataReceived: this.onAwardedProductsDataReceived.bind(this)
+				}
 			})
 		},
+
+		onAwardedProductsDataReceived: function (event) {
+			const products = event?.getParameters("data")?.data?.results
+
+			if (products && products.length > 0) {
+				const allProductsHaveOutcome = products.every(product => product.Outcome);
+				this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", allProductsHaveOutcome);
+			}
+		},
+
 		/* =========================================================== */
 		/* event handlers                                              */
 		/* =========================================================== */
