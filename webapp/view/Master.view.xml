@@ -42,6 +42,13 @@
 							sorter: { 
 								path: 'Country/CountryName' 
 							},
+							filters: {
+								filters: [
+									{ path: 'Application', operator: 'EQ', value1: 'STA' },
+									{ path: 'Application', operator: 'EQ', value1: 'ALL' }
+								],
+								and: false
+							},
 							 events: {
 								dataReceived: '.onCountriesReceived'
 							}
