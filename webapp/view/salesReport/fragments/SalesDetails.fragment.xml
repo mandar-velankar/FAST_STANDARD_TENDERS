@@ -14,31 +14,19 @@
 			visibleRowCount="10"
 		>
 			<tree:columns>
-				<tree:Column sortProperty="OfferID" width="10rem">
-					<Label text="OfferID" wrapping="true"/>
-					<tree:template>
-						<Text text="{OfferID}" />
-					</tree:template>
-				</tree:Column>
-				<tree:Column sortProperty="DistributorName" width="15rem">
-					<Label text="Wholesaler Name" wrapping="true"/>
-					<tree:template>
-						<Text text="{DistributorName}" />
-					</tree:template>
-				</tree:Column>
-				<tree:Column sortProperty="MainInstituteName" width="18rem">
+				<tree:Column sortProperty="MainInstituteName" width="15rem">
 					<Label text="Institute" wrapping="true"/>
 					<tree:template>
 						<Text text="{MainInstituteName}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="External_InstituteId" width="15rem">
+				<tree:Column sortProperty="External_InstituteId" width="5rem">
 					<Label text="Customer ID" wrapping="true"/>
 					<tree:template>
 						<Text text="{External_InstituteId}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="FilePeriod" width="15rem">
+				<tree:Column sortProperty="FilePeriod" width="6rem">
 					<Label text="Date" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -50,25 +38,13 @@
 						}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="BrandName" width="15rem">
-					<Label text="Brand" wrapping="true"/>
-					<tree:template>
-						<Text text="{BrandName}" />
-					</tree:template>
-				</tree:Column>
-				<tree:Column sortProperty="PRODUCTPACKNAME" width="20rem">
+				<tree:Column sortProperty="PRODUCTPACKNAME" width="18rem">
 					<Label text="Product" wrapping="true"/>
 					<tree:template>
 						<Text text="{PRODUCTPACKNAME}" />
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="EANNumber" width="15rem">
-					<Label text="EAN Number" wrapping="true"/>
-					<tree:template>
-						<Text text="{EANNumber}" />
-					</tree:template>
-				</tree:Column>
-				<tree:Column sortProperty="Quantity" width="15rem">
+				<tree:Column sortProperty="Quantity" width="5rem">
 					<Label text="Quantity [Units]" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -77,16 +53,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="QuantityMl" width="15rem">
-					<Label text="Quantity [ML]" wrapping="true"/>
-					<tree:template>
-						<Text text="{
-							parts: ['QuantityMl', 'CountryCode'],
-							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
-						}"/>
-					</tree:template>
-				</tree:Column>
-				<tree:Column sortProperty="WholesalerPurchasePrice" width="15rem">
+				<tree:Column sortProperty="WholesalerPurchasePrice" width="8rem">
 					<Label text="List Price" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -95,7 +62,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="WholesalerContractPrice" width="15rem">
+				<tree:Column sortProperty="WholesalerContractPrice" width="8rem">
 					<Label text="Special Price" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -104,16 +71,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="WholesalerPurchaseAmount" width="15rem">
-					<Label text="Wholesaler Purchased Amount" wrapping="true"/>
-					<tree:template>
-						<Text text="{
-							parts: ['WholesalerPurchaseAmount', 'Currency','Region', 'CountryCode'],
-							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
-						}"/>
-					</tree:template>
-				</tree:Column>
-				<tree:Column sortProperty="TotalSales" width="15rem">
+				<tree:Column sortProperty="TotalSales" width="8rem">
 					<Label text="Net Sales" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -122,7 +80,40 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="RequestedVolume" width="15rem">
+				<tree:Column sortProperty="DistributorName" width="7rem">
+					<Label text="Wholesaler Name" wrapping="true"/>
+					<tree:template>
+						<Text text="{DistributorName}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="OfferID" width="6rem">
+					<Label text="OfferID" wrapping="true"/>
+					<tree:template>
+						<Text text="{OfferID}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="BrandName" width="6rem">
+					<Label text="Brand" wrapping="true"/>
+					<tree:template>
+						<Text text="{BrandName}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="EANNumber" width="8rem">
+					<Label text="EAN Number" wrapping="true"/>
+					<tree:template>
+						<Text text="{EANNumber}" />
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="QuantityMl" width="5rem">
+					<Label text="Quantity [ML]" wrapping="true"/>
+					<tree:template>
+						<Text text="{
+							parts: ['QuantityMl', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="RequestedVolume" width="8rem">
 					<Label text="Contract Product Volume" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -131,7 +122,7 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="BrandUsedVolume" width="15rem">
+				<tree:Column sortProperty="BrandUsedVolume" width="8rem">
 					<Label text="Used Brand Volume" wrapping="true"/>
 					<tree:template>
 						<Text text="{
@@ -140,12 +131,21 @@
 						}"/>
 					</tree:template>
 				</tree:Column>
-				<tree:Column sortProperty="ContractBrandUsage"  width="15rem">
+				<tree:Column sortProperty="ContractBrandUsage" width="8rem">
 					<Label text="Contract Brand Usage" wrapping="true"/>
 					<tree:template>
 						<Text text="{
 							parts: ['ContractBrandUsage', 'CountryCode'],
 							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+						}"/>
+					</tree:template>
+				</tree:Column>
+				<tree:Column sortProperty="WholesalerPurchaseAmount" width="10rem">
+					<Label text="Wholesaler Purchased Amount" wrapping="true"/>
+					<tree:template>
+						<Text text="{
+							parts: ['WholesalerPurchaseAmount', 'Currency','Region', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 						}"/>
 					</tree:template>
 				</tree:Column>
