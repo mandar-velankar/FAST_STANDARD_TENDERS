@@ -257,6 +257,7 @@ sap.ui.define([
 					});
 				}.bind(this));
 				this.byId("idOfferProductsTable").removeSelections();
+				this.getOwnerComponent().getEventBus().publish("PriceConditionFormChannel", "UpdatePriceConditionForm");
 				//this.byId("idOfferProductsTable").getBinding("items").refresh();
 			}
 			else{

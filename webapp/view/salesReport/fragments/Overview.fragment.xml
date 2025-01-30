@@ -8,10 +8,13 @@
         <tree:Table 
             id="idSalesOverviewTable"
             rows="{
-                path: '/OverviewSectionsView'
+                path: '/OverviewSectionsView',
+                events: {
+                    dataReceived: '.onOverviewSectionDataReceived'
+                }
             }"
             selectionMode="None"   
-            visibleRowCount="8" >
+            >
             <tree:columns>
                 <tree:Column sortProperty="BrandName" filterProperty="BrandName">
                     <Label text="BRAND" />

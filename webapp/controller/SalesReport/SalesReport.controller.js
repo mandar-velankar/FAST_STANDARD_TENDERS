@@ -674,16 +674,19 @@ sap.ui.define([
 			const url = `/v2/sta_tender${path}/content`;
 			URLHelper.redirect(url, true);
 		},
-		onOverviewSectionViewReceived: function (oEvent) {
-			var oTable = this.byId("idSalesOverviewTable");
-			var oBinding = oTable.getBinding("rows");
-			var aRows = oBinding.getContexts();
-			
-			var iRowCount = aRows.length;
-		
-			oTable.setVisibleRowCount(iRowCount);
-		}
-				
+		onOverviewSectionDataReceived: function (oEvent) {
+				const oTable = this.byId("idSalesOverviewTable");
+				const oBinding = oTable.getBinding("rows");
+				const iRowCount = oBinding.getLength();
+				oTable.setVisibleRowCount(iRowCount === 0 ? iRowCount + 1 : iRowCount > 10 ? 10 : iRowCount);
+		},
+
+		onSaleDetailsDataReceived: function (oEvent) {
+			const oTable = this.byId("idSalesDetailTable");
+			const oBinding = oTable.getBinding("rows");
+			const iRowCount = oBinding.getLength();
+			oTable.setVisibleRowCount(iRowCount === 0 ? iRowCount + 1 : iRowCount > 10 ? 10 : iRowCount);
+	}
 	});
 
 });
