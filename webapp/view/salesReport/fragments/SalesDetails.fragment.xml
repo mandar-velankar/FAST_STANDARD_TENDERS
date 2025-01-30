@@ -9,9 +9,13 @@
     <VBox >
 		<tree:Table 
 			id="idSalesDetailTable"
-			rows="{/SalesReportsView}"
+			rows="{
+				path: '/SalesReportsView',
+				events: {
+                    dataReceived: '.onSaleDetailsDataReceived'
+                }
+			}"
 			selectionMode="None"
-			visibleRowCount="10"
 		>
 			<tree:columns>
 				<tree:Column sortProperty="MainInstituteName" width="15rem">
