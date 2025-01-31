@@ -374,6 +374,38 @@ sap.ui.define([
 					},
 				});
 			});
-		} 
+		},
+
+		getSavedQuotations: async function (OfferID) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/PT_TMQUTO", {
+					filters: [
+						new Filter("OfferID", "EQ", OfferID)
+					],
+					success: function (res) {
+						resolve({
+							results: res?.results,
+							count: res?.results?.length
+						})
+					}
+				});
+			})
+		},
+
+		getSavedAwardedProducts: async function (OfferID) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/AwardedProducts", {
+					filters: [
+						new Filter("OfferID", "EQ", OfferID)
+					],
+					success: function (res) {
+						resolve({
+							results: res?.results,
+							count: res?.results?.length
+						})
+					}
+				});
+			})
+		},
     });
 });
