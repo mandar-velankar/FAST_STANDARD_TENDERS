@@ -643,7 +643,8 @@ sap.ui.define([
 		},
 
 		onDownloadSalesReportExtract: async function () {
-			const templateId = await this.stState.getService().getTemplateIDByName("Sales Report");
+			
+			//const templateId = await this.stState.getService().getTemplateIDByName("Sales Report");
 			const CountryCode = this.stState.getProperty("/SelectedCountry");
 			const TenderID = this.stState.getProperty("/SelectedTenderId");
 			const DistributorID = this.stState.getProperty("/SelectedWholesaler");
@@ -656,24 +657,276 @@ sap.ui.define([
 			const DateTo = this.byId("idSalesReportToDate").getDateValue();
 			const selectedDateFrom = new CustomDateType().getModelFormat().format(DateFrom);
             const selectedDateTo = new CustomDateType().getModelFormat().format(DateTo);
+			let filters = [
+				new Filter("CountryCode", FilterOperator.EQ, CountryCode)
+			];
+			if(TenderID){
+				if (TenderID.toLowerCase() === 'no related tender') {
+					filters.push(new Filter({
+						path: "OfferID",
+						operator: FilterOperator.EQ,
+						value1: null
+					}));
+				} else if (!TenderID.toLowerCase().includes("all")) {
+					// Add filter for a specific TenderID if not "All"
+					filters.push(new Filter({
+						path: "TenderID",
+						operator: FilterOperator.EQ,
+						value1: TenderID
+					}));
+				}
+			}
+			if (DistributorID && !DistributorID.toLowerCase().includes("all")) {
+				filters.push(new Filter({
+					path: "DistributorID",
+					operator: FilterOperator.EQ,
+					value1: DistributorID
+				}));
+			}
+			
+			if (BrandID && !BrandID.toLowerCase().includes("all")) {
+				filters.push(new Filter({
+					path: "BrandId",
+					operator: FilterOperator.EQ,
+					value1: BrandID
+				}));
+			}
 
-			const path = this.getModel().createKey("/ExtractPolandSalesReport", {
-				templateId: templateId,
-				TenderID: TenderID,
-				CountryCode: CountryCode,
-				DistributorID: DistributorID,
-				BrandID: BrandID,
-				ProductPackID: ProductPackID,
-				KAM_Territory: KAM_Territory,
-				InstituteType: InstituteType,
-				InstituteID: InstituteID,
-				DateFrom: selectedDateFrom,
-				DateTo: selectedDateTo
-			});
+			if (ProductPackID && !ProductPackID.toLowerCase().includes("all")) {
+				filters.push(new Filter({
+					path: "ProductPackID",
+					operator: FilterOperator.EQ,
+					value1: ProductPackID
+				}));
+			}
 
-			const url = `/v2/sta_tender${path}/content`;
-			URLHelper.redirect(url, true);
+			if (KAM_Territory && !KAM_Territory.toLowerCase().includes("all")) {
+				filters.push(new Filter({
+					path: "KAM_Territory",
+					operator: FilterOperator.EQ,
+					value1: KAM_Territory
+				}));
+			}
+			if (InstituteType && !InstituteType.toLowerCase().includes("all")) {
+				filters.push(new Filter({
+					path: "InstituteType",
+					operator: FilterOperator.EQ,
+					value1: InstituteType
+				}));
+			}
+			if (InstituteID && !InstituteID.toLowerCase().includes("all")) {
+				filters.push(new Filter({
+					path: "MainInstituteID",
+					operator: FilterOperator.EQ,
+					value1: InstituteID
+				}));
+			}
+			
+			if (selectedDateFrom) {
+                if (selectedDateTo) {
+                    filters.push(new Filter({
+                        path: "DateTo",
+                        operator: FilterOperator.GE,
+                        value1: selectedDateFrom,
+                        caseSensitive: false
+                    }));
+                }else {
+                    filters.push(new Filter({
+                        path: "DateFrom",
+                        operator: FilterOperator.LE,
+                        value1: selectedDateFrom,
+                        caseSensitive: false
+                    }));
+                }
+            }
+
+            if (selectedDateTo) {
+                filters.push(new Filter({
+                    path: "DateFrom",
+                    operator: FilterOperator.LE,
+                    value1: selectedDateTo,
+                    caseSensitive: false
+                }));
+            }
+			
+			const excelData = await this.getExcelData(filters); 
+
+			const formattedExcelData = this.formattedSalesReportExtract(excelData, CountryCode);
+
+			this.generateXLSX(formattedExcelData);
+		
+			// const url = `/v2/sta_tender${path}/content`;
+			// URLHelper.redirect(url, true);
 		},
+
+		getExcelData: async function (filters) {
+			const path = "/SalesReportsView"; 
+			return new Promise((resolve, reject) => {
+				this.getModel().read(path, {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		formatPolandPrices: function (value) {
+			if (!value){
+				value = 0;
+			};
+
+			const formattedValue = this.formatCurrency(Number(value), 'en-US', 2, 2);
+			return formattedValue.replace(/,/g, ' ').replace(/\.(?=\d{2}$)/, ',');
+		},
+	
+		formatPolandQuantity: function (value) {
+			if (!value){
+				value = 0;
+			};
+			const formattedValue = this.formatNumber(Number(value), 0, 0);
+			return formattedValue.replace(/,/g, ' ');
+		},
+
+		formatNumber: function(num, minDigits, maxDigits) {
+			if (!num){
+				num = 0;
+			}
+	
+			return num.toLocaleString('en-US', {
+				minimumFractionDigits: minDigits, 
+				maximumFractionDigits: maxDigits
+			});
+		},
+
+		formatCurrency: function (num, locale, minDigits, maxDigits, truncate) {
+			if (!num){
+				num = 0;
+			};
+	
+			if (truncate) {
+				const fixed = (num * 100).toFixed(10); // Fix the precision issue
+				num = Number(Math.floor(fixed) / 100); 
+			}
+	
+			return num.toLocaleString(locale, {
+				minimumFractionDigits: minDigits, 
+				maximumFractionDigits: maxDigits
+			});
+		},
+
+		formatDate: function(dateString, inputFormat, outputFormat) {
+			const date = new Date(dateString); // Parse date string directly
+		
+			if (isNaN(date)) {
+				return "Invalid date"; // Handle invalid date parsing
+			}
+		
+			const pad = (n) => (n < 10 ? "0" + n : n); // Pad single digits with a leading zero
+		
+			// Replace placeholders in the output format
+			return outputFormat
+				.replace("YYYY", date.getFullYear())
+				.replace("MM", pad(date.getMonth() + 1)) // Months are zero-indexed
+				.replace("DD", pad(date.getDate()));
+		},
+
+		formattedSalesReportExtract: function (excelData, CountryCode) {
+			const countryCodeLocals = {
+				'PL': 'en-US'
+			};
+		
+			const locale = countryCodeLocals[CountryCode];
+		
+			// Use map to create a new array with formatted data
+			const formattedData = excelData.map(ed => {
+				// Format Quantities
+				ed.Quantity = this.formatPolandQuantity(ed.Quantity, CountryCode);
+				ed.QuantityML = this.formatPolandQuantity(ed.QuantityML, CountryCode);
+				ed.RequestedVolume = this.formatPolandQuantity(ed.RequestedVolume, CountryCode);
+				ed.BrandUsedVolume = this.formatPolandQuantity(ed.BrandUsedVolume, CountryCode);
+				ed.BrandContractVolume = this.formatPolandQuantity(ed.BrandContractVolume, CountryCode);
+		
+				// Format Prices
+				ed.WholesalerPurchasePrice = this.formatPolandPrices(ed.WholesalerPurchasePrice, locale, CountryCode);
+				ed.WholesalerContractPrice = this.formatPolandPrices(ed.WholesalerContractPrice, locale, CountryCode);
+				ed.WholesalerPurchasedAmount = this.formatPolandPrices(ed.WholesalerPurchasedAmount, locale, CountryCode);
+				ed.TotalSales = this.formatPolandPrices(ed.TotalSales, locale, CountryCode);
+		
+				// Format Date
+				ed.FilePeriod = ed.FilePeriod && this.formatDate(ed.FilePeriod, '', 'DD-MM-YYYY');
+		
+				// Format Percentage
+				ed.ContractBrandUsage = ed.ContractBrandUsage ? `${(Number(ed.ContractBrandUsage) * 100).toFixed(2)}%` : '0%';
+		
+				return ed;
+			});
+		
+			return formattedData;
+		},
+
+		generateXLSX: function (excelData) {
+
+			const headers = [
+				"OfferID",
+				"Wholesaler Name",
+				"Institute",
+				"Customer ID",
+				"Date",
+				"Brand",
+				"Product",
+				"EAN Number",
+				"Quantity [Units]",
+				"Quantity [ML]",
+				"List Price",
+				"Special Price",
+				"Wholesaler Purchased Amount",
+				"Net Sales",
+				"Contract Product Volume",
+				"Used Brand Volume",
+				"Contract Brand Usage",
+			];
+		
+			// Map the data to match the headers
+			const formattedData = excelData.map(item => ({
+				"OfferID": item.OfferID || "",
+				"Wholesaler Name": item.DistributorName || "",
+				"Institute": item.MainInstituteName || "",
+				"Customer ID": item.External_InstituteId || "",
+				"Date": item.FilePeriod || "",
+				"Brand": item.BrandName || "",
+				"Product": item.PRODUCTPACKNAME || "",
+				"EAN Number": item.EANNumber || "",
+				"Quantity [Units]": item.Quantity || 0,
+				"Quantity [ML]": item.QuantityML || 0,
+				"List Price": item.WholesalerPurchasePrice || 0.0,
+				"Special Price": item.WholesalerContractPrice || 0.0,
+				"Wholesaler Purchased Amount": item.WholesalerPurchasedAmount || 0.0,
+				"Net Sales": item.NetSales || "",
+				"Contract Product Volume": item.RequestedVolume || "",
+				"Used Brand Volume": item.BrandUsedVolume || "",
+				"Contract Brand Usage": item.ContractBrandUsage || "0.00%",
+			}));
+
+			// Create a new workbook
+			let wb = XLSX.utils.book_new();
+		
+			// Convert JSON data to a worksheet
+			let ws = XLSX.utils.json_to_sheet(formattedData, { header: headers });
+		
+			// Append worksheet to workbook
+			XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+
+							
+			// Trigger file download
+			XLSX.writeFile(wb, "Sales_Report.xlsx");
+		
+			sap.m.MessageToast.show("Excel file downloaded successfully!");
+		},
+
 		onOverviewSectionDataReceived: function (oEvent) {
 				const oTable = this.byId("idSalesOverviewTable");
 				const oBinding = oTable.getBinding("rows");
@@ -686,7 +939,7 @@ sap.ui.define([
 			const oBinding = oTable.getBinding("rows");
 			const iRowCount = oBinding.getLength();
 			oTable.setVisibleRowCount(iRowCount === 0 ? iRowCount + 1 : iRowCount > 10 ? 10 : iRowCount);
-	}
+		}
 	});
 
 });
