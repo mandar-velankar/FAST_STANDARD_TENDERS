@@ -46,6 +46,11 @@
 										sorter: { 
 											path: 'Country/CountryName' 
 										},
+										filters: {
+											filters: [
+													{ path: 'CountryCode', operator: 'EQ', value1: 'PL' }
+												]
+										},
 										events: {
 											dataReceived: '.onCountriesReceived'
 										}
