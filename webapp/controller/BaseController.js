@@ -283,8 +283,11 @@ sap.ui.define([
 		},
 
 		updateEnablementModel: async function (offerStatus, productKeys, stTenderRoles) {
+			const stState = this.getOwnerComponent().getModel("st");
 			const isProductDeclined = await this.checkIsProductInactive(productKeys);
-			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles);
+			const savedQuotationsCount = await stState.getService().getSavedQuotations(productKeys.OfferID);
+			const savedAwardedProductsCount = await stState.getService().getSavedAwardedProducts(productKeys.OfferID);
+			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles, savedQuotationsCount, savedAwardedProductsCount);
 			const enablementModel = new JSONModel(obj);
 			this.getOwnerComponent().setModel(enablementModel, 'em');
 		},
