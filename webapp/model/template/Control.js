@@ -9,8 +9,9 @@ sap.ui.define(["sap/m/Text",
                "./ValueHelp",
                "../../service/StandardSingletonService",
                "sap/ui/model/Filter",
-               "../formatter"
-], function (Text, BaseObject, ControlProperty, Input, MultiInput, TextArea, DatePicker, ValueHelp, StandardSingletonService, Filter, formatter) {
+               "../formatter",
+               "sap/m/ObjectStatus"
+], function (Text, BaseObject, ControlProperty, Input, MultiInput, TextArea, DatePicker, ValueHelp, StandardSingletonService, Filter, formatter, ObjectStatus) {
 
   const Control = BaseObject.extend("com.bayer.tender.statenderapp.model.template.Control", {
     constructor: function (parentId,data) {
