@@ -179,6 +179,23 @@ sap.ui.define([
             }else {
                 return today;
             }
-        }
+        },
+		outcome: function(grossMargin){
+            if(!grossMargin){return};
+            let newGrossMargin =  grossMargin * 100;
+            if (parseFloat(newGrossMargin) >= parseFloat('40%')) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+		formatESProductOutcomeIcon: function (grossMargin) {
+			const outcome = this.outcome(grossMargin);
+			return outcome ? "sap-icon://sys-enter-2" : "sap-icon://error"
+		},
+		formatESProductOutcomeState: function (grossMargin) {
+			const outcome = this.outcome(grossMargin);
+			return outcome ? "Success" : "Error"
+		}
 	};
 });
