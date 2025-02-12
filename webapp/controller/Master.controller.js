@@ -755,7 +755,7 @@ sap.ui.define([
 			const formContainers = form.getAggregation("formContainers");
 			let instituteInBranch;
 
-			const tenderInstituteTypeContainer = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab("Tender").getXMLView().getFormByName("TenderForm").getFormContainerByName("Institute & Type");
+			const tenderInstituteTypeContainer = this.templateStateData.masterConfig.countryTemplate.getTemplate().getForm().getFormContainerByName("Institute & Type");
 			const InstituteInBranchConfigField = tenderInstituteTypeContainer.getFormElementByName("Institute In Branch");
 
 			formContainers.forEach(forContainer => {
