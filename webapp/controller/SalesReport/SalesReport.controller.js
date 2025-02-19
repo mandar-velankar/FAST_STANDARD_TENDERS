@@ -356,9 +356,10 @@ sap.ui.define([
 
 						controller.stState.setProperty("/SalesReportInstitutesView", salesReportInstituteData);
 
-						const items = salesReportInstituteData.filter((value, index, self) => 
-							self.findIndex(v => v.Territory === value.Territory) === index);
+						// const items = salesReportInstituteData.filter((value, index, self) => 
+						// 	self.findIndex(v => v.InstituteID === value.InstituteID) === index);
 
+						const items = salesReportInstituteData;
 						// Add "All" option to the items array
 						items.unshift({
 							Territory: "All",
