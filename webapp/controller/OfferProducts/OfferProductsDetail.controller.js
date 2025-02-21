@@ -27,7 +27,7 @@ sap.ui.define([
 			this.oDynamicPage = this.byId("idProductForm");
 
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
-
+			this.getOwnerComponent().getEventBus().subscribe("PriceConditionFormChannel", "UpdatePriceConditionForm", this.handleUpdatePriceConditionForm, this);
 			// /*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
 			// this.setModel(this.paState.getModel(), "pa");
 
@@ -326,6 +326,17 @@ sap.ui.define([
 				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
 				new Filter("ConditionType",FilterOperator.NE, 'FOC')	
 			]
+
+			oSelectedTender.InstituteType === 'Public' && orFilters.push(
+				new Filter({
+					filters: [
+						new Filter("InstituteType",FilterOperator.EQ, oSelectedTender.InstituteType),
+						new Filter("InstituteType",FilterOperator.EQ, null)
+					],
+					and: false
+				})
+			);
+
 			oPriceCondBinding.filter(orFilters);
 		},
 	
@@ -412,6 +423,7 @@ sap.ui.define([
 
 		_onSubmitChangesSuccessProductForm: function(res){
 			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
+			const UserInfo = this.stState.getProperty('/UserInfo');
 			this.refreshPricingForm();
 			this.setMessageSection(["OfferProductsDetailView"], "offerProductDetailMsg");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/offerProductDetailMsg").length > 0;
@@ -419,7 +431,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
-				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles);
+				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			}
@@ -914,7 +926,7 @@ sap.ui.define([
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1033,7 +1045,7 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},	
@@ -1066,7 +1078,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1097,7 +1109,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 
-			if(priceObj.CountryCode !== 'AU'){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 			
@@ -1915,6 +1927,7 @@ sap.ui.define([
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
 				this.cancelPendingChanges(["idOfferPrice", "PriceConditionSpecialPriceView", "PriceConditionWithMaximumPriceView"], "priceCondPrice");
+				this.getOwnerComponent().getEventBus().publish("OfferFormViewChannel", "updateOfferForm");
 			} 
 			this._refreshOfferProductTable();
 			this.refreshPricingForm();
@@ -1988,13 +2001,19 @@ sap.ui.define([
 			if(!property) return;
 			const pathIndex = property.split('/')[1];
 			let maximumPrice = property?.toLowerCase().includes("price1") ? parseFloat(value).toFixed(2) : Number(priceObj.Price1);
-			let maximumWholesalerMargin = property?.toLowerCase().includes("level2discount1") ? parseFloat(value) : priceObj.Level2Discount1;
+			let maximumWholesalerMargin = (property?.toLowerCase().includes("level2discount1") ? parseFloat(value) : priceObj.Level2Discount1) || 0;
 			let cogs = priceObj.COGS;
-			let specialPrice = parseFloat(maximumPrice * (1 - maximumWholesalerMargin));
+			let specialPrice = parseFloat(maximumPrice / (1 + parseFloat(maximumWholesalerMargin)));
 			let margin = !!specialPrice ? (specialPrice - cogs) / specialPrice : 0;
 			
 			context.getModel().setProperty('SpecialPrice', specialPrice, context);
 			context.getModel().setProperty('Margin', margin, context);
+		},
+		handleUpdatePriceConditionForm: function () {
+			let oContext = this.byId('idPricingForm').getBindingContext();
+			let sPath = oContext.getPath();
+			let oModel = this.getModel();
+				oModel.read(sPath);
 		}
     });
 });

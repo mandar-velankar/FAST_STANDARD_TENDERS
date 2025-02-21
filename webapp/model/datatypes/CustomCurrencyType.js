@@ -16,11 +16,21 @@ sap.ui.define([
             if(!parts){
                 return "";
             }
+            const countryGroupingSeparators = {
+                'NL': '.',
+                'PL': ' '
+            }
+
+            const countryDecimalSeparators = {
+                'NL': ',',
+                'PL': ','
+            }
+
             const oCurrencyFormat = NumberFormat.getCurrencyInstance({
                     minFractionDigits: parts[3]?.includes('HM') ? 4 : parts[2] === 'MEA' ? 3 : 2,
                     maxFractionDigits: parts[3]?.includes('HM') ? 4 : parts[2] === 'MEA' ? 3 : 2,
-                    groupingSeparator: parts[3] === 'NL' ? "." : ",",
-                    decimalSeparator: parts[3] === 'NL' ? "," : "."
+                    groupingSeparator: countryGroupingSeparators[parts[3]] ? countryGroupingSeparators[parts[3]] : ",",
+                    decimalSeparator: countryDecimalSeparators[parts[3]] ? countryDecimalSeparators[parts[3]] : "."
                 });
 			return `${oCurrencyFormat.format(Number(parts[0] ?? 0))} ${parts[1] ?? ''}` ;
         },

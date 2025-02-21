@@ -281,6 +281,10 @@ sap.ui.define([
 
 			const isSendNotificationEnabledForHematology = status === "Offer Created";
 
+			const isAwardedTabAccessGrantedForPolishUSer =  UserInfo.Role === 'Tender Manager' || UserInfo.Role === 'Sales Manager';
+			const isAwardedTabVisible = CountryCode === 'PL' ? isAwardedTabAccessGrantedForPolishUSer && checkCopyOfferBtn : checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess;
+			const isAwardedProductDetailPageEditable = CountryCode === 'PL' ? isAwardedTabAccessGrantedForPolishUSer && isAwardDetailEnabled : isAwardDetailEnabled;
+
 			return {
 				Detail: {
 					TenderTab: {
@@ -318,7 +322,7 @@ sap.ui.define([
 						}
 					},
 					AwardTab: {
-						isVisible: checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess,
+						isVisible: isAwardedTabVisible
 					},
 					DeliveryTrackingTab: {
 						isVisible: isDeliveryTruckingVisible && !stTenderRoles.LimitedPricingTabAccess,
@@ -339,10 +343,10 @@ sap.ui.define([
 				},
 				AwardedProductDetail: {
 					AwardDetail: {
-						editMode: isAwardDetailEnabled
+						editMode: isAwardedProductDetailPageEditable
 					},
 					CompetitorResult: {
-						editMode: isAwardDetailEnabled
+						editMode: isAwardedProductDetailPageEditable
 					}
 				},
 				DeliveryTrackingDetail: {

@@ -407,5 +407,46 @@ sap.ui.define([
 				});
 			})
 		},
+		getTemplateIDByName: function (name) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/ExcelTemplate",
+				{
+					filters: [
+						new Filter ("name", FilterOperator.EQ, name)
+					],
+					success: function (res) {
+						resolve(res?.results?.[0]?.templateId); // Resolve the promise on success
+					},
+				});
+			});
+        },
+
+		getTemplateContent: async function (templateName) {
+			const templateId = await this.getTemplateIDByName(templateName);
+			return await fetch(`${this.model.sServiceUrl}/ExcelTemplate(${templateId})/$value`, {
+				method: "GET",
+				headers: {
+					"Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+				},
+				credentials: "include" // Important if using authentication
+			})
+			.then(response => response.blob())
+			.then(blob => blob.arrayBuffer())
+			.catch(error => console.error("Error:", error));
+		},
+		
+		getQuotationInfo: function (offerID) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/PT_TMQUTO",
+				{
+					filters: [
+						new Filter ("OfferID", FilterOperator.EQ, offerID)
+					],
+					success: function (res) {
+						resolve(res?.results?.[0]);
+					},
+				});
+			});
+        },
     });
 });

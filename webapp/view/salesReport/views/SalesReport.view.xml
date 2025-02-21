@@ -1,0 +1,244 @@
+<mvc:View
+	controllerName="com.bayer.tender.statenderapp.controller.SalesReport.SalesReport"
+	xmlns="sap.m"
+	xmlns:t="sap.ui.table"
+	xmlns:f="sap.f"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:tnt="sap.tnt">
+
+	<f:DynamicPage
+		preserveHeaderStateOnScroll="true"
+		toggleHeaderOnTitleClick="false">
+		
+		<!-- DynamicPage Title -->
+		<f:title>
+			<f:DynamicPageTitle>
+				<f:heading>
+					<Title text ="{i18n>SalesReport}"/>
+				</f:heading>
+			</f:DynamicPageTitle>
+		</f:title>
+
+
+		<f:content>
+			<VBox >
+				<OverflowToolbar height="8rem" class="sapFDynamicPageAlignContent">
+					<HBox width="100%" alignItems="Start">
+						<VBox class="sapUiSmallMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Country"
+									labelFor="idSalesReportCountry"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportCountry" 
+									selectedKey="{st>/SelectedCountry}"
+									items="{ 
+										path: '/UserCountries', 
+										parameters: {
+											expand: 'Country'
+										},
+										sorter: { 
+											path: 'Country/CountryName' 
+										},
+										filters: {
+											filters: [
+													{ path: 'CountryCode', operator: 'EQ', value1: 'PL' }
+												]
+										},
+										events: {
+											dataReceived: '.onCountriesReceived'
+										}
+									}"
+									change=".onCountriesReceived"
+									width="8rem"
+								>
+									<core:Item key="{Country/CountryCode}" text="{Country/CountryName}"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="TenderID"
+									labelFor="idSalesReportTenderID"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportTenderID"
+									selectedKey="{st>/SelectedTenderId}"
+									change=".setFilter"
+									width="8rem"
+								>
+									<core:Item key="{TenderID}" text="{TenderID}"/>
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Wholesaler"
+									labelFor="idSalesReportWholesaler"
+									class="sapUiSmallMarginEnd"
+									width="5rem"	
+								/>
+								<Select 
+									id="idSalesReportWholesaler" 
+									selectedKey="{st>/SelectedWholesaler}"
+									change=".setFilter"
+									width="8rem"
+								>
+									<core:Item text="{DistributorName}" key="{DistributorID}" />
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Brand"
+									labelFor="idSalesReportBrand"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportBrand" 
+									selectedKey="{st>/SelectedBrandID}"
+									change=".bindCountryBrandProducts"
+									width="8rem"
+								>
+									<core:Item text="{BRANDNAME}" key="{BRANDID}" />
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Product"
+									labelFor="idSalesReportProduct"
+									class="sapUiSmallMarginEnd"	
+									width="5rem"
+								/>
+								<Select 
+									id="idSalesReportProduct"
+									selectedKey="{st>/SelectedProductId}"
+									change=".bindTenderIds"
+									width="8rem"
+								>
+									<core:Item key="{PRODUCT_ID}" text="{PRODUCT_NAME}"/>
+								</Select>
+							</HBox>
+						</VBox>
+
+						<VBox class="sapUiMediumMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="KAM Territory"
+									labelFor="idSalesReportKAMTerritory"
+									class="sapUiSmallMarginEnd"	
+									width="7rem"
+								/>
+								<Select 
+									id="idSalesReportKAMTerritory"
+									selectedKey="{st>/SelectedTerritory}"
+									change=".onTerritoryChange"
+									width="8rem"
+								>
+									<core:Item key="{Territory}" text="{Territory}"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Institute Type"
+									labelFor="idSalesReportInstituteType"
+									class="sapUiSmallMarginEnd"	
+									width="7rem"
+								/>
+								<Select 
+									id="idSalesReportInstituteType"
+									selectedKey="{st>/SelectedInstituteType}"
+									change=".onInstituteTypeChange"
+									width="8rem" 
+								>
+									<core:Item key="{InstituteType}" text="{InstituteType}"/>
+								</Select>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="Institute"
+									labelFor="idSalesReportInstitute"
+									class="sapUiSmallMarginEnd"	
+									width="7rem"
+								/>
+								<Select 
+									id="idSalesReportInstitute" 
+									selectedKey="{st>/SelectedInstitute}"
+									change=".bindTenderIds"
+									width="8rem"
+								>
+									<core:Item key="{InstituteID}" text="{InstituteName}"/>
+								</Select>
+							</HBox>
+						</VBox>
+						<VBox class="sapUiSmallMarginEnd">
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="From"
+									labelFor="idSalesReportFromDate"
+									class="sapUiSmallMarginEnd"	
+									width="2rem"
+								/>
+								<DatePicker 
+									id="idSalesReportFromDate" 
+									change=".setFilter" width="8rem"
+									value = "{
+										path: 'st>/dateFrom',
+										type: 'sap.ui.model.type.Date',
+										formatOptions: { 
+											pattern: 'dd-MM-yyyy',
+											UTC: false
+										}
+                        			}"
+								/>
+							</HBox>
+							<HBox alignItems="Center" justifyContent="Start">
+								<Label
+									text="To"
+									labelFor="idSalesReportToDate"
+									class="sapUiSmallMarginEnd"	
+									width="2rem"
+								/>
+								<DatePicker 
+									id="idSalesReportToDate" 
+									change=".setFilter" width="8rem"
+									minDate="{st>/dateFrom}"
+									enabled="{= !!${st>/dateFrom}}"
+									value = "{
+										path: 'st>/dateTo',
+										type: 'sap.ui.model.type.Date',
+										formatOptions: { 
+											pattern: 'dd-MM-yyyy',
+											UTC: false
+										}
+									}"
+								/>
+							</HBox>
+						</VBox>
+						<Button press=".onDownloadSalesReportExtract" text="Download" />
+					</HBox>
+				</OverflowToolbar>
+
+				<Panel expanded="true" expandable="true" headerText="Overview">
+					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.salesReport.fragments.Overview" type="XML"/>
+				</Panel>
+
+				<Panel expanded="true" expandable="true" headerText="Sales Details">
+					<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.salesReport.fragments.SalesDetails" type="XML"/>
+				</Panel>
+			</VBox>
+		</f:content>
+	</f:DynamicPage>
+</mvc:View>
