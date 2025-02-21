@@ -356,10 +356,9 @@ sap.ui.define([
 
 						controller.stState.setProperty("/SalesReportInstitutesView", salesReportInstituteData);
 
-						// const items = salesReportInstituteData.filter((value, index, self) => 
-						// 	self.findIndex(v => v.InstituteID === value.InstituteID) === index);
+						const items = salesReportInstituteData.filter((value, index, self) => 
+							self.findIndex(v => v.Territory === value.Territory) === index);
 
-						const items = salesReportInstituteData;
 						// Add "All" option to the items array
 						items.unshift({
 							Territory: "All",
@@ -378,8 +377,8 @@ sap.ui.define([
 						// Default selection to "All"
 						controller.stState.setProperty('/SelectedTerritory', "All");
 
-						controller.bindInstituteType(items);
-                		controller.bindInstitute(items);
+						controller.bindInstituteType(salesReportInstituteData);
+                		controller.bindInstitute(salesReportInstituteData);
 
 						controller.onFilter();
                     }
@@ -869,27 +868,30 @@ sap.ui.define([
 			return formattedData;
 		},
 
-		generateXLSX: function (excelData) {
+		generateXLSX: async function (excelData) {
+			
+			
+			const template = await this.stState.getService().getTemplateContent("Sales Report");
 
-			const headers = [
-				"OfferID",
-				"Wholesaler Name",
-				"Institute",
-				"Customer ID",
-				"Date",
-				"Brand",
-				"Product",
-				"EAN Number",
-				"Quantity [Units]",
-				"Quantity [ML]",
-				"List Price",
-				"Special Price",
-				"Wholesaler Purchased Amount",
-				"Net Sales",
-				"Contract Product Volume",
-				"Used Brand Volume",
-				"Contract Brand Usage",
-			];
+			// const headers = [
+			// 	"OfferID",
+			// 	"Wholesaler Name",
+			// 	"Institute",
+			// 	"Customer ID",
+			// 	"Date",
+			// 	"Brand",
+			// 	"Product",
+			// 	"EAN Number",
+			// 	"Quantity [Units]",
+			// 	"Quantity [ML]",
+			// 	"List Price",
+			// 	"Special Price",
+			// 	"Wholesaler Purchased Amount",
+			// 	"Net Sales",
+			// 	"Contract Product Volume",
+			// 	"Used Brand Volume",
+			// 	"Contract Brand Usage",
+			// ];
 		
 			// Map the data to match the headers
 			const formattedData = excelData.map(item => ({
@@ -912,15 +914,12 @@ sap.ui.define([
 				"Contract Brand Usage": item.ContractBrandUsage || "0.00%",
 			}));
 
-			// Create a new workbook
-			let wb = XLSX.utils.book_new();
-		
-			// Convert JSON data to a worksheet
-			let ws = XLSX.utils.json_to_sheet(formattedData, { header: headers });
-		
-			// Append worksheet to workbook
-			XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+			// read existing workbook
+			let wb = XLSX.read(template, { type: "array", cellStyles: true});
+			let ws = wb.Sheets[wb.SheetNames[0]];
 
+			// Append JSON data to the sheet (starting at row 2 if headers exist)
+			XLSX.utils.sheet_add_json(ws, formattedData, { skipHeader: true, origin: -1 });
 							
 			// Trigger file download
 			XLSX.writeFile(wb, "Sales_Report.xlsx");
