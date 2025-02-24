@@ -177,7 +177,7 @@ sap.ui.define([
 		},
 
 		setVisibleWithMaxPriceNewOffer: async function (form) {
-			const maxWholesalerMarginField = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			const maxWholesalerMarginField = form.getAggregation('formContainers')[2]?.getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
 			maxWholesalerMarginField && maxWholesalerMarginField.setVisible(false);
 		},
 
@@ -1709,7 +1709,7 @@ sap.ui.define([
 			const userInfo = await this.getUserInfo(this.getModel("st").getProperty("/UserID"));
 			const userRole = userInfo.results[0].Role;
 			const allWithMaximumPrice = await this.getSavedPriceConditionType();
-			const maxWholesalerMarginField = form.getAggregation('formContainers')[2].getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
+			const maxWholesalerMarginField = form.getAggregation('formContainers')[2]?.getAggregation('formElements').find(el => el.getAggregation('label') === 'Maximum Wholesaler Margin' || el.getAggregation('label') === 'Maksymalna marża')
 			maxWholesalerMarginField && maxWholesalerMarginField.setVisible((userRole === 'Tender Manager') && allWithMaximumPrice);
 		},
 
