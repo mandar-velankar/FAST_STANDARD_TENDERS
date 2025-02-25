@@ -718,6 +718,9 @@ sap.ui.define([
 			if (userInfo?.Role === 'KAM' && this.countryCode === 'PL') {
 				this.getModel().setProperty(`${sElemBindingPath}/Custom_String_1`, userInfo.UserName);
 			}
+			if (this.countryCode === 'ES') {
+				this.getModel().setProperty(`${sElemBindingPath}/TenderChannel`, 'Direct');
+			}
 		},
 		onCloseTenderCreationDialog: function () {
 			const bindingPath = this.byId("idNewTenderForm").getBindingContext().getPath().replace("/", "");
