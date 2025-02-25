@@ -131,12 +131,13 @@ sap.ui.define([
 				enableDeleteProductButton: false,
 				brandProducts: [],
 				ContractDurationForm: {
+					CountryCode: this.countryCode,
 					OfferID: this.offerId,
 					ProductCode: this.productId,
 					InstituteName: "", 
 					ContractDuration: "", 
-					ContractStartDate: "", 
-					ContractEndDate: "",
+					ContractStartDate: undefined, 
+					ContractEndDate: undefined,
 				}
 			});
 	
@@ -154,6 +155,20 @@ sap.ui.define([
 			this.bindTable(this.offerId, this.productId);
 			this.setInitialWholeSalerMultiInputTokens();
 			this.countryCode == 'NL' && await this.getAwardedContractDurations()
+			this.countryCode == 'PL' && await this.getPolandAwardedContractInformation();
+		},
+
+		getPolandAwardedContractInformation: async function(){
+            const result = await this.stState.getService().getAwardedContractDurations(this.offerId, this.productId)
+			let awardedContractInformationForm = {
+				CountryCode: result?.[0]?.CountryCode,
+				OfferID: result?.[0]?.OfferID,
+				ProductCode: result?.[0]?.ProductCode,
+				ContractStartDate: result?.[0]?.ContractStartDate, 
+				ContractEndDate: result?.[0]?.ContractEndDate,
+			}
+			this.getModel("ui").setProperty("/ContractDurationForm", awardedContractInformationForm)
+			this.bindPolandContractDatesForm();
 		},
 
 		getAwardedContractDurations: async function(){
@@ -285,6 +300,25 @@ sap.ui.define([
 				}
 			});
 			this.unbindCompetitorResultForm();
+		},
+
+		bindPolandContractDatesForm: async function() {
+			const form = this.getView().byId('idContractDates');
+			const { EffectiveDate, ExpiryDate } = await this.stState.getService().getQuotationInfo(this.offerId);
+			const uiModel = this.getModel("ui");
+		
+			const currentStartDate = uiModel.getProperty("/ContractDurationForm/ContractStartDate");
+			const currentEndDate = uiModel.getProperty("/ContractDurationForm/ContractEndDate");
+		
+			const newStartDate = currentStartDate? currentStartDate : EffectiveDate;
+			const newEndDate = currentEndDate? currentEndDate : ExpiryDate;
+		
+			uiModel.setProperty("/ContractDurationForm/ContractStartDate", newStartDate);
+			uiModel.setProperty("/ContractDurationForm/ContractEndDate", newEndDate);
+		
+			form.bindElement({
+				path: "ui>/ContractDurationForm",
+			});
 		},
 
 		onDataReceived: function(event) {
@@ -644,7 +678,8 @@ sap.ui.define([
 			this.getModel("ui").setProperty('/ContractInformation/editMode', true);
 		},	
 
-		onButtonContractInformationFormAcceptPress: function(event){
+		onButtonContractInformationFormAcceptPress: async function(event){
+			this.countryCode === 'PL' && await this.getPolandAwardedContractInformation();
 			this.getModel("ui").setProperty('/ContractInformation/editMode', false);
 		},
 
@@ -933,7 +968,6 @@ sap.ui.define([
 
 		onButtonApplyWholesalersProductsPress: async function () {
 			try {
-				BusyIndicator.show(0);
 				const wholesalersListTokens = this.byId("idContractInformationWholesalersMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
 				const brandProductMultiInputTokens = this.byId("idContractInformationProductsMultiInput").getTokens().map(item => item.getProperty('key')).join(';');
 
@@ -948,8 +982,7 @@ sap.ui.define([
 					properties: pendingChange,
 					groupId: "AwardedOfferDistributors"
 				});
-				
-				
+				this.getDistributorAssignementDialog().then(dialog => dialog.close());
 				this.getModel().submitChanges({
 					success: this.onSubmitChangesNLDistributorSuccess.bind(this),
 					groupId: "AwardedOfferDistributors"
@@ -963,16 +996,12 @@ sap.ui.define([
 		onSubmitChangesNLDistributorSuccess: async function (event) {
 			const errStatus = event?.__batchResponses?.[0]?.response?.statusCode;
 			const errMessage = event?.__batchResponses?.[0]?.response?.body;
-			let dialog = await this.getDistributorAssignementDialog();
+			
 			if (errStatus == 403) {
 				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
-				BusyIndicator.hide();
 			}else {
 				this.resetMultiInputTokens();
 				this.setInitialWholeSalerMultiInputTokens();
-				dialog.close();
-				MessageBox.success('Wholesalers were saved successfully');
-				BusyIndicator.hide();
 			}
 		},
 
@@ -1139,21 +1168,21 @@ sap.ui.define([
 
         onSavehandleAwardedContractDuration: function(){
             try {
+				let newEntry = {};
+				switch (this.countryCode) {
+					case "NL":
+						newEntry = this.saveNetherLandContractInformation();
+						break;
+					case "PL":
+						newEntry = this.savePolandContractDateInformation();
+						break;
+					default:
+						break;
+				}
                 this.getModel("appView").setProperty('/busy', true);
-                const form = this.byId("idContractDurationForm");
-                const contractDurationValue = this.byId("idContractDuration").getSelectedKey();
-                const obj = form.getBindingContext("ui").getObject();
-                const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
-                
-                obj.InstituteName = InstituteGroupIds;            
-                obj.ContractDuration = contractDurationValue;
-                obj.ContractStartDate = obj.ContractStartDate && new Date(obj.ContractStartDate);
-                obj.ContractEndDate = obj.ContractEndDate && new Date(obj.ContractEndDate);
-                obj.OfferID = this.offerId;
-                obj.ProductCode = this.productId;
                 
                 this.getModel().createEntry('/ContractInfomation', {
-                    properties: obj,
+                    properties: newEntry,
                     groupId: "ContractDuration"
                 });
 
@@ -1167,6 +1196,61 @@ sap.ui.define([
             }
         },
 
+		/**
+		 * Applicable only for Poland
+		 */
+
+		savePolandContractDateInformation: function () {
+			const form = this.byId("idContractDates");
+			const obj = form.getBindingContext("ui").getObject();
+			const uiModel = this.getModel("ui");
+			const ContractStartDate = uiModel.getProperty("/ContractDurationForm/ContractStartDate");
+			const ContractEndDate = uiModel.getProperty("/ContractDurationForm/ContractEndDate");
+			const data = {
+				ContractStartDate: ContractStartDate,
+				ContractEndDate: ContractEndDate,
+			}
+
+			return this.mappedContractInformations(this.countryCode, data);
+		},
+
+		saveNetherLandContractInformation: function () {
+			const form = this.byId("idContractDurationForm");
+			const contractDurationValue = this.byId("idContractDuration").getSelectedKey();
+			const obj = form.getBindingContext("ui").getObject();
+			const InstituteGroupIds = this.byId("idAwardedInstituteGroupMultiSelect").getTokens().map(item => item.getProperty('key')).join(',');
+			const data = {
+				InstituteGroupIds,
+				contractDurationValue,
+				ContractStartDate: obj.ContractStartDate,
+				ContractEndDate: obj.ContractEndDate
+			}
+
+			return this.mappedContractInformations(this.countryCode, data);
+		},
+
+		mappedContractInformations: function (countryCode, data) {
+			const mapping = {
+				"NL": {
+					InstituteName:  data.InstituteGroupIds,            
+					ContractDuration:  data.contractDurationValue,
+					ContractStartDate:  data.ContractStartDate && new Date(data.ContractStartDate),
+					ContractEndDate:  data.ContractEndDate && new Date(data.ContractEndDate),
+					OfferID:  this.offerId,
+					ProductCode:  this.productId,
+					CountryCode:  this.countryCode,
+				},
+				"PL": {
+					CountryCode:  this.countryCode,
+					ContractStartDate:  data.ContractStartDate && new Date(data.ContractStartDate),
+					ContractEndDate:  data.ContractEndDate && new Date(data.ContractEndDate),
+					OfferID:  this.offerId,
+					ProductCode:  this.productId,
+				}
+			}
+			return mapping[countryCode]
+		},
+
 
 		onSubmitChangesAwardedContractDurationSuccess: async function (event) {
 			const errStatus = event?.__batchResponses?.[0]?.response?.statusCode;
@@ -1175,10 +1259,17 @@ sap.ui.define([
 				MessageBox.error(JSON.parse(errMessage)?.error?.message?.value);
 				this.getModel("appView").setProperty('/busy', false);
 			}else {
-				await this.getAwardedContractDurations()
-				MessageBox.success('Contract Duration was saved successfully');
+				if (this.countryCode == 'NL') {
+					await this.getAwardedContractDurations();
+					MessageBox.success('Contract Duration was saved successfully');
+					this.getModel("ui").setProperty('/ContractDuration/editMode', false);
+				}else if (this.countryCode == 'PL') {
+					await this.getPolandAwardedContractInformation();
+					this.getModel("ui").setProperty('/ContractInformation/editMode', false);
+				}
+				
 				this.getModel("appView").setProperty('/busy', false);
-				this.getModel("ui").setProperty('/ContractDuration/editMode', false);
+				
 			}
 			this.getModel().resetChanges();
 		},
@@ -1215,6 +1306,12 @@ sap.ui.define([
 		onAwardedContractDurationFormCancelBtnPress: async function(){
 			this.getModel("ui").setProperty('/ContractDuration/editMode', false);
 			await this.getAwardedContractDurations()
+		},
+
+		onSavehandleAwardedWholesalers: function () {
+			this.countryCode === 'PL' && this.onSavehandleAwardedContractDuration();
+			this.getModel("ui").setProperty('/ContractInformation/editMode', false);
+			MessageBox.success('Wholesalers were saved successfully');
 		}
     });
 });

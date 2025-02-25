@@ -144,6 +144,11 @@
 					"target": "master"
 				},
 				{
+					"pattern": "sales-report",
+					"name": "salesReport",
+					"target": "salesReport"
+				},
+				{
 					"pattern": "detail/{countryCode}/{productScope}/{objectId}/:offerId:",
 					"name": "object",
 					"target": [
@@ -217,6 +222,11 @@
 					"viewName": "Master",
 					"viewLevel": 1,
 					"viewId": "master"
+				},
+				"salesReport": {
+					"viewName": "salesReport/views/SalesReport",
+					"viewLevel": 1,
+					"viewId": "salesReport"
 				},
 				"object": {
 					"viewName": "Detail",

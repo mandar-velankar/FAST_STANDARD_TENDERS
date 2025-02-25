@@ -228,8 +228,8 @@ sap.ui.define([
 		 * @param {string} offerStatus - The status that influences the visibility of tabs.
 		 */
 
-		updateVisibilityOfTabs: function (iconTabBar, offerStatus, productKeys, stTenderRoles) {
-			this.updateEnablementModel(offerStatus, productKeys, stTenderRoles);
+		updateVisibilityOfTabs: async function (iconTabBar, offerStatus, productKeys, stTenderRoles) {
+			await this.updateEnablementModel(offerStatus, productKeys, stTenderRoles);
 			if (!iconTabBar) return;
 			const tabs = iconTabBar.getAggregation("items");
 			tabs.forEach(tab => {
@@ -241,6 +241,7 @@ sap.ui.define([
 
 		getTabVisibility: function (tabName) {
 			const enablementModel = this.getModel("em");
+			if (!enablementModel) return;
 			let isVisible = "";
 			switch (tabName) {
 				case "Tender":
@@ -282,7 +283,7 @@ sap.ui.define([
 			return isVisible;
 		},
 
-		updateEnablementModel: async function (offerStatus, productKeys, stTenderRoles) {
+		updateEnablementModel: async function (offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode) {
 			const stState = this.getOwnerComponent().getModel("st");
 			const isProductDeclined = await this.checkIsProductInactive(productKeys);
 			const savedQuotationsCount = await stState.getService().getSavedQuotations(productKeys.OfferID);

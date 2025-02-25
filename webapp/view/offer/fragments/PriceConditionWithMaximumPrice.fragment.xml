@@ -70,7 +70,7 @@
 									 />
 						</form:fields>
 					</form:FormElement>
-					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.MaximumWholesalerMargin}" >
+					<form:FormElement label="{i18n>PriceConditionWithMaximumPriceFragment.MaximumWholesalerMargin}">
 						<form:fields>
 							<Input value="{
 										parts: ['Level2Discount1', 'CountryCode'],

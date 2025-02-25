@@ -252,9 +252,7 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status, isProductDeclined, stTenderRoles, savedQuotations, savedAwardedProductsCount) {
-
-			const isQuotationSaved = (savedQuotations?.count > 0 && savedAwardedProductsCount.count > 0);
+        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode) {
 
 			const isOverviewTabVisible = !!status;
 			const checkCopyOfferBtn = status === "Quotation Submitted" || 
@@ -275,11 +273,15 @@ sap.ui.define([
 									status === "Outcome Partially Accepted" || 
 									status === "Outcome Rejected") ? true : false;
 			const checkOverviewDownloadBtn = (status === "Offer Created" || status === "Awaiting Approval") ? false : true;
-			const checkOverviewSetAsSubmitBtn = status === "Offer Approved" ? true : checkCopyOfferBtn ? !isQuotationSaved : false;
+			const checkOverviewSetAsSubmitBtn = (status === "Offer Approved") ? true : false;
 			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
 			const isCancelApprovalBtnEnabled = (status === "Awaiting Approval") ? true : false;
 
 			const isSendNotificationEnabledForHematology = status === "Offer Created";
+
+			const isAwardedTabAccessGrantedForPolishUSer =  UserInfo.Role === 'Tender Manager' || UserInfo.Role === 'Sales Manager';
+			const isAwardedTabVisible = CountryCode === 'PL' ? isAwardedTabAccessGrantedForPolishUSer && checkCopyOfferBtn : checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess;
+			const isAwardedProductDetailPageEditable = CountryCode === 'PL' ? isAwardedTabAccessGrantedForPolishUSer && isAwardDetailEnabled : isAwardDetailEnabled;
 
 			return {
 				Detail: {
@@ -318,7 +320,7 @@ sap.ui.define([
 						}
 					},
 					AwardTab: {
-						isVisible: checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess,
+						isVisible: isAwardedTabVisible
 					},
 					DeliveryTrackingTab: {
 						isVisible: isDeliveryTruckingVisible && !stTenderRoles.LimitedPricingTabAccess,
@@ -339,10 +341,10 @@ sap.ui.define([
 				},
 				AwardedProductDetail: {
 					AwardDetail: {
-						editMode: isAwardDetailEnabled
+						editMode: isAwardedProductDetailPageEditable
 					},
 					CompetitorResult: {
-						editMode: isAwardDetailEnabled
+						editMode: isAwardedProductDetailPageEditable
 					}
 				},
 				DeliveryTrackingDetail: {
