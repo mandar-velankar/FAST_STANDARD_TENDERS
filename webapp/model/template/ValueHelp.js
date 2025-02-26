@@ -71,6 +71,11 @@ sap.ui.define([
           } else {            
             originalInputField.removeAllTokens();
           }
+          // moved outside if condition above to track multiinput changes even when no item is selected
+          const changeFunction = StandardSingletonService[`onChange${this.title.split(" ").join("")}`];
+          if (changeFunction) {
+            changeFunction(originalInputField, aSelectedItems, StandardSingletonService);
+          }
         }
         else{
           const oParam = oEvent.getParameter("selectedItem");
@@ -83,10 +88,12 @@ sap.ui.define([
                 const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + field.ID;
                 originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem[field.ID]); 
             })
-            const changeFunction = StandardSingletonService[`onChange${this.title}`];
+            
+          }
+          // moved outside if condition above to track multiinput changes even when no item is selected
+          const changeFunction = StandardSingletonService[`onChange${this.title.split(" ").join("")}`];
             if (changeFunction) {
               changeFunction(originalInputField, selectedItem, StandardSingletonService);
-            }
           }
         }     
       },

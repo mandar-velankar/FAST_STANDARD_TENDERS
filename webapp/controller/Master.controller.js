@@ -710,6 +710,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`,classificationObj[this.countryCode]? classificationObj[this.countryCode]: '');
+			this.getModel().setProperty(`${sElemBindingPath}/CountryCode`, sCountryCode);
 			if(this.countryCode === 'TW'){
 				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
 				this.getModel().setProperty(`${sElemBindingPath}/BidDueDate`, nextDate);
@@ -847,7 +848,7 @@ sap.ui.define([
 
 			//set defaults
 			newTenderObj.Active = 1;
-			newTenderObj.CountryCode = sSelectedCountry;
+			// newTenderObj.CountryCode = sSelectedCountry;
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
