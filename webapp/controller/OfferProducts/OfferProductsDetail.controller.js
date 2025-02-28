@@ -927,6 +927,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1046,6 +1047,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},	
@@ -1079,6 +1081,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1110,6 +1113,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 			
