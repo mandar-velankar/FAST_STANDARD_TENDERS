@@ -71,7 +71,8 @@ sap.ui.define([
 				"ComplianceOfficerView",
 				"GlobalStrategicMarketingView",
 				"SupplyManagementView",
-				"MEACHNotificationMail"
+				"MEACHNotificationMail",
+				"ProfitabilityCalcParamView"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -184,6 +185,9 @@ sap.ui.define([
 				},
 				"MEACHOutbox": {
 					groupId: "MEACHNotificationMail"
+				},
+				"ProfitabilityCalcParamView":{
+					groupId: "ProfitabilityCalcParamView"
 				}
 			});
 		},

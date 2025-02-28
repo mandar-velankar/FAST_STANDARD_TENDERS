@@ -51,7 +51,8 @@ sap.ui.define([
 				priceCondFoc: [],
 				offerProductDetailMsg: [],
 				priceCondSpecial: [],
-				priceCondWithMaximumPrice: []
+				priceCondWithMaximumPrice: [],
+				profitibilityCalcValueMsg: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -151,6 +152,10 @@ sap.ui.define([
 				ProductForm:{
 					editMode: false
 				},
+				ProfitabilityForm:{
+					editMode: false,
+					Division: ""
+				},
 				PricingForm:{
 					editMode: false,
 					mainPriceConditionID: null,
@@ -173,9 +178,12 @@ sap.ui.define([
 			this.offerStatus = await this.stState.getOfferStatus(sOfferId);
 			const priceConditionType = await this.getSavedPriceConditionType();
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
+			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
 			this._bindView();
 			this._bindForm("ProductForm");
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+			countryCode === 'ES' && this.bindProfitabilityForm();
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
 			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
@@ -2029,6 +2037,109 @@ sap.ui.define([
 					ctx.getModel().setProperty("MaxPrice", 0, ctx);
 				}
 			}
-		}
+		},
+
+		bindProfitabilityForm: function () {
+			const awardedProductForm = this.byId("idProfitabilityForm");
+			const path = this.getModel().createKey("/ProfitabilityCalcParamView", {
+				OfferID: this.offerId
+			});
+
+			awardedProductForm.bindElement({
+				path: path,
+				groupId: "ProfitabilityCalcParamView"
+			})
+		},
+
+		validateProfitabilityFormCalcParam: function () {
+			const contextPath = this.byId('idProfitabilityForm').getObjectBinding().getPath();
+			const profitabilityCalParam = this.defaultModel.getProperty(contextPath);
+			let messages = [];
+
+			if (!profitabilityCalParam.ProfitabilityStartMnth) {
+				messages.push(new Message({
+					message: "Please enter the Start Month",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityStartMnth`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityAgrDur){
+				messages.push(new Message({
+					message: "Please enter the Agreement Duration",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityAgrDur`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityYrlyMntCost){
+				messages.push(new Message({
+					message: "Please enter the Yearly Maintenance Cost per Unit",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityYrlyMntCost`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityDiscRate){
+				messages.push(new Message({
+					message: "Please enter the NPV Interest Rate",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityDiscRate`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityGrowthRate){
+				messages.push(new Message({
+					message: "Please enter the Growth Rate",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityGrowthRate`,
+					processor: this.getView().getModel()
+				}));
+			}
+			
+			if(messages.length > 0){
+				sap.ui.getCore().getMessageManager().addMessages(messages);
+				this.getModel("ui").setProperty('/ProfitabilityForm/editMode', true);
+				return false;
+			}
+
+			return true;
+		},
+
+		onProfitabilityFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/ProfitabilityForm/editMode', true);
+		},
+
+		onProfitabilityFormCancelBtnPress:function(event){
+			this.getModel("ui").setProperty('/ProfitabilityForm/editMode', false);
+			this.cancelPendingChanges(["ProfitabilityCalcParamView"], "profitibilityCalcValueMsg");
+			this.defaultModel.resetChanges();
+		},
+
+		onProfitabilityFormSaveBtnPress:function(event){
+			this.validateProfitabilityFormCalcParam();
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesProfitabilityFormSuccess.bind(this),
+				groupId: "ProfitabilityCalcParamView"
+			});
+		},
+
+		_onSubmitChangesProfitabilityFormSuccess: function () {
+			const hasErrorMessages =  this.getMessages(["ProfitabilityCalcParamView"]).length > 0;
+			this.setMessageSection(["ProfitabilityCalcParamView"], "ProfitabilityCalcParamView");
+			this.invalidateEntityType([
+				"ProfitabilityCalcParamView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/ProfitabilityForm/editMode`, false);
+				this.cancelPendingChanges(["ProfitabilityCalcParamView"], "ProfitabilityCalcParamView");
+			}
+		},
+
     });
 });

@@ -531,6 +531,13 @@ sap.ui.define([
 			newOfferObj.Division = this.countryCode === 'NL' ? 'All' : oBoundContext.getObject().Division;
 			newOfferObj.WholesaleOffer = oBoundContext.getObject().WholesaleOffer || "No";	
 			newOfferObj.DistributorComments = this.productScope;
+			if(this.countryCode === 'ES'){
+				newOfferObj.ProfitabilityStartMnth = 1;
+				newOfferObj.ProfitabilityAgrDur = 5;
+				newOfferObj.ProfitabilityYrlyMntCost = 1200;
+				newOfferObj.ProfitabilityDiscRate = 0.05;
+				newOfferObj.ProfitabilityGrowthRate = 0.05;
+			}
 			if(region === 'MEA'){
 				newOfferObj.Custom_String_1 = paymentTerm;
 			}
