@@ -193,7 +193,7 @@
 								/>
 								<DatePicker 
 									id="idSalesReportFromDate" 
-									change=".setFilter" width="8rem"
+									change=".onChangeSalesReportFromDate" width="8rem"
 									value = "{
 										path: 'st>/dateFrom',
 										type: 'sap.ui.model.type.Date',
@@ -215,6 +215,10 @@
 									id="idSalesReportToDate" 
 									change=".setFilter" width="8rem"
 									minDate="{st>/dateFrom}"
+									maxDate="{
+										path: 'st>/dateFrom',
+										formatter: '.formatMaxToDate'
+									}"
 									enabled="{= !!${st>/dateFrom}}"
 									value = "{
 										path: 'st>/dateTo',

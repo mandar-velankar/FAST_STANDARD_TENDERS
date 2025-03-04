@@ -17,8 +17,9 @@ sap.ui.define([
 	"../../service/StandardSingletonService",
 	"sap/ui/core/EventBus",
 	"sap/m/library",
-    "../../model/datatypes/CustomDateType"
-], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus, mobileLibrary, CustomDateType) {
+    "../../model/datatypes/CustomDateType",
+	"sap/m/MessageBox"
+], function (BaseController, Component, ComponentContainer, JSONModel, Filter, FilterType, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, ColumnListItem, Item, MessageToast, StandardSingletonService, EventBus, mobileLibrary, CustomDateType, MessageBox) {
 	"use strict";
 	var URLHelper = mobileLibrary.URLHelper;
 	return BaseController.extend("com.bayer.tender.statenderapp.controller.SalesReport.SalesReport", {
@@ -644,7 +645,7 @@ sap.ui.define([
 
 		onDownloadSalesReportExtract: async function () {
 			
-			//const templateId = await this.stState.getService().getTemplateIDByName("Sales Report");
+			const templateId = await this.stState.getService().getTemplateIDByName("Sales Report");
 			const CountryCode = this.stState.getProperty("/SelectedCountry");
 			const TenderID = this.stState.getProperty("/SelectedTenderId");
 			const DistributorID = this.stState.getProperty("/SelectedWholesaler");
@@ -657,106 +658,129 @@ sap.ui.define([
 			const DateTo = this.byId("idSalesReportToDate").getDateValue();
 			const selectedDateFrom = new CustomDateType().getModelFormat().format(DateFrom);
             const selectedDateTo = new CustomDateType().getModelFormat().format(DateTo);
-			let filters = [
-				new Filter("CountryCode", FilterOperator.EQ, CountryCode)
-			];
-			if(TenderID){
-				if (TenderID.toLowerCase() === 'no related tender') {
-					filters.push(new Filter({
-						path: "OfferID",
-						operator: FilterOperator.EQ,
-						value1: null
-					}));
-				} else if (!TenderID.toLowerCase().includes("all")) {
-					// Add filter for a specific TenderID if not "All"
-					filters.push(new Filter({
-						path: "TenderID",
-						operator: FilterOperator.EQ,
-						value1: TenderID
-					}));
-				}
+
+			if (!selectedDateFrom || !selectedDateTo) {
+				return MessageBox.error("Select sales report period");
 			}
-			if (DistributorID && !DistributorID.toLowerCase().includes("all")) {
-				filters.push(new Filter({
-					path: "DistributorID",
-					operator: FilterOperator.EQ,
-					value1: DistributorID
-				}));
-			}
+			const periodDiff = DateTo.getFullYear() - DateFrom.getFullYear();
 			
-			if (BrandID && !BrandID.toLowerCase().includes("all")) {
-				filters.push(new Filter({
-					path: "BrandId",
-					operator: FilterOperator.EQ,
-					value1: BrandID
-				}));
+			if (periodDiff > 3) {
+				return MessageBox.error("Selected date difference should be less than 3 years");
 			}
 
-			if (ProductPackID && !ProductPackID.toLowerCase().includes("all")) {
-				filters.push(new Filter({
-					path: "ProductPackID",
-					operator: FilterOperator.EQ,
-					value1: ProductPackID
-				}));
-			}
-
-			if (KAM_Territory && !KAM_Territory.toLowerCase().includes("all")) {
-				filters.push(new Filter({
-					path: "KAM_Territory",
-					operator: FilterOperator.EQ,
-					value1: KAM_Territory
-				}));
-			}
-			if (InstituteType && !InstituteType.toLowerCase().includes("all")) {
-				filters.push(new Filter({
-					path: "InstituteType",
-					operator: FilterOperator.EQ,
-					value1: InstituteType
-				}));
-			}
-			if (InstituteID && !InstituteID.toLowerCase().includes("all")) {
-				filters.push(new Filter({
-					path: "MainInstituteID",
-					operator: FilterOperator.EQ,
-					value1: InstituteID
-				}));
-			}
+			const path = this.getModel().createKey("/ExtractPolandSalesReport", {
+				templateId: templateId,
+				TenderID: TenderID,
+				CountryCode: CountryCode,
+				DistributorID: DistributorID,
+				BrandID: BrandID,
+				ProductPackID: ProductPackID,
+				KAM_Territory: KAM_Territory,
+				InstituteType: InstituteType,
+				InstituteID: InstituteID,
+				DateFrom: selectedDateFrom,
+				DateTo: selectedDateTo,
+			}) 
+			// let filters = [
+			// 	new Filter("CountryCode", FilterOperator.EQ, CountryCode)
+			// ];
+			// if(TenderID){
+			// 	if (TenderID.toLowerCase() === 'no related tender') {
+			// 		filters.push(new Filter({
+			// 			path: "OfferID",
+			// 			operator: FilterOperator.EQ,
+			// 			value1: null
+			// 		}));
+			// 	} else if (!TenderID.toLowerCase().includes("all")) {
+			// 		// Add filter for a specific TenderID if not "All"
+			// 		filters.push(new Filter({
+			// 			path: "TenderID",
+			// 			operator: FilterOperator.EQ,
+			// 			value1: TenderID
+			// 		}));
+			// 	}
+			// }
+			// if (DistributorID && !DistributorID.toLowerCase().includes("all")) {
+			// 	filters.push(new Filter({
+			// 		path: "DistributorID",
+			// 		operator: FilterOperator.EQ,
+			// 		value1: DistributorID
+			// 	}));
+			// }
 			
-			if (selectedDateFrom) {
-                if (selectedDateTo) {
-                    filters.push(new Filter({
-                        path: "DateTo",
-                        operator: FilterOperator.GE,
-                        value1: selectedDateFrom,
-                        caseSensitive: false
-                    }));
-                }else {
-                    filters.push(new Filter({
-                        path: "DateFrom",
-                        operator: FilterOperator.LE,
-                        value1: selectedDateFrom,
-                        caseSensitive: false
-                    }));
-                }
-            }
+			// if (BrandID && !BrandID.toLowerCase().includes("all")) {
+			// 	filters.push(new Filter({
+			// 		path: "BrandId",
+			// 		operator: FilterOperator.EQ,
+			// 		value1: BrandID
+			// 	}));
+			// }
 
-            if (selectedDateTo) {
-                filters.push(new Filter({
-                    path: "DateFrom",
-                    operator: FilterOperator.LE,
-                    value1: selectedDateTo,
-                    caseSensitive: false
-                }));
-            }
+			// if (ProductPackID && !ProductPackID.toLowerCase().includes("all")) {
+			// 	filters.push(new Filter({
+			// 		path: "ProductPackID",
+			// 		operator: FilterOperator.EQ,
+			// 		value1: ProductPackID
+			// 	}));
+			// }
+
+			// if (KAM_Territory && !KAM_Territory.toLowerCase().includes("all")) {
+			// 	filters.push(new Filter({
+			// 		path: "KAM_Territory",
+			// 		operator: FilterOperator.EQ,
+			// 		value1: KAM_Territory
+			// 	}));
+			// }
+			// if (InstituteType && !InstituteType.toLowerCase().includes("all")) {
+			// 	filters.push(new Filter({
+			// 		path: "InstituteType",
+			// 		operator: FilterOperator.EQ,
+			// 		value1: InstituteType
+			// 	}));
+			// }
+			// if (InstituteID && !InstituteID.toLowerCase().includes("all")) {
+			// 	filters.push(new Filter({
+			// 		path: "MainInstituteID",
+			// 		operator: FilterOperator.EQ,
+			// 		value1: InstituteID
+			// 	}));
+			// }
 			
-			const excelData = await this.getExcelData(filters); 
+			// if (selectedDateFrom) {
+            //     if (selectedDateTo) {
+            //         filters.push(new Filter({
+            //             path: "DateTo",
+            //             operator: FilterOperator.GE,
+            //             value1: selectedDateFrom,
+            //             caseSensitive: false
+            //         }));
+            //     }else {
+            //         filters.push(new Filter({
+            //             path: "DateFrom",
+            //             operator: FilterOperator.LE,
+            //             value1: selectedDateFrom,
+            //             caseSensitive: false
+            //         }));
+            //     }
+            // }
 
-			const formattedExcelData = this.formattedSalesReportExtract(excelData, CountryCode);
+            // if (selectedDateTo) {
+            //     filters.push(new Filter({
+            //         path: "DateFrom",
+            //         operator: FilterOperator.LE,
+            //         value1: selectedDateTo,
+            //         caseSensitive: false
+            //     }));
+            // }
+			
+			// const excelData = await this.getExcelData(filters); 
 
-			this.generateXLSX(formattedExcelData);
+			// const formattedExcelData = this.formattedSalesReportExtract(excelData, CountryCode);
+
+			// this.generateXLSX(formattedExcelData);
 		
-			// const url = `/v2/sta_tender${path}/content`;
-			// URLHelper.redirect(url, true);
+			const url = `/v2/sta_tender${path}/content`;
+			URLHelper.redirect(url, true);
 		},
 
 		getExcelData: async function (filters) {
@@ -939,6 +963,23 @@ sap.ui.define([
 			const oBinding = oTable.getBinding("rows");
 			const iRowCount = oBinding.getLength();
 			oTable.setVisibleRowCount(iRowCount === 0 ? iRowCount + 1 : iRowCount > 10 ? 10 : iRowCount);
+		},
+
+		formatMaxToDate: function (dateFrom) {
+			if (!dateFrom) return;
+			let clonedDate = new Date(dateFrom); // Clone the date
+			clonedDate.setFullYear(clonedDate.getFullYear() + 3); // Add 3 years
+
+			return clonedDate;
+		},
+		
+		onChangeSalesReportFromDate: function () {
+			//Reseting to date
+			const DateTo = this.byId("idSalesReportToDate");
+			if (!DateTo) return;
+			DateTo.setDateValue(null);
+			
+			this.setFilter();
 		}
 	});
 
