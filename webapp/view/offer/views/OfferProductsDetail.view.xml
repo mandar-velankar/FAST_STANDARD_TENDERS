@@ -176,6 +176,13 @@
                         <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
                     </VBox>
 				</Panel>
+                <Panel
+                    expandable="true"
+                    visible="{= ${ui>/RappelForm/hasRappelPriceCondition}}"
+                    headerText="{i18n>OfferProductsDetailView.Rappel}"
+                >
+                    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.Rappel" type="XML"/>
+				</Panel>
                  <Panel
                     expandable="true"
                     visible="{= ${ui>/FocForm/hasFocPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/isVisible}}"

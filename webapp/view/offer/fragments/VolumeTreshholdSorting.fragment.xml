@@ -1,0 +1,10 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<ViewSettingsDialog
+		confirm=".handleSortDialogDiscountConditionConfirm">
+		<sortItems>
+			<ViewSettingsItem text="Volume" key="Volume" selected="true" />
+		</sortItems>
+	</ViewSettingsDialog>
+</core:FragmentDefinition>
