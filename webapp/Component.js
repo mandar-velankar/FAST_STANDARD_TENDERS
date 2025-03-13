@@ -72,7 +72,8 @@ sap.ui.define([
 				"GlobalStrategicMarketingView",
 				"SupplyManagementView",
 				"MEACHNotificationMail",
-				"ProfitabilityCalcParamView"
+				"ProfitabilityCalcParamView",
+				"RappelForm"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -188,6 +189,9 @@ sap.ui.define([
 				},
 				"ProfitabilityCalcParamView":{
 					groupId: "ProfitabilityCalcParamView"
+				},
+				"PriceConditionRappelView":{
+					groupId: "RappelForm"
 				}
 			});
 		},
