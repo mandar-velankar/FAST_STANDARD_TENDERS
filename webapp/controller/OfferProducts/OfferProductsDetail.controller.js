@@ -344,7 +344,7 @@ sap.ui.define([
 				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
 				new Filter("Division",FilterOperator.EQ, oSelectedOffer.Division),
 				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
-				new Filter("ConditionType",FilterOperator.NE, 'FOC')	
+				new Filter("isMain",FilterOperator.EQ, true)
 			]
 
 			oSelectedTender.InstituteType === 'Public' && orFilters.push(
