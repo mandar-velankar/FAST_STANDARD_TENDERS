@@ -254,11 +254,11 @@ sap.ui.define([
 			})
 		},
 		getInstituteInContract: function ({Custom_String_3,InstituteID,CountryCode}) {
-			const InstituteNames = Custom_String_3.split(";")
 			const orFilters = []
 			let andFilters = []
 			let oFilters;
 			if (Custom_String_3) {
+				const InstituteNames = Custom_String_3.split(";")
 				andFilters = [
 					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
 					new Filter("InstituteID", FilterOperator.NE, InstituteID),
