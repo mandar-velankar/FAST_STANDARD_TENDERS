@@ -215,7 +215,18 @@ sap.ui.define([
 			}).map(e=>"/" + e);
 		},
 		setMessageSection: function (entities, sectionName) {
+			const resourceModel = this.getModel("i18n");
 			const messages = this.getMessages(entities);
+			messages.map(message => {
+				const regex = /\/([^(/]+)(?:\([^)]*\))?\/([^/]+)/;
+				const match = messages[0].aFullTargets[0].match(regex);
+				const messageKey = `${match[1]}.${match[2]}.Message`;
+				const tranlation = resourceModel.getResourceBundle().getText(messageKey);
+
+				// by default getText returns messageKey if translation is not found
+				message.message = !tranlation || tranlation === messageKey ? message.message : tranlation;
+				return message;
+			})
 			this.getModel("messages").setProperty(`/${sectionName}`, messages);
 		},
 
