@@ -1322,6 +1322,7 @@ sap.ui.define([
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
 
+			//loading only main fragment without containers (Current and New) as CurrentPriceConditionType does not exist yet
 			if (this.sCountryCode === "ES" && !currentPriceConditionType) {
 				return this.loadMainFragmentOnly(selectedPriceConditonType);
 			}
@@ -1340,11 +1341,10 @@ sap.ui.define([
 		
 			return Fragment.load({
 				id: this.getView().getId(),
-				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionPrecioNeto`, // Change to actual main fragment name
+				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionPrecioNeto`, //keeping it static as we only want to display Edit button
 				controller: this
 			}).then(function (form) {
 				vbox.addItem(form);
-				// Ensure only the Edit button is visible
 				return form;
 			}.bind(this));
 		},
