@@ -187,6 +187,9 @@ sap.ui.define([
 	
 			this.setModel(oModel, "ui");
 			this.offerStatus = await this.stState.getOfferStatus(sOfferId);
+			const currentPriceConditionType = await this.getCurrentPricingConditionType();
+			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
+			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
 			const priceConditionType = await this.getSavedPriceConditionType();
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
@@ -208,6 +211,7 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
 			const controller = this;
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/StandardTenderPriceConditionView", {
@@ -216,9 +220,9 @@ sap.ui.define([
 						new Filter("ProductCode", "EQ", this.productId),
 						new Filter("ProductCode", "EQ", this.productId)
 					],
-					success: function (res) {
+					success: function (res) {						
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
-						priceCondition = priceCondition ? priceCondition : res?.results.find(el => el.isMain == true);
+						priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == currentPriceConditionType) : res?.results.find(el => el.isMain == true); 
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -1316,11 +1320,48 @@ sap.ui.define([
 		loadPriceCondition: async function(){
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
+			const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
+
+			if (this.sCountryCode === "ES" && !currentPriceConditionType) {
+				return this.loadMainFragmentOnly(selectedPriceConditonType);
+			}
+
 			return this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
 				productID:this.productId,
 				tenderID: this.sObjectId,
 				instituteID: selectedTender?.InstituteID
+			});
+		},
+
+		loadMainFragmentOnly: function(selectedPriceConditonType) {
+			const vbox = this.byId("idPriceConditionVbox");
+			vbox.destroyItems(); // Clear previous items
+		
+			return Fragment.load({
+				id: this.getView().getId(),
+				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionPrecioNeto`, // Change to actual main fragment name
+				controller: this
+			}).then(function (form) {
+				vbox.addItem(form);
+				// Ensure only the Edit button is visible
+				return form;
+			}.bind(this));
+		},
+
+		getCurrentPricingConditionType: function() {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/PriceConditionPreviousView", {
+					filters: [
+						new Filter("ProductCode", "EQ", this.productId)
+					],
+					success: function (res) {
+						resolve(res.results[0]?.ConditionType);
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
 			});
 		},
 
@@ -1351,6 +1392,41 @@ sap.ui.define([
 			}.bind(this));
 		},
 
+		bindESCurrentPricingSection: function(conditionType, form) {
+			const path = this.getModel().createKey(`/PriceConditionPreviousView`, {
+				"OfferID": this.sOfferId,
+				"TenderID": this.sObjectId,
+				"ProductCode": this.productId,
+				"ConditionType": conditionType
+			});
+		
+			form.bindElement({
+				path: path,
+				groupId: "PricingForm",
+				events: {
+					dataReceived: this.onPricingFormDataReceived.bind(this)
+				}
+			});
+		},
+
+		bindESNewPricingSection: function(conditionType, form) {
+			let entityName = `/PriceCondition${conditionType}View`
+			const path = this.getModel().createKey(entityName, {
+				"OfferID": this.sOfferId,
+				"TenderID": this.sObjectId,
+				"ProductCode": this.productId,
+				"ConditionType": conditionType
+			});
+		
+			form.bindElement({
+				path: path,
+				groupId: "PricingForm",
+				events: {
+					dataReceived: this.onPricingFormDataReceived.bind(this)
+				}
+			});
+		},
+
 		bindCurrentSectionFields: function(form, {offerID,productID,tenderID,instituteID}){
 			let entityName = "/PriceConditionCurrentSectionTaiwanView";
 			const path = this.getModel().createKey(entityName, {
@@ -1367,8 +1443,13 @@ sap.ui.define([
 			});
 		},
 
-		onPriceConditionLoadSuccess: function(conditionType, form, contextData){
-			this.bindPricingForm(conditionType, form, contextData);
+		onPriceConditionLoadSuccess: function(conditionType, form, contextData){			
+			if (this.sCountryCode === "ES"){
+				this.bindESCurrentPricingSection(conditionType, form);
+				this.bindESNewPricingSection(conditionType, form);
+			}else{
+				this.bindPricingForm(conditionType, form, contextData);
+			}
 		},
 
 		bindPricingForm(conditionType, form, {offerID, productID, tenderID}){

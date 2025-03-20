@@ -1,0 +1,57 @@
+<core:FragmentDefinition 
+    xmlns="sap.m" 
+    xmlns:core="sap.ui.core" 
+    xmlns:form="sap.ui.layout.form" 
+>
+    <form:Form id="idCurrentPricingForm" editable="true">
+        <form:layout>
+			<form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+        <form:formContainers>
+            <form:FormContainer>
+                <form:formElements>
+                    <form:FormElement label="PVL:">
+                        <form:fields><Input value="{PVL}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Confidential Price:">
+                        <form:fields><Input value="{ConfidentialPrice}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Royal Decree Applies?:">
+                        <form:fields><Switch state="{RoyalDecreeApplies}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Discount:">
+                        <form:fields><Input value="{Discount}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Royal Decree:">
+                        <form:fields><Input value="{RoyalDecree}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Net Price w/o tax:">
+                        <form:fields><Input value="{NetPriceWithoutTax}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Royal Decree Value:">
+                        <form:fields><Input value="{RoyalDecreeValue}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Tax (IVA / IGIC):">
+                        <form:fields><Input value="{Tax}"/></form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="Net price with tax:">
+                        <form:fields><Input value="{NetPriceWithTax}"/></form:fields>
+                    </form:FormElement>
+                </form:formElements>
+            </form:FormContainer>
+        </form:formContainers>
+    </form:Form>
+</core:FragmentDefinition>

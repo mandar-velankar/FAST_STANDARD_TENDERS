@@ -116,6 +116,18 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "With Maximum Price";
 					break;
+				case 'precioneto'	:
+					stringToReplace	= originalString;
+					replacementString = "Precio Neto";
+					break;
+				case 'descuentocomercial'	:
+					stringToReplace	= originalString;
+					replacementString = "Descuento Comercial";
+					break;
+				case 'descuentoespecial'	:
+					stringToReplace	= originalString;
+					replacementString = "Descuento Especial";
+					break;
 				default:
 					return originalString;
 			}
