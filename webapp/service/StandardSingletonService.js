@@ -274,6 +274,7 @@ sap.ui.define([
 									status === "Outcome Rejected") ? true : false;
 			const checkOverviewDownloadBtn = (status === "Offer Created" || status === "Awaiting Approval") ? false : true;
 			const checkOverviewSetAsSubmitBtn = (status === "Offer Approved") ? true : false;
+			const isApprovalButtonEnabled = CountryCode.includes('HM') ? UserInfo.Role !== "Restricted User Role" : true;
 			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
 			const isCancelApprovalBtnEnabled = (status === "Awaiting Approval") ? true : false;
 
@@ -315,6 +316,7 @@ sap.ui.define([
 							editMode: isTenderOfferOverviewVisible,
 						},
 						Approval: {
+							enableApprovalButton: isApprovalButtonEnabled,
 							enableSendApprovalBtn: isSendApprovalBtnEnabled,
 							enableCancelApprovalBtn: isCancelApprovalBtnEnabled
 						}
