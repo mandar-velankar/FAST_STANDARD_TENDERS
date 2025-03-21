@@ -53,7 +53,7 @@
 					icon="sap-icon://validate" 
 					press="onApprovalsPress" 
 					visible="{= !${ui>/OverviewForm/editMode}}"
-					enabled="{= ${ui>/enableApprovalButton} }"
+					enabled="{= !!${ui>/enableApprovalButton} &amp;&amp; ${em>/Detail/OverviewTab/Approval/enableApprovalButton} }"
 				/>
 
 				<MenuButton id="idDownloadAttachmentButton" text="Download" useDefaultActionOnly="false" visible="{= !${ui>/OverviewForm/editMode} &amp;&amp; (${st>/SelectedCountry} !== 'PK' || ${accessControl>/standardtenderAccess/OverviewDownload}) }" class = "sapUiSmallMarginTop" enabled = "{= ${em>/Detail/OverviewTab/enableDownload}}">

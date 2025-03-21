@@ -215,7 +215,18 @@ sap.ui.define([
 			}).map(e=>"/" + e);
 		},
 		setMessageSection: function (entities, sectionName) {
+			const resourceModel = this.getModel("i18n");
 			const messages = this.getMessages(entities);
+			messages.map(message => {
+				const regex = /\/([^(/]+)(?:\([^)]*\))?\/([^/]+)/;
+				const match = messages[0].aFullTargets[0].match(regex);
+				const messageKey = `${match[1]}.${match[2]}.Message`;
+				const tranlation = resourceModel.getResourceBundle().getText(messageKey);
+
+				// by default getText returns messageKey if translation is not found
+				message.message = !tranlation || tranlation === messageKey ? message.message : tranlation;
+				return message;
+			})
 			this.getModel("messages").setProperty(`/${sectionName}`, messages);
 		},
 
@@ -228,8 +239,8 @@ sap.ui.define([
 		 * @param {string} offerStatus - The status that influences the visibility of tabs.
 		 */
 
-		updateVisibilityOfTabs: async function (iconTabBar, offerStatus, productKeys, stTenderRoles) {
-			await this.updateEnablementModel(offerStatus, productKeys, stTenderRoles);
+		updateVisibilityOfTabs: async function (iconTabBar, offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode) {
+			await this.updateEnablementModel(offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode);
 			if (!iconTabBar) return;
 			const tabs = iconTabBar.getAggregation("items");
 			tabs.forEach(tab => {
@@ -288,7 +299,7 @@ sap.ui.define([
 			const isProductDeclined = await this.checkIsProductInactive(productKeys);
 			const savedQuotationsCount = await stState.getService().getSavedQuotations(productKeys.OfferID);
 			const savedAwardedProductsCount = await stState.getService().getSavedAwardedProducts(productKeys.OfferID);
-			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles, savedQuotationsCount, savedAwardedProductsCount);
+			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotationsCount, savedAwardedProductsCount);
 			const enablementModel = new JSONModel(obj);
 			this.getOwnerComponent().setModel(enablementModel, 'em');
 		},

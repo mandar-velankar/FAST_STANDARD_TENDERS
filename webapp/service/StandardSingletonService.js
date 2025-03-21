@@ -305,8 +305,9 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode) {
+        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotations, savedAwardedProductsCount) {
 
+			const isQuotationSaved = (savedQuotations?.count > 0 && savedAwardedProductsCount.count > 0);
 			const isOverviewTabVisible = !!status;
 			const checkCopyOfferBtn = status === "Quotation Submitted" || 
 										status === "Results Recorded" || 
@@ -326,7 +327,8 @@ sap.ui.define([
 									status === "Outcome Partially Accepted" || 
 									status === "Outcome Rejected") ? true : false;
 			const checkOverviewDownloadBtn = (status === "Offer Created" || status === "Awaiting Approval") ? false : true;
-			const checkOverviewSetAsSubmitBtn = (status === "Offer Approved") ? true : false;
+			const checkOverviewSetAsSubmitBtn = status === "Offer Approved" ? true : checkCopyOfferBtn ? !isQuotationSaved : false;
+			const isApprovalButtonEnabled = CountryCode.includes('HM') ? UserInfo.Role !== "Restricted User Role" : true;
 			const isSendApprovalBtnEnabled = (status === "Offer Rejected" || status === "Offer Created") ? true : false;
 			const isCancelApprovalBtnEnabled = (status === "Awaiting Approval") ? true : false;
 
@@ -368,6 +370,7 @@ sap.ui.define([
 							editMode: isTenderOfferOverviewVisible,
 						},
 						Approval: {
+							enableApprovalButton: isApprovalButtonEnabled,
 							enableSendApprovalBtn: isSendApprovalBtnEnabled,
 							enableCancelApprovalBtn: isCancelApprovalBtnEnabled
 						}
