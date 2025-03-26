@@ -58,7 +58,7 @@
 					</tree:template>
 				</tree:Column>
 				<tree:Column sortProperty="WholesalerPurchasePrice" width="8rem">
-					<Label text="List Price" wrapping="true"/>
+					<Label text="Net Price" wrapping="true"/>
 					<tree:template>
 						<Text text="{
 							parts: ['WholesalerPurchasePrice', 'Currency','Region', 'CountryCode'],
