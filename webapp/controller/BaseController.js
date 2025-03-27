@@ -294,6 +294,7 @@ sap.ui.define([
 		},
 
 		updateEnablementModel: async function (offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode) {
+			const stState = this.getOwnerComponent().getModel("st");
 			const isProductDeclined = await this.checkIsProductInactive(productKeys);
 			const savedQuotationsCount = await stState.getService().getSavedQuotations(productKeys.OfferID);
 			const savedAwardedProductsCount = await stState.getService().getSavedAwardedProducts(productKeys.OfferID);
