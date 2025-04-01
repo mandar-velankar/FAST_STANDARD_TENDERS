@@ -48,7 +48,7 @@
 										},
 										filters: {
 											filters: [
-													{ path: 'CountryCode', operator: 'EQ', value1: 'PL' }
+													{ path: 'Application', operator: 'EQ', value1: 'STA' }
 												]
 										},
 										events: {
