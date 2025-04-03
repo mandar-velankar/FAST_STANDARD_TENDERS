@@ -7,7 +7,6 @@
     <form:Form id="idPricingForm" editable="true">
         <form:toolbar>
             <Toolbar>
-				<Title text="{i18n>Price}"/>
 				<ToolbarSpacer />
 				<Button
 					icon="sap-icon://alert"

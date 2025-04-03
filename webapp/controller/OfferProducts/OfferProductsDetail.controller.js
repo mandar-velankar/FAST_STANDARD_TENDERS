@@ -725,14 +725,21 @@ sap.ui.define([
 		 * @param {string} conditionType - The type of condition.
 		 */
 		rebasePrice: function(conditonType){
-			const pricingForm = this.byId("idPricingForm");
-			const context = pricingForm.getElementBinding().getBoundContext();
-			const boundObject = context.getObject();
-			const contextPath = context.getPath();
-			if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
-				context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
+			if(conditonType){
+				const pricingForm = this.byId("idPricingForm");
+				let context = null;
+				if(this.sCountryCode === 'ES'){
+					context = pricingForm.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getAggregation("fields")[0]?.getElementBinding()?.getBoundContext();
+				}else{
+					context = pricingForm.getElementBinding().getBoundContext();
+				}
+				const boundObject = context.getObject();
+				const contextPath = context.getPath();
+				if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
+					context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
+				}
+				this.calculatePricingFormFields({conditonType,context});
 			}
-			this.calculatePricingFormFields({conditonType,context});
 		},
 
 		onPricingFormSaveBtnPress: function(event){
@@ -1329,7 +1336,7 @@ sap.ui.define([
 
 			return this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
-				productID:this.productId,
+				productID: this.productId,
 				tenderID: this.sObjectId,
 				instituteID: selectedTender?.InstituteID
 			});
@@ -1351,7 +1358,7 @@ sap.ui.define([
 
 		getCurrentPricingConditionType: function() {
 			return new Promise((resolve, reject) => {
-				this.getModel().read("/PriceConditionPreviousView", {
+				this.getModel().read("/CCMPriceConditionView", {
 					filters: [
 						new Filter("ProductCode", "EQ", this.productId)
 					],
@@ -1393,24 +1400,27 @@ sap.ui.define([
 		},
 
 		bindESCurrentPricingSection: function(conditionType, form) {
-			const path = this.getModel().createKey(`/PriceConditionPreviousView`, {
+			const path = this.getModel().createKey(`/CCMPriceConditionView`, {
 				"OfferID": this.sOfferId,
 				"TenderID": this.sObjectId,
 				"ProductCode": this.productId,
 				"ConditionType": conditionType
 			});
 		
-			form.bindElement({
-				path: path,
-				groupId: "PricingForm",
-				events: {
-					dataReceived: this.onPricingFormDataReceived.bind(this)
-				}
+			form.getAggregation("formContainers")[0].getAggregation("formElements").forEach(formElement => {
+				const field = formElement.getAggregation("fields")[0];
+				field.bindElement({
+					path: path,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
 			});
 		},
 
 		bindESNewPricingSection: function(conditionType, form) {
-			let entityName = `/PriceCondition${conditionType}View`
+			let entityName = `/PriceCondition${conditionType}View`;
 			const path = this.getModel().createKey(entityName, {
 				"OfferID": this.sOfferId,
 				"TenderID": this.sObjectId,
@@ -1418,12 +1428,15 @@ sap.ui.define([
 				"ConditionType": conditionType
 			});
 		
-			form.bindElement({
-				path: path,
-				groupId: "PricingForm",
-				events: {
-					dataReceived: this.onPricingFormDataReceived.bind(this)
-				}
+			form.getAggregation("formContainers")[1].getAggregation("formElements").forEach(formElement => {
+				const field = formElement.getAggregation("fields")[0];
+				field.bindElement({
+					path: path,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
 			});
 		},
 
