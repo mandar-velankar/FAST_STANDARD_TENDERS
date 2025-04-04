@@ -729,7 +729,7 @@ sap.ui.define([
 				const pricingForm = this.byId("idPricingForm");
 				let context = null;
 				if(this.sCountryCode === 'ES'){
-					context = pricingForm.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getAggregation("fields")[0]?.getElementBinding()?.getBoundContext();
+					context = pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 				}else{
 					context = pricingForm.getElementBinding().getBoundContext();
 				}
@@ -1399,46 +1399,6 @@ sap.ui.define([
 			}.bind(this));
 		},
 
-		bindESCurrentPricingSection: function(conditionType, form) {
-			const path = this.getModel().createKey(`/CCMPriceConditionView`, {
-				"OfferID": this.sOfferId,
-				"TenderID": this.sObjectId,
-				"ProductCode": this.productId,
-				"ConditionType": conditionType
-			});
-		
-			form.getAggregation("formContainers")[0].getAggregation("formElements").forEach(formElement => {
-				const field = formElement.getAggregation("fields")[0];
-				field.bindElement({
-					path: path,
-					groupId: "PricingForm",
-					events: {
-						dataReceived: this.onPricingFormDataReceived.bind(this)
-					}
-				});
-			});
-		},
-
-		bindESNewPricingSection: function(conditionType, form) {
-			let entityName = `/PriceCondition${conditionType}View`;
-			const path = this.getModel().createKey(entityName, {
-				"OfferID": this.sOfferId,
-				"TenderID": this.sObjectId,
-				"ProductCode": this.productId,
-				"ConditionType": conditionType
-			});
-		
-			form.getAggregation("formContainers")[1].getAggregation("formElements").forEach(formElement => {
-				const field = formElement.getAggregation("fields")[0];
-				field.bindElement({
-					path: path,
-					groupId: "PricingForm",
-					events: {
-						dataReceived: this.onPricingFormDataReceived.bind(this)
-					}
-				});
-			});
-		},
 
 		bindCurrentSectionFields: function(form, {offerID,productID,tenderID,instituteID}){
 			let entityName = "/PriceConditionCurrentSectionTaiwanView";
@@ -1457,12 +1417,7 @@ sap.ui.define([
 		},
 
 		onPriceConditionLoadSuccess: function(conditionType, form, contextData){			
-			if (this.sCountryCode === "ES"){
-				this.bindESCurrentPricingSection(conditionType, form);
-				this.bindESNewPricingSection(conditionType, form);
-			}else{
-				this.bindPricingForm(conditionType, form, contextData);
-			}
+			this.bindPricingForm(conditionType, form, contextData);
 		},
 
 		bindPricingForm(conditionType, form, {offerID, productID, tenderID}){
@@ -1484,7 +1439,29 @@ sap.ui.define([
 						}
 					});
 				})
-			}else {
+			}else if(this.sCountryCode === "ES") {
+				const currentPath = this.getModel().createKey(`/CCMPriceConditionView`, {
+					"OfferID": offerID,
+					"TenderID": tenderID,
+					"ProductCode": productID,
+					"ConditionType": conditionType
+				});
+				form.getAggregation("formContainers")[0].bindElement({
+					path: currentPath,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
+	
+				form.getAggregation("formContainers")[1].bindElement({
+					path: path,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
+			}else{
 				form.bindElement({
 					path: path,
 					groupId: "PricingForm",
