@@ -7,7 +7,9 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"../../service/StandardSingletonService",
 	"sap/ui/model/Sorter",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter) {
+	"sap/ui/core/BusyIndicator",
+	"sap/m/MessageBox",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, BusyIndicator, MessageBox) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -48,6 +50,7 @@ sap.ui.define([
 		},
 
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode, productScope}) {
+			this.stState = this.getOwnerComponent().getModel("st");
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
@@ -149,6 +152,36 @@ sap.ui.define([
 
 		handleRefreshAwardedProductTable: function () {
 			this.byId('idAwardedProducts').getBinding('items').refresh();
-		}
+		},
+
+		onMenuSetAllProductWonLostItemSelected: async function(evt){
+			BusyIndicator.show(1);
+			try {
+				const selectedItem = evt.getParameter("item");
+
+				//Getting saved awarded products 
+				const awardedProducts = await this.stState.getService().getAwardedProducts(this.offerId);
+				
+				//Updating existing awarded product's Outcome
+				const promisses = awardedProducts.map(product => {
+					const mappedAwardedProduct = {
+						...product, 
+						Outcome: selectedItem.getText()
+					};
+
+					return this.stState.getService().updateAwardedProduct(product.OfferID, product.ProductCode, mappedAwardedProduct);
+				});
+				//Sending request
+				await Promise.all(promisses);
+
+				//Refreshing Master tender and Awarded products table bindings
+				this.getOwnerComponent().getEventBus().publish("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent");
+				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+				BusyIndicator.hide();
+			} catch (error) {
+				MessageBox.error(error?.message || "Something went wrong");
+				BusyIndicator.hide();
+			}
+		},
     });
 });
