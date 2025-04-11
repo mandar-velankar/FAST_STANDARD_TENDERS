@@ -448,5 +448,34 @@ sap.ui.define([
 				});
 			});
         },
+
+		getAwardedProducts: async function (offerID) {
+			const filters = [
+				new Filter("OfferID",FilterOperator.EQ, offerID),
+			]
+			return new Promise((resolve, reject) => {
+				this.model.read('/AwardedProductFormView', {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results); 
+					}
+				});
+			})
+		},
+
+		updateAwardedProduct: function (offerId, productCode, data) {
+			const sKey = this.model.createKey("/AwardedProductFormView", {
+				OfferID: offerId,
+				ProductCode: productCode,
+				LotID: 1
+			});
+			return new Promise((resolve, reject) => {
+				this.model.update(sKey, data, {
+					success: function (res) {
+						resolve(true);
+					},
+				});
+			});
+		}
     });
 });

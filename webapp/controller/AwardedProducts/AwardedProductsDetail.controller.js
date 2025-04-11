@@ -978,6 +978,9 @@ sap.ui.define([
 					ProductPackName: brandProductMultiInputTokens,
 					AssignedProductCode: this.productId
 				};
+
+				// needed to save product information in the ContractInformation table
+				this.getModel("st").setProperty("/SetDistributorAssignedProductCodes", brandProductMultiInputTokens);
 				this.getModel().createEntry('/AwardedOfferDistributors', {
 					properties: pendingChange,
 					groupId: "AwardedOfferDistributors"
@@ -1175,30 +1178,34 @@ sap.ui.define([
 			context.getModel().refresh()
         },
 
-        onSavehandleAwardedContractDuration: function(){
+        onSavehandleAwardedContractDuration: async function(){
             try {
-				let newEntry = {};
+				const products = this.getModel("st").getProperty("/SetDistributorAssignedProductCodes");
+				const productCodes = products ? products.split(";") : [this.productId];
+				let newEntries = [];
 				switch (this.countryCode) {
 					case "NL":
-						newEntry = this.saveNetherLandContractInformation();
+						newEntries = productCodes.map(pc => this.saveNetherLandContractInformation(pc));
 						break;
 					case "PL":
-						newEntry = this.savePolandContractDateInformation();
+						newEntries = productCodes.map(pc => this.savePolandContractDateInformation(pc));
 						break;
 					default:
 						break;
 				}
                 this.getModel("appView").setProperty('/busy', true);
-                
-                this.getModel().createEntry('/ContractInfomation', {
-                    properties: newEntry,
-                    groupId: "ContractDuration"
-                });
 
-                this.getModel().submitChanges({
-                    success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
-                    groupId: "ContractDuration"
-                });
+				newEntries.forEach(entry => {
+					this.getModel().createEntry('/ContractInfomation', {
+						properties: entry,
+						groupId: "ContractDuration"
+					});
+	
+					this.getModel().submitChanges({
+						success: this.onSubmitChangesAwardedContractDurationSuccess.bind(this),
+						groupId: "ContractDuration"
+					});
+				})
             } catch (error) {
                 MessageBox.error(error.message);
                 this.getModel("appView").setProperty('/busy', false);
@@ -1209,7 +1216,7 @@ sap.ui.define([
 		 * Applicable only for Poland
 		 */
 
-		savePolandContractDateInformation: function () {
+		savePolandContractDateInformation: function (productCode) {
 			const form = this.byId("idContractDates");
 			const obj = form.getBindingContext("ui").getObject();
 			const uiModel = this.getModel("ui");
@@ -1220,10 +1227,10 @@ sap.ui.define([
 				ContractEndDate: ContractEndDate,
 			}
 
-			return this.mappedContractInformations(this.countryCode, data);
+			return this.mappedContractInformations(this.countryCode, productCode, data);
 		},
 
-		saveNetherLandContractInformation: function () {
+		saveNetherLandContractInformation: function (productCode) {
 			const form = this.byId("idContractDurationForm");
 			const contractDurationValue = this.byId("idContractDuration").getSelectedKey();
 			const obj = form.getBindingContext("ui").getObject();
@@ -1235,10 +1242,10 @@ sap.ui.define([
 				ContractEndDate: obj.ContractEndDate
 			}
 
-			return this.mappedContractInformations(this.countryCode, data);
+			return this.mappedContractInformations(this.countryCode, productCode, data);
 		},
 
-		mappedContractInformations: function (countryCode, data) {
+		mappedContractInformations: function (countryCode, productCode, data) {
 			const mapping = {
 				"NL": {
 					InstituteName:  data.InstituteGroupIds,            
@@ -1246,7 +1253,7 @@ sap.ui.define([
 					ContractStartDate:  data.ContractStartDate && new Date(data.ContractStartDate),
 					ContractEndDate:  data.ContractEndDate && new Date(data.ContractEndDate),
 					OfferID:  this.offerId,
-					ProductCode:  this.productId,
+					ProductCode:  productCode,
 					CountryCode:  this.countryCode,
 				},
 				"PL": {
@@ -1254,7 +1261,7 @@ sap.ui.define([
 					ContractStartDate:  data.ContractStartDate && new Date(data.ContractStartDate),
 					ContractEndDate:  data.ContractEndDate && new Date(data.ContractEndDate),
 					OfferID:  this.offerId,
-					ProductCode:  this.productId,
+					ProductCode:  productCode,
 				}
 			}
 			return mapping[countryCode]
@@ -1276,7 +1283,7 @@ sap.ui.define([
 					await this.getPolandAwardedContractInformation();
 					this.getModel("ui").setProperty('/ContractInformation/editMode', false);
 				}
-				
+				this.getModel("st").setProperty("/SetDistributorAssignedProductCodes", "");
 				this.getModel("appView").setProperty('/busy', false);
 				
 			}
