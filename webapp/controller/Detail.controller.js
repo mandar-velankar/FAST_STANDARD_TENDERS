@@ -353,6 +353,7 @@ sap.ui.define([
 			this.getView().unbindElement();
 			this.getRouter().navTo("master");
 			this.getModel('st').setProperty("/selectedTab", "");
+			this.getOwnerComponent().getEventBus().publish("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent");
 		},
 
 		/**
