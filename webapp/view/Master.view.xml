@@ -91,6 +91,24 @@
 						<core:Item key="{ProductScope}" text="{ProductScope}"/>
 					</Select>
 
+					<Label
+						text="Institute"
+						labelFor="idSelectInstitute"
+					/>
+					<ComboBox
+						id="idSelectInstitute"
+						selectedKey="{st>/SelectedInstituteIDFilter}"
+						showSecondaryValues= "true"
+						filterSecondaryValues="true"
+						change=".setFilter"
+					>
+						<core:ListItem
+							text="{InstituteName}"
+							key="{InstituteID}"
+							additionalText="{CustomerID}"
+						/>
+					</ComboBox>
+
 					<ToolbarSpacer/>
 					<Button text="{i18n>SalesReport}" visible="{= ${st>/SelectedCountry} === 'PL'}" press=".onOpenSalesReportScreen"/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
