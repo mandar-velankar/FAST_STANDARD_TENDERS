@@ -71,7 +71,7 @@
                                 <Input  value="{parts: ['ConfidentialPrice', 'Currency','Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
 									enabled="false" 
-									fieldWidth="80%" required="true" visible="{= ${ui>/RappelForm/InstituteType} !== 'Private Account'}"/>
+									fieldWidth="80%" required="true"/>
                             </form:fields>
                         </form:FormElement>
                         <form:FormElement label="{i18n>RoyalDecreeApplies}" >

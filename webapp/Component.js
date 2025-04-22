@@ -136,6 +136,15 @@ sap.ui.define([
 				"PriceConditionWithMaximumPriceView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionDescuentoComercialView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionDescuentoEspecialView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionPrecioNetoView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},

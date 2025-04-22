@@ -194,13 +194,16 @@ sap.ui.define([
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
 			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
+			let offerProduct = await this.stState.getService().getOfferProduct(sOfferId, productCode);
+			this.getModel("st").setProperty("/OfferProduct", offerProduct);
 			this._bindView();
 			this._bindForm("ProductForm");
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
 			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
-			this.getModel("ui").setProperty("/RappelForm/instituteType", selectedTender?.InstituteType);
+			this.getModel("ui").setProperty("/InstituteType", selectedTender?.InstituteType);
+			this.getModel("ui").setProperty("/Classification", selectedTender?.Classification);
 			if(countryCode === 'ES'){
 				this.bindProfitabilityForm();
 				this.bindRappelForm();
@@ -929,6 +932,12 @@ sap.ui.define([
 					break;
 				case "withmaximumprice":
 					this.calculatePolandWithMaximumPriceConditionType({property, value, context});
+					break;
+				case "precioneto":
+					this.calculatePrecioNetoPriceConditionType({property, value, context});
+					break;
+				case "descuentocomercial":
+					this.calculateDescuentoComercialPriceConditionType({property, value, context});
 					break;
 			}
 		},
@@ -2471,8 +2480,8 @@ sap.ui.define([
             const bindingContext = event.getSource().getBindingContext();
             const discountConditionObj = bindingContext.getObject();
 
-            let oProductPrice = await this.stState.getService().getOfferProduct(this.offerId, this.productId);
-            let instType = this.getModel("ui").getProperty("/RappelForm/instituteType");
+            let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+            let instType = this.getModel("ui").getProperty("/InstituteType");
             let packFactor =  oProductPrice.PACKFACTOR;
             let UOM = oProductPrice.UnitPerPack;
             let correctPrice;
@@ -2513,6 +2522,153 @@ sap.ui.define([
 				rappelForm.getElementBinding().refresh(true);
 			}
 						
+		},
+
+		/**
+		 * Calculate price condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculatePrecioNetoPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let newNetPriceWithoutTaxBeforeDeductionRD = property?.toLowerCase().includes("netpricewithouttaxbeforedeductionrd") ? parseFloat(value) : priceObj.NetPriceWithoutTaxBeforeDeductionRD;
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+			let classification = this.getModel("ui").getProperty("/Classification");
+			this.validatePrecioNetoForm(context, {newNetPriceWithoutTaxBeforeDeductionRD, priceObj, classification, uom, packFactor});
+
+			let netPriceWithoutTaxAfterDeductionRD;
+			let royalDecreeValue;
+
+			const useConfidential = priceObj.ConfidentialDiscount !== 0;
+			const basePrice = useConfidential ? priceObj.ConfidentialPrice : priceObj.PVL;
+			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+
+			let confidentialPrice = useConfidential ? (priceObj.PVL * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
+
+			let additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			
+			if(priceObj.RoyalDecree === 'Yes'){
+				netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1)).toFixed(6);
+				royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+			}
+
+			let netPriceWithTax = (newNetPriceWithoutTaxBeforeDeductionRD * (1 + Number(priceObj.Tax)));
+
+			context.getModel().setProperty("ConfidentialPrice", confidentialPrice, context);
+			context.getModel().setProperty("AdditionalDiscount", additionalDiscount, context);
+			context.getModel().setProperty("NetPriceWithoutTaxAfterDeductionRD", netPriceWithoutTaxAfterDeductionRD, context);
+			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
+			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+
+		},
+
+		validatePrecioNetoForm: function (context, { newNetPriceWithoutTaxBeforeDeductionRD, priceObj, classification, uom, packFactor }) {
+			const target = `${context.getPath()}/NetPriceWithoutTaxBeforeDeductionRD`;
+			const allErrorMessages = this.getMessages(["PriceConditionPrecioNetoView"]);
+			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target));
+			const processor = this.getView().getModel();
+		
+			const maxPrice = Number(priceObj.MaximumPrice);
+			const pvl = Number(priceObj.PVL);
+			const confidentialPrice = Number(priceObj.ConfidentialPrice);
+			const isUnit = uom === "Unit";
+			const isPack = uom === "Pack";
+		
+			let isInvalid = false;
+			let errorText = "";
+		
+			if (classification === "Tender") {
+				if (newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
+					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)
+				)) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than the maximum price and PVL.";
+				}
+		
+				if (!isInvalid && newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
+					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice)
+				)) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than the maximum price and confidential price.";
+				}
+		
+			} else if (classification === "Commercial Agreement") {
+				if ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than PVL.";
+				}
+		
+				if (!isInvalid && ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice))) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than the confidential price.";
+				}
+			}
+		
+			if (isInvalid && !errorMessage) {
+				this.oMessageManager.addMessages(new Message({
+					message: errorText,
+					type: MessageType.Error,
+					target: target,
+					processor: processor
+				}));
+				this.setMessageSection(["PriceConditionPrecioNetoView"], "priceCondPrice");
+			} else if (!isInvalid && errorMessage) {
+				this.oMessageManager.removeMessages(errorMessage);
+				this.removeMessages(errorMessage, "priceCondPrice");
+			}
+		},
+		
+
+		/**
+		 * Calculate price condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculateDescuentoComercialPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value) : priceObj.Discount;
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+
+			let royalDecreeValue;
+			const basePrice = priceObj.ConfidentialDiscount !== 0 ? priceObj.ConfidentialPrice : priceObj.PVL;
+			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+
+			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? (priceObj.PVL * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
+
+			let netPriceBeforeRC = (correctPrice * (1 - discount)).toFixed(6);
+			
+			if(priceObj.RoyalDecree === 'Yes'){
+				netPriceBeforeRC = (correctPrice * (1 - discount) * (1 - priceObj.RoyalDecreePercentage_1)).toFixed(6);
+				royalDecreeValue = (correctPrice * priceObj.RoyalDecreePercentage_1 * (1 - discount));
+			}
+			
+
+			let netPriceWithTax = (priceObj.NetPriceWithoutTaxAfterDeductionRD * (1 + Number(priceObj.Tax)));
+
+			context.getModel().setProperty("ConfidentialPrice", confidentialPrice, context);
+			context.getModel().setProperty("NetPriceWithoutTax", netPriceBeforeRC, context);
+			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
+			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 		},
 
 		
