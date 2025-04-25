@@ -12,7 +12,8 @@ sap.ui.define([
 	"sap/ui/model/Context",
 	"sap/ui/core/EventBus",
 	"../service/StandardSingletonService",
-], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context, EventBus, StandardSingletonService) {
+	"sap/m/MessageToast",
+], function (BaseController, JSONModel, formatter, ComponentContainer, mobileLibrary, IconTabFilter,IconTabBar, View,ViewType, HashChanger,Context, EventBus, StandardSingletonService, MessageToast) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -490,6 +491,56 @@ sap.ui.define([
 			this.getOwnerComponent().getModel().read("/TenderMasterView");
 			// this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.filter(); // not needed because it overwrites already exising filters
 			this.getOwnerComponent().oListSelector?._oList?.getBinding('items')?.refresh(true);
+		},
+
+		onCopyTender: function () {
+			const requestHandle = this.defaultModel.callFunction("/copyTender", {
+				method:"POST", 
+				urlParameters: {"TenderID": this.sObjectId},
+				success: this.onTenderCopySuccess.bind(this),
+				error: this.onTenderCopyFail.bind(this)
+			});
+		},
+
+		onTenderCopySuccess: async function({TenderID, OfferID}){
+			// this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			this.navToOffer(TenderID, OfferID);
+			this.refreshMasterTable(TenderID, OfferID).then(()=>{
+				MessageToast.show(TenderID + " created");
+			});	
+		},
+
+		onTenderCopyFail: function(error){
+			console.error("Copying the tender was not possible. Reason :", error);
+			sap.m.MessageBox.error(JSON.parse(error?.responseText)?.error?.message?.value);
+		},
+
+		navToOffer: function (TenderID, OfferID) {
+			this.getRouter().navTo("objectDetailOffer", {
+				countryCode: this.sCountryCode,
+				productScope: this.sProductScope,
+				objectId: TenderID, 
+				offerId: OfferID,
+			});
+		},
+
+		refreshMasterTable: async function (TenderID, OfferID) {
+			const path = this.getModel().createKey("/TenderMasterView", {
+				TenderID: TenderID,
+				OfferID: OfferID
+			});
+			const model = this.getModel();
+			return new Promise((resolve, reject) => {
+				this.getModel().read(path, {
+					success: function (res) {
+						model.refresh();
+						resolve(res);
+					},
+					error: function(err){
+						reject(err);
+					}
+				});
+			});
 		},
 	});
 
