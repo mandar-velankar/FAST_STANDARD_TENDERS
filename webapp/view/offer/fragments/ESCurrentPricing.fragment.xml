@@ -40,26 +40,26 @@
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.ConfidentialDiscount}" visible="{= ${ConfidentialDiscount} > 0}"
+                        label="{i18n>ESPricingFragment.ConfidentialDiscount}" visible="{= ${YP04} > 0}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['YP04', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= ${ConfidentialDiscount} > 0}"
+                                visible="{= ${YP04} > 0}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.ConfidentialPrice}" visible="{= ${ConfidentialDiscount} > 0}"
+                        label="{i18n>ESPricingFragment.ConfidentialPrice}" visible="{= ${YP04} > 0}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['ConfidentialPrice', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${ConfidentialDiscount} > 0}"
+                                visible="{= ${YP04} > 0}"
                             />
                         </form:fields>
                     </form:FormElement>
@@ -85,22 +85,11 @@
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.StandardDiscount}"
-                    >
-                        <form:fields>
-                            <Input
-                                value="{ parts: ['StandardDiscount', 'CountryCode'], 
-                        			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
-                                enabled="false"
-                            />
-                        </form:fields>
-                    </form:FormElement>
-                    <form:FormElement
                         label="{i18n>ESPricingFragment.AdditionalDiscount}"
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['AdditionalDiscount', 'CountryCode'], 
+                                value="{ parts: ['YD75', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                             />
@@ -109,7 +98,7 @@
                     <form:FormElement label="{i18n>ESPricingFragment.Discount}">
                         <form:fields>
                             <Input
-                                value="{ parts: ['Discount', 'CountryCode'], 
+                                value="{ parts: ['YD02', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                             />
@@ -120,7 +109,7 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['RoyalDecreePercentage', 'CountryCode'], 
+                                value="{ parts: ['YD06', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${RoyalDecree} === 'Yes'}"
@@ -133,7 +122,7 @@
                         <form:fields>
                             <Input
                                 fieldGroupIds="priceInputPrecioNeto"
-                                value="{ parts: ['NetPriceWithoutTaxBeforeDeductionRD', 'Currency','', 'CountryCode'], 
+                                value="{ parts: ['NETPRICEWITHOUTTAXBEFOREDEDUCTIONRD', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
                             />
@@ -167,7 +156,7 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['NetPriceWithoutTaxAfterDeductionRD', 'Currency','', 'CountryCode'], 
+                                value="{ parts: ['NETPRICEWITHOUTTAXAFTERDEDUCTIONRD', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
                                 visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
@@ -189,7 +178,7 @@
                     <form:FormElement label="{i18n>ESPricingFragment.Tax}">
                         <form:fields>
                             <Input
-                                value="{ parts: ['Tax', 'CountryCode'], 
+                                value="{ parts: ['SAPTAX', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                             />
@@ -200,7 +189,7 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['NetPriceWithTax', 'Currency','', 'CountryCode'], 
+                                value="{ parts: ['NETPRICEWITHTAX', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
                             />
@@ -211,7 +200,7 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['NetPriceWithoutTax', 'Currency','', 'CountryCode'], 
+                                value="{ parts: ['NETPRICEWITHOUTTAX', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
                                 visible="{= ${ConditionType} === 'DescuentoComercial' }"
@@ -223,7 +212,7 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['NetPriceWithTaxAfterDeductionRD', 'Currency','', 'CountryCode'], 
+                                value="{ parts: ['NETPRICEWITHTAXAFTERDEDUCTIONRD', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false" visible = "false"
                             />

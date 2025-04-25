@@ -85,17 +85,6 @@
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.StandardDiscount}"
-                    >
-                        <form:fields>
-                            <Input
-                                value="{ parts: ['StandardDiscount', 'CountryCode'], 
-                        			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
-                                enabled="false"
-                            />
-                        </form:fields>
-                    </form:FormElement>
-                    <form:FormElement
                         label="{i18n>ESPricingFragment.AdditionalDiscount}"
                     >
                         <form:fields>
