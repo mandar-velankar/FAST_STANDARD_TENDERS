@@ -139,7 +139,7 @@ sap.ui.define([
 				"PriceConditionDescuentoComercialView": {
 					groupId: "PricingForm",
 				},
-				"PriceConditionDescuentoEspecialView": {
+				"PriceConditionPVLView": {
 					groupId: "PricingForm",
 				},
 				"PriceConditionPrecioNetoView": {

@@ -11,8 +11,9 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"sap/m/Token",
 	"sap/m/ColumnListItem",
-	"sap/ui/model/Sorter"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter) {
+	"sap/ui/model/Sorter",
+	"sap/m/MessageBox"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -161,6 +162,7 @@ sap.ui.define([
 				},
 				PricingForm:{
 					editMode: false,
+					hasCurrentPricingReceived: false,
 					mainPriceConditionID: null,
 					instituteInBranch: true,
 					hasOfferProductDetailsSaved: false
@@ -214,7 +216,11 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
-			const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
+			if(this.sCountryCode === 'ES'){
+				const currentPriceConditionType = await this.getCurrentPricingConditionType();
+				this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
+				this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
+			}
 			const controller = this;
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/StandardTenderPriceConditionView", {
@@ -225,7 +231,7 @@ sap.ui.define([
 					],
 					success: function (res) {						
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
-						priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == currentPriceConditionType) : res?.results.find(el => el.isMain == true); 
+						priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -643,7 +649,11 @@ sap.ui.define([
 
 		refreshPricingForm: function(){
 			const pricingForm = this.byId("idPricingForm");
-			pricingForm.getElementBinding().refresh();
+			if(this.sCountryCode === 'ES'){
+				pricingForm.getAggregation("formContainers")[1]?.getElementBinding().refresh();
+			}else{
+				pricingForm.getElementBinding().refresh();
+			}
 		},
 
 
@@ -1369,6 +1379,9 @@ sap.ui.define([
 			return new Promise((resolve, reject) => {
 				this.getModel().read("/CCMPriceConditionView", {
 					filters: [
+						new Filter("TenderID", "EQ", this.sObjectId),
+						new Filter("OfferID", "EQ", this.sOfferId),
+						new Filter("CountryCode", "EQ", this.sCountryCode),
 						new Filter("ProductCode", "EQ", this.productId)
 					],
 					success: function (res) {
@@ -2670,6 +2683,83 @@ sap.ui.define([
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 		},
+
+		onPricingFormGetPricingDataBtnPress: function(event){
+			const that = this;
+			// create dialog lazily
+			if (!this.byId("idGetCurrentPriceDialog")) {
+				this.getCurrentPriceDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.GetCurrentPriceCondition",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+                    oDialog.open();
+                    that.bindInstituteData();
+                })
+			}else {
+				this.byId("idGetCurrentPriceDialog").open();
+                this.bindInstituteData();
+			}
+		},
+
+		onCloseGetCurrentPriceDialog: function () {
+            if (this.getCurrentPriceDialog) {
+                this.byId("idGetCurrentPriceDialog").close();
+            }
+        },
+
+		bindInstituteData: function () {
+			let instituteList = this.byId('idInstitutes')
+            instituteList.bindItems({
+                path: '/PT_TMINST',
+                filters: [
+                    new Filter('CountryCode', FilterOperator.EQ, this.sCountryCode),
+                    new Filter('CustomerID', FilterOperator.NE, null),
+                    new Filter('CustomerID', FilterOperator.NE, 0),
+                    new Filter('InstituteType', FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
+                ],
+                sorter: new Sorter("InstituteName", false),
+				template: new sap.ui.core.ListItem({
+					key: "{InstituteID}",
+					text: "{InstituteName}",
+					additionalText: "{CustomerID}"
+				})
+            });
+        },
+
+		onGetCurrentPrice: function(event){
+			const instituteID = this.getView().byId("idInstitutes").getSelectedKey();
+			if (!instituteID) {
+				MessageBox.error("Please select an Institute before proceeding.");
+				return;
+			}
+			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
+			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
+			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
+				method:"POST", 
+				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": this.byId("idInstitutes").getSelectedItem().getProperty("additionalText"), "materialNumber": materialNumber, "countryCode": this.sCountryCode },
+				success: this.onGetSAPSalesOrderSimulationSuccess.bind(this),
+				error: this.onGetSAPSalesOrderSimulationFail.bind(this)
+			});
+		},
+
+		onGetSAPSalesOrderSimulationSuccess: function(res){
+			MessageBox.success(res);
+			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", true);
+			this.onCloseGetCurrentPriceDialog();
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
+		onGetSAPSalesOrderSimulationFail: function(res){
+			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
+            MessageBox.error(message);
+			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
+		}
 
 		
     });
