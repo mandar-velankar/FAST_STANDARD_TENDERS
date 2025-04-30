@@ -26,7 +26,7 @@
 					icon="sap-icon://save"
 					text="Save"
 					press=".onPricingFormSaveBtnPress"
-					visible="{= ${ui>/PricingForm/editMode} }"
+					visible="{= ${ui>/PricingForm/hasCurrentPricingReceived} &amp;&amp; ${ui>/PricingForm/editMode}}"
 				/>
 				<Button
 					icon="sap-icon://decline"
