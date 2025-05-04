@@ -25,13 +25,13 @@
 				<Button
 					icon="sap-icon://save"
 					text="Save"
-					press=".onPricingFormSaveBtnPress"
+					press=".onSpainPVLPricingFormSaveBtnPress"
 					visible="{= ${ui>/PricingForm/hasCurrentPricingReceived} &amp;&amp; ${ui>/PricingForm/editMode}}"
 				/>
 				<Button
 					icon="sap-icon://decline"
 					text="Cancel"
-					press=".onPricingFormCancelBtnPress"
+					press=".onSpainPricingFormCancelBtnPress"
 					visible="{= ${ui>/PricingForm/editMode} }"
 				/>
                 <Button

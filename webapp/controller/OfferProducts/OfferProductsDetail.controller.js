@@ -1462,11 +1462,12 @@ sap.ui.define([
 					});
 				})
 			}else if(this.sCountryCode === "ES") {
+				const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
 				const currentPath = this.getModel().createKey(`/CCMPriceConditionView`, {
 					"OfferID": offerID,
 					"TenderID": tenderID,
 					"ProductCode": productID,
-					"ConditionType": conditionType
+					"ConditionType": currentPriceConditionType ? currentPriceConditionType : conditionType
 				});
 				form.getAggregation("formContainers")[0].bindElement({
 					path: currentPath,
@@ -1550,7 +1551,10 @@ sap.ui.define([
 					"PriceConditionNLPriceView",
 					"PriceConditionNLDiscountView",
 					"PriceConditionSpecialPriceView",
-					"PriceConditionWithMaximumPriceView"
+					"PriceConditionWithMaximumPriceView",
+					"PriceConditionDescuentoComercialView",
+					"PriceConditionPVLView",
+					"PriceConditionPrecioNetoView"
 				], 
 				"priceCondPrice"
 			);
@@ -2759,7 +2763,42 @@ sap.ui.define([
 			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
             MessageBox.error(message);
 			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
-		}
+		},
+
+		onSpainPrecioNetoPricingFormSaveBtnPress:function(event){
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainPrecioNetoPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		onSpainPricingFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionDescuentoComercialView", "PriceConditionPVLView", "PriceConditionPrecioNetoView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
+		_onSubmitChangesSpainPrecioNetoPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPrecioNetoView"]).length > 0;
+			this.setMessageSection(["PriceConditionPrecioNetoView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPrecioNetoView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionPrecioNetoView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
 
 		
     });
