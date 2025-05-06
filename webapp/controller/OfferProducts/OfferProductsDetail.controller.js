@@ -652,11 +652,7 @@ sap.ui.define([
 
 		refreshPricingForm: function(){
 			const pricingForm = this.byId("idPricingForm");
-			if(this.sCountryCode === 'ES'){
-				pricingForm.getAggregation("formContainers")[1]?.getElementBinding().refresh();
-			}else{
-				pricingForm.getElementBinding().refresh();
-			}
+			this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.refresh() || pricingForm.getElementBinding()?.refresh() : pricingForm.getElementBinding()?.refresh();
 		},
 
 
