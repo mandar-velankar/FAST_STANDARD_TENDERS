@@ -12,8 +12,11 @@ sap.ui.define([
 	"sap/m/Token",
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Sorter",
-	"sap/m/MessageBox"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox) {
+	"sap/m/MessageBox",
+	"sap/m/TableSelectDialog",
+	"sap/m/Column",
+	"sap/m/Text",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -740,12 +743,9 @@ sap.ui.define([
 		rebasePrice: function(conditonType){
 			if(conditonType){
 				const pricingForm = this.byId("idPricingForm");
-				let context = null;
-				if(this.sCountryCode === 'ES'){
-					context = pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
-				}else{
-					context = pricingForm.getElementBinding().getBoundContext();
-				}
+
+				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
+
 				const boundObject = context.getObject();
 				const contextPath = context.getPath();
 				if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
@@ -2699,11 +2699,9 @@ sap.ui.define([
 				}).then(function (oDialog) {
 					that.getView().addDependent(oDialog);
                     oDialog.open();
-                    that.bindInstituteData();
                 })
 			}else {
 				this.byId("idGetCurrentPriceDialog").open();
-                this.bindInstituteData();
 			}
 		},
 
@@ -2713,27 +2711,81 @@ sap.ui.define([
             }
         },
 
-		bindInstituteData: function () {
-			let instituteList = this.byId('idInstitutes')
-            instituteList.bindItems({
-                path: '/PT_TMINST',
-                filters: [
-                    new Filter('CountryCode', FilterOperator.EQ, this.sCountryCode),
-                    new Filter('CustomerID', FilterOperator.NE, null),
-                    new Filter('CustomerID', FilterOperator.NE, 0),
-                    new Filter('InstituteType', FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
-                ],
-                sorter: new Sorter("InstituteName", false),
-				template: new sap.ui.core.ListItem({
-					key: "{InstituteID}",
-					text: "{InstituteName}",
-					additionalText: "{CustomerID}"
-				})
-            });
-        },
+		onOpenInstituteValueHelp: async function (event) {
+			const source = event.getSource();
+		
+			const filters = [
+				new Filter("CountryCode", FilterOperator.EQ, this.sCountryCode),
+				new Filter("CustomerID", FilterOperator.NE, null),
+				new Filter("CustomerID", FilterOperator.NE, 0),
+				new Filter("InstituteType", FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
+			];
+		
+			// Define the dialog
+			this.instituteVHDialog = new TableSelectDialog({
+				title: "Select Institute",
+				multiSelect: false,
+				contentWidth: '250px',
+				search: function (event) {
+					const sValue = event.getParameter("value");
+					const filters = [];
+				
+					if (!isNaN(sValue)) {
+						filters.push(new Filter("CustomerID", FilterOperator.EQ, parseInt(sValue, 10)));
+					}
+				
+					// Always allow partial match on InstituteName
+					filters.push(new Filter("InstituteName", FilterOperator.Contains, sValue));
+				
+					event.getSource().getBinding("items").filter(new Filter({
+						filters: filters,
+						and: false
+					}));
+				},
+				items: {
+					path: "/PT_TMINST",
+					parameters: {
+						$orderby: "InstituteName asc"
+					},
+					filters: filters,
+					template: new ColumnListItem({
+						type: "Active",
+						cells: [
+							new Text({ text: "{InstituteName}" }),
+							new Text({ text: "{CustomerID}" })
+						]
+					})
+				},
+				confirm: (event) => this.handleInstituteVHClose(event)
+			});
+		
+			// Add columns to match the cells
+			this.instituteVHDialog.addColumn(new Column());
+			this.instituteVHDialog.addColumn(new Column());
+		
+			// Set models
+			this.instituteVHDialog.setModel(source.getModel());
+        	this.instituteVHDialog.setModel(source.getModel("ui"), "ui");
+		
+			this.instituteVHDialog.open();
+		},
+
+		handleInstituteVHClose: function (oEvent) {
+			const oSelectedItem = oEvent.getParameter("selectedItem");
+			if (!oSelectedItem) return;
+		
+			const selectedObj = oSelectedItem.getBindingContext().getObject();
+		
+			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedObj.InstituteName);
+			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedObj.InstituteID);
+			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedObj.CustomerID);
+
+		},
 
 		onGetCurrentPrice: function(event){
-			const instituteID = this.getView().byId("idInstitutes").getSelectedKey();
+			const instituteID = this.getModel("ui").getProperty(`/SelectedInstituteID`);
+			const customerID = this.getModel("ui").getProperty(`/SelectedCustomerID`);
+						
 			if (!instituteID) {
 				MessageBox.error("Please select an Institute before proceeding.");
 				return;
@@ -2742,7 +2794,7 @@ sap.ui.define([
 			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
 			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
 				method:"POST", 
-				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": this.byId("idInstitutes").getSelectedItem().getProperty("additionalText"), "materialNumber": materialNumber, "countryCode": this.sCountryCode },
+				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode },
 				success: this.onGetSAPSalesOrderSimulationSuccess.bind(this),
 				error: this.onGetSAPSalesOrderSimulationFail.bind(this)
 			});

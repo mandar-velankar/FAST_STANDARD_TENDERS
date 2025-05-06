@@ -47,18 +47,13 @@
                             </form:fields>
                         </form:FormElement>
                         <form:FormElement label="Institute Name">
-                            <ComboBox
+                            <Input
                                 id="idInstitutes"
-                                selectedKey="{ui>/SelectedInstituteID}"
+                                value="{ui>/SelectedInstituteName}"
+                                showValueHelp="true"
+                                valueHelpRequest=".onOpenInstituteValueHelp"
                                 placeholder="Select Institute"
-                                showSecondaryValues="true"
-                            >
-                                <core:ListItem
-                                    key="{InstituteID}"
-                                    text="{InstituteName}"
-                                    additionalText="{CustomerID}"
-                                />
-                            </ComboBox>
+                            />
                         </form:FormElement>
                     </form:formElements>
                 </form:FormContainer>
