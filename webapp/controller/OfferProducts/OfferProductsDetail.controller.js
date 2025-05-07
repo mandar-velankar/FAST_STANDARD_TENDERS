@@ -2561,10 +2561,10 @@ sap.ui.define([
 			let royalDecreeValue;
 
 			const useConfidential = priceObj.ConfidentialDiscount !== 0;
-			const basePrice = useConfidential ? priceObj.ConfidentialPrice : priceObj.PVL;
+			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
 			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
 
-			let confidentialPrice = useConfidential ? (priceObj.PVL * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
+			let confidentialPrice = useConfidential ? (parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
 
 			let additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
 			
@@ -2663,10 +2663,10 @@ sap.ui.define([
 			const isUnit = uom === "Unit";
 
 			let royalDecreeValue;
-			const basePrice = priceObj.ConfidentialDiscount !== 0 ? priceObj.ConfidentialPrice : priceObj.PVL;
+			const basePrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
 			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
 
-			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? (priceObj.PVL * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
+			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? (parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
 
 			let netPriceBeforeRC = (correctPrice * (1 - discount)).toFixed(6);
 			
@@ -2847,6 +2847,85 @@ sap.ui.define([
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
+
+		onSpainDescuentoComercialPricingFormSaveBtnPress:function(event){
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainDescuentoComercialPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		_onSubmitChangesSpainDescuentoComercialPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDescuentoComercialView"]).length > 0;
+			this.setMessageSection(["PriceConditionDescuentoComercialView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionDescuentoComercialView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionDescuentoComercialView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainPVLPricingFormSaveBtnPress:function(event){
+			const pvlPricingForm = this.byId("idPricingForm");
+			this.setPVLPricingFormPendingChanges(pvlPricingForm);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainPVLPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		_onSubmitChangesSpainPVLPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPVLView"]).length > 0;
+			this.setMessageSection(["PriceConditionPVLView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPVLView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		setPVLPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+
+			const pvlPricingObj = oBoundContext.getObject();
+
+			const basePrice = pvlPricingObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPricingObj.ConfidentialPrice) : parseFloat(pvlPricingObj.PVL);
+			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+
+			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
+			pvlPricingObj.NetPriceWithoutTax = correctPrice;
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPVLView", {
+				properties: pvlPricingObj,
+				groupId: "PricingForm"
+			});
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+
 
 		
     });
