@@ -812,7 +812,7 @@ sap.ui.define([
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
 			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
-				MessageToast.show("Tender has been successfully created");
+				MessageToast.show(newTenderCtx.getObject()?.Classification + " has been successfully created");
 				this.cancelPendingChanges(["TenderFormView"], "newTenderMsg");
 				this.onCloseTenderCreationDialog();
 				this._showDetail(newTenderCtx.getObject());
