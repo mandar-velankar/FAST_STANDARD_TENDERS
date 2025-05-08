@@ -4,8 +4,8 @@
 
 	<Dialog title="Volume Treshhold" >
 		<buttons>
-			<Button text="{i18n>Apply}" press=".onApplyDiscountCondition" />
-            <Button text="{i18n>Cancel}" press=".onCancelDiscountCondition"/>
+			<Button text="{i18n>VolumeTreshholdFragment.Apply}" press=".onApplyDiscountCondition" />
+            <Button text="{i18n>VolumeTreshholdFragment.Cancel}" press=".onCancelDiscountCondition"/>
 		</buttons>
 
         <Table id="idVolumeTreshold" items="{
@@ -23,22 +23,22 @@
             </headerToolbar>
             <columns>
                 <Column>
-                    <Text text="{i18n>Volume}"/>
+                    <Text text="{i18n>VolumeTreshholdFragment.Volume}"/>
                 </Column>
                 <Column>
-                    <Text text="{i18n>Discount}"/>
+                    <Text text="{i18n>VolumeTreshholdFragment.Discount}"/>
                 </Column>
                 <Column>
-                    <Text text="{i18n>Tax}"/>
+                    <Text text="{i18n>VolumeTreshholdFragment.Tax}"/>
                 </Column>
                 <Column>
-                    <Text text="{i18n>NetPriceWithoutTax}"/>
+                    <Text text="{i18n>VolumeTreshholdFragment.NetPriceWithoutTax}"/>
                 </Column>    
                 <Column>
-                    <Text text="{i18n>NetPricewithTax}"/>
+                    <Text text="{i18n>VolumeTreshholdFragment.NetPricewithTax}"/>
                 </Column>  
                 <Column>
-                    <Text text="{i18n>Action}"/>
+                    <Text text="{i18n>VolumeTreshholdFragment.Action}"/>
                 </Column>            
             </columns>
             <ColumnListItem>

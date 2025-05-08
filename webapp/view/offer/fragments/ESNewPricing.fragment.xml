@@ -40,37 +40,37 @@
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.ConfidentialDiscount}" visible="{= ${ConfidentialDiscount} > 0 &amp;&amp; ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.ConfidentialDiscount}" visible="{= ${ConfidentialDiscount} > 0}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['ConfidentialDiscount', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= ${ConfidentialDiscount} > 0 &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible="{= ${ConfidentialDiscount} > 0 }"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.ConfidentialPrice}" visible="{= ${ConfidentialDiscount} > 0 &amp;&amp; ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.ConfidentialPrice}" visible="{= ${ConfidentialDiscount} > 0 }"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['ConfidentialPrice', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${ConfidentialDiscount} > 0 &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible="{= ${ConfidentialDiscount} > 0 }"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.RoyalDecreeApplies}" visible = "{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.RoyalDecreeApplies}" visible = "{= !${RoyalDecreeIncl} }"
                     >
                         <form:fields>
                             <Select
                                 selectedKey="{= ${RoyalDecree} ? ${RoyalDecree} : 'No'}"
                                 enabled="false"
-                                visible = "{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible = "{= !${RoyalDecreeIncl} }"
                             >
                                 <items>
                                     <core:Item
@@ -109,19 +109,19 @@
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.RoyalDecree}" visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.RoyalDecree}" visible="{= !${RoyalDecreeIncl} }"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['RoyalDecreePercentage_1', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible="{= !${RoyalDecreeIncl} }"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.NetPriceBeforeRC}" visible = "{= ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.NetPriceBeforeRC}" visible = "{= ${ConditionType} === 'PrecioNeto'}"
                     >
                         <form:fields>
                             <Input
@@ -130,7 +130,7 @@
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                 liveChange=".onPricingFormLiveChange($event, 'PrecioNeto')"
-                                visible = "{= ${ConditionType} !== 'PVL'}"
+                                visible = "{= ${ConditionType} === 'PrecioNeto'}"
                             />
                         </form:fields>
                     </form:FormElement>
@@ -148,14 +148,14 @@
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.RoyalDecreeValue}" visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.RoyalDecreeValue}" visible="{= !${RoyalDecreeIncl} }"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['RoyalDecreeValue', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible="{= !${RoyalDecreeIncl} }"
                             />
                         </form:fields>
                     </form:FormElement>
@@ -184,25 +184,23 @@
                             />
                         </form:fields>
                     </form:FormElement>
-                    <form:FormElement label="{i18n>ESPricingFragment.Tax}" visible = "{= ${ConditionType} !== 'PVL'}">
+                    <form:FormElement label="{i18n>ESPricingFragment.Tax}" >
                         <form:fields>
                             <Input
                                 value="{ parts: ['Tax', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible = "{= ${ConditionType} !== 'PVL'}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.NetPriceWtax}" visible = "{= ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.NetPriceWtax}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['NetPriceWithTax', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible = "{= ${ConditionType} !== 'PVL'}"
                             />
                         </form:fields>
                     </form:FormElement>
