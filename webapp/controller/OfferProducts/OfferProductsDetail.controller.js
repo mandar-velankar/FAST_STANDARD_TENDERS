@@ -209,6 +209,9 @@ sap.ui.define([
 			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
 			this.getModel("ui").setProperty("/InstituteType", selectedTender?.InstituteType);
 			this.getModel("ui").setProperty("/Classification", selectedTender?.Classification);
+			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedTender?.InstituteName);
+			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedTender?.InstituteID);
+			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedTender?.CustomerID);
 			if(countryCode === 'ES'){
 				this.bindProfitabilityForm();
 				this.bindRappelForm();
