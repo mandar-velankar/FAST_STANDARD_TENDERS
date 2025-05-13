@@ -145,7 +145,7 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceBeforeRC}"
-                        visible="{= ${ConditionType} === 'PrecioNeto'}"
+                        visible="{= ${ConditionType} === 'PrecioNeto' || ${ConditionType} === 'PVL'}"
                     >
                         <form:fields>
                             <Input
@@ -154,7 +154,7 @@
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                 liveChange=".onPricingFormLiveChange($event, 'PrecioNeto')"
-                                visible="{= ${ConditionType} === 'PrecioNeto'}"
+                                visible="{= ${ConditionType} === 'PrecioNeto' || ${ConditionType} === 'PVL'}"
                             />
                         </form:fields>
                     </form:FormElement>
