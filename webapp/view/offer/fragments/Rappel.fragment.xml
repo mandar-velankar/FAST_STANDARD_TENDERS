@@ -23,7 +23,7 @@
 					text="Edit"
 					press=".onRappelFormEditBtnPress"
 					visible="{= !${ui>/RappelForm/editMode} }"
-					enabled="true"  
+					enabled="{= ${ui>/RappelForm/hasMainPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
 				/>
 				<Button
 					icon="sap-icon://save"

@@ -358,6 +358,7 @@ sap.ui.define([
 		_filterPriceCondition: async function () {
 			const oSelectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const oSelectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+			const offerProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
 			const oPriceCondBinding = this.byId("idSelectedPriceContition").getBinding("items");
 			const orFilters = [
 				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
@@ -365,6 +366,12 @@ sap.ui.define([
 				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
 				new Filter("isMain",FilterOperator.EQ, true)
 			]
+
+			const productTypeFilters = [new Filter("ProductType", FilterOperator.EQ, "All")];
+			if (offerProduct.ProductType === "Injector") {
+				productTypeFilters.push(new Filter("ProductType", FilterOperator.EQ, "Injector"));
+			}	
+			orFilters.push(new Filter({ filters: productTypeFilters, and: false }));
 
 			oSelectedTender.InstituteType === 'Public' && orFilters.push(
 				new Filter({
@@ -947,6 +954,9 @@ sap.ui.define([
 					break;
 				case "descuentocomercial":
 					this.calculateDescuentoComercialPriceConditionType({property, value, context});
+					break;
+				case "rental":
+					this.calculateRentalPriceConditionType({property, value, context});
 					break;
 			}
 		},
@@ -1553,7 +1563,9 @@ sap.ui.define([
 					"PriceConditionWithMaximumPriceView",
 					"PriceConditionDescuentoComercialView",
 					"PriceConditionPVLView",
-					"PriceConditionPrecioNetoView"
+					"PriceConditionPrecioNetoView",
+					"PriceConditionDescuentoEspecialView",
+					"PriceConditionRentalView"
 				], 
 				"priceCondPrice"
 			);
@@ -2342,14 +2354,14 @@ sap.ui.define([
 			})
 		},
 
-		getRappelPriceConditionClassificationCount: async function (countryCode) {
+		getRappelPriceConditionClassificationCount: async function (countryCode, classification) {
 			const path = "/PriceConditionClassification/$count"; 
 			return new Promise((resolve, reject) => {
 				this.defaultModel.read(path, {
 					filters: [
 						new Filter("CountryCode",FilterOperator.EQ, countryCode),
 						new Filter("ConditionType",FilterOperator.EQ, 'Rappel'),
-						new Filter("Classification",FilterOperator.EQ, 'Commercial Agreement')	
+						new Filter("Classification",FilterOperator.EQ, classification)	
 					],
 					success: function (res) {
 						resolve(res)
@@ -2362,7 +2374,8 @@ sap.ui.define([
 		},
 
 		setHasRappelPriceConditionClassification: async function(){
-			const rappelPriceConditionClassificationCount = await this.getRappelPriceConditionClassificationCount(this.sCountryCode);
+			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+			const rappelPriceConditionClassificationCount = await this.getRappelPriceConditionClassificationCount(this.sCountryCode, selectedTender?.Classification);
 			const hasRappelPriceCondition = Number(rappelPriceConditionClassificationCount) > 0;
 			this.getModel("ui").setProperty("/RappelForm/hasRappelPriceCondition", hasRappelPriceCondition);
 			return hasRappelPriceCondition;
@@ -2687,6 +2700,17 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 		},
 
+		calculateRentalPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let monthlyRent = property?.toLowerCase().includes("monthlyrentperunit") ? parseFloat(value) : priceObj.MonthlyRentPerUnit;
+			const reqestedVolume = priceObj.RequestedVolume;
+			// Annual Values = (Monthly Rent x 12) x (RequestedVolume)
+            let annualValue = (monthlyRent * 12) * reqestedVolume;
+
+			context.getModel().setProperty("AnnualValue", annualValue, context);
+        },
+
 		onPricingFormGetPricingDataBtnPress: function(event){
 			const that = this;
 			// create dialog lazily
@@ -2885,22 +2909,6 @@ sap.ui.define([
 			});
 		},
 
-		_onSubmitChangesSpainPVLPricingFormSuccess: function(res){
-			const hasErrorMessages =  this.getMessages(["PriceConditionPVLView"]).length > 0;
-			this.setMessageSection(["PriceConditionPVLView"], "priceCondPrice");
-			this.invalidateEntityType([
-				"PriceConditionPVLView"
-			]);
-			if(!hasErrorMessages){
-				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
-				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
-			} 
-
-			this._refreshOfferProductTable();
-			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
-		},
-
 		setPVLPricingFormPendingChanges: function (form) {
 			const oDefaultModel = form.getModel();
 			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
@@ -2930,6 +2938,100 @@ sap.ui.define([
 		},
 
 
+		_onSubmitChangesSpainPVLPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPVLView"]).length > 0;
+			this.setMessageSection(["PriceConditionPVLView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPVLView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainDescuentoEspecialPricingFormSaveBtnPress:function(event){
+			const desespecialPricingForm = this.byId("idPricingForm");
+			this.setDescuentoEspecialPricingFormPendingChanges(desespecialPricingForm);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainDescuentoEspecialPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		setDescuentoEspecialPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+
+			const desEspecialPricingObj = oBoundContext.getObject();
+
+			const basePrice = desEspecialPricingObj.ConfidentialDiscount !== 0 ? parseFloat(desEspecialPricingObj.ConfidentialPrice) : parseFloat(desEspecialPricingObj.PVL);
+			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+
+			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
+			desEspecialPricingObj.ESDiscount = 1;
+
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoEspecialView", {
+				properties: desEspecialPricingObj,
+				groupId: "PricingForm"
+			});
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+
+		_onSubmitChangesSpainDescuentoEspecialPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDescuentoEspecialView"]).length > 0;
+			this.setMessageSection(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionDescuentoEspecialView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainRentalPricingFormSaveBtnPress:function(event){
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainRentalPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		_onSubmitChangesSpainRentalPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionRentalView"]).length > 0;
+			this.setMessageSection(["PriceConditionRentalView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionRentalView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.cancelPendingChanges(["PriceConditionRentalView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
 		
     });
 });

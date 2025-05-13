@@ -142,6 +142,12 @@ sap.ui.define([
 				"PriceConditionPVLView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionRentalView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionDescuentoEspecialView": {
+					groupId: "PricingForm",
+				},
 				"PriceConditionPrecioNetoView": {
 					groupId: "PricingForm",
 				},
