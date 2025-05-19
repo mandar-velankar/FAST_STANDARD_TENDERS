@@ -416,15 +416,14 @@ sap.ui.define([
 				});
 			});
         },
-		getStandardTenderPriceConditionView: function (tenderID,offerID,productID,conditionType) {
+		getStandardTenderPriceConditionView: function (tenderID,offerID,productID) {
 			return new Promise((resolve, reject) => {
 				this.model.read("/StandardTenderPriceConditionView",
 				{
 					filters: [
 						new Filter ("TenderID", FilterOperator.EQ, tenderID),
 						new Filter ("OfferID", FilterOperator.EQ, offerID),
-						new Filter ("ProductCode", FilterOperator.EQ, productID),
-						new Filter ("ConditionType", FilterOperator.EQ, conditionType)
+						new Filter ("ProductCode", FilterOperator.EQ, productID)
 					],
 					success: function (res) {
 						resolve(res?.results);

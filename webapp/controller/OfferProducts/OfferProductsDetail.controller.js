@@ -212,6 +212,8 @@ sap.ui.define([
 			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedTender?.InstituteName);
 			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedTender?.InstituteID);
 			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedTender?.CustomerID);
+			const standardTenderPriceConditionViews = await this.stState.getService().getStandardTenderPriceConditionView(sObjectId, sOfferId, productCode);
+			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);
 			if(countryCode === 'ES'){
 				this.bindProfitabilityForm();
 				this.bindRappelForm();
@@ -1576,6 +1578,8 @@ sap.ui.define([
 			const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice();
 		},
 
 		setMainPriceCondition: function(priceCondition){
@@ -2512,33 +2516,70 @@ sap.ui.define([
             let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
             let instType = this.getModel("ui").getProperty("/InstituteType");
             let packFactor =  oProductPrice.PACKFACTOR;
-            let UOM = oProductPrice.UnitPerPack;
-            let correctPrice;
-            if(instType === "Private Account"){
-                if(UOM === "Unit"){
-                    correctPrice = priceConditionRappelView.PVL / packFactor;
-                } else {
-                    correctPrice = priceConditionRappelView.PVL;
-                }
-            } else {
-                if(UOM === "Unit"){
-                    correctPrice = priceConditionRappelView.YLAP / packFactor;
-                } else {
-                    correctPrice = priceConditionRappelView.YLAP;
-                }
-            }
+            let uom = oProductPrice.UnitPerPack;
+            const isUnit = uom === "Unit";
+
+			const useConfidential = priceConditionRappelView.ConfidentialDiscount !== 0;
+			const basePrice = useConfidential ? parseFloat(priceConditionRappelView.ConfidentialPrice) : parseFloat(priceConditionRappelView.PVL);
+			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 
             // set the calcualted field and update the bindings
-            // let NetPriceWithoutTax = Number(priceConditionRappelView?.MainPrice * (1 - discount / 100)).toFixed(2);
-            // let NetPriceWithTax = Number(discountConditionObj.NetPriceWithoutTax * (1 + parseFloat(priceConditionRappelView.Tax))).toFixed(2);
-			let NetPriceWithoutTax = 0;
-			let NetPriceWithTax = 0;
+            let NetPriceWithoutTax = priceConditionRappelView?.MainPrice * (1 - discount / 100);
+            let NetPriceWithTax = discountConditionObj.NetPriceWithoutTax * (1 + parseFloat(priceConditionRappelView.Tax));
+			NetPriceWithoutTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithoutTax);
+			NetPriceWithTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithTax);
 
 
             bindingContext.getModel().setProperty("NetPriceWithoutTax", NetPriceWithoutTax, bindingContext);
 			bindingContext.getModel().setProperty("NetPriceWithTax", NetPriceWithTax, bindingContext);
 
+        },
+
+		calculateRoyalDecreeAppliesAndMainConditionPrice: function(){
+            //calculating the RoyalDecreeApplies
+            const priceConditionViews = this.getModel("st").getProperty("/StandardTenderPriceConditionViews");
+			const rappelForm = this.byId("idRapelForm");
+			const bindingContext = rappelForm.getBindingContext();
+            const rappelIndex = priceConditionViews.findIndex(item => item.ConditionType === "Rappel");
+            if(rappelIndex < 0) return null;
+            const rappelPriceCondition = priceConditionViews[rappelIndex];
+            //calculating Main Price Condition
+            const sSelectedMainPriceCondition = this.getModel("st").getProperty("/SelectedPriceConditionType");
+            const mainPriceCondition = priceConditionViews.find(i => i.isMain &&  i.ConditionType === sSelectedMainPriceCondition);
+			let mainPrice = 0;
+            if(mainPriceCondition){
+                if(mainPriceCondition.ConditionType === "PrecioNeto")
+                {
+                    mainPrice = mainPriceCondition.NetPriceWithoutTaxAfterDeductionRD;
+                }
+
+                if(mainPriceCondition.ConditionType === "DescuentoComercial")
+                {
+                    mainPrice = mainPriceCondition.NetPriceWithoutTax;
+                }
+
+                if(mainPriceCondition.ConditionType === "DescuentoEspecial")
+                {
+                    mainPrice = 0;
+                }
+
+                if(mainPriceCondition.ConditionType === "Rental" || mainPriceCondition.ConditionType === "PVL")
+                {
+                    let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+					let packFactor =  oProductPrice.PACKFACTOR;
+					let uom = oProductPrice.UnitPerPack;
+					const isUnit = uom === "Unit";
+                    const useConfidential = mainPriceCondition.ConfidentialDiscount !== 0;
+					const basePrice = useConfidential ? parseFloat(mainPriceCondition.ConfidentialPrice) : parseFloat(mainPriceCondition.PVL);
+					let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+        
+                    mainPrice = rappelPriceCondition.RoyalDecree === "Yes" ? Number((correctPrice * (1 - mainPriceCondition.RoyalDecreePercentage)).toFixed(2)) : correctPrice;     
+
+                }
+            }            
+            bindingContext.getModel().setProperty("MainPrice", mainPrice, bindingContext);
         },
 
 		_onSubmitChangesRappelFormSuccess: function(res){
@@ -2578,24 +2619,32 @@ sap.ui.define([
 
 			const useConfidential = priceObj.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
-			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
-			let confidentialPrice = useConfidential ? (parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
+			let confidentialPrice = useConfidential ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
+			confidentialPrice = this.formatter.roundToSixDecimalPlaces(confidentialPrice);
 
 			let additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			additionalDiscount = this.formatter.roundToSixDecimalPlaces(additionalDiscount);
 			
 			if(priceObj.RoyalDecree === 'Yes'){
-				netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1)).toFixed(6);
+				netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1));
+				netPriceWithoutTaxAfterDeductionRD = this.formatter.roundToSixDecimalPlaces(netPriceWithoutTaxAfterDeductionRD);
 				royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+				royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
 			}
 
 			let netPriceWithTax = (newNetPriceWithoutTaxBeforeDeductionRD * (1 + Number(priceObj.Tax)));
+			netPriceWithTax = this.formatter.roundToSixDecimalPlaces(netPriceWithTax);
 
 			context.getModel().setProperty("ConfidentialPrice", confidentialPrice, context);
 			context.getModel().setProperty("AdditionalDiscount", additionalDiscount, context);
 			context.getModel().setProperty("NetPriceWithoutTaxAfterDeductionRD", netPriceWithoutTaxAfterDeductionRD, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice();
 
 		},
 
@@ -2680,24 +2729,32 @@ sap.ui.define([
 
 			let royalDecreeValue;
 			const basePrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
-			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
-			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? (parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount)).toFixed(6) : 0;
+			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
+			confidentialPrice = this.formatter.roundToSixDecimalPlaces(confidentialPrice);
 
-			let netPriceBeforeRC = (correctPrice * (1 - discount)).toFixed(6);
+			let netPriceBeforeRC = correctPrice * (1 - discount);
+			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
 			
 			if(priceObj.RoyalDecree === 'Yes'){
-				netPriceBeforeRC = (correctPrice * (1 - discount) * (1 - priceObj.RoyalDecreePercentage_1)).toFixed(6);
-				royalDecreeValue = (correctPrice * priceObj.RoyalDecreePercentage_1 * (1 - discount));
+				netPriceBeforeRC = correctPrice * (1 - discount) * (1 - priceObj.RoyalDecreePercentage_1);				
+				royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1 * (1 - discount);
+				netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
+				royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
 			}
 			
 
-			let netPriceWithTax = (priceObj.NetPriceWithoutTaxAfterDeductionRD * (1 + Number(priceObj.Tax)));
+			let netPriceWithTax = priceObj.NetPriceWithoutTaxAfterDeductionRD * (1 + Number(priceObj.Tax));
+			netPriceWithTax = this.formatter.roundToSixDecimalPlaces(netPriceWithTax);
 
 			context.getModel().setProperty("ConfidentialPrice", confidentialPrice, context);
 			context.getModel().setProperty("NetPriceWithoutTax", netPriceBeforeRC, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice();
 		},
 
 		calculateRentalPriceConditionType: function({property, value, context}){

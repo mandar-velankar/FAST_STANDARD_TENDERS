@@ -152,6 +152,12 @@ sap.ui.define([
 			const result = Math.round(number * factor) / factor;
 			return result;
 		},
+
+		roundToSixDecimalPlaces: function(number) {
+			const factor = 1000000;
+			const result = Math.round(number * factor) / factor;
+			return result;
+		},
 		
 		formatRequestedQuantity: function (value, uom) {
 			if (!value && value != 0) return;
