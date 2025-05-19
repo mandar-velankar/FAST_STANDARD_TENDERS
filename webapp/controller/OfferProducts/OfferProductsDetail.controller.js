@@ -694,7 +694,7 @@ sap.ui.define([
 
 			// Get the target path for the price condition
 			const targetPath = this.getTargets(["PriceCondition"])[0];
-			const priceConditionPath = targetPath.split('/')[1];
+			const priceConditionPath = targetPath?.split('/')[1];
 
 			// Fetch the original price condition from the service
 			const originalPriceCondtion = await this.stState.getService().getPriceCondition(targetPath);
@@ -727,7 +727,12 @@ sap.ui.define([
 						"PriceConditionNLPriceView",
 						"PriceConditionNLDiscountView",
 						"PriceConditionSpecialPriceView",
-						"PriceConditionWithMaximumPriceView"
+						"PriceConditionWithMaximumPriceView",
+						"PriceConditionDescuentoComercialView",
+						"PriceConditionPVLView",
+						"PriceConditionRentalView",
+						"PriceConditionDescuentoEspecialView",
+						"PriceConditionPrecioNetoView"
 					],
 					"priceCondPrice"
 				);
@@ -2271,7 +2276,7 @@ sap.ui.define([
 		},
 
 		bindRappelForm: function () {
-			const awardedProductForm = this.byId("idRapelForm");
+			const rappelForm = this.byId("idRapelForm");
 			const path = this.getModel().createKey("/PriceConditionRappelView", {
 				"OfferID": this.offerId,
 				"TenderID": this.objectId,
@@ -2279,7 +2284,7 @@ sap.ui.define([
 				"ConditionType": "Rappel"
 			});
 
-			awardedProductForm.bindElement({
+			rappelForm.bindElement({
 				path: path,
 				groupId: "RappelForm"
 			})
@@ -2897,12 +2902,37 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 		},
 
+		refreshRappelForm: function(){
+			const rappelForm = this.byId("idRapelForm");
+			rappelForm.getElementBinding()?.refresh();
+		},
+
 		onSpainPrecioNetoPricingFormSaveBtnPress:function(event){
+			const form = this.byId("idPricingForm");
+			this.setPrecioNetoPricingFormPendingChanges(form);
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSpainPrecioNetoPricingFormSuccess.bind(this),
 				groupId: "PricingForm"
 			});
+		},
+
+		setPrecioNetoPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			const precioNetoPricingObj = oBoundContext.getObject();
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPrecioNetoView", {
+				properties: precioNetoPricingObj,
+				groupId: "PricingForm"
+			});
+
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},
 
 		onSpainPricingFormCancelBtnPress: function(event){
@@ -2924,20 +2954,43 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionPrecioNetoView"], "priceCondPrice");
 			} 
 
 			this._refreshOfferProductTable();
+			this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
 
 		onSpainDescuentoComercialPricingFormSaveBtnPress:function(event){
+			const form = this.byId("idPricingForm");
+			this.setDescuentoComercialPricingFormPendingChanges(form);
 			this.defaultModel.submitChanges({
 				error: this._onSubmitChangesFail.bind(this),
 				success: this._onSubmitChangesSpainDescuentoComercialPricingFormSuccess.bind(this),
 				groupId: "PricingForm"
 			});
+		},
+
+		setDescuentoComercialPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			const desComercialPricingObj = oBoundContext.getObject();
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoComercialView", {
+				properties: desComercialPricingObj,
+				groupId: "PricingForm"
+			});
+
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+			
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
 		},
 
 		_onSubmitChangesSpainDescuentoComercialPricingFormSuccess: function(res){
@@ -2948,6 +3001,8 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionDescuentoComercialView"], "priceCondPrice");
 			} 
 
@@ -3003,6 +3058,8 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
 			} 
 
@@ -3058,6 +3115,8 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
 			} 
 
@@ -3082,6 +3141,8 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionRentalView"], "priceCondPrice");
 			} 
 
