@@ -39,7 +39,7 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
 
-			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request") return;
+			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request" && this.selectedTab !== "Basic Information") return;
 			 // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
 
 			this.defaultModel = this.getOwnerComponent().getModel();
