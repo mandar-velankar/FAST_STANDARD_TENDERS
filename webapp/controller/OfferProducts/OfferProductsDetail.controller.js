@@ -2509,7 +2509,6 @@ sap.ui.define([
 			dialog.close();
 		},
 
-		/* need to re-work on this calculate function once the price conditions for Spain are implemented*/
 		calculateNetPricesRappel: async function(event){ 
 
             const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
@@ -2532,7 +2531,7 @@ sap.ui.define([
 
             // set the calcualted field and update the bindings
             let NetPriceWithoutTax = priceConditionRappelView?.MainPrice * (1 - discount / 100);
-            let NetPriceWithTax = discountConditionObj.NetPriceWithoutTax * (1 + parseFloat(priceConditionRappelView.Tax));
+            let NetPriceWithTax = NetPriceWithoutTax * (1 + parseFloat(priceConditionRappelView.Tax));
 			NetPriceWithoutTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithoutTax);
 			NetPriceWithTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithTax);
 
