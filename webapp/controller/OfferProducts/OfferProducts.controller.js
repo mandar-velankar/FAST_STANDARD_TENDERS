@@ -1590,26 +1590,33 @@ sap.ui.define([
 		},
 
 		OfferProductColumnVisibility: function (title) {
+			const userRoles = this.getModel("accessControl").getData();
 			const obj = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
 			const tenderPath = this.getModel().createKey('/TenderFormView', {
 				TenderID: this.objectId || obj.TenderID
 			});
 			const tender = this.getModel().getObject(tenderPath) || obj;
 			if (!tender || !title) return true;
-			if (tender.CountryCode !== 'NL') return true;
-			const cases = {
-				'Contract Duration 1': tender.Custom_Integer_1,
-				'Contract Duration 2': tender.Custom_Integer_2,
-				'Contract Duration 3': tender.Custom_Integer_3,
-				'Price 1': tender.Custom_Integer_1,
-				'Price 2': tender.Custom_Integer_2,
-				'Price 3': tender.Custom_Integer_3,
+
+			if (tender.CountryCode === 'NL' || tender.CountryCode === 'ES' ) {
+				const cases = {
+					'Contract Duration 1': tender.Custom_Integer_1,
+					'Contract Duration 2': tender.Custom_Integer_2,
+					'Contract Duration 3': tender.Custom_Integer_3,
+					'Price 1': tender.Custom_Integer_1,
+					'Price 2': tender.Custom_Integer_2,
+					'Price 3': tender.Custom_Integer_3,
+					'COGS': userRoles?.tenderAccess?.COGS,
+					'Gross Profit': userRoles?.tenderAccess?.COGS,
+					'Gross Margin': userRoles?.tenderAccess?.COGS,
+				}
+				if (!cases.hasOwnProperty(title)) return true;
+	
+	
+				return !!cases[title];
+			} else {
+				return true;
 			}
-			if (!cases.hasOwnProperty(title)) return true;
-
-
-			return !!cases[title];
-
 		},
 
 		onComplianceofficerEditBtnPress: function(){
