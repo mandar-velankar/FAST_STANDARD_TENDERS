@@ -7,7 +7,8 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"../../service/StandardSingletonService",
 	"sap/ui/model/Sorter",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter) {
+	"sap/ui/core/Fragment",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -149,6 +150,43 @@ sap.ui.define([
 
 		handleRefreshAwardedProductTable: function () {
 			this.byId('idAwardedProducts').getBinding('items').refresh();
+		},
+	
+		onBankGuaranteeMenuAction: function(evt){
+			const selectedItem = evt.getParameter("item");
+			const selectedItemText = this.formatter.toUpperCamelCase(selectedItem.getText()).toLowerCase();
+			
+			this.openCreateBankGuaranteeDialog();
+		},
+
+
+		openCreateBankGuaranteeDialog: function () {
+			const that = this;
+			const dialog = this.byId(`idCreateBankGuarantee${this.countryCode}Dialog`);
+			// create dialog lazily
+			if (!dialog) {
+				this.bankGuaranteeCreateDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: `com.bayer.tender.statenderapp.view.awards.fragments.NewBankGuarantee${this.countryCode}`,
+					controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+					oDialog.open();
+				})
+			} else {
+				dialog.open();
+			}
+		},
+
+		onSaveNewBankGuarantee: function () {
+
+		},
+		
+		onCancelNewBankGuarantee: function () {
+			const dialog = this.byId(`idCreateBankGuarantee${this.countryCode}Dialog`);
+			if (dialog) {
+				dialog.close();
+			}
 		}
     });
 });

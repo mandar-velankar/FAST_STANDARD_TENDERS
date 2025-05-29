@@ -9,7 +9,7 @@
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
                 >
                 <menu>
-                    <Menu>
+                    <Menu itemSelected="onBankGuaranteeMenuAction">
                         <MenuItem text="Final" />
                         <MenuItem text="Additional" />
                     </Menu>
