@@ -430,6 +430,20 @@ sap.ui.define([
 					},
 				});
 			});
-		}
+		},
+
+		getBankGuarantee: async function (tenderID, type) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/BankGuarantees", {
+					filters: [
+						new Filter("TenderID", "EQ", tenderID),
+						new Filter("Type", "EQ", type)
+					],
+					success: function (res) {
+						resolve(res?.results[0])
+					}
+				});
+			})
+		},
     });
 });

@@ -73,7 +73,8 @@ sap.ui.define([
 				"SupplyManagementView",
 				"MEACHNotificationMail",
 				"ProfitabilityCalcParamView",
-				"RappelForm"
+				"RappelForm",
+				"BankGuarantees"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -207,6 +208,9 @@ sap.ui.define([
 				},
 				"PriceConditionRappelView":{
 					groupId: "RappelForm"
+				},
+				"BankGuarantees": {
+					groupId: "BankGuarantees"
 				}
 			});
 		},

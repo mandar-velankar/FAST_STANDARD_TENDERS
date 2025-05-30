@@ -33,12 +33,12 @@
 
 				<!-- Type -->
 				<Label text="{i18n>type}"/>
-				<Text text="{fastAppData>/newBankGuarantee/Type}"/>
+				<Text text="{Type}"/>
 				<!-- Reference -->
 				<Label text="{i18n>bankRequestDate}" required="true"/>
 				<DatePicker 
 					value="{
-						path :'fastAppData>/newBankGuarantee/BankRequestDate', 
+						path :'BankRequestDate', 
 						type: 'sap.ui.model.type.Date', 
 						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
 					}" 
@@ -46,26 +46,46 @@
 					enabled="true"/>
 				<!-- Reference -->
 				<Label text="{i18n>bankName}"/>
-				<Input value="{fastAppData>/newBankGuarantee/BankName}"
+				<Input value="{BankName}"
 					   required="true"/>
 
 				<!-- Amount -->
 				<Label text="{i18n>amount}" required="true"/>
 				<Input id="idBankGuaranteeESAmount" 
-					   value="{fastAppData>/newBankGuarantee/GuaranteedAmount}" 
+					   value="{GuaranteedAmount}" 
 					   required="true" 
 					   type="Number"/>
 
 				<!-- Currency -->
 				<Label text="{i18n>Currency}" required="true" />
-				<Select id="idCurrencynewBankGuaranteeES" selectedKey="{fastAppData>/newBankGuarantee/Currency}" items="{ path: 'fastAppData>/CountryCurrency', sorter: { path: 'COUNTRY_CODE' } }">
-					<core:Item key="{fastAppData>CURRENCY}" text="{fastAppData>CURRENCY}"/>
+				<Select 
+					id="idCurrencynewBankGuaranteeES" 
+					selectedKey="{Currency}" 
+					items="{ 
+						path: '/MasterCountryCurrencies', 
+						filters: {
+							filters: [
+								{ 
+									path: 'CountryCode', 
+									operator: 'EQ', 
+									value1: 'ES' 
+								}
+							]
+						},
+						sorter: { 
+							path: 'CountryCode' 
+						},
+						events: {
+							dataReceived: '.onCountyCurrencyReceived'
+						}
+					}">
+					<core:Item key="{Currency}" text="{Currency}"/>
 				</Select>
 
 				<!-- Reference -->
 				<Label text="{i18n>bankGuaranteeID}"/>
 				<Input id="idBankGuaranteeESReference"
-					   value="{fastAppData>/newBankGuarantee/Reference}"
+					   value="{Reference}"
 					   required="true"/>
 
 				<!-- Contract Date -->
@@ -74,7 +94,7 @@
 				<DatePicker 
 					id="idIssueDateNewBankGuaranteeES" 
 					value="{
-						path :'fastAppData>/newBankGuarantee/IssueDate', 
+						path :'IssueDate', 
 						type: 'sap.ui.model.type.Date', 
 						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
 					}" 
@@ -84,7 +104,7 @@
 				<Label text="{i18n>shippingDate}" required="false"/>
 				<DatePicker
 					value="{
-						path :'fastAppData>/newBankGuarantee/ShippingDate', 
+						path :'ShippingDate', 
 						type: 'sap.ui.model.type.Date', 
 						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
 					}" 
@@ -92,7 +112,7 @@
 
 				<!-- Status -->
 				<Label text="{i18n>Status}"/>
-				<Input value="{fastAppData>/newBankGuarantee/BankStatus}"
+				<Input value="{BankStatus}"
 					   required="true"  visible="false"/>
 
 				<!-- Expected Expiry Date-->
@@ -101,18 +121,18 @@
 				<DatePicker 
 					id="idExpectedExpiryDateNewBankGuaranteeES" 
 					value="{
-						path :'fastAppData>/newBankGuarantee/ExpectedExpiryDate', 
+						path :'ExpectedExpiryDate', 
 						type: 'sap.ui.model.type.Date', 
 						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
 					}" 
 					enabled="true"  visible="false"/>
 
                 <Label text="{i18n>comment}"/>
-				<TextArea value="{fastAppData>/newBankGuarantee/Comment}" 
-								          		  showExceededText="true" 
-										  		  maxLength="500" 
-										  		  valueLiveUpdate="false" liveChange="handleLiveChange"
-												  enabled="true"/>
+				<TextArea value="{Comment}" 
+					showExceededText="true" 
+					maxLength="500" 
+					valueLiveUpdate="false" liveChange="handleLiveChange"
+					enabled="true"/>
 				
 
 			</form:content>

@@ -8,7 +8,8 @@ sap.ui.define([
 	"../../service/StandardSingletonService",
 	"sap/ui/model/Sorter",
 	"sap/ui/core/Fragment",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment) {
+	"sap/ui/core/Item",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -46,6 +47,8 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
 			this.getOwnerComponent().getEventBus().subscribe("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent", this.handleRefreshAwardedProductTable, this);
+
+			this.stState = this.getOwnerComponent().getModel("st");
 		},
 
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode, productScope}) {
@@ -154,13 +157,13 @@ sap.ui.define([
 	
 		onBankGuaranteeMenuAction: function(evt){
 			const selectedItem = evt.getParameter("item");
-			const selectedItemText = this.formatter.toUpperCamelCase(selectedItem.getText()).toLowerCase();
+			const selectedItemText = selectedItem.getText();
 			
-			this.openCreateBankGuaranteeDialog();
+			this.openCreateBankGuaranteeDialog(selectedItemText);
 		},
 
 
-		openCreateBankGuaranteeDialog: function () {
+		openCreateBankGuaranteeDialog: function (type) {
 			const that = this;
 			const dialog = this.byId(`idCreateBankGuarantee${this.countryCode}Dialog`);
 			// create dialog lazily
@@ -172,10 +175,40 @@ sap.ui.define([
 				}).then(function (oDialog) {
 					that.getView().addDependent(oDialog);
 					oDialog.open();
+					oDialog.setModel(that.getModel());
+					that._bindBankGuaranteeForm(type);
 				})
 			} else {
 				dialog.open();
 			}
+		},
+
+		_bindBankGuaranteeForm: async function (type) {
+			const bankguarantee = await this.stState.getService().getBankGuarantee(this.tenderId, type);
+			const form = this.byId(`idCreateBankGuarantee${this.countryCode}Form`);
+			let path = "";
+
+			if (bankguarantee) {
+				path = this.getModel().createKey("/BankGuarantees", {
+					ID: bankguarantee.ID
+				}); 
+			}else {
+				const entry = this.getModel().createEntry("/BankGuarantees", {
+					properties: {
+						TenderID: this.tenderId,
+						CountryCode: this.countryCode,
+						Type: type,
+						GuaranteedAmount: 0,
+					},
+					groupId: "BankGuarantees"
+				}); 
+				path = entry.getPath();
+			}
+
+			form.bindElement({
+				path: path,
+				groupId: "BankGuarantees"
+			})
 		},
 
 		onSaveNewBankGuarantee: function () {
@@ -186,7 +219,27 @@ sap.ui.define([
 			const dialog = this.byId(`idCreateBankGuarantee${this.countryCode}Dialog`);
 			if (dialog) {
 				dialog.close();
+				dialog.destroy();
 			}
+		},
+
+		onCountyCurrencyReceived: function (event) {
+			const select = this.byId("idCurrencynewBankGuaranteeES");
+			const currencies = event?.getParameter("data")?.results || [];
+
+			select.destroyItems();
+
+			currencies.unshift({
+				CountryCode: "ES",
+				Currency: ""
+			});
+
+			currencies.forEach(item => {
+				select.addItem(new Item({
+					key: item.Currency,
+					text: item.Currency
+				}));
+			});
 		}
     });
 });
