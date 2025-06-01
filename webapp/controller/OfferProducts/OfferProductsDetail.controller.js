@@ -2293,6 +2293,9 @@ sap.ui.define([
 		},
 
 		onRappelFormEditBtnPress: function(event){
+			const form = this.byId(`idPricingForm`);
+			let priceObj = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext()?.getObject();
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 			this.getModel("ui").setProperty('/RappelForm/editMode', true);
 		},
 
@@ -2336,6 +2339,13 @@ sap.ui.define([
 		
 				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/PriceConditionID", priceConditionID);
 			}
+
+			Object.keys(pendingChanges).forEach((key) => {
+				if (key.startsWith("PriceConditionRappelView")) {
+					const path = `/${key}/MainPrice`; 
+					this.defaultModel.resetChanges([path], undefined, true);
+				}
+			});
 
 			// Submit changes
 			this.defaultModel.submitChanges({
@@ -2589,15 +2599,19 @@ sap.ui.define([
         },
 
 		_onSubmitChangesRappelFormSuccess: function(res){
-			const rappelForm = this.byId("idRapelForm");
 			this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/priceCondRappel").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty('/RappelForm/editMode', false);
 				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");				
-				rappelForm.getElementBinding().refresh(true);
+				this.refreshRappelForm();
 			}
 						
+		},
+
+		refreshRappelForm: function(){
+			const form = this.byId("idRapelForm");
+			form.getElementBinding()?.refresh();
 		},
 
 		/**
@@ -2951,6 +2965,8 @@ sap.ui.define([
 			} 
 
 			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
@@ -2997,6 +3013,7 @@ sap.ui.define([
 			} 
 
 			this._refreshOfferProductTable();
+			this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
@@ -3054,6 +3071,8 @@ sap.ui.define([
 			} 
 
 			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
@@ -3111,6 +3130,8 @@ sap.ui.define([
 			} 
 
 			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
@@ -3137,6 +3158,8 @@ sap.ui.define([
 			} 
 
 			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
