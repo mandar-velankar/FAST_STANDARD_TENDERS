@@ -9,7 +9,8 @@ sap.ui.define([
 	"sap/ui/model/Sorter",
 	"sap/ui/core/Fragment",
 	"sap/ui/core/Item",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item) {
+	"sap/m/MessageBox",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item, MessageBox) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -33,6 +34,10 @@ sap.ui.define([
 				delay: 0,
 				lineItemListTitle: this.getResourceBundle().getText("detailLineItemTableHeading")
 			});
+
+			const messagesModel = new JSONModel({
+				bankGuarantee: [],
+			})
 			/*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
 			this.setModel(this.paState.getModel(), "pa");
 
@@ -43,6 +48,11 @@ sap.ui.define([
 			this.getRouter().getRoute("objectDetail").attachPatternMatched(this._onObjectMatched, this);*/
 
 			this.setModel(oViewModel, "detailView");
+			this.setModel(messagesModel, "messages");
+
+			// set message manager model
+			this.oMessageManager = sap.ui.getCore().getMessageManager();
+			this.getView().setModel(this.oMessageManager.getMessageModel(), "message");
 			
 			this.getRouter().getRoute("objectDetailAwards").attachPatternMatched(this._onObjectMatched, this);
 			// this.getOwnerComponent().getModel().metadataLoaded().then(this._onMetadataLoaded.bind(this));
@@ -72,12 +82,18 @@ sap.ui.define([
 				delay: 0,
 				editMode: false,
 				minDate: new Date(),
-				enableApprovalButton: false
+				enableApprovalButton: false,
+				bankGuaranteeTypes: {
+					Final: false,
+					Additional: false,
+				}
 			});
 			
 			this.setModel(oModel, "ui");
 
 			this.bindTable();
+
+			this.hasTenderBankGuarantee(this.tenderId);
 		},
 
 		_onObjectMatched: async function (oEvent) {
@@ -212,6 +228,63 @@ sap.ui.define([
 		},
 
 		onSaveNewBankGuarantee: function () {
+			this.getModel().submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesBankGuaranteeFormSuccess.bind(this),
+				groupId: "BankGuarantees"
+			}); 
+		},
+
+		_onSubmitChangesFail: function(error){
+			// not implemented
+		},
+
+		_onSubmitChangesBankGuaranteeFormSuccess: function (res) {
+			const messages = this.getMessages(["bankGuarantee"]);
+			const hasErrorMessages =  messages.length > 0;
+			
+			if (hasErrorMessages) {
+				MessageBox.error("Please enter all mandatory fields.");
+				return;
+			}
+		
+			const aChangeResponses = res?.__batchResponses?.[0]?.__changeResponses || [];
+			let isCreated = false;
+			let isUpdated = false;
+		
+			aChangeResponses.forEach(function (oChange) {
+				const statusCode = parseInt(oChange.statusCode, 10);
+				if (statusCode === 201) {
+					isCreated = true;
+				} else if (statusCode === 200 || statusCode === 204) {
+					isUpdated = true;
+				}
+			});
+		
+			this.onCancelNewBankGuarantee(); // close dialog or reset form
+			
+			const successMessage = [];
+
+			if (isCreated && !isUpdated) {
+				successMessage.push({
+					type: 'Success',
+					title: 'Bank Guarantee Created',
+					description: 'A new bank guarantee has been created for this tender.',
+					subtitle: '',
+					counter: 1
+				})
+			} else if (isUpdated && !isCreated) {
+				successMessage.push({
+					type: 'Success',
+					title: 'Bank Guarantee Updated',
+					description: 'Bank guarantee for this tender has been updated succesfully.',
+					subtitle: '',
+					counter: 1
+				})
+			}
+
+			this.showMessageCompositeView("Success", successMessage, "Success");
+			this.hasTenderBankGuarantee(this.tenderId);
 
 		},
 		
@@ -220,6 +293,7 @@ sap.ui.define([
 			if (dialog) {
 				dialog.close();
 				dialog.destroy();
+				this.cancelPendingChanges(["BankGuarantees"], "bankGuarantee");
 			}
 		},
 
@@ -239,6 +313,15 @@ sap.ui.define([
 					key: item.Currency,
 					text: item.Currency
 				}));
+			});
+		},
+
+		// Show accept icon if there is bank guarantee for the current type
+		hasTenderBankGuarantee: async function(tenderID){
+			const tenderBankGuarantees = await this.stState.getService().getBankGuarantee(tenderID) || [];
+
+			tenderBankGuarantees.forEach(bg => {
+				this.getModel("ui").setProperty(`/bankGuaranteeTypes/${bg.Type}`, true);
 			});
 		}
     });

@@ -4,14 +4,15 @@
     <HBox justifyContent="SpaceBetween">
         <HBox >
             <MenuButton 
+                id="idBankGuaranteemenuButton"
                 text="{i18n>BankGuarantee}" 
                 class="sapUiMediumMarginEnd"
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
                 >
                 <menu>
                     <Menu itemSelected="onBankGuaranteeMenuAction">
-                        <MenuItem text="Final" />
-                        <MenuItem text="Additional" />
+                        <MenuItem text="{i18n>final}" icon= "{= ${ui>/bankGuaranteeTypes/Final} ? 'sap-icon://accept' : ''}"/>
+                        <MenuItem text="{i18n>additional}" icon= "{= ${ui>/bankGuaranteeTypes/Additional} ? 'sap-icon://accept' : ''}"/>
                     </Menu>
                 </menu>
             </MenuButton>

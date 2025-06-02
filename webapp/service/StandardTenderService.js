@@ -434,13 +434,17 @@ sap.ui.define([
 
 		getBankGuarantee: async function (tenderID, type) {
 			return new Promise((resolve, reject) => {
+				const filters = [
+					new Filter("TenderID", "EQ", tenderID)
+				];
+
+				if (type) {
+					filters.push(new Filter("Type", "EQ", type))
+				}
 				this.model.read("/BankGuarantees", {
-					filters: [
-						new Filter("TenderID", "EQ", tenderID),
-						new Filter("Type", "EQ", type)
-					],
+					filters: filters,
 					success: function (res) {
-						resolve(res?.results[0])
+						resolve(type ? res?.results[0] : res?.results);
 					}
 				});
 			})
