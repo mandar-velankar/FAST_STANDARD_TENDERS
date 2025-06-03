@@ -134,6 +134,8 @@ sap.ui.define([
 			if (products && products.length > 0) {
 				const allProductsHaveOutcome = products.every(product => product.Outcome);
 				this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", allProductsHaveOutcome);
+				this.getModel("st").setProperty("/ContractStartDate", products[0]?.ContractStartDate);
+				this.getModel("st").setProperty("/ContractEndDate", products[0]?.ContractEndDate);
 			}
 		},
 
@@ -323,6 +325,40 @@ sap.ui.define([
 			tenderBankGuarantees.forEach(bg => {
 				this.getModel("ui").setProperty(`/bankGuaranteeTypes/${bg.Type}`, true);
 			});
+		},
+
+		onContractDateChange: async function () {
+			const oModel = this.getView().getModel();
+
+			const oStartDate = this.byId("contractStartDate").getDateValue();
+			const oEndDate = this.byId("contractEndDate").getDateValue();
+
+			if (!oStartDate || !oEndDate) {
+				return;
+			}
+
+			try {
+				await new Promise((resolve, reject) => {
+					oModel.callFunction("/updateFinalContractStartEndDate", {
+						method: "POST",
+						urlParameters: {
+						OfferID: this.offerId,
+						ContractStartDate: oStartDate.toISOString().split("T")[0],
+						ContractEndDate: oEndDate.toISOString().split("T")[0]
+					},
+					success: (oData) => {
+						sap.m.MessageToast.show(`Contract dates updated for ${oData} records.`);
+						resolve(oData);
+					},
+					error: (oError) => {
+						sap.m.MessageBox.error("Failed to update contract dates.");
+						reject(oError);
+					}
+					});
+				});
+			} catch (err) {
+				console.error(err);
+			}
 		}
     });
 });

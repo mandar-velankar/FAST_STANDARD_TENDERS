@@ -1,27 +1,97 @@
-<core:FragmentDefinition 
-	xmlns="sap.m" 
-	xmlns:core="sap.ui.core">
-    <HBox justifyContent="SpaceBetween">
-        <HBox >
-            <MenuButton 
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <HBox
+        justifyContent="SpaceBetween"
+        alignItems="Center"
+    >
+        <!-- LEFT SIDE: Guarantee + Fast Contract + Dates -->
+        <HBox
+            alignItems="Center"
+            wrap="Wrap"
+        >
+            <!-- Bank Guarantee Button -->
+            <MenuButton
                 id="idBankGuaranteemenuButton"
-                text="{i18n>BankGuarantee}" 
-                class="sapUiMediumMarginEnd"
+                text="{i18n>BankGuarantee}"
+                class="sapUiSmallMarginEnd"
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
-                >
+            >
                 <menu>
                     <Menu itemSelected="onBankGuaranteeMenuAction">
-                        <MenuItem text="{i18n>final}" icon= "{= ${ui>/bankGuaranteeTypes/Final} ? 'sap-icon://accept' : ''}"/>
-                        <MenuItem text="{i18n>additional}" icon= "{= ${ui>/bankGuaranteeTypes/Additional} ? 'sap-icon://accept' : ''}"/>
+                        <MenuItem
+                            text="{i18n>final}"
+                            icon="{= ${ui>/bankGuaranteeTypes/Final} ? 'sap-icon://accept' : ''}"
+                        />
+                        <MenuItem
+                            text="{i18n>additional}"
+                            icon="{= ${ui>/bankGuaranteeTypes/Additional} ? 'sap-icon://accept' : ''}"
+                        />
                     </Menu>
                 </menu>
             </MenuButton>
-            <Button visible="{= ${st>/SelectedCountry} === 'ES'}" enabled="{= ${st>/AllAwardProductsHaveOutcome}}" text="{i18n>CreateAllFASTContracts}"/>
-        </HBox>
-        <MenuButton 
-            text="{i18n>SetAllProductWonLost}" 
-            enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
+
+            <!-- Create FAST Contracts -->
+            <Button
+                visible="{= ${st>/SelectedCountry} === 'ES'}"
+                enabled="{= ${st>/AllAwardProductsHaveOutcome}}"
+                text="{i18n>CreateAllFASTContracts}"
+                class="sapUiSmallMarginEnd"
+            />
+
+            <HBox
+                alignItems="Center"
+                class="sapUiSmallMarginEnd"
             >
+                <Label
+                    text="{i18n>ContractStartDate}"
+                    labelFor="contractStartDate"
+                    class="sapUiTinyMarginEnd"
+                    visible="{= ${st>/SelectedCountry} === 'ES'}"
+                />
+                <DatePicker
+                    id="contractStartDate"
+                    value="{
+						path :'st>/ContractStartDate', 
+						type: 'sap.ui.model.type.Date', 
+						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
+					}" 
+                    change=".onContractDateChange"
+                    width="10rem"
+                    enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    visible="{= ${st>/SelectedCountry} === 'ES'}"
+                />
+            </HBox>
+
+            <!-- Contract End Date -->
+            <HBox alignItems="Center">
+                <Label
+                    text="{i18n>ContractEndDate}"
+                    labelFor="contractEndDate"
+                    class="sapUiTinyMarginEnd"
+                    visible="{= ${st>/SelectedCountry} === 'ES'}"
+                />
+                <DatePicker
+                    id="contractEndDate"
+                    value="{
+						path :'st>/ContractEndDate', 
+						type: 'sap.ui.model.type.Date', 
+						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
+					}" 
+                    change=".onContractDateChange"
+                    width="10rem"
+                    enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    visible="{= ${st>/SelectedCountry} === 'ES'}"
+                />
+            </HBox>
+        </HBox>
+
+        <!-- RIGHT SIDE: Set All Product Outcome -->
+        <MenuButton
+            text="{i18n>SetAllProductWonLost}"
+            enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
+        >
             <menu>
                 <Menu>
                     <MenuItem text="Won" />
