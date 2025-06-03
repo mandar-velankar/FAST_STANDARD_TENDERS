@@ -328,8 +328,6 @@ sap.ui.define([
 		},
 
 		onContractDateChange: async function () {
-			const oModel = this.getView().getModel();
-
 			const oStartDate = this.byId("contractStartDate").getDateValue();
 			const oEndDate = this.byId("contractEndDate").getDateValue();
 
@@ -338,27 +336,25 @@ sap.ui.define([
 			}
 
 			try {
-				await new Promise((resolve, reject) => {
-					oModel.callFunction("/updateFinalContractStartEndDate", {
-						method: "POST",
-						urlParameters: {
-						OfferID: this.offerId,
-						ContractStartDate: oStartDate.toISOString().split("T")[0],
-						ContractEndDate: oEndDate.toISOString().split("T")[0]
-					},
-					success: (oData) => {
-						sap.m.MessageToast.show(`Contract dates updated for ${oData} records.`);
-						resolve(oData);
-					},
-					error: (oError) => {
-						sap.m.MessageBox.error("Failed to update contract dates.");
-						reject(oError);
-					}
-					});
+				this.getModel().callFunction("/updateFinalContractStartEndDate", {
+					method:"POST", 
+					urlParameters: {"OfferID": this.offerId, "ContractStartDate": oStartDate.toISOString().split("T")[0], "ContractEndDate": oEndDate.toISOString().split("T")[0]},
+					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this),
+					error: this.onUpdateFinalContractStartEndDateFail.bind(this)
 				});
 			} catch (err) {
 				console.error(err);
 			}
+		},
+
+		onUpdateFinalContractStartEndDateSuccess: function(res){
+			MessageBox.success(res);
+			this.handleRefreshAwardedProductTable();
+		},
+
+		onUpdateFinalContractStartEndDateFail: function(res){
+			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
+            MessageBox.error(message);
 		}
     });
-});
+})
