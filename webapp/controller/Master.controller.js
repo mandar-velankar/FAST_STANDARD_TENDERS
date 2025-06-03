@@ -709,6 +709,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
+			this.getModel().setProperty(`${sElemBindingPath}/createdAt`, today);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`,classificationObj[this.countryCode]? classificationObj[this.countryCode]: '');
 			if(this.countryCode === 'TW'){
 				this.getModel().setProperty(`${sElemBindingPath}/PublicationDate`, today);
@@ -716,6 +717,9 @@ sap.ui.define([
 			}
 			if (userInfo?.Role === 'KAM' && this.countryCode === 'PL') {
 				this.getModel().setProperty(`${sElemBindingPath}/Custom_String_1`, userInfo.UserName);
+			}
+			if (this.countryCode === 'ES') {
+				this.getModel().setProperty(`${sElemBindingPath}/TenderChannel`, 'Direct');
 			}
 		},
 		onCloseTenderCreationDialog: function () {
@@ -808,7 +812,7 @@ sap.ui.define([
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
 			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
-				MessageToast.show("Tender has been successfully created");
+				MessageToast.show(newTenderCtx.getObject()?.Classification + " has been successfully created");
 				this.cancelPendingChanges(["TenderFormView"], "newTenderMsg");
 				this.onCloseTenderCreationDialog();
 				this._showDetail(newTenderCtx.getObject());

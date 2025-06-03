@@ -1,0 +1,107 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" 
+    xmlns:t="sap.ui.table" 
+    xmlns:form="sap.ui.layout.form" xmlns:u="sap.uxap"
+	xmlns:l="sap.ui.layout">
+
+
+    <form:Form
+		id="idProfitabilityForm"
+		editable="true"
+	>
+		<form:toolbar>
+			<Toolbar>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://alert"
+					text="{= ${messages>/profitibilityCalcValueMsg}.length }"
+					visible="{= ${messages>/profitibilityCalcValueMsg}.length > 0 &amp;&amp; ${ui>/ProfitabilityForm/editMode}}"
+					type="Emphasized"
+					press="onMessagePopoverPress($event, 'profitibilityCalcValueMsg')" 
+				/>
+				<Button
+					icon="sap-icon://edit"
+					text="Edit"
+					press=".onProfitabilityFormEditBtnPress"
+					visible="{= !${ui>/ProfitabilityForm/editMode} }"
+					enabled="true"  
+				/>
+				<Button
+					icon="sap-icon://save"
+					text="Save"
+					press=".onProfitabilityFormSaveBtnPress"
+					visible="{= ${ui>/ProfitabilityForm/editMode} }"
+				/>
+				<Button
+					icon="sap-icon://decline"
+					text="Cancel"
+					press=".onProfitabilityFormCancelBtnPress"
+					visible="{= ${ui>/ProfitabilityForm/editMode} }"
+				/>
+			</Toolbar>
+		</form:toolbar>
+        <form:layout>
+            <form:ResponsiveGridLayout
+				labelSpanXL="3"
+				labelSpanL="3"
+				labelSpanM="3"
+				labelSpanS="12"
+				adjustLabelSpan="false"
+				emptySpanXL="4"
+				emptySpanL="4"
+				emptySpanM="4"
+				emptySpanS="0"
+				columnsXL="1"
+				columnsL="1"
+				columnsM="1"
+				singleContainerFullSize="false" />
+		</form:layout>
+           <form:formContainers>
+			<form:FormContainer>
+				<form:formElements>
+					<form:FormElement label="{i18n>StartMonth}">
+						<form:fields>
+							<Input  value="{ parts: ['ProfitabilityStartMnth', 'CountryCode'], 
+                        			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'}" 
+									enabled="{ui>/ProfitabilityForm/editMode}" 
+									fieldWidth="80%" required="true"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>AgreementDuration}" >
+						<form:fields>
+							<Input  value="{ parts: ['ProfitabilityAgrDur', 'CountryCode'], 
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomNumberType'}" 
+									description="Years" 
+									enabled="{ui>/ProfitabilityForm/editMode}" 
+									fieldWidth="80%" required="true"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>YearlyMaintenanceCostPerUnit}" >
+						<form:fields>
+							<Input  value="{parts: ['ProfitabilityYrlyMntCost', 'Currency','', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
+									enabled="{ui>/ProfitabilityForm/editMode}" 
+									fieldWidth="80%" required="true"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement label="{i18n>NPVInterestRate}" >
+						<form:fields>
+							<Input  value="{parts: ['ProfitabilityDiscRate', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}" 
+							enabled="{ui>/ProfitabilityForm/editMode}" 
+							fieldWidth="80%" required="true"/>
+						</form:fields>
+					</form:FormElement>
+					<form:FormElement  label="{i18n>GrowthRate}" >
+						<form:fields>
+							<Input value="{parts: ['ProfitabilityGrowthRate', 'CountryCode'],
+							type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
+							enabled="{ui>/ProfitabilityForm/editMode}" 
+							fieldWidth="80%" required="true"/>
+						</form:fields>
+					</form:FormElement>
+				</form:formElements>
+			</form:FormContainer>
+		</form:formContainers>
+	</form:Form>
+    
+</core:FragmentDefinition>

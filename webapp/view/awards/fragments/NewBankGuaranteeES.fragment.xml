@@ -1,0 +1,141 @@
+<!-- Fragment for Creating a new contract -->
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:l="sap.ui.layout" 
+	xmlns:form="sap.ui.layout.form" 
+	xmlns:core="sap.ui.core"
+	xmlns:dnd="sap.ui.core.dnd">
+
+	<Dialog title="Create Bank Guarantee" stretch="true" id="idCreateBankGuaranteeESDialog" >
+		<buttons>
+			<Button text="Save" press="onSaveNewBankGuarantee" />
+			<Button text="Cancel" press="onCancelNewBankGuarantee" />
+		</buttons>
+
+
+		<!-- FORM WITH OFFER DATA -->
+		<form:SimpleForm 
+			id="idCreateBankGuaranteeESForm" 
+			editable="true" 
+			maxContainerCols="1" 
+			layout="ResponsiveGridLayout"  
+			labelSpanL="12" 
+			labelSpanM="12"
+			emptySpanL="0" 
+			emptySpanM="0" 
+			columnsL="2" 
+			columnsM="2" 
+			class="editableForm" 
+			visible="true">
+
+			<form:content>
+			<core:Title/>
+
+				<!-- Type -->
+				<Label text="{i18n>type}"/>
+				<Text text="{Type}"/>
+				<!-- Reference -->
+				<Label text="{i18n>bankRequestDate}" required="true"/>
+				<DatePicker 
+					value="{
+						path :'BankRequestDate', 
+						type: 'sap.ui.model.type.Date', 
+						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
+					}" 
+					required="true"
+					enabled="true"/>
+				<!-- Reference -->
+				<Label text="{i18n>bankName}"/>
+				<Input value="{BankName}"
+					   required="true"/>
+
+				<!-- Amount -->
+				<Label text="{i18n>amount}" required="true"/>
+				<Input id="idBankGuaranteeESAmount" 
+					   value="{GuaranteedAmount}" 
+					   required="true" 
+					   type="Number"/>
+
+				<!-- Currency -->
+				<Label text="{i18n>Currency}" required="true" />
+				<Select 
+					id="idCurrencynewBankGuaranteeES" 
+					selectedKey="{Currency}" 
+					items="{ 
+						path: '/MasterCountryCurrencies', 
+						filters: {
+							filters: [
+								{ 
+									path: 'CountryCode', 
+									operator: 'EQ', 
+									value1: 'ES' 
+								}
+							]
+						},
+						sorter: { 
+							path: 'CountryCode' 
+						},
+						events: {
+							dataReceived: '.onCountyCurrencyReceived'
+						}
+					}">
+					<core:Item key="{Currency}" text="{Currency}"/>
+				</Select>
+
+				<!-- Reference -->
+				<Label text="{i18n>bankGuaranteeID}"/>
+				<Input id="idBankGuaranteeESReference"
+					   value="{Reference}"
+					   required="true"/>
+
+				<!-- Contract Date -->
+				<!-- <Label text="{i18n>issueDate}" required="true"/> -->
+				<Label text="{i18n>bankGuaranteeIssue}" required="true"/>
+				<DatePicker 
+					id="idIssueDateNewBankGuaranteeES" 
+					value="{
+						path :'IssueDate', 
+						type: 'sap.ui.model.type.Date', 
+						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
+					}" 
+					enabled="true"/>
+					
+				<!-- Shipping Date -->
+				<Label text="{i18n>shippingDate}" required="false"/>
+				<DatePicker
+					value="{
+						path :'ShippingDate', 
+						type: 'sap.ui.model.type.Date', 
+						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
+					}" 
+					enabled="true"/>
+
+				<!-- Status -->
+				<Label text="{i18n>Status}"/>
+				<Input value="{BankStatus}"
+					   required="true"  visible="false"/>
+
+				<!-- Expected Expiry Date-->
+				<!-- <Label text="{i18n>expectedExpiryDate}" required="true"/> -->
+				<Label text="{i18n>cancellationDate}" required="false"/>
+				<DatePicker 
+					id="idExpectedExpiryDateNewBankGuaranteeES" 
+					value="{
+						path :'ExpectedExpiryDate', 
+						type: 'sap.ui.model.type.Date', 
+						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
+					}" 
+					enabled="true"  visible="false"/>
+
+                <Label text="{i18n>comment}"/>
+				<TextArea value="{Comment}" 
+					showExceededText="true" 
+					maxLength="500" 
+					valueLiveUpdate="false" liveChange="handleLiveChange"
+					enabled="true"/>
+				
+
+			</form:content>
+		</form:SimpleForm>
+	</Dialog>
+</core:FragmentDefinition>

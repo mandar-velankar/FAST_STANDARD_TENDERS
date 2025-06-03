@@ -96,6 +96,56 @@ sap.ui.define([
             }     
         },
 
+		onChangeClassification: function (event, StandardSingletonService) {
+			const countryCode = StandardSingletonService.CountryCode;
+			if (countryCode !== 'ES') {
+				return;
+			}
+		
+			const selectedClassification = event.getValue();
+			const formContainers = event.getParent().getParent().getParent().getAggregation("formContainers");
+		
+			// Find Timeline Section
+			const timelineContainer = formContainers.find(container => container.getAggregation("title") === "Timeline");
+		
+			// Find Institute & Type Section
+			const instituteTypeContainer = formContainers.find(container => container.getAggregation("title") === "Institute & Type");
+		
+			// Get all form elements from the sections
+			const timelineElements = timelineContainer.getAggregation("formElements");
+			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
+		
+			// Find specific elements (Effective Date, Expiry Date, Tender Types)
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Effective Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Expiry Date");
+		
+			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
+			const tenderType2Element = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type 2");
+		
+			if (selectedClassification === 'Commercial Agreement') {
+				// Show only EffectiveDate and ExpiryDate in Timeline
+				timelineElements.forEach(el => {
+					el.setVisible(false);
+				});
+				effectiveDateElement.setVisible(true);
+				expiryDateElement.setVisible(true);
+		
+				tenderTypeElement.setVisible(false);
+				tenderType2Element.setVisible(false);
+			} else if (selectedClassification === 'Tender') {
+				// Show all fields in Timeline except EffectiveDate/ExpiryDate
+				timelineElements.forEach(el => {
+					el.setVisible(true);
+				});
+				effectiveDateElement.setVisible(false);
+				expiryDateElement.setVisible(false);
+		
+				tenderTypeElement.setVisible(true);
+				tenderType2Element.setVisible(true);
+			}
+		},
+		
+
 		onChangeQuotationInstitute: function (originalInputField, selectedItem, StandardSingletonService) {
             const paymentTermsBinding = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")[2].getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Term")?.getAggregation("fields")[0].getBinding("items");
             const parentInstituteID = StandardSingletonService.getParentInstituteID();
@@ -154,6 +204,16 @@ sap.ui.define([
 					!bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
 					institutesInGroup.setVisible(true);
 					break
+				case "ES": 
+					const regionsMultiSelectField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+					regionsMultiSelectField.setVisible(selectedItem.ChannelName === "Region(s)");
+
+					// originalInputField.getModel().setProperty(`${path}/State`, undefined);
+					regionsMultiSelectField.getFields()[0].removeAllTokens()
+					break;
 				default:
 					break;
 			}
@@ -192,6 +252,17 @@ sap.ui.define([
 					}
 						
 					break;
+				case "ES": 
+				const instituteRegion = await StandardSingletonService.getRegionByID(selectedItem, countryCode, defaultModel);
+				const regionsMultiSelectField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+					regionsMultiSelectField.getFields()[0].removeAllTokens();
+
+					for(const value of instituteRegion.split(",")){
+						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
+					break;
 				default:
 					break;
 			}
@@ -225,6 +296,24 @@ sap.ui.define([
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.InstituteName}` : `${acc}${curr.InstituteName}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
+
+		getRegionByID: async function (selectedItem, countryCode, defaultModel) {
+			return new Promise((resolve, reject) => {
+				defaultModel.read('/CountryRegionsTableView', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("ID", "EQ", selectedItem?.RegionID),
+					],
+					success: function (res) {
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.Name}` : `${acc}${curr.Name}`, ''))
 					},
 
 					error: function (err) {
