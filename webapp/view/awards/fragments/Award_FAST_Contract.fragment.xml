@@ -1,0 +1,33 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <HBox justifyContent="SpaceBetween">
+        <HBox >
+            <MenuButton 
+                id="idBankGuaranteemenuButton"
+                text="{i18n>BankGuarantee}" 
+                class="sapUiMediumMarginEnd"
+                visible="{= ${st>/SelectedCountry} === 'ES'}"
+                >
+                <menu>
+                    <Menu itemSelected="onBankGuaranteeMenuAction">
+                        <MenuItem text="{i18n>final}" icon= "{= ${ui>/bankGuaranteeTypes/Final} ? 'sap-icon://accept' : ''}"/>
+                        <MenuItem text="{i18n>additional}" icon= "{= ${ui>/bankGuaranteeTypes/Additional} ? 'sap-icon://accept' : ''}"/>
+                    </Menu>
+                </menu>
+            </MenuButton>
+            <Button visible="{= ${st>/SelectedCountry} === 'ES'}" enabled="{= ${st>/AllAwardProductsHaveOutcome}}" text="{i18n>CreateAllFASTContracts}"/>
+        </HBox>
+        <MenuButton 
+            text="{i18n>SetAllProductWonLost}" 
+            enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
+            >
+            <menu>
+                <Menu>
+                    <MenuItem text="Won" />
+                    <MenuItem text="Lost" />
+                </Menu>
+            </menu>
+        </MenuButton>
+    </HBox>
+</core:FragmentDefinition>

@@ -144,6 +144,13 @@
                         </form:Form>
                     </VBox>
                 </Panel>
+                <Panel 
+                    expandable="true" 
+                    headerText="{i18n>OfferProductsDetailView.ProfitabilityCalculationParameters}"
+                    visible="{= ${ui>/ProfitabilityForm/Division} === 'Radiology'}" 
+                >
+                    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.ProfitabilityCalcValues" type="XML" />
+				</Panel>
                 <Panel
                     expandable="true"
                     headerText="{i18n>OfferProductsDetailView.PricingInfo}"
@@ -168,6 +175,13 @@
                     <VBox id="idPriceConditionVbox" class="sapUiNoMargin">
                         <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
                     </VBox>
+				</Panel>
+                <Panel
+                    expandable="true"
+                    visible="{= ${ui>/RappelForm/hasRappelPriceCondition}}"
+                    headerText="{i18n>OfferProductsDetailView.Rappel}"
+                >
+                    <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.Rappel" type="XML"/>
 				</Panel>
                  <Panel
                     expandable="true"

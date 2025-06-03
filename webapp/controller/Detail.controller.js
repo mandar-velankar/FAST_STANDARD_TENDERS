@@ -109,7 +109,7 @@ sap.ui.define([
 			const xmlView = tab.getXMLView();
 			const viewFolder = tab.title.toLowerCase().split(" ").join("");
 			const language = this.getModel("appView").getProperty("/language");
-			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder === "pricerequest"? "tender" : viewFolder}.views.${xmlView.getName()}`;
+			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder === "pricerequest" || viewFolder === "basicinformation" ? "tender" : viewFolder}.views.${xmlView.getName()}`;
 			const viewData = {
 				objectId:this.sObjectId,
 				offerId:this.sOfferId,

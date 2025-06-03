@@ -12,7 +12,11 @@ sap.ui.define([
 	"sap/m/Token",
 	"sap/m/ColumnListItem",
 	"sap/ui/model/Sorter",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter) {
+	"sap/m/MessageBox",
+	"sap/m/TableSelectDialog",
+	"sap/m/Column",
+	"sap/m/Text",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -52,7 +56,9 @@ sap.ui.define([
 				priceCondFoc: [],
 				offerProductDetailMsg: [],
 				priceCondSpecial: [],
-				priceCondWithMaximumPrice: []
+				priceCondWithMaximumPrice: [],
+				profitibilityCalcValueMsg: [],
+				priceCondRappel: []
 			});
 			this.setModel(messagesModel, "messages");
 			
@@ -103,6 +109,7 @@ sap.ui.define([
 				//this._bindForm("ProductForm");
 				this._filterPriceCondition();	
 				this.setHasFocPriceConditionClassification();
+				this.setHasRappelPriceConditionClassification();
 				this.setHasOfferProductDetailsSaved();
 			}.bind(this));
 		},
@@ -152,11 +159,24 @@ sap.ui.define([
 				ProductForm:{
 					editMode: false
 				},
+				ProfitabilityForm:{
+					editMode: false,
+					Division: ""
+				},
 				PricingForm:{
 					editMode: false,
+					hasCurrentPricingReceived: false,
 					mainPriceConditionID: null,
 					instituteInBranch: true,
 					hasOfferProductDetailsSaved: false
+				},
+				RappelForm:{
+					hasRappelPriceCondition: false,
+					editMode: false,
+					hasMainPriceCondition: false,
+					settlements: null,
+					instituteType: "",
+					PriceConditionID: null
 				},
 				FocForm:{
 					hasFocPriceCondition: false,
@@ -172,18 +192,43 @@ sap.ui.define([
 	
 			this.setModel(oModel, "ui");
 			this.offerStatus = await this.stState.getOfferStatus(sOfferId);
+			const currentPriceConditionType = await this.getCurrentPricingConditionType();
+			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
+			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
 			const priceConditionType = await this.getSavedPriceConditionType();
 			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
+			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
+			let offerProduct = await this.stState.getService().getOfferProduct(sOfferId, productCode);
+			this.getModel("st").setProperty("/OfferProduct", offerProduct);
 			this._bindView();
 			this._bindForm("ProductForm");
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
 			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+			this.getModel("ui").setProperty("/InstituteType", selectedTender?.InstituteType);
+			this.getModel("ui").setProperty("/Classification", selectedTender?.Classification);
+			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedTender?.InstituteName);
+			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedTender?.InstituteID);
+			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedTender?.CustomerID);
+			const standardTenderPriceConditionViews = await this.stState.getService().getStandardTenderPriceConditionView(sObjectId, sOfferId, productCode);
+			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);
+			if(countryCode === 'ES'){
+				this.bindProfitabilityForm();
+				this.bindRappelForm();
+				await this.setSpainMaxPriceFieldVisibility();
+				await this.getSettlements();
+			} 
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			if(this.sCountryCode === 'ES'){
+				const currentPriceConditionType = await this.getCurrentPricingConditionType();
+				this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
+				this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
+			}
 			const controller = this;
 			return new Promise((resolve, reject) => {
 				const countryDefaultPriceConditionType = {
@@ -196,9 +241,9 @@ sap.ui.define([
 						new Filter("ProductCode", "EQ", this.productId),
 						new Filter("ProductCode", "EQ", this.productId)
 					],
-					success: function (res) {
-						let priceCondition = res?.results.find(el => el.hasPriceCondition == true);
-						priceCondition = priceCondition ? priceCondition : res?.results.find(el => countryDefaultPriceConditionType[controller.sCountryCode] ? el.isMain == true && el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : el.isMain == true);
+					success: function (res) {						
+						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
+						priceCondition = priceCondition ? priceCondition : (controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : (res?.results.find(el => countryDefaultPriceConditionType[controller.sCountryCode] ? el.isMain == true && el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : el.isMain == true))); 
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -319,13 +364,20 @@ sap.ui.define([
 		_filterPriceCondition: async function () {
 			const oSelectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const oSelectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+			const offerProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
 			const oPriceCondBinding = this.byId("idSelectedPriceContition").getBinding("items");
 			const orFilters = [
 				new Filter("CountryCode",FilterOperator.EQ, this.sCountryCode),
 				new Filter("Division",FilterOperator.EQ, oSelectedOffer.Division),
 				new Filter("Classification",FilterOperator.EQ, oSelectedTender.Classification),
-				new Filter("ConditionType",FilterOperator.NE, 'FOC')	
+				new Filter("isMain",FilterOperator.EQ, true)
 			]
+
+			const productTypeFilters = [new Filter("ProductType", FilterOperator.EQ, "All")];
+			if (offerProduct.ProductType === "Injector") {
+				productTypeFilters.push(new Filter("ProductType", FilterOperator.EQ, "Injector"));
+			}	
+			orFilters.push(new Filter({ filters: productTypeFilters, and: false }));
 
 			oSelectedTender.InstituteType === 'Public' && orFilters.push(
 				new Filter({
@@ -616,7 +668,7 @@ sap.ui.define([
 
 		refreshPricingForm: function(){
 			const pricingForm = this.byId("idPricingForm");
-			pricingForm.getElementBinding().refresh();
+			this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.refresh() || pricingForm.getElementBinding()?.refresh() : pricingForm.getElementBinding()?.refresh();
 		},
 
 
@@ -646,7 +698,7 @@ sap.ui.define([
 
 			// Get the target path for the price condition
 			const targetPath = this.getTargets(["PriceCondition"])[0];
-			const priceConditionPath = targetPath.split('/')[1];
+			const priceConditionPath = targetPath?.split('/')[1];
 
 			// Fetch the original price condition from the service
 			const originalPriceCondtion = await this.stState.getService().getPriceCondition(targetPath);
@@ -679,7 +731,12 @@ sap.ui.define([
 						"PriceConditionNLPriceView",
 						"PriceConditionNLDiscountView",
 						"PriceConditionSpecialPriceView",
-						"PriceConditionWithMaximumPriceView"
+						"PriceConditionWithMaximumPriceView",
+						"PriceConditionDescuentoComercialView",
+						"PriceConditionPVLView",
+						"PriceConditionRentalView",
+						"PriceConditionDescuentoEspecialView",
+						"PriceConditionPrecioNetoView"
 					],
 					"priceCondPrice"
 				);
@@ -701,14 +758,18 @@ sap.ui.define([
 		 * @param {string} conditionType - The type of condition.
 		 */
 		rebasePrice: function(conditonType){
-			const pricingForm = this.byId("idPricingForm");
-			const context = pricingForm.getElementBinding().getBoundContext();
-			const boundObject = context.getObject();
-			const contextPath = context.getPath();
-			if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
-				context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
+			if(conditonType){
+				const pricingForm = this.byId("idPricingForm");
+
+				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
+
+				const boundObject = context.getObject();
+				const contextPath = context.getPath();
+				if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
+					context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
+				}
+				this.calculatePricingFormFields({conditonType,context});
 			}
-			this.calculatePricingFormFields({conditonType,context});
 		},
 
 		onPricingFormSaveBtnPress: function(event){
@@ -898,6 +959,15 @@ sap.ui.define([
 					break;
 				case "withmaximumprice":
 					this.calculatePolandWithMaximumPriceConditionType({property, value, context});
+					break;
+				case "precioneto":
+					this.calculatePrecioNetoPriceConditionType({property, value, context});
+					break;
+				case "descuentocomercial":
+					this.calculateDescuentoComercialPriceConditionType({property, value, context});
+					break;
+				case "rental":
+					this.calculateRentalPriceConditionType({property, value, context});
 					break;
 			}
 		},
@@ -1296,11 +1366,51 @@ sap.ui.define([
 		loadPriceCondition: async function(){
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const selectedPriceConditonType = this.getModel('st').getProperty("/SelectedPriceConditionType");
+			const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
+
+			//loading only main fragment without containers (Current and New) as CurrentPriceConditionType does not exist yet
+			if (this.sCountryCode === "ES" && !currentPriceConditionType) {
+				return this.loadMainFragmentOnly(selectedPriceConditonType);
+			}
+
 			return this.loadPriceConditionFragment(selectedPriceConditonType, {
 				offerID: this.sOfferId, 
-				productID:this.productId,
+				productID: this.productId,
 				tenderID: this.sObjectId,
 				instituteID: selectedTender?.InstituteID
+			});
+		},
+
+		loadMainFragmentOnly: function(selectedPriceConditonType) {
+			const vbox = this.byId("idPriceConditionVbox");
+			vbox.destroyItems(); // Clear previous items
+		
+			return Fragment.load({
+				id: this.getView().getId(),
+				name: `com.bayer.tender.statenderapp.view.offer.fragments.PriceConditionPrecioNeto`, //keeping it static as we only want to display Edit button
+				controller: this
+			}).then(function (form) {
+				vbox.addItem(form);
+				return form;
+			}.bind(this));
+		},
+
+		getCurrentPricingConditionType: function() {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/CCMPriceConditionView", {
+					filters: [
+						new Filter("TenderID", "EQ", this.sObjectId),
+						new Filter("OfferID", "EQ", this.sOfferId),
+						new Filter("CountryCode", "EQ", this.sCountryCode),
+						new Filter("ProductCode", "EQ", this.productId)
+					],
+					success: function (res) {
+						resolve(res.results[0]?.ConditionType);
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
 			});
 		},
 
@@ -1331,6 +1441,7 @@ sap.ui.define([
 			}.bind(this));
 		},
 
+
 		bindCurrentSectionFields: function(form, {offerID,productID,tenderID,instituteID}){
 			let entityName = "/PriceConditionCurrentSectionTaiwanView";
 			const path = this.getModel().createKey(entityName, {
@@ -1347,7 +1458,7 @@ sap.ui.define([
 			});
 		},
 
-		onPriceConditionLoadSuccess: function(conditionType, form, contextData){
+		onPriceConditionLoadSuccess: function(conditionType, form, contextData){			
 			this.bindPricingForm(conditionType, form, contextData);
 		},
 
@@ -1370,7 +1481,30 @@ sap.ui.define([
 						}
 					});
 				})
-			}else {
+			}else if(this.sCountryCode === "ES") {
+				const currentPriceConditionType = this.getModel("st").getProperty("/CurrentPriceConditionType");
+				const currentPath = this.getModel().createKey(`/CCMPriceConditionView`, {
+					"OfferID": offerID,
+					"TenderID": tenderID,
+					"ProductCode": productID,
+					"ConditionType": currentPriceConditionType ? currentPriceConditionType : conditionType
+				});
+				form.getAggregation("formContainers")[0].bindElement({
+					path: currentPath,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
+	
+				form.getAggregation("formContainers")[1].bindElement({
+					path: path,
+					groupId: "PricingForm",
+					events: {
+						dataReceived: this.onPricingFormDataReceived.bind(this)
+					}
+				});
+			}else{
 				form.bindElement({
 					path: path,
 					groupId: "PricingForm",
@@ -1391,6 +1525,8 @@ sap.ui.define([
 			const priceCondition = event.getParameter('data');
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
 		},
 
 
@@ -1437,7 +1573,12 @@ sap.ui.define([
 					"PriceConditionNLPriceView",
 					"PriceConditionNLDiscountView",
 					"PriceConditionSpecialPriceView",
-					"PriceConditionWithMaximumPriceView"
+					"PriceConditionWithMaximumPriceView",
+					"PriceConditionDescuentoComercialView",
+					"PriceConditionPVLView",
+					"PriceConditionPrecioNetoView",
+					"PriceConditionDescuentoEspecialView",
+					"PriceConditionRentalView"
 				], 
 				"priceCondPrice"
 			);
@@ -1448,6 +1589,8 @@ sap.ui.define([
 			const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
 		},
 
 		setMainPriceCondition: function(priceCondition){
@@ -1464,6 +1607,7 @@ sap.ui.define([
 		 */
 		setHasMainPriceCondition: function(hasPriceCondition = false){
 			this.getModel("ui").setProperty("/FocForm/hasMainPriceCondition", hasPriceCondition);
+			this.getModel("ui").setProperty("/RappelForm/hasMainPriceCondition", hasPriceCondition);
 			return hasPriceCondition;
 		},
 
@@ -2014,6 +2158,1015 @@ sap.ui.define([
 			let sPath = oContext.getPath();
 			let oModel = this.getModel();
 				oModel.read(sPath);
-		}
+		},
+
+		setSpainMaxPriceFieldVisibility: async function () {
+			const form = this.byId("idProductForm");
+			const ctx = form.getBindingContext();
+			if (!ctx) return;
+			const bindingObject = ctx.getObject();
+			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+			const maxPriceField = form.getAggregation("formContainers")?.[0].getAggregation("formElements")
+			.find(el => el.getAggregation("label") === "Max Price");
+
+			if (selectedTender) {
+				const isClassificationTender = selectedTender.Classification === "Tender";
+				maxPriceField && maxPriceField.setVisible(isClassificationTender);
+
+				if (!isClassificationTender && !bindingObject.MaxPrice) {
+					ctx.getModel().setProperty("MaxPrice", 0, ctx);
+				}
+			}
+		},
+
+		bindProfitabilityForm: function () {
+			const awardedProductForm = this.byId("idProfitabilityForm");
+			const path = this.getModel().createKey("/ProfitabilityCalcParamView", {
+				OfferID: this.offerId
+			});
+
+			awardedProductForm.bindElement({
+				path: path,
+				groupId: "ProfitabilityCalcParamView"
+			})
+		},
+
+		validateProfitabilityFormCalcParam: function () {
+			const contextPath = this.byId('idProfitabilityForm').getObjectBinding().getPath();
+			const profitabilityCalParam = this.defaultModel.getProperty(contextPath);
+			let messages = [];
+
+			if (!profitabilityCalParam.ProfitabilityStartMnth) {
+				messages.push(new Message({
+					message: "Please enter the Start Month",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityStartMnth`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityAgrDur){
+				messages.push(new Message({
+					message: "Please enter the Agreement Duration",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityAgrDur`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityYrlyMntCost){
+				messages.push(new Message({
+					message: "Please enter the Yearly Maintenance Cost per Unit",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityYrlyMntCost`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityDiscRate){
+				messages.push(new Message({
+					message: "Please enter the NPV Interest Rate",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityDiscRate`,
+					processor: this.getView().getModel()
+				}));
+			}
+
+			if(!profitabilityCalParam.ProfitabilityGrowthRate){
+				messages.push(new Message({
+					message: "Please enter the Growth Rate",
+					type: MessageType.Error,
+					target: `${contextPath}/ProfitabilityGrowthRate`,
+					processor: this.getView().getModel()
+				}));
+			}
+			
+			if(messages.length > 0){
+				sap.ui.getCore().getMessageManager().addMessages(messages);
+				this.getModel("ui").setProperty('/ProfitabilityForm/editMode', true);
+				return false;
+			}
+
+			return true;
+		},
+
+		onProfitabilityFormEditBtnPress: function(event){
+			this.getModel("ui").setProperty('/ProfitabilityForm/editMode', true);
+		},
+
+		onProfitabilityFormCancelBtnPress:function(event){
+			this.getModel("ui").setProperty('/ProfitabilityForm/editMode', false);
+			this.cancelPendingChanges(["ProfitabilityCalcParamView"], "profitibilityCalcValueMsg");
+			this.defaultModel.resetChanges();
+		},
+
+		onProfitabilityFormSaveBtnPress:function(event){
+			this.validateProfitabilityFormCalcParam();
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesProfitabilityFormSuccess.bind(this),
+				groupId: "ProfitabilityCalcParamView"
+			});
+		},
+
+		_onSubmitChangesProfitabilityFormSuccess: function () {
+			const hasErrorMessages =  this.getMessages(["ProfitabilityCalcParamView"]).length > 0;
+			this.setMessageSection(["ProfitabilityCalcParamView"], "ProfitabilityCalcParamView");
+			this.invalidateEntityType([
+				"ProfitabilityCalcParamView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/ProfitabilityForm/editMode`, false);
+				this.cancelPendingChanges(["ProfitabilityCalcParamView"], "ProfitabilityCalcParamView");
+			}
+		},
+
+		bindRappelForm: function () {
+			const rappelForm = this.byId("idRapelForm");
+			const path = this.getModel().createKey("/PriceConditionRappelView", {
+				"OfferID": this.offerId,
+				"TenderID": this.objectId,
+				"ProductCode": this.productId,
+				"ConditionType": "Rappel"
+			});
+
+			rappelForm.bindElement({
+				path: path,
+				groupId: "RappelForm"
+			})
+		},
+
+		onRappelFormEditBtnPress: function(event){
+			const form = this.byId(`idPricingForm`);
+			let priceObj = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext()?.getObject();
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
+			this.getModel("ui").setProperty('/RappelForm/editMode', true);
+		},
+
+		onRappelFormCancelBtnPress:function(event){
+			this.getModel("ui").setProperty('/RappelForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionRappelView"], "priceCondRappel");
+			this.defaultModel.resetChanges();
+		},
+
+		onRappelFormSaveBtnPress: function(event) {
+			const hasErrorMessages = this.getMessages(["PriceConditionRappelView"]).length > 0;
+			if (hasErrorMessages) return;
+
+			this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
+			
+			const form = this.byId(`idRapelForm`);
+										
+			const pendingChanges = this.defaultModel.getPendingChanges();
+			// Check if PriceConditionID already exists in either entity
+			let existingPriceConditionID = null;
+
+			Object.keys(pendingChanges).forEach((key) => {
+				if (
+					(key.startsWith("PriceConditionRappelView") || key.startsWith("DiscountConditionView")) &&
+					pendingChanges[key].PriceConditionID
+				) {
+					existingPriceConditionID = pendingChanges[key].PriceConditionID;
+				}
+			});
+		
+			// If no existing PriceConditionID is found, generate a new one
+			let priceConditionID = existingPriceConditionID || this.generateUUID();
+		
+			// Iterate over pending changes and update all DiscountConditionView entries if a new ID was generated
+			if (!existingPriceConditionID) {
+				Object.keys(pendingChanges).forEach((key) => {
+					if (key.startsWith("DiscountConditionView")) {
+						this.defaultModel.setProperty(`/${key}/PriceConditionID`, priceConditionID);
+					}
+				});
+		
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/PriceConditionID", priceConditionID);
+			}
+
+			Object.keys(pendingChanges).forEach((key) => {
+				if (key.startsWith("PriceConditionRappelView")) {
+					const path = `/${key}/MainPrice`; 
+					this.defaultModel.resetChanges([path], undefined, true);
+				}
+			});
+
+			// Submit changes
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesRappelFormSuccess.bind(this),
+				groupId: "RappelForm"
+			});
+		},
+				
+		// UUID generation function
+		generateUUID: function() {
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+				return v.toString(16);
+			});
+		},
+		
+		getSettlements: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/Settlements", {
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/RappelForm/settlements", data.results);
+			})
+		},
+
+		getRappelPriceConditionClassificationCount: async function (countryCode, classification) {
+			const path = "/PriceConditionClassification/$count"; 
+			return new Promise((resolve, reject) => {
+				this.defaultModel.read(path, {
+					filters: [
+						new Filter("CountryCode",FilterOperator.EQ, countryCode),
+						new Filter("ConditionType",FilterOperator.EQ, 'Rappel'),
+						new Filter("Classification",FilterOperator.EQ, classification)	
+					],
+					success: function (res) {
+						resolve(res)
+					},
+					error: function (err) {
+						reject(err)
+					}
+				});
+			});
+		},
+
+		setHasRappelPriceConditionClassification: async function(){
+			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
+			const rappelPriceConditionClassificationCount = await this.getRappelPriceConditionClassificationCount(this.sCountryCode, selectedTender?.Classification);
+			const hasRappelPriceCondition = Number(rappelPriceConditionClassificationCount) > 0;
+			this.getModel("ui").setProperty("/RappelForm/hasRappelPriceCondition", hasRappelPriceCondition);
+			return hasRappelPriceCondition;
+		},
+
+		onVolumeTreshhold: async function(event){
+			const priceConditionRappelView = event.getSource().getBindingContext().getObject();
+			this.getModel("st").setProperty("/selectedPriceConditionRappelView", priceConditionRappelView);
+			this.getPriceConditionRappelDialog().then(this.onPriceConditionRappelDialogLoaded.bind(this, priceConditionRappelView));
+
+        },
+
+		getPriceConditionRappelDialog: function(){
+			const view = this.getView();
+			if (!this.dialogRappel) {
+				this.dialogRappel = Fragment.load({
+					id: view.getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.VolumeTreshhold_ES",
+					controller: this
+				}).then(function (dialog) {
+					// connect dialog to the root view of this component (models, lifecycle)
+					view.addDependent(dialog);
+					return dialog;
+				});
+			}
+			return this.dialogRappel;	
+		},
+
+
+		onPriceConditionRappelDialogLoaded: function(priceConditionRappelView, dialog){
+			const volumeTresholdTable = this.byId("idVolumeTreshold");
+			const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
+
+			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
+
+			// Unbind and rebind items
+			volumeTresholdTable.unbindItems();
+			volumeTresholdTable.bindItems({
+				path : itemsBindingInfo.path,
+				template : itemsBindingInfo.template,
+				filters : filter,
+				groupId: "RappelForm"
+			});
+
+			dialog.open();
+		},
+
+		onCancelDiscountCondition: async function(event){
+			const dialog = await this.getPriceConditionRappelDialog();
+			if(this.defaultModel.hasPendingChanges()){
+				this.defaultModel.resetChanges(null, false, true);
+			}
+			dialog.close(); 
+		},
+
+		onAddNewDiscountCondition: function(event){
+			const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
+			const table = this.byId("idVolumeTreshold");
+			const context = this.defaultModel.createEntry("/DiscountConditionView", {
+				groupId: "RappelForm"
+			});
+			context.getModel().setProperty("Volume", 0, context);
+			context.getModel().setProperty("Discount", 0, context);
+			context.getModel().setProperty("PriceConditionID", priceConditionRappelView?.PriceConditionID, context);
+			context.getModel().setProperty("Tax", priceConditionRappelView?.Tax, context);
+			context.getModel().setProperty("NetPriceWithoutTax", 0, context);
+			context.getModel().setProperty("NetPriceWithTax", 0, context);
+			const newItem = table.getBindingInfo("items").template.clone();
+			newItem.setBindingContext(context)
+			table.insertItem(newItem);
+		},
+
+		onDeleteDiscountCondition: function(event){
+			const selectedItem = event.getSource().getParent();
+			const context = selectedItem.getBindingContext();
+			if(context.isTransient()){
+				this.defaultModel.resetChanges([context.getPath()], undefined, true);
+			}else{
+				this.defaultModel.remove(context.getPath());
+			}
+		},
+
+		onSortDiscountCondition:function(){
+            var view = this.getView();
+			if (!this.volumeTreshholdSortingDialog) {
+				this.volumeTreshholdSortingDialog = Fragment.load({
+					id: this.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.VolumeTreshholdSorting",
+					controller: this
+				}).then(function (dialog) {
+                    // connect dialog to the root view of this component (models, lifecycle)
+                    view.addDependent(dialog);
+                    return dialog;
+				});
+			}
+            this.volumeTreshholdSortingDialog.then(function(dialog){
+                dialog.open();
+            });
+        },
+
+        handleSortDialogDiscountConditionConfirm:function(event){
+			const table = this.byId("idVolumeTreshold"),
+			params = event.getParameters(),
+			binding = table.getBinding("items"),
+			sorters = [];
+
+			const path = params.sortItem.getKey();
+			const descending = params.sortDescending;
+			sorters.push(new Sorter(path, descending,false,function(a,b){
+                a = parseFloat(a);
+                b = parseFloat(b);
+                if( a < b ) return -1;
+                if( a > b ) return 1;
+                return -1;
+            }));
+
+			binding.sort(sorters);
+        },
+
+		onApplyDiscountCondition: async function(event){	
+			const dialog = await this.getPriceConditionRappelDialog();
+			dialog.close();
+		},
+
+		calculateNetPricesRappel: async function(event){ 
+
+            const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
+
+            const discount = Number(event.getSource().getValue());
+            const bindingContext = event.getSource().getBindingContext();
+            const discountConditionObj = bindingContext.getObject();
+
+            let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+            let instType = this.getModel("ui").getProperty("/InstituteType");
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+            const isUnit = uom === "Unit";
+
+			const useConfidential = priceConditionRappelView.ConfidentialDiscount !== 0;
+			const basePrice = useConfidential ? parseFloat(priceConditionRappelView.ConfidentialPrice) : parseFloat(priceConditionRappelView.PVL);
+			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
+
+
+            // set the calcualted field and update the bindings
+            let NetPriceWithoutTax = priceConditionRappelView?.MainPrice * (1 - discount / 100);
+            let NetPriceWithTax = NetPriceWithoutTax * (1 + parseFloat(priceConditionRappelView.Tax));
+			NetPriceWithoutTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithoutTax);
+			NetPriceWithTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithTax);
+
+
+            bindingContext.getModel().setProperty("NetPriceWithoutTax", NetPriceWithoutTax, bindingContext);
+			bindingContext.getModel().setProperty("NetPriceWithTax", NetPriceWithTax, bindingContext);
+
+        },
+
+		calculateRoyalDecreeAppliesAndMainConditionPrice: function(mainPriceCondition){
+            //calculating the RoyalDecreeApplies
+            const priceConditionViews = this.getModel("st").getProperty("/StandardTenderPriceConditionViews");
+			const rappelForm = this.byId("idRapelForm");
+			const bindingContext = rappelForm.getBindingContext();
+            const rappelIndex = priceConditionViews.findIndex(item => item.ConditionType === "Rappel");
+            if(rappelIndex < 0) return null;
+            const rappelPriceCondition = priceConditionViews[rappelIndex];
+            //calculating Main Price Condition
+            // const sSelectedMainPriceCondition = this.getModel("st").getProperty("/SelectedPriceConditionType");
+            // const mainPriceCondition = priceConditionViews.find(i => i.isMain &&  i.ConditionType === sSelectedMainPriceCondition);
+			let mainPrice = 0;
+            if(mainPriceCondition){
+                if(mainPriceCondition.ConditionType === "PrecioNeto")
+                {
+                    mainPrice = mainPriceCondition.NetPriceWithoutTaxAfterDeductionRD;
+                }
+
+                if(mainPriceCondition.ConditionType === "DescuentoComercial")
+                {
+                    mainPrice = mainPriceCondition.NetPriceWithoutTax;
+                }
+
+                if(mainPriceCondition.ConditionType === "DescuentoEspecial")
+                {
+                    mainPrice = 0;
+                }
+
+                if(mainPriceCondition.ConditionType === "Rental" || mainPriceCondition.ConditionType === "PVL")
+                {
+                    let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+					let packFactor =  oProductPrice.PACKFACTOR;
+					let uom = oProductPrice.UnitPerPack;
+					const isUnit = uom === "Unit";
+                    const useConfidential = mainPriceCondition.ConfidentialDiscount !== 0;
+					const basePrice = useConfidential ? parseFloat(mainPriceCondition.ConfidentialPrice) : parseFloat(mainPriceCondition.PVL);
+					let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+        
+                    mainPrice = rappelPriceCondition.RoyalDecree === "Yes" ? Number((correctPrice * (1 - mainPriceCondition.RoyalDecreePercentage)).toFixed(2)) : correctPrice;     
+
+                }
+            }            
+            bindingContext.getModel().setProperty("MainPrice", mainPrice, bindingContext);
+        },
+
+		_onSubmitChangesRappelFormSuccess: function(res){
+			this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
+			const hasErrorMessages =  this.getModel("messages").getProperty("/priceCondRappel").length > 0;
+			if (!hasErrorMessages) {
+				this.getModel("ui").setProperty('/RappelForm/editMode', false);
+				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");				
+				this.refreshRappelForm();
+			}
+						
+		},
+
+		refreshRappelForm: function(){
+			const form = this.byId("idRapelForm");
+			form.getElementBinding()?.refresh();
+		},
+
+		/**
+		 * Calculate price condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculatePrecioNetoPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let newNetPriceWithoutTaxBeforeDeductionRD = property?.toLowerCase().includes("netpricewithouttaxbeforedeductionrd") ? parseFloat(value) : priceObj.NetPriceWithoutTaxBeforeDeductionRD;
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+			let classification = this.getModel("ui").getProperty("/Classification");
+			this.validatePrecioNetoForm(context, {newNetPriceWithoutTaxBeforeDeductionRD, priceObj, classification, uom, packFactor});
+
+			let netPriceWithoutTaxAfterDeductionRD = 0;
+			let royalDecreeValue = 0;
+
+			const useConfidential = priceObj.ConfidentialDiscount !== 0;
+			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
+			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
+
+			let confidentialPrice = useConfidential ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
+			confidentialPrice = this.formatter.roundToSixDecimalPlaces(confidentialPrice);
+
+			let additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			additionalDiscount = this.formatter.roundToSixDecimalPlaces(additionalDiscount);
+			
+			netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1));
+			netPriceWithoutTaxAfterDeductionRD = this.formatter.roundToSixDecimalPlaces(netPriceWithoutTaxAfterDeductionRD);
+			royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+			royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
+
+			let netPriceWithTax = (netPriceWithoutTaxAfterDeductionRD * (1 + Number(priceObj.Tax)));
+			netPriceWithTax = this.formatter.roundToSixDecimalPlaces(netPriceWithTax);
+
+			context.getModel().setProperty("ConfidentialPrice", confidentialPrice, context);
+			context.getModel().setProperty("AdditionalDiscount", additionalDiscount, context);
+			context.getModel().setProperty("NetPriceWithoutTaxAfterDeductionRD", netPriceWithoutTaxAfterDeductionRD, context);
+			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
+			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
+
+		},
+
+		validatePrecioNetoForm: function (context, { newNetPriceWithoutTaxBeforeDeductionRD, priceObj, classification, uom, packFactor }) {
+			const target = `${context.getPath()}/NetPriceWithoutTaxBeforeDeductionRD`;
+			const allErrorMessages = this.getMessages(["PriceConditionPrecioNetoView"]);
+			const errorMessage = allErrorMessages.find(msg => msg.getTargets().includes(target));
+			const processor = this.getView().getModel();
+		
+			const maxPrice = Number(priceObj.MaximumPrice);
+			const pvl = Number(priceObj.PVL);
+			const confidentialPrice = Number(priceObj.ConfidentialPrice);
+			const isUnit = uom === "Unit";
+			const isPack = uom === "Pack";
+		
+			let isInvalid = false;
+			let errorText = "";
+		
+			if (classification === "Tender") {
+				if (newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
+					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)
+				)) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than the maximum price and PVL.";
+				}
+		
+				if (!isInvalid && newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
+					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice)
+				)) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than the maximum price and confidential price.";
+				}
+		
+			} else if (classification === "Commercial Agreement") {
+				if ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than PVL.";
+				}
+		
+				if (!isInvalid && ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
+					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice))) {
+					isInvalid = true;
+					errorText = "Net price w/o tax must be lower than the confidential price.";
+				}
+			}
+		
+			if (isInvalid && !errorMessage) {
+				this.oMessageManager.addMessages(new Message({
+					message: errorText,
+					type: MessageType.Error,
+					target: target,
+					processor: processor
+				}));
+				this.setMessageSection(["PriceConditionPrecioNetoView"], "priceCondPrice");
+			} else if (!isInvalid && errorMessage) {
+				this.oMessageManager.removeMessages(errorMessage);
+				this.removeMessages(errorMessage, "priceCondPrice");
+			}
+		},
+		
+
+		/**
+		 * Calculate price condition type.
+		 *
+		 * @param {object} options - Options for the calculation.
+		 * @param {string} options.property - The property name (optional).
+		 * @param {number|string} options.value - The property value (optional).
+		 * @param {object} options.context - The context object
+		 * @returns {void} - Changes context properties
+		 */
+		calculateDescuentoComercialPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let discount = property?.toLowerCase().includes("discount") ? parseFloat(value) : priceObj.Discount;
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+
+			let royalDecreeValue = 0;
+			const basePrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
+			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
+
+			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
+			confidentialPrice = this.formatter.roundToSixDecimalPlaces(confidentialPrice);
+
+			let netPriceBeforeRC = correctPrice * (1 - discount);
+			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
+			
+			netPriceBeforeRC = correctPrice * (1 - discount) * (1 - priceObj.RoyalDecreePercentage_1);				
+			royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1 * (1 - discount);
+			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
+			royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
+
+			let netPriceWithTax = netPriceBeforeRC * (1 + Number(priceObj.Tax));
+			netPriceWithTax = this.formatter.roundToSixDecimalPlaces(netPriceWithTax);
+
+			context.getModel().setProperty("ConfidentialPrice", confidentialPrice, context);
+			context.getModel().setProperty("NetPriceWithoutTax", netPriceBeforeRC, context);
+			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
+			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
+		},
+
+		calculateRentalPriceConditionType: function({property, value, context}){
+			const priceObj = context.getObject();
+
+			let monthlyRent = property?.toLowerCase().includes("monthlyrentperunit") ? parseFloat(value) : priceObj.MonthlyRentPerUnit;
+			const reqestedVolume = priceObj.RequestedVolume;
+			// Annual Values = (Monthly Rent x 12) x (RequestedVolume)
+            let annualValue = (monthlyRent * 12) * reqestedVolume;
+
+			context.getModel().setProperty("AnnualValue", annualValue, context);
+        },
+
+		onPricingFormGetPricingDataBtnPress: function(event){
+			const that = this;
+			// create dialog lazily
+			if (!this.byId("idGetCurrentPriceDialog")) {
+				this.getCurrentPriceDialog = Fragment.load({
+					id: that.getView().getId(),
+					name: "com.bayer.tender.statenderapp.view.offer.fragments.GetCurrentPriceCondition",
+                    controller: that,
+				}).then(function (oDialog) {
+					that.getView().addDependent(oDialog);
+                    oDialog.open();
+                })
+			}else {
+				this.byId("idGetCurrentPriceDialog").open();
+			}
+		},
+
+		onCloseGetCurrentPriceDialog: function () {
+            if (this.getCurrentPriceDialog) {
+                this.byId("idGetCurrentPriceDialog").close();
+            }
+        },
+
+		onOpenInstituteValueHelp: async function (event) {
+			const source = event.getSource();
+		
+			const filters = [
+				new Filter("CountryCode", FilterOperator.EQ, this.sCountryCode),
+				new Filter("CustomerID", FilterOperator.NE, null),
+				new Filter("CustomerID", FilterOperator.NE, 0),
+				new Filter("InstituteType", FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
+			];
+		
+			// Define the dialog
+			this.instituteVHDialog = new TableSelectDialog({
+				title: "Select Institute",
+				multiSelect: false,
+				contentWidth: '250px',
+				search: function (event) {
+					const sValue = event.getParameter("value");
+					const filters = [];
+				
+					if (!isNaN(sValue)) {
+						filters.push(new Filter("CustomerID", FilterOperator.EQ, parseInt(sValue, 10)));
+					}
+				
+					// Always allow partial match on InstituteName
+					filters.push(new Filter("InstituteName", FilterOperator.Contains, sValue));
+				
+					event.getSource().getBinding("items").filter(new Filter({
+						filters: filters,
+						and: false
+					}));
+				},
+				items: {
+					path: "/PT_TMINST",
+					parameters: {
+						$orderby: "InstituteName asc"
+					},
+					filters: filters,
+					template: new ColumnListItem({
+						type: "Active",
+						cells: [
+							new Text({ text: "{InstituteName}" }),
+							new Text({ text: "{CustomerID}" })
+						]
+					})
+				},
+				confirm: (event) => this.handleInstituteVHClose(event)
+			});
+		
+			// Add columns to match the cells
+			this.instituteVHDialog.addColumn(new Column());
+			this.instituteVHDialog.addColumn(new Column());
+		
+			// Set models
+			this.instituteVHDialog.setModel(source.getModel());
+        	this.instituteVHDialog.setModel(source.getModel("ui"), "ui");
+		
+			this.instituteVHDialog.open();
+		},
+
+		handleInstituteVHClose: function (oEvent) {
+			const oSelectedItem = oEvent.getParameter("selectedItem");
+			if (!oSelectedItem) return;
+		
+			const selectedObj = oSelectedItem.getBindingContext().getObject();
+		
+			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedObj.InstituteName);
+			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedObj.InstituteID);
+			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedObj.CustomerID);
+
+		},
+
+		onGetCurrentPrice: function(event){
+			const instituteID = this.getModel("ui").getProperty(`/SelectedInstituteID`);
+			const customerID = this.getModel("ui").getProperty(`/SelectedCustomerID`);
+						
+			if (!instituteID) {
+				MessageBox.error("Please select an Institute before proceeding.");
+				return;
+			}
+			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
+			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
+			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
+				method:"POST", 
+				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode },
+				success: this.onGetSAPSalesOrderSimulationSuccess.bind(this),
+				error: this.onGetSAPSalesOrderSimulationFail.bind(this)
+			});
+		},
+
+		onGetSAPSalesOrderSimulationSuccess: function(res){
+			MessageBox.success(res);
+			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", true);
+			this.onCloseGetCurrentPriceDialog();
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
+		onGetSAPSalesOrderSimulationFail: function(res){
+			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
+            MessageBox.error(message);
+			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
+		},
+
+		onSpainPrecioNetoPricingFormSaveBtnPress:function(event){
+			const form = this.byId("idPricingForm");
+			this.setPrecioNetoPricingFormPendingChanges(form);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainPrecioNetoPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		setPrecioNetoPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			const precioNetoPricingObj = oBoundContext.getObject();
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPrecioNetoView", {
+				properties: precioNetoPricingObj,
+				groupId: "PricingForm"
+			});
+
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+
+		onSpainPricingFormCancelBtnPress: function(event){
+			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.cancelPendingChanges(["PriceConditionDescuentoComercialView", "PriceConditionPVLView", "PriceConditionPrecioNetoView"], "priceCondPrice");
+			
+			// reload saved condition type
+			this.getSavedPriceConditionType().then((priceConditionType) => {
+				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+				this.loadPriceCondition();
+			});
+		},
+
+		_onSubmitChangesSpainPrecioNetoPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPrecioNetoView"]).length > 0;
+			this.setMessageSection(["PriceConditionPrecioNetoView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPrecioNetoView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
+				this.cancelPendingChanges(["PriceConditionPrecioNetoView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainDescuentoComercialPricingFormSaveBtnPress:function(event){
+			const form = this.byId("idPricingForm");
+			this.setDescuentoComercialPricingFormPendingChanges(form);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainDescuentoComercialPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		setDescuentoComercialPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			const desComercialPricingObj = oBoundContext.getObject();
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoComercialView", {
+				properties: desComercialPricingObj,
+				groupId: "PricingForm"
+			});
+
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+			
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+
+		_onSubmitChangesSpainDescuentoComercialPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDescuentoComercialView"]).length > 0;
+			this.setMessageSection(["PriceConditionDescuentoComercialView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionDescuentoComercialView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
+				this.cancelPendingChanges(["PriceConditionDescuentoComercialView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			this.refreshRappelForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainPVLPricingFormSaveBtnPress:function(event){
+			const pvlPricingForm = this.byId("idPricingForm");
+			this.setPVLPricingFormPendingChanges(pvlPricingForm);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainPVLPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		setPVLPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+
+			const pvlPricingObj = oBoundContext.getObject();
+
+			const basePrice = pvlPricingObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPricingObj.ConfidentialPrice) : parseFloat(pvlPricingObj.PVL);
+			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+
+			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
+			pvlPricingObj.NetPriceWithoutTax = correctPrice;
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPVLView", {
+				properties: pvlPricingObj,
+				groupId: "PricingForm"
+			});
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+
+
+		_onSubmitChangesSpainPVLPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionPVLView"]).length > 0;
+			this.setMessageSection(["PriceConditionPVLView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionPVLView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
+				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainDescuentoEspecialPricingFormSaveBtnPress:function(event){
+			const desespecialPricingForm = this.byId("idPricingForm");
+			this.setDescuentoEspecialPricingFormPendingChanges(desespecialPricingForm);
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainDescuentoEspecialPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		setDescuentoEspecialPricingFormPendingChanges: function (form) {
+			const oDefaultModel = form.getModel();
+			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
+			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
+			
+            let packFactor =  oProductPrice.PACKFACTOR;
+            let uom = oProductPrice.UnitPerPack;
+			const isUnit = uom === "Unit";
+
+			const desEspecialPricingObj = oBoundContext.getObject();
+
+			const basePrice = desEspecialPricingObj.ConfidentialDiscount !== 0 ? parseFloat(desEspecialPricingObj.ConfidentialPrice) : parseFloat(desEspecialPricingObj.PVL);
+			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+
+			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
+			desEspecialPricingObj.ESDiscount = 1;
+
+
+			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoEspecialView", {
+				properties: desEspecialPricingObj,
+				groupId: "PricingForm"
+			});
+			form?.bindElement({
+				path: oNewBindingCtx.getPath(),
+				groupId: "PricingForm"
+			});
+			oDefaultModel.resetChanges([oBoundContext.getPath()]);
+		},
+
+		_onSubmitChangesSpainDescuentoEspecialPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionDescuentoEspecialView"]).length > 0;
+			this.setMessageSection(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionDescuentoEspecialView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
+				this.cancelPendingChanges(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+
+		onSpainRentalPricingFormSaveBtnPress:function(event){
+			this.defaultModel.submitChanges({
+				error: this._onSubmitChangesFail.bind(this),
+				success: this._onSubmitChangesSpainRentalPricingFormSuccess.bind(this),
+				groupId: "PricingForm"
+			});
+		},
+
+		_onSubmitChangesSpainRentalPricingFormSuccess: function(res){
+			const hasErrorMessages =  this.getMessages(["PriceConditionRentalView"]).length > 0;
+			this.setMessageSection(["PriceConditionRentalView"], "priceCondPrice");
+			this.invalidateEntityType([
+				"PriceConditionRentalView"
+			]);
+			if(!hasErrorMessages){
+				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
+				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
+				this.cancelPendingChanges(["PriceConditionRentalView"], "priceCondPrice");
+			} 
+
+			this._refreshOfferProductTable();
+			let classification = this.getModel("ui").getProperty("/Classification");
+			if(classification === "Commercial Agreement") this.refreshRappelForm();
+			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+						
+		},
+		
     });
 });

@@ -448,5 +448,38 @@ sap.ui.define([
 				});
 			});
         },
+		getStandardTenderPriceConditionView: function (tenderID,offerID,productID) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/StandardTenderPriceConditionView",
+				{
+					filters: [
+						new Filter ("TenderID", FilterOperator.EQ, tenderID),
+						new Filter ("OfferID", FilterOperator.EQ, offerID),
+						new Filter ("ProductCode", FilterOperator.EQ, productID)
+					],
+					success: function (res) {
+						resolve(res?.results);
+					},
+				});
+			});
+		},
+
+		getBankGuarantee: async function (tenderID, type) {
+			return new Promise((resolve, reject) => {
+				const filters = [
+					new Filter("TenderID", "EQ", tenderID)
+				];
+
+				if (type) {
+					filters.push(new Filter("Type", "EQ", type))
+				}
+				this.model.read("/BankGuarantees", {
+					filters: filters,
+					success: function (res) {
+						resolve(type ? res?.results[0] : res?.results);
+					}
+				});
+			})
+		},
     });
 });

@@ -116,6 +116,18 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "With Maximum Price";
 					break;
+				case 'precioneto'	:
+					stringToReplace	= originalString;
+					replacementString = "Precio Neto";
+					break;
+				case 'descuentocomercial'	:
+					stringToReplace	= originalString;
+					replacementString = "Descuento Comercial";
+					break;
+				case 'descuentoespecial'	:
+					stringToReplace	= originalString;
+					replacementString = "Descuento Especial";
+					break;
 				default:
 					return originalString;
 			}
@@ -137,6 +149,12 @@ sap.ui.define([
 
 		truncToFourDecimalPlaces: function(number) {
 			const factor = 10000; // 10^4 for four decimal places
+			const result = Math.round(number * factor) / factor;
+			return result;
+		},
+
+		roundToSixDecimalPlaces: function(number) {
+			const factor = 1000000;
 			const result = Math.round(number * factor) / factor;
 			return result;
 		},
@@ -179,6 +197,23 @@ sap.ui.define([
             }else {
                 return today;
             }
-        }
+        },
+		outcome: function(grossMargin){
+            if(!grossMargin){return};
+            let newGrossMargin =  grossMargin * 100;
+            if (parseFloat(newGrossMargin) >= parseFloat('40%')) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+		formatESProductOutcomeIcon: function (grossMargin) {
+			const outcome = this.outcome(grossMargin);
+			return outcome ? "sap-icon://sys-enter-2" : "sap-icon://error"
+		},
+		formatESProductOutcomeState: function (grossMargin) {
+			const outcome = this.outcome(grossMargin);
+			return outcome ? "Success" : "Error"
+		}
 	};
 });

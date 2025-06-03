@@ -255,6 +255,7 @@ sap.ui.define([
 			let isVisible = "";
 			switch (tabName) {
 				case "Tender":
+				case "Basic Information":
 				case "Price Request":
 				case "價格要求":
 				case "Przetarg":
