@@ -1,0 +1,157 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <Table 
+        visible="{= ${st>/OverviewPriceConditionTableSpain/descuentoEspecial}.length > 0}"
+        items="{
+            path: 'st>/OverviewPriceConditionTableSpain/descuentoEspecial',
+            sorter: [{path: 'SORTER', descending: false}]
+        }"
+        inset="false" 
+        class="sapFDynamicPageAlignContent" 
+        contextualWidth="auto"
+        alternateRowColors="true" 
+    >   
+        <headerToolbar>
+            <OverflowToolbar>
+                <content>
+                    <Title text="{i18n>ESOverviewDescuentoEspecialFragment.Title}" level="H2"/>
+                    <ToolbarSpacer />
+                </content>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.ID}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.Product}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.PackFactor}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.Qty}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.UnitPrice}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.PackPrice}"/>
+            </Column>    
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.PVL}"/>
+            </Column>   
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.PriceCondition}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.NetPriceWOtax}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.Discount}"/>
+            </Column> 
+            <Column visible="{= ${ui>/Classification} === 'Commercial Agreement'}">
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.Rappel}"/>
+            </Column> 
+            <Column visible="{= ${ui>/Classification} === 'Commercial Agreement'}">
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.FOC}"/>
+            </Column>  
+            <Column>
+                <Text text="{i18n>ESOverviewDescuentoEspecialFragment.Total}"/>
+            </Column>              
+        </columns>
+        <ColumnListItem>
+            <cells>
+                <!-- Contract ID -->
+                <Text text="{path :'st>SORTER'}"/>
+                
+                <!-- Article Name -->
+                <Text text="{path :'st>PRODUCTNAME'}"/>
+
+                <!-- Pack Factor -->
+                <Text text="{path :'st>PACKSIZE'}"/>
+
+                <!-- Quantity -->
+                <Text text="{st>PAID_VOLUME} {st>UNIT}"/>
+
+                <!-- Unit Price    -->                        
+                <ObjectStatus
+                    text="{= ${st>/Tender/Institute/InstituteType} === 'Private Account' ? ${parts: [
+                        {path: 'st>PriceCondition/PVL'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.priceTwoOrFour'} : ${parts: [
+                        {path: 'st>PriceCondition/ConfidentialPrice'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.priceTwoOrFour'} }"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- Pack Price -->
+                <ObjectStatus
+                    text="{= ${st>/Tender/Institute/InstituteType} === 'Private Account' ? 
+                    ${parts: [
+                        {path: 'st>PriceCondition/PVL'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.priceTwoOrFour'} : 
+                    ${parts: [
+                        {path: 'st>PriceCondition/ConfidentialPrice'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.priceTwoOrFour'} }"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- PVL -->
+                <Text text="{parts: [
+                    {path: 'st>PriceCondition/PVL'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+
+                <!-- Price Condition -->
+                <Text text="{
+                    path :'st>PriceCondition/PriceConditionClassification/ConditionType',
+                    formatter: '.formatter.replaceString'
+                }"/>
+                
+                <!-- NetPriceWithoutTax -->
+                <!-- <Text text="{= ${st>PriceCondition/NetPriceWithoutTax} ? {parts: [
+                    {path: 'st>PriceCondition/NetPriceWithoutTax'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'} : Number(0).toFixed(2) + ' ' + ${path: 'st>CURRENCY'}}"/> -->
+                    <Text text="{parts: [
+                    {path: 'st>PriceCondition/NetPriceWithoutTax'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+
+                <!-- Discount -->
+                <Text text="{= ${st>PriceCondition/Discount} ? ${path :'st>PriceCondition/Discount', type:'.types.percent'} + '%' : Number(100).toFixed(2) + '%'}"/>
+
+                <!-- Rappel -->
+                <Text text="{ 
+                        parts:[
+                            {path:'st>SORTER'},
+                            {path:'st>/QuotationPriceConditionTableSpain/rappel'}
+                        ], 
+                        formatter: '.formatter.hasAdditionalCondition'
+                    }"
+                />
+
+                <!-- FOC -->
+                <Text text="{ 
+                        parts:[
+                            {path:'st>SORTER'},
+                            {path:'st>/QuotationPriceConditionTableSpain/foc'}
+                        ], 
+                        formatter: '.formatter.hasAdditionalCondition'
+                    }"
+                />
+
+                <!-- Total -->
+                <Text text="{parts: [
+                    {path: 'st>GROSS_SALES_OFFER_CURRENCY'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+            </cells>
+        </ColumnListItem>
+    </Table>
+</core:FragmentDefinition>

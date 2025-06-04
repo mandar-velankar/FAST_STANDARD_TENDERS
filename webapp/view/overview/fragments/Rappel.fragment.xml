@@ -1,0 +1,86 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+    <Table 
+        visible="{= ${st>/OverviewPriceConditionTableSpain/rappel}.length > 0}"
+        items="{
+            path: 'st>/OverviewPriceConditionTableSpain/rappel',
+            sorter: [{path: 'SORTER', descending: false}]
+        }"
+        inset="false" 
+        class="sapFDynamicPageAlignContent" 
+        contextualWidth="auto"
+        alternateRowColors="true" 
+    >   
+        <headerToolbar>
+            <OverflowToolbar>
+                <content>
+                    <Title text="{i18n>ESOverviewRappelFragment.Title}" level="H2"/>
+                    <ToolbarSpacer />
+                </content>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.ID}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.Product}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.PVL}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.RoyalDecree}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.Liquidation}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.PaymentBackDate}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewRappelFragment.VolumeThreshold}"/>
+            </Column>              
+        </columns>
+        <ColumnListItem>
+            <cells>
+                <!-- Contract ID -->
+                <Text text="{path :'st>SORTER'}"/>
+                
+                <!-- Article Name -->
+                <Text text="{path :'st>PRODUCTNAME'}"/>
+
+                <!-- PVL -->
+                <Text text="{parts: [
+                        {path: 'st>PriceCondition/PVL'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.price'}"
+                />
+
+                <!-- Royal Decree -->
+                <Text text="{path :'st>PriceCondition/RoyalDecree'}"/>
+
+                <!-- Liquidation -->
+                <Text text="{path :'st>PriceCondition/Liquidation'}"/>
+
+                <!-- Payment Back date -->
+                <Text text="{
+                    path: 'st>PriceCondition/RefundDate',
+                    type: 'sap.ui.model.type.Date',
+                    formatOptions: {
+                        style: 'long'
+                    }
+                }" />
+
+                <!-- Volume Threshold -->
+                <Button icon="sap-icon://value-help" press=".onVolumeTreshholdPress">
+                    <layoutData>
+                        <l:GridData span="XL1 L1 M1 S2" />
+                    </layoutData>
+                </Button>
+            </cells>
+        </ColumnListItem>
+    </Table>
+</core:FragmentDefinition>

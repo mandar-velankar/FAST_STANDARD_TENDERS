@@ -1,0 +1,156 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <Table 
+        visible="{= ${st>/OverviewPriceConditionTableSpain/precioNeto}.length > 0}"
+        items="{
+            path: 'st>/OverviewPriceConditionTableSpain/precioNeto',
+            sorter: [{path: 'SORTER', descending: false}]
+        }"
+        inset="false" 
+        class="sapFDynamicPageAlignContent" 
+        contextualWidth="auto"
+        alternateRowColors="true" 
+    >   
+        <headerToolbar>
+            <OverflowToolbar>
+                <content>
+                    <Title text="{i18n>ESOverviewPrecioNetoFragment.Title}" level="H2"/>
+                    <ToolbarSpacer />
+                </content>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.ID}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.Product}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.PackFactor}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.Qty}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.UnitPrice}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.PackPrice}"/>
+            </Column>    
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.PVL}"/>
+            </Column>   
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.PriceCondition}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.RoyalDecree}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.VAT}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.NetPriceWOtaxAfterRD}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.NetPriceWtaxAfterRD}"/>
+            </Column> 
+            <Column visible="{= ${ui>/Classification} === 'Commercial Agreement'}">
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.Rappel}"/>
+            </Column> 
+            <Column visible="{= ${ui>/Classification} === 'Commercial Agreement'}">
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.FOC}"/>
+            </Column>  
+            <Column>
+                <Text text="{i18n>ESOverviewPrecioNetoFragment.Total}"/>
+            </Column>              
+        </columns>
+        <ColumnListItem>
+            <cells>
+                 <!-- Contract ID -->
+                <Text text="{path :'st>SORTER'}"/>
+                
+                <!-- Article Name -->
+                <Text text="{path :'st>PRODUCTNAME'}"/>
+
+                <!-- Pack Factor -->
+                <Text text="{path :'st>PACKSIZE'}"/>
+
+                <!-- Quantity -->
+                <Text text="{st>PAID_VOLUME} {st>UNIT}"/>
+
+                <!-- Unit Price -->
+                <ObjectStatus
+                    text="{parts: [
+                        {path: 'st>REQ_PRICE_UNIT_OFFER_CURRENCY'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.priceTwoOrFour'}"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- Pack Price -->
+                <ObjectStatus text="{parts: [ {path: 'st>REQ_PRICE_PACK_OFFER_CURRENCY'},  {path: 'st>CURRENCY'} ], formatter:'.formatter.price'}"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- PVL -->
+                <Text text="{parts: [
+                    {path: 'st>PriceCondition/PVL'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+
+                <!-- Price Condition -->
+                <Text text="{
+                    path :'st>PriceCondition/PriceConditionClassification/ConditionType',
+                    formatter: '.formatter.replaceString'
+                }"/>
+
+                <!-- Royal Decree -->
+                <Text text="{path :'st>PriceCondition/RoyalDecree'}"/>
+
+                <!-- VAT -->
+                <Text text="{path :'st>PriceCondition/Tax', type:'.types.percent'} %"/>
+
+                <!-- NetPriceWithoutTaxAfterRD -->
+                <Text text="{parts: [
+                    {path: 'st>PriceCondition/NetPriceWithoutTaxAfterDeductionRD'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+
+                <!-- NetPriceWithTaxAfterRD -->
+                <Text text="{parts: [
+                    {path: 'st>PriceCondition/NetPriceWithTaxAfterDeductionRD'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+
+                <!-- Rappel -->
+                <Text text="{ 
+                        parts:[
+                            {path:'st>SORTER'},
+                            {path:'st>/QuotationPriceConditionTableSpain/rappel'}
+                        ], 
+                        formatter: '.formatter.hasAdditionalCondition'
+                    }"
+                />
+
+                <!-- FOC -->
+                <Text text="{ 
+                        parts:[
+                            {path:'st>SORTER'},
+                            {path:'st>/QuotationPriceConditionTableSpain/foc'}
+                        ], 
+                        formatter: '.formatter.hasAdditionalCondition'
+                    }"
+                />
+
+                <!-- Total -->
+                <Text text="{parts: [
+                    {path: 'st>GROSS_SALES_OFFER_CURRENCY'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+            </cells>
+        </ColumnListItem>
+    </Table>
+</core:FragmentDefinition>

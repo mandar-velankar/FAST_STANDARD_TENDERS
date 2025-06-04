@@ -10,6 +10,15 @@ sap.ui.define(
             constructor: function (url) {
                 JSONModel.prototype.constructor.call(this, {
                     SelectedPriceConditionType: "Price",
+                    OverviewPriceConditionTableSpain: {
+                        pvl: [],
+                        precioNeto: [],
+                        descuentoComercial: [],
+                        descuentoEspecial: [],
+                        rappel: [],
+                        foc: [],
+                        rental: []
+                    }
                 });
                 this.url = url;
                 const model = new ODataModel({

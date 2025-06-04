@@ -214,6 +214,56 @@ sap.ui.define([
 		formatESProductOutcomeState: function (grossMargin) {
 			const outcome = this.outcome(grossMargin);
 			return outcome ? "Success" : "Error"
-		}
+		},
+
+		priceTwoOrFour: function(price, currency, unit) {
+			if (!price){
+				return "";
+			}
+			var oNumberFormat = NumberFormat.getFloatInstance({
+				maxFractionDigits: unit !== "Pack" ? 4 : 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			var oValue = oNumberFormat.format(parseFloat(price));
+			if (!currency){
+				return oValue;
+			}
+			return oValue + " "+ currency;
+		},
+
+		statusPrice:  function (isLowest) {
+			try {
+				if (isLowest === 1){
+					return "Error";
+				}
+				return "None";
+			} catch (err) {
+				return "None";
+			}
+		},
+
+		hasAdditionalCondition: function(sorter, additionalConditions){
+			if(!sorter || !additionalConditions) return 'No';
+			return additionalConditions.some(cond => cond.SORTER === sorter) ? 'Yes' : 'No';
+		},
+
+		price: function(price, currency) {
+			if (!price){
+				return "";
+			}
+			var oNumberFormat = NumberFormat.getFloatInstance({
+				maxFractionDigits: 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			var oValue = oNumberFormat.format(parseFloat(price));
+			if (currency === undefined){
+				return oValue;
+			}
+			return oValue + " "+ currency;
+		},
 	};
 });

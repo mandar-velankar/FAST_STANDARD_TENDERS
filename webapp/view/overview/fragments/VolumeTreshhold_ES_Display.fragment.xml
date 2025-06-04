@@ -1,0 +1,41 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+
+	<Dialog title="Volume Treshhold" id="idESVolumeThresholdDialog">
+        <buttons>
+            <Button text="{i18n>Cancel}" press=".onCancelDiscountCondition"/>
+		</buttons>
+        <Table id="idVolumeTresholdDisplay" items="{path:'st>PriceCondition/DiscountCondition/results'}">
+            <columns>
+                <Column>
+                    <Text text="{i18n>ESVolumeThresholdFragment.Volume}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>ESVolumeThresholdFragment.Discount}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>ESVolumeThresholdFragment.Tax}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>ESVolumeThresholdFragment.NetPriceWOtax}"/>
+                </Column>    
+                <Column>
+                    <Text text="{i18n>ESVolumeThresholdFragment.NetPriceWithTax}"/>
+                </Column>             
+            </columns>
+            <ColumnListItem>
+                <cells>
+                    <HBox>
+                        <Text text=">=" wrapping="false" class="sapUiSmallMarginTop"/>
+                        <Input value="{st>Volume}" fieldWidth="80%" enabled="false"/>
+                    </HBox>
+                    <Input value="{st>Discount}" description="%" fieldWidth="80%" enabled="false"/>
+                    <Input value="{parts:['st>Tax', 'st>/SelectedCountry'], type:'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}" description="%" enabled="false" fieldWidth="80%"/>
+                    <Input value="{path:'st>NetPriceWithoutTax', type:'sap.ui.model.type.Float', formatOptions: { maxFractionDigits: 2, minFractionDigits: 2, groupingEnabled: false, groupingSeparator: ',', decimalSeparator: '.'}}" enabled="false" fieldWidth="80%" type="Number"/>
+                    <Input value="{path:'st>NetPriceWithTax', type:'sap.ui.model.type.Float', formatOptions: { maxFractionDigits: 2, minFractionDigits: 2, groupingEnabled: false, groupingSeparator: ',', decimalSeparator: '.'}}" enabled="false" fieldWidth="80%" type="Number"/>
+                </cells>
+            </ColumnListItem>
+        </Table>
+   	</Dialog>	
+</core:FragmentDefinition>
