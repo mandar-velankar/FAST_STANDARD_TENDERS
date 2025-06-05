@@ -4,18 +4,16 @@
 >
     <HBox
         justifyContent="SpaceBetween"
-        alignItems="Center"
+        alignItems="Start"
+        wrap="Wrap"
     >
-        <!-- LEFT SIDE: Guarantee + Fast Contract + Dates -->
-        <HBox
-            alignItems="Center"
-            wrap="Wrap"
-        >
+        <!-- LEFT SIDE: Vertically stacked elements -->
+        <VBox>
             <!-- Bank Guarantee Button -->
             <MenuButton
                 id="idBankGuaranteemenuButton"
                 text="{i18n>BankGuarantee}"
-                class="sapUiSmallMarginEnd"
+                width = "10rem"
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
             >
                 <menu>
@@ -37,29 +35,28 @@
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
                 enabled="{= ${st>/AllAwardProductsHaveOutcome}}"
                 text="{i18n>CreateAllFASTContracts}"
-                class="sapUiSmallMarginEnd"
+                width="10rem"
             />
 
-            <HBox
-                alignItems="Center"
-                class="sapUiSmallMarginEnd"
-            >
+
+            <!-- Contract Start Date -->
+            <HBox alignItems="Center" class="sapUiSmallMarginBottom">
                 <Label
                     text="{i18n>ContractStartDate}"
                     labelFor="contractStartDate"
-                    class="sapUiTinyMarginEnd"
+                    width = "10rem"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
                 />
                 <DatePicker
                     id="contractStartDate"
                     value="{
-						path :'st>/ContractStartDate', 
-						type: 'sap.ui.model.type.Date', 
-						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
-					}" 
+                        path :'st>/ContractStartDate', 
+                        type: 'sap.ui.model.type.Date', 
+                        formatOptions: { pattern: 'yyyy-MM-dd', UTC: true }
+                    }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
                 />
             </HBox>
@@ -69,25 +66,25 @@
                 <Label
                     text="{i18n>ContractEndDate}"
                     labelFor="contractEndDate"
-                    class="sapUiTinyMarginEnd"
+                    width = "10rem"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
                 />
                 <DatePicker
                     id="contractEndDate"
                     value="{
-						path :'st>/ContractEndDate', 
-						type: 'sap.ui.model.type.Date', 
-						formatOptions: { pattern: 'yyyy-MM-dd' , UTC:true}
-					}" 
+                        path :'st>/ContractEndDate', 
+                        type: 'sap.ui.model.type.Date', 
+                        formatOptions: { pattern: 'yyyy-MM-dd', UTC: true }
+                    }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled = "{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
                 />
             </HBox>
-        </HBox>
+        </VBox>
 
-        <!-- RIGHT SIDE: Set All Product Outcome -->
+        <!-- RIGHT SIDE: Set All Product Outcome button -->
         <MenuButton
             text="{i18n>SetAllProductWonLost}"
             enabled="{= !${st>/AllAwardProductsHaveOutcome}}"

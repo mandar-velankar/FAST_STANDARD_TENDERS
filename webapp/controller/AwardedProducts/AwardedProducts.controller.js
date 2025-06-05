@@ -328,17 +328,38 @@ sap.ui.define([
 		},
 
 		onContractDateChange: async function () {
-			const oStartDate = this.byId("contractStartDate").getDateValue();
-			const oEndDate = this.byId("contractEndDate").getDateValue();
+			const startDatePicker = this.byId("contractStartDate");
+			const endDatePicker = this.byId("contractEndDate");
 
-			if (!oStartDate || !oEndDate) {
+			const startDate = startDatePicker.getDateValue();
+			const endDate = endDatePicker.getDateValue();
+
+			// Clear previous state
+			startDatePicker.setValueState("None");
+			endDatePicker.setValueState("None");
+
+			if (!startDate || !endDate) {
+				if (!startDate) {
+					startDatePicker.setValueState("Error");
+					startDatePicker.setValueStateText("Contract Start Date is required.");
+				}
+				if (!endDate) {
+					endDatePicker.setValueState("Error");
+					endDatePicker.setValueStateText("Contract End Date is required.");
+				}
+			return;
+			}
+
+			if (startDate > endDate) {
+				startDatePicker.setValueState("Error");
+				startDatePicker.setValueStateText("Start Date cannot be after End Date.");
 				return;
 			}
 
 			try {
 				this.getModel().callFunction("/updateFinalContractStartEndDate", {
 					method:"POST", 
-					urlParameters: {"OfferID": this.offerId, "ContractStartDate": oStartDate.toISOString().split("T")[0], "ContractEndDate": oEndDate.toISOString().split("T")[0]},
+					urlParameters: {"OfferID": this.offerId, "ContractStartDate": startDate.toISOString().split("T")[0], "ContractEndDate": endDate.toISOString().split("T")[0]},
 					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this),
 					error: this.onUpdateFinalContractStartEndDateFail.bind(this)
 				});
