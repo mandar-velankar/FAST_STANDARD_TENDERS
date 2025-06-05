@@ -40,7 +40,7 @@
 
 
             <!-- Contract Start Date -->
-            <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+            <HBox alignItems="Center">
                 <Label
                     text="{i18n>ContractStartDate}"
                     labelFor="contractStartDate"
