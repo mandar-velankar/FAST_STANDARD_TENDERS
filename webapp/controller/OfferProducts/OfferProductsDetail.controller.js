@@ -311,10 +311,10 @@ sap.ui.define([
 			const lostCheckBox = this.byId('lostCheckId');
 
 			//default filters
-			const oFilters = [
-				new Filter("CountryCode", FilterOperator.EQ, countryCode),
-			];
+			const oFilters = [];
 
+			// Spain has a separate CDS history view no need to use CountryCode filter
+			countryCode !== 'ES' && oFilters.push(new Filter("CountryCode", FilterOperator.EQ, countryCode));
 			countryCode !== 'PL' && oFilters.push(new Filter("ProductCode", FilterOperator.EQ, productCode));
 
 			if (instituteCheckBox.getSelected()) {
