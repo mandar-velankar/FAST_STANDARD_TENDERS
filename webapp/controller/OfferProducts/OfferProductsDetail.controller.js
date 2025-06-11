@@ -16,7 +16,8 @@ sap.ui.define([
 	"sap/m/TableSelectDialog",
 	"sap/m/Column",
 	"sap/m/Text",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text) {
+	"sap/ui/core/BusyIndicator"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text, BusyIndicator) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -2887,6 +2888,7 @@ sap.ui.define([
 			}
 			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
 			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
+			BusyIndicator.show(1);
 			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
 				method:"POST", 
 				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode },
@@ -2904,12 +2906,14 @@ sap.ui.define([
 				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 				this.loadPriceCondition();
 			});
+			BusyIndicator.hide();
 		},
 
 		onGetSAPSalesOrderSimulationFail: function(res){
 			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
             MessageBox.error(message);
 			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
+			BusyIndicator.hide();
 		},
 
 		onSpainPrecioNetoPricingFormSaveBtnPress:function(event){
