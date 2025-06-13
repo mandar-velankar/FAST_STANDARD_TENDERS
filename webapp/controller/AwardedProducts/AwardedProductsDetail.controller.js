@@ -1170,9 +1170,9 @@ sap.ui.define([
             const startDate = this.byId('idContractStartDate').getDateValue();
 			const endDate = new Date(startDate);
             const durationSelect = parseInt(this.byId("idContractDuration").getSelectedKey(), 10);
-			endDate.setDate(0);
+			// endDate.setDate(0);
 			let formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + durationSelect));
-			formettedEndDate.setDate(formettedEndDate.getDate() + 1);
+			formettedEndDate.setDate(formettedEndDate.getDate());
 			
 			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
 			context.getModel().refresh()
