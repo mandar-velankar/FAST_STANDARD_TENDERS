@@ -186,6 +186,7 @@ sap.ui.define([
 			this.bindFields();
 			if(this.offerId && this.offerId !== "NA"){await this.bindProductFOCInformationTable(this.countryCode, this.offerId);}
 			await this.approvalButtonEnableCheck();
+			this.countryCode === "ES" && this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
 			//this.getOwnerComponent().getModel().refresh(true);			
 		},
 		bindForm: async function (tabName) {
@@ -601,8 +602,17 @@ sap.ui.define([
 		 */
 		_createPriceConditionTableEntitiesOnQuotationTabForSpain: function(){ 
 			const uiModel = this.getModel("ui");
-			const OfferProductValidation = this.stState.getProperty("/OfferProductsValidations")
-			const tableData = uiModel.getProperty("/OverviewPriceConditionTableSpain");
+			const OfferProductValidation = this.stState.getProperty("/OfferProductsValidations");
+
+			const tableData = {
+				pvl: [],
+				precioNeto: [],
+				descuentoComercial: [],
+				descuentoEspecial: [],
+				rappel: [],
+				foc: [],
+				rental: []
+			};
 
 			// create PriceConditionTableEntities
 			OfferProductValidation.forEach(prd => {
@@ -614,7 +624,7 @@ sap.ui.define([
 						PACKSIZE: prd.PACKSIZE,
 						REQUESTED_QUANTITY: prd.REQUESTED_QUANTITY,
 						REQ_PRICE_UNIT_OFFER_CURRENCY: prd.REQ_PRICE_UNIT_OFFER_CURRENCY,
-						CURRENCY: prd.CURRENCY,
+						CURRENCY: prd.CURRENCY || "",
 						IS_LOWEST: prd.IS_LOWEST,
 						REQ_PRICE_PACK_OFFER_CURRENCY: prd.REQ_PRICE_PACK_OFFER_CURRENCY,
 						GROSS_SALES_OFFER_CURRENCY: prd.GROSS_SALES_OFFER_CURRENCY,

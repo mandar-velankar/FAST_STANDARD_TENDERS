@@ -119,10 +119,16 @@
 		</form:Form>
 	
 
+		<Panel 
+			expandable="false"
+        	headerText="{i18n>ProductInformation}"
+			visible="{= ${st>/SelectedCountry} === 'ES'}"
+		></Panel>
 			<Table 
 				id="idProductInformationTable" 
 				mode="SingleSelectMaster"
 				items = "{path: '/OfferProductValidation', templateShareable: true}"
+				visible="{= ${st>/SelectedCountry} !== 'ES'}"
 			>
 			<headerToolbar>
 			<OverflowToolbar>

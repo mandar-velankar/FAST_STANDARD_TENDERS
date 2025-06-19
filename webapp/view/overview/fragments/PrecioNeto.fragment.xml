@@ -111,7 +111,9 @@
                 <Text text="{path :'st>PriceCondition/RoyalDecree'}"/>
 
                 <!-- VAT -->
-                <Text text="{path :'st>PriceCondition/Tax', type:'.types.percent'} %"/>
+                <Text text="{
+                    parts :['st>PriceCondition/Tax', 'st>PriceCondition/COUNTRY_CODE'], 
+                    type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"/>
 
                 <!-- NetPriceWithoutTaxAfterRD -->
                 <Text text="{parts: [
