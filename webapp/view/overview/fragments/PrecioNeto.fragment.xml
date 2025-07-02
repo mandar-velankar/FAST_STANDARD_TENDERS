@@ -131,7 +131,7 @@
                 <Text text="{ 
                         parts:[
                             {path:'st>SORTER'},
-                            {path:'st>/QuotationPriceConditionTableSpain/rappel'}
+                            {path:'st>/OverviewPriceConditionTableSpain/rappel'}
                         ], 
                         formatter: '.formatter.hasAdditionalCondition'
                     }"
@@ -141,7 +141,7 @@
                 <Text text="{ 
                         parts:[
                             {path:'st>SORTER'},
-                            {path:'st>/QuotationPriceConditionTableSpain/foc'}
+                            {path:'st>/OverviewPriceConditionTableSpain/foc'}
                         ], 
                         formatter: '.formatter.hasAdditionalCondition'
                     }"
