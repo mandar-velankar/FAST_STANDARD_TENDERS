@@ -210,8 +210,8 @@ sap.ui.define([
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
+				await this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				!this.selectedOfferHasBinding() && this._bindView();
-				this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 			}.bind(this));
 		},
 
