@@ -103,11 +103,13 @@ sap.ui.define([
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
 						const classification = form?.getElementBinding()?.getBoundContext()?.getProperty("Classification");
+						const manager = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_1");
 						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
 						}else if (this.countryCode === "NL") {
 							this.setInstitutesinGroupFieldVisible(form, cs);
+							this.setRemovedStaticManagerItem(form, manager);
 						}
 
 						if(this.countryCode === "ES" && classification){
@@ -130,11 +132,13 @@ sap.ui.define([
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
 						const classification = form?.getElementBinding()?.getBoundContext()?.getProperty("Classification");
+						const manager = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_1");
 						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
 							this.setRegionsFieldVisible(form, instituteType);
 						}else if (this.countryCode === "NL") {
 							this.setInstitutesinGroupFieldVisible(form, cs);
+							this.setRemovedStaticManagerItem(form, manager);
 						}
 
 						if(this.countryCode === "ES" && classification){
@@ -528,6 +532,32 @@ sap.ui.define([
 				});
 			});
 		},
+
+		/**
+		* Adds a disabled static item to the Manager dropdown in the given form 
+		* if the specified manager name does not already exist in the list.
+		*
+		* This is useful for keeping a reference to a previously saved manager 
+		* that no longer exists in the current list of managers, so the old value 
+		* can still be displayed in the dropdown as disabled.
+		*
+		* @param {sap.ui.layout.form.Form} form - The form control that contains the Manager dropdown.
+		* @param {string} managerName - The name of the manager to add as a disabled item if it does not exist.
+		*/
+		setRemovedStaticManagerItem (form, managerName) {
+			if (!managerName) return;
+			const managerDropdown = form?.getAggregation("formContainers")?.find(fc => fc.getAggregation("title") === "Timeline")?.getAggregation("formElements")?.find(fe => fe.getAggregation("label") === "Manager")?.getFields()?.[0];
+			const existingManager = managerDropdown?.getItems()?.find(item => item.getProperty("key") === managerName);
+			
+			if (managerDropdown && !existingManager) {
+				managerDropdown.addItem(new sap.ui.core.Item({
+					key: managerName,
+					text: managerName,
+					enabled: false
+				}))
+			}
+		}
+		
 		// onMessagePopoverPress : function (oEvent) {
 		// 	const oSourceControl = oEvent.getSource();
 		// 	this._getMessagePopover().then(function(oMessagePopover){
