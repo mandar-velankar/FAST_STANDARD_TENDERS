@@ -185,6 +185,7 @@ sap.ui.define([
 					}
 
 					originalInputField.getModel().setProperty(`${path}/State`, undefined);
+					originalInputField.getModel().setProperty(`${path}/Custom_String_2`, undefined);
 					regionsField.getFields()[0].removeAllTokens()
 					break;
 				case "TW": 
@@ -262,6 +263,58 @@ sap.ui.define([
 					for(const value of instituteRegion.split(",")){
 						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
 					}
+					break;
+				default:
+					break;
+			}
+		},
+
+		onChangeRegions: async function (originalInputField, selectedItems, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
+			const defaultModel = originalInputField.getModel();
+
+
+			switch (countryCode) {
+				case "GB":
+					debugger;
+					let regions = selectedItems.map(item => item.getBindingContext().getObject().Name).join(',');
+					defaultModel.setProperty(`${path}/Custom_String_2`, regions);
+					break;
+				default:
+					break;
+			}
+		},
+
+		onChangeInstitutesInGroup: async function (originalInputField, selectedItems, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
+			const defaultModel = originalInputField.getModel();
+
+
+			switch (countryCode) {
+				case "NL":
+					let instInGroup = selectedItems.map(item => item.getBindingContext().getObject().InstituteName).join(';');
+					defaultModel.setProperty(`${path}/Custom_String_3`, instInGroup);
+					break;
+				default:
+					break;
+			}
+		},
+
+		onChangeInstituteInBranch: async function (originalInputField, selectedItems, StandardSingletonService) {
+			const countryCode = StandardSingletonService.getCountryCode();
+			const ctx = originalInputField.getParent().getParent().getParent().getBindingContext();
+			const path = ctx.getPath();
+			const defaultModel = originalInputField.getModel();
+
+
+			switch (countryCode) {
+				case "TW":
+					let instInBranch = selectedItems.map(item => item.getBindingContext().getObject().InstituteName).join(',');
+					defaultModel.setProperty(`${path}/Custom_String_3`, instInBranch);
 					break;
 				default:
 					break;
