@@ -34,6 +34,7 @@
             <Button
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
                 enabled="{= ${st>/AllAwardProductsHaveOutcome}}"
+                press=".onCreateAllFASTContracts"
                 text="{i18n>CreateAllFASTContracts}"
                 width="10rem"
             />

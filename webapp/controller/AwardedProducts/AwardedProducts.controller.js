@@ -10,7 +10,8 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"sap/ui/core/Item",
 	"sap/m/MessageBox",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item, MessageBox) {
+	"sap/ui/core/BusyIndicator"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item, MessageBox, BusyIndicator) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -133,6 +134,8 @@ sap.ui.define([
 
 			if (products && products.length > 0) {
 				const allProductsHaveOutcome = products.every(product => product.Outcome);
+				const allProductsWithOutcomeWon = products.filter(product => product.Outcome === "Won");
+				this.getModel("st").setProperty("/AllProductsWithOutcomeWon", allProductsWithOutcomeWon);
 				this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", allProductsHaveOutcome);
 				this.getModel("st").setProperty("/ContractStartDate", products[0]?.ContractStartDate);
 				this.getModel("st").setProperty("/ContractEndDate", products[0]?.ContractEndDate);
@@ -376,6 +379,37 @@ sap.ui.define([
 		onUpdateFinalContractStartEndDateFail: function(res){
 			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
             MessageBox.error(message);
-		}
+		},
+
+		onCreateAllFASTContracts: function () {
+			BusyIndicator.show(0);
+			const allProductsWithOutcomeWon = this.getModel("st").getProperty("/AllProductsWithOutcomeWon");
+
+			if (allProductsWithOutcomeWon && allProductsWithOutcomeWon.length === 0) {
+				MessageBox.error("No Products with outcome 'Won' found.");
+				return;
+			}
+
+			this.getView().getModel().callFunction("/createAllFastConditionContracts", {
+				method:"POST", 
+				urlParameters: {"OfferID": this.offerId},
+				success: this.createAllFastConditionContractsSuccess.bind(this),
+				error: this.createAllFastConditionContractsFail.bind(this)
+			})
+		},
+
+		createAllFastConditionContractsSuccess: function(res){
+			MessageBox.success(res);
+			BusyIndicator.hide();
+			this.handleRefreshAwardedProductTable();
+			this.getModel("st").setProperty("/AllProductsWithOutcomeWon", []);
+			this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", false);
+		},
+
+		createAllFastConditionContractsFail: function(res){
+			BusyIndicator.hide();
+			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
+            MessageBox.error(message);
+		},
     });
 })
