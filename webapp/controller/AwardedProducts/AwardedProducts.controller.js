@@ -399,8 +399,16 @@ sap.ui.define([
 		},
 
 		createAllFastConditionContractsSuccess: function(res){
-			MessageBox.success(res);
 			BusyIndicator.hide();
+
+			MessageBox.success(res.message, {
+				onClose: function () {
+					if (res.fastCCMContractId) {
+						window.open(`/app/#/conditioncontract&/ccma/detail/${res.fastCCMContractId}/TwoColumnsMidExpanded`, "_blank");
+					}
+				}
+			});
+
 			this.handleRefreshAwardedProductTable();
 			this.getModel("st").setProperty("/AllProductsWithOutcomeWon", []);
 			this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", false);
