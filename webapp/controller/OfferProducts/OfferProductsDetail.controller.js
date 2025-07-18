@@ -1721,10 +1721,12 @@ sap.ui.define([
 
 			// refresh priceWithFOCForm to get the newly calculated values
 			const pricingForm = this.byId("idPricingForm");
-			pricingForm.getElementBinding().refresh(true);
-
-			const pricingFormBinding = pricingForm.getElementBinding();
-            pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+			const formElementBinding = pricingForm?.getElementBinding() || pricingForm?.getAggregation("formContainers")?.[1]?.getElementBinding();
+			
+			if (formElementBinding) {
+				formElementBinding.refresh(true);
+				formElementBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+			}
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: async function(evt){
@@ -1746,7 +1748,9 @@ sap.ui.define([
             this.getModel().setProperty("NetPrice", netPrice, context);
 			this.getModel().setProperty("NetofferPrice", netOfferPrice, context);
 
-			this.getModel().submitChanges();
+			this.getModel().submitChanges({
+				groupId: "PT_TMBDPR"
+			});
 
 			this._refreshOfferProductTable();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
@@ -2972,6 +2976,7 @@ sap.ui.define([
 			let classification = this.getModel("ui").getProperty("/Classification");
 			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			this.loadPriceCondition();
 						
 		},
 
@@ -3019,7 +3024,7 @@ sap.ui.define([
 			this._refreshOfferProductTable();
 			this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
+			this.loadPriceCondition();
 		},
 
 		onSpainPVLPricingFormSaveBtnPress:function(event){
@@ -3078,7 +3083,7 @@ sap.ui.define([
 			let classification = this.getModel("ui").getProperty("/Classification");
 			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
+			this.loadPriceCondition();
 		},
 
 		onSpainDescuentoEspecialPricingFormSaveBtnPress:function(event){
@@ -3137,7 +3142,7 @@ sap.ui.define([
 			let classification = this.getModel("ui").getProperty("/Classification");
 			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
+			this.loadPriceCondition();
 		},
 
 		onSpainRentalPricingFormSaveBtnPress:function(event){
