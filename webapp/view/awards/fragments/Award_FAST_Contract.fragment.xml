@@ -33,7 +33,7 @@
             <!-- Create FAST Contracts -->
             <Button
                 visible="{= ${st>/SelectedCountry} === 'ES'}"
-                enabled="{= ${st>/AllAwardProductsHaveOutcome}}"
+                enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate}}"
                 press=".onCreateAllFASTContracts"
                 text="{i18n>CreateAllFASTContracts}"
                 width="10rem"

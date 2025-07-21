@@ -410,7 +410,6 @@ sap.ui.define([
 			});
 
 			this.handleRefreshAwardedProductTable();
-			this.getModel("st").setProperty("/AllProductsWithOutcomeWon", []);
 			this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", false);
 		},
 
