@@ -74,7 +74,8 @@ sap.ui.define([
 				"MEACHNotificationMail",
 				"ProfitabilityCalcParamView",
 				"RappelForm",
-				"BankGuarantees"
+				"BankGuarantees",
+				"PT_TMBDPR"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -211,6 +212,9 @@ sap.ui.define([
 				},
 				"BankGuarantees": {
 					groupId: "BankGuarantees"
+				},
+				"PT_TMBDPR": {
+					groupId: "PT_TMBDPR"
 				}
 			});
 		},
