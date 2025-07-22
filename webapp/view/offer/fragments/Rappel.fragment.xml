@@ -66,11 +66,12 @@
 									fieldWidth="80%" required="true"/>
 						    </form:fields>
 					    </form:FormElement>
-                        <form:FormElement label="{i18n>ConfidentialPrice}" >
+                        <form:FormElement label="{i18n>ConfidentialPrice}" visible="{= ${ConfidentialDiscount} > 0 }">
                             <form:fields>
                                 <Input  value="{parts: ['ConfidentialPrice', 'Currency','Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
 									enabled="false" 
+                                    visible="{= ${ConfidentialDiscount} > 0 }"
 									fieldWidth="80%" required="true"/>
                             </form:fields>
                         </form:FormElement>
