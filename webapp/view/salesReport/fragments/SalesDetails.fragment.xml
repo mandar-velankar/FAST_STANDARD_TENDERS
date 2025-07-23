@@ -34,7 +34,7 @@
 					<Label text="Date" wrapping="true"/>
 					<tree:template>
 						<Text text="{
-							path: 'FilePeriod',
+							path: 'Date',
 							type: 'sap.ui.model.type.Date',
 							formatOptions: { 
 								pattern: 'dd-MM-yyyy'
