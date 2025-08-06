@@ -1,162 +1,246 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" 
-    xmlns:t="sap.ui.table" 
-    xmlns:form="sap.ui.layout.form" xmlns:u="sap.uxap"
-	xmlns:l="sap.ui.layout">
-
-
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:t="sap.ui.table"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.uxap"
+    xmlns:l="sap.ui.layout"
+>
     <form:Form
-		id="idRapelForm"
-		editable="true"
-	>
-		<form:toolbar>
-			<Toolbar>
-				<ToolbarSpacer />
-				<Button
-					icon="sap-icon://alert"
-					text="{= ${messages>/priceCondRappel}.length }"
-					visible="{= ${messages>/priceCondRappel}.length > 0 &amp;&amp; ${ui>/RappelForm/editMode}}"
-					type="Emphasized"
-					press="onMessagePopoverPress($event, 'priceCondRappel')" 
-				/>
-				<Button
-					icon="sap-icon://edit"
-					text="Edit"
-					press=".onRappelFormEditBtnPress"
-					visible="{= !${ui>/RappelForm/editMode} }"
-					enabled="{= ${ui>/RappelForm/hasMainPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
-				/>
-				<Button
-					icon="sap-icon://save"
-					text="Save"
-					press=".onRappelFormSaveBtnPress"
-					visible="{= ${ui>/RappelForm/editMode} }"
-				/>
-				<Button
-					icon="sap-icon://decline"
-					text="Cancel"
-					press=".onRappelFormCancelBtnPress"
-					visible="{= ${ui>/RappelForm/editMode} }"
-				/>
-			</Toolbar>
-		</form:toolbar>
+        id="idRapelForm"
+        editable="true"
+    >
+        <form:toolbar>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    icon="sap-icon://alert"
+                    text="{= ${messages>/priceCondRappel}.length }"
+                    visible="{= ${messages>/priceCondRappel}.length > 0 &amp;&amp; ${ui>/RappelForm/editMode}}"
+                    type="Emphasized"
+                    press="onMessagePopoverPress($event, 'priceCondRappel')"
+                />
+                <Button
+                    icon="sap-icon://edit"
+                    text="Edit"
+                    press=".onRappelFormEditBtnPress"
+                    visible="{= !${ui>/RappelForm/editMode} }"
+                    enabled="{= ${ui>/RappelForm/hasMainPriceCondition} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"
+                />
+                <Button
+                    icon="sap-icon://save"
+                    text="Save"
+                    press=".onRappelFormSaveBtnPress"
+                    visible="{= ${ui>/RappelForm/editMode} }"
+                />
+                <Button
+                    icon="sap-icon://decline"
+                    text="Cancel"
+                    press=".onRappelFormCancelBtnPress"
+                    visible="{= ${ui>/RappelForm/editMode} }"
+                />
+            </Toolbar>
+        </form:toolbar>
         <form:layout>
             <form:ResponsiveGridLayout
-            labelSpanXL="3"
-            labelSpanL="3"
-            labelSpanM="3"
-            labelSpanS="12"
-            adjustLabelSpan="false"
-            emptySpanXL="4"
-            emptySpanL="4"
-            emptySpanM="4"
-            emptySpanS="0"
-            columnsXL="1"
-            columnsL="1"
-            columnsM="1"
-            singleContainerFullSize="false" />
+                labelSpanXL="3"
+                labelSpanL="3"
+                labelSpanM="3"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="4"
+                emptySpanL="4"
+                emptySpanM="4"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false"
+            />
         </form:layout>
-            <form:formContainers>
-			    <form:FormContainer>
-				    <form:formElements>
-					    <form:FormElement label="{i18n>PVL}">
-						    <form:fields>
-							    <Input  value="{parts: ['PVL', 'Currency','Region', 'CountryCode'],
+        <form:formContainers>
+            <form:FormContainer>
+                <form:formElements>
+                    <form:FormElement label="{i18n>PVL}">
+                        <form:fields>
+                            <Input
+                                value="{parts: ['PVL', 'Currency','Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
-									enabled="false" 
-									fieldWidth="80%" required="true"/>
-						    </form:fields>
-					    </form:FormElement>
-                        <form:FormElement label="{i18n>ConfidentialPrice}" visible="{= ${ConfidentialDiscount} > 0 }">
-                            <form:fields>
-                                <Input  value="{parts: ['ConfidentialPrice', 'Currency','Region', 'CountryCode'],
+                                enabled="false"
+                                fieldWidth="80%"
+                                required="true"
+                            />
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement
+                        label="{i18n>ConfidentialPrice}"
+                        visible="{= ${ConfidentialDiscount} > 0 }"
+                    >
+                        <form:fields>
+                            <Input
+                                value="{parts: ['ConfidentialPrice', 'Currency','Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
-									enabled="false" 
-                                    visible="{= ${ConfidentialDiscount} > 0 }"
-									fieldWidth="80%" required="true"/>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement label="{i18n>RoyalDecreeApplies}" >
-                            <form:fields>
-                                <Select selectedKey="{RoyalDecree}" enabled="false"> 
-                                    <items>
-                                        <core:Item key="No" text="No" />
-                                        <core:Item key="Yes" text="Yes" />									
-                                    </items>
-                                </Select>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement label="{i18n>MainConditionPrice}" >
-                            <form:fields>
-                                <Input  value="{parts: ['MainPrice', 'Currency','Region', 'CountryCode'],
+                                enabled="false"
+                                visible="{= ${ConfidentialDiscount} > 0 }"
+                                fieldWidth="80%"
+                                required="true"
+                            />
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>RoyalDecreeApplies}">
+                        <form:fields>
+                            <Select
+                                selectedKey="{RoyalDecree}"
+                                enabled="false"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="No"
+                                        text="No"
+                                    />
+                                    <core:Item
+                                        key="Yes"
+                                        text="Yes"
+                                    />
+                                </items>
+                            </Select>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>MainConditionPrice}">
+                        <form:fields>
+                            <Input
+                                value="{parts: ['MainPrice', 'Currency','Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
-									enabled="false" 
-									fieldWidth="80%" required="true"/>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement  label="{i18n>Liquidation}" >
-                            <form:fields>
-                                <Select selectedKey="{Liquidation}" enabled="{= ${ui>/RappelForm/editMode}}"> 
-                                    <items>
-                                        <core:Item key="" text="" />
-                                        <core:Item key="Monthly" text="Monthly" />
-                                        <core:Item key="Quarterly" text="Quarterly" />
-                                        <core:Item key="HalfYearly" text="Half Yearly" />
-                                        <core:Item key="Annually" text="Yearly" />									
-                                    </items>
-                                </Select>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement  label="{i18n>RebateCalculation}" >
-                            <form:fields>
-                                <Select selectedKey="{PriceConditionCode}" enabled="{= ${ui>/RappelForm/editMode}}"> 
-                                    <items>
-                                        <core:Item key="" text="" />
-                                        <core:Item key="YAW1" text="Retroactive" />
-                                        <core:Item key="YAW2" text="Conclusive tiers" />
-                                                                    
-                                    </items>
-                                </Select>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement  label="{i18n>PaymentBackDate}" >
-                            <form:fields>
-                                <DatePicker
-                                    id="DP1"
-                                    value="{
+                                enabled="false"
+                                fieldWidth="80%"
+                                required="true"
+                            />
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>Liquidation}">
+                        <form:fields>
+                            <Select
+                                selectedKey="{Liquidation}"
+                                enabled="{= ${ui>/RappelForm/editMode}}"
+                            >
+                                <items>
+                                    <core:Item
+                                        key=""
+                                        text=""
+                                    />
+                                    <core:Item
+                                        key="Monthly"
+                                        text="Monthly"
+                                    />
+                                    <core:Item
+                                        key="Quarterly"
+                                        text="Quarterly"
+                                    />
+                                    <core:Item
+                                        key="HalfYearly"
+                                        text="Half Yearly"
+                                    />
+                                    <core:Item
+                                        key="Annually"
+                                        text="Yearly"
+                                    />
+                                </items>
+                            </Select>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>RebateCalculation}">
+                        <form:fields>
+                            <Select
+                                selectedKey="{PriceConditionCode}"
+                                enabled="{= ${ui>/RappelForm/editMode}}"
+                            >
+                                <items>
+                                    <core:Item
+                                        key=""
+                                        text=""
+                                    />
+                                    <core:Item
+                                        key="YAW1"
+                                        text="Retroactive"
+                                    />
+                                    <core:Item
+                                        key="YAW2"
+                                        text="Conclusive tiers"
+                                    />
+                                </items>
+                            </Select>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>PaymentBackDate}">
+                        <form:fields>
+                            <DatePicker
+                                id="DP1"
+                                value="{
                                             path:'RefundDate',
                                             type:'sap.ui.model.type.Date', 
                                             formatOptions: { style: 'short', pattern: 'dd.MM.yyyy',UTC: true}
                                     }"
-                                    placeholder="Enter Date"
-                                    change="handleChange"
-                                    enabled="{= ${ui>/RappelForm/editMode}}"
-                                    class="sapUiSmallMarginBottom"/>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement  label="{i18n>Settlement}" >
-                            <form:fields>
-                                <Select selectedKey="{Settlement_ID}" 
-                                        enabled="{= ${ui>/RappelForm/editMode}}"
-                                        items="{ui>/RappelForm/settlements}"
-                                        forceSelection="false"> 
-                                    <items>
-                                        <core:Item key="{ui>ID}" text="{ui>Description}" />								
-                                    </items>
-                                </Select>
-                            </form:fields>
-                        </form:FormElement>
-                        <form:FormElement  label="{i18n>VolTreshold}" >
-                            <form:fields>
-                                <Button icon="sap-icon://value-help" press=".onVolumeTreshhold" enabled="{= ${ui>/RappelForm/editMode}}">
-                                    <layoutData>
-                                        <l:GridData span="XL1 L1 M1 S2" />
-                                    </layoutData>
-                                </Button>
-                            </form:fields>
-                        </form:FormElement>
-				</form:formElements>
-			</form:FormContainer>
-		</form:formContainers>
-	</form:Form>
-    
+                                placeholder="Enter Date"
+                                change="handleChange"
+                                enabled="{= ${ui>/RappelForm/editMode}}"
+                                class="sapUiSmallMarginBottom"
+                            />
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>Settlement}">
+                        <form:fields>
+                            <Select
+                                selectedKey="{Settlement_ID}"
+                                enabled="{= ${ui>/RappelForm/editMode}}"
+                                items="{ui>/RappelForm/settlements}"
+                                forceSelection="false"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="{ui>ID}"
+                                        text="{ui>Description}"
+                                    />
+                                </items>
+                            </Select>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement>
+                        <form:label>
+                            <Label
+                                text="{i18n>MarketIncentiveId}"
+                                required="true"
+                            />
+                        </form:label>
+                        <form:fields>
+                            <Select
+                                enabled="{= ${ui>/RappelForm/editMode}}"
+                                selectedKey="{MarketIncentiveID}"
+                                items="{ui>/RappelForm/MarketIncentive}"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="{ui>MarketIncentiveID}"
+                                        text="{ui>Description}"
+                                    />
+                                </items>
+                            </Select>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement label="{i18n>VolTreshold}">
+                        <form:fields>
+                            <Button
+                                icon="sap-icon://value-help"
+                                press=".onVolumeTreshhold"
+                                enabled="{= ${ui>/RappelForm/editMode}}"
+                            >
+                                <layoutData>
+                                    <l:GridData span="XL1 L1 M1 S2" />
+                                </layoutData>
+                            </Button>
+                        </form:fields>
+                    </form:FormElement>
+                </form:formElements>
+            </form:FormContainer>
+        </form:formContainers>
+    </form:Form>
 </core:FragmentDefinition>

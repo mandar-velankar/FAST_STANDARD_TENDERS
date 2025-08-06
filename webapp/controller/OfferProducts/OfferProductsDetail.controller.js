@@ -176,6 +176,7 @@ sap.ui.define([
 					editMode: false,
 					hasMainPriceCondition: false,
 					settlements: null,
+					MarketIncentive: null,
 					instituteType: "",
 					PriceConditionID: null
 				},
@@ -2379,6 +2380,19 @@ sap.ui.define([
 				this.getModel("ui").setProperty("/RappelForm/settlements", data.results);
 			})
 		},
+
+		getMarketIncentiveID: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/MarketIncentive", {
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/RappelForm/MarketIncentive", data.results);
+			})
+		},
+
 
 		getRappelPriceConditionClassificationCount: async function (countryCode, classification) {
 			const path = "/PriceConditionClassification/$count"; 
