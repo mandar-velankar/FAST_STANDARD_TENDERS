@@ -10,7 +10,8 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"sap/ui/core/Item",
 	"sap/m/MessageBox",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item, MessageBox) {
+	"sap/ui/core/BusyIndicator"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, StandardSingletonService, Sorter, Fragment, Item, MessageBox, BusyIndicator) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -133,7 +134,11 @@ sap.ui.define([
 
 			if (products && products.length > 0) {
 				const allProductsHaveOutcome = products.every(product => product.Outcome);
+				const allProductsWithOutcomeWon = products.filter(product => product.Outcome === "Won");
+				this.getModel("st").setProperty("/AllProductsWithOutcomeWon", allProductsWithOutcomeWon);
 				this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", allProductsHaveOutcome);
+				this.getModel("st").setProperty("/ContractStartDate", products[0]?.ContractStartDate);
+				this.getModel("st").setProperty("/ContractEndDate", products[0]?.ContractEndDate);
 			}
 		},
 
@@ -323,6 +328,95 @@ sap.ui.define([
 			tenderBankGuarantees.forEach(bg => {
 				this.getModel("ui").setProperty(`/bankGuaranteeTypes/${bg.Type}`, true);
 			});
-		}
+		},
+
+		onContractDateChange: async function () {
+			const startDatePicker = this.byId("contractStartDate");
+			const endDatePicker = this.byId("contractEndDate");
+
+			const startDate = startDatePicker.getDateValue();
+			const endDate = endDatePicker.getDateValue();
+
+			// Clear previous state
+			startDatePicker.setValueState("None");
+			endDatePicker.setValueState("None");
+
+			if (!startDate || !endDate) {
+				if (!startDate) {
+					startDatePicker.setValueState("Error");
+					startDatePicker.setValueStateText("Contract Start Date is required.");
+				}
+				if (!endDate) {
+					endDatePicker.setValueState("Error");
+					endDatePicker.setValueStateText("Contract End Date is required.");
+				}
+			return;
+			}
+
+			if (startDate > endDate) {
+				startDatePicker.setValueState("Error");
+				startDatePicker.setValueStateText("Start Date cannot be after End Date.");
+				return;
+			}
+
+			try {
+				this.getModel().callFunction("/updateFinalContractStartEndDate", {
+					method:"POST", 
+					urlParameters: {"OfferID": this.offerId, "ContractStartDate": startDate.toISOString().split("T")[0], "ContractEndDate": endDate.toISOString().split("T")[0]},
+					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this),
+					error: this.onUpdateFinalContractStartEndDateFail.bind(this)
+				});
+			} catch (err) {
+				console.error(err);
+			}
+		},
+
+		onUpdateFinalContractStartEndDateSuccess: function(res){
+			MessageBox.success(res);
+			this.handleRefreshAwardedProductTable();
+		},
+
+		onUpdateFinalContractStartEndDateFail: function(res){
+			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
+            MessageBox.error(message);
+		},
+
+		onCreateAllFASTContracts: function () {
+			BusyIndicator.show(0);
+			const allProductsWithOutcomeWon = this.getModel("st").getProperty("/AllProductsWithOutcomeWon");
+
+			if (allProductsWithOutcomeWon && allProductsWithOutcomeWon.length === 0) {
+				MessageBox.error("No Products with outcome 'Won' found.");
+				return;
+			}
+
+			this.getView().getModel().callFunction("/createAllFastConditionContracts", {
+				method:"POST", 
+				urlParameters: {"OfferID": this.offerId},
+				success: this.createAllFastConditionContractsSuccess.bind(this),
+				error: this.createAllFastConditionContractsFail.bind(this)
+			})
+		},
+
+		createAllFastConditionContractsSuccess: function(res){
+			BusyIndicator.hide();
+
+			MessageBox.success(res.message, {
+				onClose: function () {
+					if (res.fastCCMContractId) {
+						window.open(`/app/#/conditioncontract&/ccma/detail/${res.fastCCMContractId}/TwoColumnsMidExpanded`, "_blank");
+					}
+				}
+			});
+
+			this.handleRefreshAwardedProductTable();
+			this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", false);
+		},
+
+		createAllFastConditionContractsFail: function(res){
+			BusyIndicator.hide();
+			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
+            MessageBox.error(message);
+		},
     });
-});
+})

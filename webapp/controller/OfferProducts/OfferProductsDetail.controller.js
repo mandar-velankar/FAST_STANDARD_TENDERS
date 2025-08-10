@@ -16,7 +16,8 @@ sap.ui.define([
 	"sap/m/TableSelectDialog",
 	"sap/m/Column",
 	"sap/m/Text",
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text) {
+	"sap/ui/core/BusyIndicator"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text, BusyIndicator) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -175,6 +176,7 @@ sap.ui.define([
 					editMode: false,
 					hasMainPriceCondition: false,
 					settlements: null,
+					MarketIncentive: null,
 					instituteType: "",
 					PriceConditionID: null
 				},
@@ -315,10 +317,10 @@ sap.ui.define([
 			const lostCheckBox = this.byId('lostCheckId');
 
 			//default filters
-			const oFilters = [
-				new Filter("CountryCode", FilterOperator.EQ, countryCode),
-			];
+			const oFilters = [];
 
+			// Spain has a separate CDS history view no need to use CountryCode filter
+			countryCode !== 'ES' && oFilters.push(new Filter("CountryCode", FilterOperator.EQ, countryCode));
 			countryCode !== 'PL' && oFilters.push(new Filter("ProductCode", FilterOperator.EQ, productCode));
 
 			if (instituteCheckBox.getSelected()) {
@@ -1724,10 +1726,12 @@ sap.ui.define([
 
 			// refresh priceWithFOCForm to get the newly calculated values
 			const pricingForm = this.byId("idPricingForm");
-			pricingForm.getElementBinding().refresh(true);
-
-			const pricingFormBinding = pricingForm.getElementBinding();
-            pricingFormBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+			const formElementBinding = pricingForm?.getElementBinding() || pricingForm?.getAggregation("formContainers")?.[1]?.getElementBinding();
+			
+			if (formElementBinding) {
+				formElementBinding.refresh(true);
+				formElementBinding.attachDataReceived(this.onPricingFormDataReceivedAfterFOCSet, this);
+			}
 		},
 
 		onPricingFormDataReceivedAfterFOCSet: async function(evt){
@@ -1749,7 +1753,9 @@ sap.ui.define([
             this.getModel().setProperty("NetPrice", netPrice, context);
 			this.getModel().setProperty("NetofferPrice", netOfferPrice, context);
 
-			this.getModel().submitChanges();
+			this.getModel().submitChanges({
+				groupId: "PT_TMBDPR"
+			});
 
 			this._refreshOfferProductTable();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
@@ -2379,6 +2385,19 @@ sap.ui.define([
 			})
 		},
 
+		getMarketIncentiveID: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/MarketIncentive", {
+					success: function (res) {
+						resolve(res)
+					}
+				});
+			}).then(data => {
+				this.getModel("ui").setProperty("/RappelForm/MarketIncentive", data.results);
+			})
+		},
+
+
 		getRappelPriceConditionClassificationCount: async function (countryCode, classification) {
 			const path = "/PriceConditionClassification/$count"; 
 			return new Promise((resolve, reject) => {
@@ -2891,6 +2910,7 @@ sap.ui.define([
 			}
 			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
 			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
+			BusyIndicator.show(1);
 			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
 				method:"POST", 
 				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode },
@@ -2908,12 +2928,14 @@ sap.ui.define([
 				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 				this.loadPriceCondition();
 			});
+			BusyIndicator.hide();
 		},
 
 		onGetSAPSalesOrderSimulationFail: function(res){
 			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
             MessageBox.error(message);
 			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
+			BusyIndicator.hide();
 		},
 
 		onSpainPrecioNetoPricingFormSaveBtnPress:function(event){
@@ -2972,6 +2994,7 @@ sap.ui.define([
 			let classification = this.getModel("ui").getProperty("/Classification");
 			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+			this.loadPriceCondition();
 						
 		},
 
@@ -3019,7 +3042,7 @@ sap.ui.define([
 			this._refreshOfferProductTable();
 			this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
+			this.loadPriceCondition();
 		},
 
 		onSpainPVLPricingFormSaveBtnPress:function(event){
@@ -3078,7 +3101,7 @@ sap.ui.define([
 			let classification = this.getModel("ui").getProperty("/Classification");
 			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
+			this.loadPriceCondition();
 		},
 
 		onSpainDescuentoEspecialPricingFormSaveBtnPress:function(event){
@@ -3137,7 +3160,7 @@ sap.ui.define([
 			let classification = this.getModel("ui").getProperty("/Classification");
 			if(classification === "Commercial Agreement") this.refreshRappelForm();
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
-						
+			this.loadPriceCondition();
 		},
 
 		onSpainRentalPricingFormSaveBtnPress:function(event){

@@ -1,0 +1,79 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <Table 
+        visible="{= ${st>/OverviewPriceConditionTableSpain/rental}.length > 0}"
+        items="{
+            path: 'st>/OverviewPriceConditionTableSpain/rental',
+            sorter: [{path: 'SORTER', descending: false}]
+        }"
+        inset="false" 
+        class="sapFDynamicPageAlignContent" 
+        contextualWidth="auto"
+        alternateRowColors="true" 
+    >   
+        <headerToolbar>
+            <OverflowToolbar>
+                <content>
+                    <Title text="{i18n>ESOverviewRentalFragment.Title}" level="H2"/>
+                    <ToolbarSpacer />
+                </content>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.ID}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.Product}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.PackFactor}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.Qty}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.PriceCondition}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.MonthlyRent}"/>
+            </Column> 
+            <Column>
+                <Text text="{i18n>ESOverviewRentalFragment.AnnualValue}"/>
+            </Column>              
+        </columns>
+        <ColumnListItem>
+            <cells>
+                <!-- Contract ID -->
+                <Text text="{path :'st>SORTER'}"/>
+                
+                <!-- Article Name -->
+                <Text text="{path :'st>PRODUCTNAME'}"/>
+
+                <!-- Pack Factor -->
+                <Text text="{path :'st>PACKSIZE'}"/>
+
+                <!-- Quantity -->
+                <Text text="{st>PAID_VOLUME} {st>UNIT}"/>
+
+                <!-- Price Condition -->
+                <Text text="{
+                    path :'st>PriceCondition/PriceConditionClassification/ConditionType',
+                    formatter: '.formatter.replaceString'
+                }"/>
+
+                <!-- Monthly Rent -->
+                <ObjectStatus text="{parts: [ {path: 'st>PriceCondition/MonthlyRentPerUnit'},  {path: 'st>CURRENCY'} ], formatter:'.formatter.price'}"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- Annual Value -->
+                <Text text="{parts: [
+                    {path: 'st>PriceCondition/AnnualValue'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+            </cells>
+        </ColumnListItem>
+    </Table>
+</core:FragmentDefinition>

@@ -212,6 +212,10 @@ sap.ui.define([
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
 				await this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				!this.selectedOfferHasBinding() && this._bindView();
+				
+				// Needed for Spain Overview screen to immediately display price condition informations
+				const offerProducts = await this.stState.getOfferProductValidation(this.sOfferId);
+				this.getModel("st").setProperty("/OfferProductsValidations", offerProducts);
 			}.bind(this));
 		},
 

@@ -119,10 +119,16 @@
 		</form:Form>
 	
 
+		<Panel 
+			expandable="false"
+        	headerText="{i18n>ProductInformation}"
+			visible="{= ${st>/SelectedCountry} === 'ES'}"
+		></Panel>
 			<Table 
 				id="idProductInformationTable" 
 				mode="SingleSelectMaster"
 				items = "{path: '/OfferProductValidation', templateShareable: true}"
+				visible="{= ${st>/SelectedCountry} !== 'ES'}"
 			>
 			<headerToolbar>
 			<OverflowToolbar>
@@ -239,6 +245,16 @@
 					</ColumnListItem>
 				</items>
 			</Table>
+
+
+			<VBox visible="{= ${st>/SelectedCountry} === 'ES'}">
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.PVL" type="XML"/>
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.PrecioNeto" type="XML"/>
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.DescuentoComercial" type="XML"/>
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.DescuentoEspecial" type="XML"/>
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.Rental" type="XML"/>
+				<core:Fragment fragmentName="com.bayer.tender.statenderapp.view.overview.fragments.Rappel" type="XML"/>
+			</VBox>
 
 			<Table 
 				id="idProductFOCInformationTable" 
