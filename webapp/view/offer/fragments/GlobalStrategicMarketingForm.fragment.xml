@@ -8,7 +8,7 @@
     xmlns:l="sap.ui.layout"
     xmlns:mvc="sap.ui.core.mvc"
 >
-    <Panel expandable="true" headerText="Global Strategic Marketing" width="auto" class="sapUiResponsiveMargin">
+    <Panel expandable="true" headerText="Global Regulatory" width="auto" class="sapUiResponsiveMargin">
 		  <content>
         <form:Form
               id="idGlobalStrategicMarketing"
