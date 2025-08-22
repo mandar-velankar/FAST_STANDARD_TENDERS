@@ -221,6 +221,7 @@ sap.ui.define([
 				this.bindRappelForm();
 				await this.setSpainMaxPriceFieldVisibility();
 				await this.getSettlements();
+				await this.getMarketIncentiveID();
 			} 
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
