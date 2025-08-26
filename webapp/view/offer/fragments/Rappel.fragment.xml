@@ -220,7 +220,7 @@
                                 <items>
                                     <core:Item
                                         key="{ui>MarketIncentiveID}"
-                                        text="{ui>MarketIncentiveID}"
+                                        text="{ui>Description}"
                                     />
                                 </items>
                             </Select>
