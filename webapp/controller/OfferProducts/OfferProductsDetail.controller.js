@@ -760,7 +760,7 @@ sap.ui.define([
 			if(conditonType){
 				const pricingForm = this.byId("idPricingForm");
 
-				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
+				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
 
 				const boundObject = context.getObject();
 				const contextPath = context.getPath();
