@@ -449,6 +449,7 @@ sap.ui.define([
 			// if(!this.validateProduct()) return;
 			if (this.getTargets(["OfferProductsDetailView"]).length > 0) {
 				const form = this.byId(`idProductForm`);
+				const requestedVolume = this.defaultModel.getProperty(form?.getBindingContext()?.getPath() + "/RequestedVolume");
 				switch (this.sCountryCode) {
 					case 'PK':
 						let pKDistributor = this.getPKDistributor(form);
@@ -462,6 +463,7 @@ sap.ui.define([
 				}
 
 				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/RequestedVolume", !requestedVolume ? null : requestedVolume);
 				this.defaultModel.submitChanges({
 					error: this._onSubmitChangesFail.bind(this),
 					success: this._onSubmitChangesSuccessProductForm.bind(this),
