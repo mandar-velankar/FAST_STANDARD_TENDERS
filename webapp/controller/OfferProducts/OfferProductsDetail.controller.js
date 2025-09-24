@@ -221,6 +221,7 @@ sap.ui.define([
 				this.bindRappelForm();
 				await this.setSpainMaxPriceFieldVisibility();
 				await this.getSettlements();
+				await this.getMarketIncentiveID();
 			} 
 			// this._bindText("ProductPackNameOfferProductDetail");
 			this.loadPriceCondition();
@@ -452,6 +453,7 @@ sap.ui.define([
 			// if(!this.validateProduct()) return;
 			if (this.getTargets(["OfferProductsDetailView"]).length > 0) {
 				const form = this.byId(`idProductForm`);
+				const requestedVolume = this.defaultModel.getProperty(form?.getBindingContext()?.getPath() + "/RequestedVolume");
 				switch (this.sCountryCode) {
 					case 'PK':
 						let pKDistributor = this.getPKDistributor(form);
@@ -465,6 +467,7 @@ sap.ui.define([
 				}
 
 				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Line", this.sProductScope); //for mandatory field check in sta-service
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/RequestedVolume", !requestedVolume ? null : requestedVolume);
 				this.defaultModel.submitChanges({
 					error: this._onSubmitChangesFail.bind(this),
 					success: this._onSubmitChangesSuccessProductForm.bind(this),
@@ -763,7 +766,7 @@ sap.ui.define([
 			if(conditonType){
 				const pricingForm = this.byId("idPricingForm");
 
-				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
+				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
 
 				const boundObject = context.getObject();
 				const contextPath = context.getPath();
