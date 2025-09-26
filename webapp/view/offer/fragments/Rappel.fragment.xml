@@ -216,6 +216,7 @@
                                 enabled="{= ${ui>/RappelForm/editMode}}"
                                 selectedKey="{MarketIncentiveID}"
                                 items="{ui>/RappelForm/MarketIncentive}"
+                                forceSelection="false"
                             >
                                 <items>
                                     <core:Item
