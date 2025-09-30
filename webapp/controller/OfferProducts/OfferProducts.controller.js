@@ -16,7 +16,8 @@ sap.ui.define([
 	"sap/m/Text", 
 	"sap/m/Column",
 	"sap/ui/unified/FileUploaderParameter",
-	"sap/ui/core/BusyIndicator"
+	"sap/ui/core/BusyIndicator",
+	"sap/ui/core/Item"
 ], function (
 		BaseController, 
 		JSONModel, 
@@ -35,7 +36,9 @@ sap.ui.define([
 		Text, 
 		Column,
 		FileUploaderParameter,
-	    BusyIndicator) {
+	    BusyIndicator,
+		Item
+	) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -1405,7 +1408,7 @@ sap.ui.define([
 				oDialog.open();
 				that.onGetNotificationContent()
 				that.NotificationMailFormBinding()
-				that.updateRecipientBinding(this.countryCode)
+				that.updateRecipientBinding(that.countryCode)
 			})
 		},
 
