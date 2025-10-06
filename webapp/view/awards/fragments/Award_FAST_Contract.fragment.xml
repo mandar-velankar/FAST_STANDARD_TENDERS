@@ -9,37 +9,6 @@
     >
         <!-- LEFT SIDE: Vertically stacked elements -->
         <VBox>
-            <!-- Bank Guarantee Button -->
-            <MenuButton
-                id="idBankGuaranteemenuButton"
-                text="{i18n>BankGuarantee}"
-                width = "10rem"
-                visible="{= ${st>/SelectedCountry} === 'ES'}"
-            >
-                <menu>
-                    <Menu itemSelected="onBankGuaranteeMenuAction">
-                        <MenuItem
-                            text="{i18n>final}"
-                            icon="{= ${ui>/bankGuaranteeTypes/Final} ? 'sap-icon://accept' : ''}"
-                        />
-                        <MenuItem
-                            text="{i18n>additional}"
-                            icon="{= ${ui>/bankGuaranteeTypes/Additional} ? 'sap-icon://accept' : ''}"
-                        />
-                    </Menu>
-                </menu>
-            </MenuButton>
-
-            <!-- Create FAST Contracts -->
-            <Button
-                visible="{= ${st>/SelectedCountry} === 'ES'}"
-                enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate}}"
-                press=".onCreateAllFASTContracts"
-                text="{i18n>CreateAllFASTContracts}"
-                width="10rem"
-            />
-
-
             <!-- Contract Start Date -->
             <HBox alignItems="Center">
                 <Label
@@ -85,17 +54,51 @@
             </HBox>
         </VBox>
 
+        <HBox alignItems="Center">
         <!-- RIGHT SIDE: Set All Product Outcome button -->
-        <MenuButton
-            text="{i18n>SetAllProductWonLost}"
-            enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
-        >
-            <menu>
-                <Menu>
-                    <MenuItem text="Won" />
-                    <MenuItem text="Lost" />
-                </Menu>
-            </menu>
-        </MenuButton>
+            <Button
+                    visible="{= ${st>/SelectedCountry} === 'ES'}"
+                    enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate}}"
+                    press=".onCreateAllFASTContracts"
+                    text="{i18n>CreateAllFASTContracts}"
+                    class="sapUiTinyMarginEnd"
+            />
+            <Button
+                text="{i18n>GoToFastContract}"
+                visible="{= !!${st>/fastCCMContractId} &amp;&amp; ${st>/SelectedCountry} === 'ES'}"
+                press=".onGoToFastContract"
+                class="sapUiTinyMarginEnd"
+            />
+            <MenuButton
+                    id="idBankGuaranteemenuButton"
+                    text="{i18n>BankGuarantee}"
+                    visible="{= ${st>/SelectedCountry} === 'ES'}"
+                    class="sapUiTinyMarginEnd"
+                >
+                    <menu>
+                        <Menu itemSelected="onBankGuaranteeMenuAction">
+                            <MenuItem
+                                text="{i18n>final}"
+                                icon="{= ${ui>/bankGuaranteeTypes/Final} ? 'sap-icon://accept' : ''}"
+                            />
+                            <MenuItem
+                                text="{i18n>additional}"
+                                icon="{= ${ui>/bankGuaranteeTypes/Additional} ? 'sap-icon://accept' : ''}"
+                            />
+                        </Menu>
+                    </menu>
+            </MenuButton>
+            <MenuButton
+                text="{i18n>SetAllProductWonLost}"
+                enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
+            >
+                <menu>
+                    <Menu>
+                        <MenuItem text="Won" />
+                        <MenuItem text="Lost" />
+                    </Menu>
+                </menu>
+            </MenuButton>
+        </HBox>
     </HBox>
 </core:FragmentDefinition>

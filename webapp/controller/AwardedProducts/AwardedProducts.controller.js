@@ -108,6 +108,7 @@ sap.ui.define([
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.bindTable();
+			this.hasExistingFASTContract(this.tenderId, this.offerId);
 		},
 
 		bindTable: function () {
@@ -418,5 +419,40 @@ sap.ui.define([
 			const message = JSON.parse(res?.responseText)?.error?.message?.value || res?.message
             MessageBox.error(message);
 		},
+
+		hasExistingFASTContract: function(tenderID, offerID){ 
+			BusyIndicator.show(0);
+			this.getModel().callFunction("/getFastContractForOffer", {
+				method:"GET", 
+				urlParameters: {"offerID": offerID, "tenderID": tenderID},
+				success: this.onGetFastContractSuccess.bind(this),
+				error: this.onGetFastContractFail.bind(this)
+			});
+		},
+
+		onGetFastContractSuccess: function (data) {
+			BusyIndicator.hide();
+			if (data && data.ID) {
+				this.getModel("st").setProperty("/fastCCMContractId", data.ID);
+			} else {
+				this.getModel("st").setProperty("/fastCCMContractId", null);
+			}
+		},
+
+		onGetFastContractFail: function (error) {
+			BusyIndicator.hide();
+			console.error("Error fetching fast contract", error);
+			this.getModel("st").setProperty("/fastCCMContractId", null);
+		},
+
+		onGoToFastContract: function () {
+			const id = this.getModel("st").getProperty("/fastCCMContractId");
+			if (id) {
+				window.open(`/app/#/conditioncontract&/ccma/detail/${id}/TwoColumnsMidExpanded`, "_blank");
+			} else {
+				MessageBox.error("No Fast Contract available for this Offer.");
+			}
+		}
+
     });
 })
