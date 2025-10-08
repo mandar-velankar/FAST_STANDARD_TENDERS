@@ -28,6 +28,7 @@
                     width="10rem"
                     enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
+                    minDate="{st>/ContractStartDate}"
                 />
             </HBox>
 
@@ -50,6 +51,7 @@
                     width="10rem"
                     enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
+                    minDate="{st>/ContractStartDate}"
                 />
             </HBox>
         </VBox>
