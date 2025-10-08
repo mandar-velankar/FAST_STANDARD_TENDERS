@@ -855,7 +855,7 @@ sap.ui.define([
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
-			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
+			newTenderObj.Custom_String_6 = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
 			newTenderObj.SubmittedOn = new Date().toISOString();
 			delete newTenderObj.ParentInstituteID; //specific for Taiwan
 
