@@ -337,7 +337,10 @@ sap.ui.define([
 
 			const startDate = startDatePicker.getDateValue();
 			const endDate = endDatePicker.getDateValue();
-
+			
+			const dateFormatter = new this.customTypes.date()
+			const formattedStartDate = dateFormatter.formatValue(startDate);
+			const formattedEndDate = dateFormatter.formatValue(endDate);
 			// Clear previous state
 			startDatePicker.setValueState("None");
 			endDatePicker.setValueState("None");
@@ -363,7 +366,7 @@ sap.ui.define([
 			try {
 				this.getModel().callFunction("/updateFinalContractStartEndDate", {
 					method:"POST", 
-					urlParameters: {"OfferID": this.offerId, "ContractStartDate": startDate.toISOString().split("T")[0], "ContractEndDate": endDate.toISOString().split("T")[0]},
+					urlParameters: {"OfferID": this.offerId, "ContractStartDate": formattedStartDate, "ContractEndDate": formattedEndDate},
 					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this),
 					error: this.onUpdateFinalContractStartEndDateFail.bind(this)
 				});
