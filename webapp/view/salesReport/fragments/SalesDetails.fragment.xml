@@ -34,7 +34,7 @@
 					<Label text="Date" wrapping="true"/>
 					<tree:template>
 						<Text text="{
-							path: 'FilePeriod',
+							path: 'Date',
 							type: 'sap.ui.model.type.Date',
 							formatOptions: { 
 								pattern: 'dd-MM-yyyy'
@@ -58,7 +58,7 @@
 					</tree:template>
 				</tree:Column>
 				<tree:Column sortProperty="WholesalerPurchasePrice" width="8rem">
-					<Label text="List Price" wrapping="true"/>
+					<Label text="Net Price" wrapping="true"/>
 					<tree:template>
 						<Text text="{
 							parts: ['WholesalerPurchasePrice', 'Currency','Region', 'CountryCode'],

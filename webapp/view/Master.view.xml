@@ -42,6 +42,13 @@
 							sorter: { 
 								path: 'Country/CountryName' 
 							},
+							filters: {
+								filters: [
+									{ path: 'Application', operator: 'EQ', value1: 'STA' },
+									{ path: 'Application', operator: 'EQ', value1: 'ALL' }
+								],
+								and: false
+							},
 							 events: {
 								dataReceived: '.onCountriesReceived'
 							}
@@ -83,6 +90,24 @@
 						change='onProductScopesReceived'>
 						<core:Item key="{ProductScope}" text="{ProductScope}"/>
 					</Select>
+
+					<Label
+						text="Institute"
+						labelFor="idSelectInstitute"
+					/>
+					<ComboBox
+						id="idSelectInstitute"
+						selectedKey="{st>/SelectedInstituteIDFilter}"
+						showSecondaryValues= "true"
+						filterSecondaryValues="true"
+						change=".setFilter"
+					>
+						<core:ListItem
+							text="{InstituteName}"
+							key="{InstituteID}"
+							additionalText="{CustomerID}"
+						/>
+					</ComboBox>
 
 					<ToolbarSpacer/>
 					<Button text="{i18n>SalesReport}" visible="{= ${st>/SelectedCountry} === 'PL'}" press=".onOpenSalesReportScreen"/>

@@ -218,7 +218,18 @@ sap.ui.define([
 			}).map(e=>"/" + e);
 		},
 		setMessageSection: function (entities, sectionName) {
+			const resourceModel = this.getModel("i18n");
 			const messages = this.getMessages(entities);
+			messages.map(message => {
+				const regex = /\/([^(/]+)(?:\([^)]*\))?\/([^/]+)/;
+				const match = messages[0].aFullTargets[0].match(regex);
+				const messageKey = `${match[1]}.${match[2]}.Message`;
+				const tranlation = resourceModel.getResourceBundle().getText(messageKey);
+
+				// by default getText returns messageKey if translation is not found
+				message.message = !tranlation || tranlation === messageKey ? message.message : tranlation;
+				return message;
+			})
 			this.getModel("messages").setProperty(`/${sectionName}`, messages);
 		},
 
@@ -231,8 +242,8 @@ sap.ui.define([
 		 * @param {string} offerStatus - The status that influences the visibility of tabs.
 		 */
 
-		updateVisibilityOfTabs: function (iconTabBar, offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode) {
-			this.updateEnablementModel(offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode);
+		updateVisibilityOfTabs: async function (iconTabBar, offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode) {
+			await this.updateEnablementModel(offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode);
 			if (!iconTabBar) return;
 			const tabs = iconTabBar.getAggregation("items");
 			tabs.forEach(tab => {
@@ -244,6 +255,7 @@ sap.ui.define([
 
 		getTabVisibility: function (tabName) {
 			const enablementModel = this.getModel("em");
+			if (!enablementModel) return;
 			let isVisible = "";
 			switch (tabName) {
 				case "Tender":
@@ -287,8 +299,11 @@ sap.ui.define([
 		},
 
 		updateEnablementModel: async function (offerStatus, productKeys, stTenderRoles, UserInfo, CountryCode) {
+			const stState = this.getOwnerComponent().getModel("st");
 			const isProductDeclined = await this.checkIsProductInactive(productKeys);
-			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles, UserInfo, CountryCode);
+			const savedQuotationsCount = await stState.getService().getSavedQuotations(productKeys.OfferID);
+			const savedAwardedProductsCount = await stState.getService().getSavedAwardedProducts(productKeys.OfferID);
+			const obj = StandardSingletonService.getEnablementObject(offerStatus, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotationsCount, savedAwardedProductsCount);
 			const enablementModel = new JSONModel(obj);
 			this.getOwnerComponent().setModel(enablementModel, 'em');
 		},

@@ -638,7 +638,7 @@ sap.ui.define([
 				return ""
 			}else{
 				const currencyType =  this.getView().getController().customTypes.currency
-				return  new currencyType().getModelFormat().format([Price, Currency, Region, CountryCode])
+				return  new currencyType().getModelFormat().format([Price, Currency || 'PLN', Region, CountryCode || 'PL'])
 			}
 			
 		},
@@ -956,6 +956,18 @@ sap.ui.define([
 				const oBinding = oTable.getBinding("rows");
 				const iRowCount = oBinding.getLength();
 				oTable.setVisibleRowCount(iRowCount === 0 ? iRowCount + 1 : iRowCount > 10 ? 10 : iRowCount);
+
+				const aContexts = oBinding.getContexts();
+				let totalSalesSum = 0;
+
+				aContexts.forEach(ctx => {
+					const sales = ctx.getProperty("TotalSales");
+					if (!isNaN(sales)) {
+						totalSalesSum += parseFloat(sales);
+					}
+				});
+
+				this.getModel("st").setProperty("/TotalSalesSum", totalSalesSum);
 		},
 
 		onSaleDetailsDataReceived: function (oEvent) {

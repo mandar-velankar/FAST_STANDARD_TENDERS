@@ -234,6 +234,10 @@ sap.ui.define([
 			}
 			const controller = this;
 			return new Promise((resolve, reject) => {
+				const countryDefaultPriceConditionType = {
+					"NL": "NLPrice"
+				};
+
 				this.getModel().read("/StandardTenderPriceConditionView", {
 					filters: [
 						new Filter("OfferID", "EQ", this.offerId),
@@ -998,6 +1002,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1117,6 +1122,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},	
@@ -1150,6 +1156,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1181,6 +1188,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 			
