@@ -2460,6 +2460,16 @@ sap.ui.define([
 			const volumeTresholdTable = this.byId("idVolumeTreshold");
 			const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
 
+			const transientContexts = [];
+			const currentItems = volumeTresholdTable.getItems();
+
+			currentItems.forEach(item => {
+				const ctx = item.getBindingContext();
+				if (ctx && ctx.isTransient()) {
+					transientContexts.push(ctx);
+				}
+			});
+
 			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
 
 			// Unbind and rebind items
@@ -2469,6 +2479,14 @@ sap.ui.define([
 				template : itemsBindingInfo.template,
 				filters : filter,
 				groupId: "RappelForm"
+			});
+
+			volumeTresholdTable.attachEventOnce("updateFinished", () => {
+				transientContexts.forEach(ctx => {
+					const newItem = itemsBindingInfo.template.clone();
+					newItem.setBindingContext(ctx);
+					volumeTresholdTable.addItem(newItem);
+				});
 			});
 
 			dialog.open();
