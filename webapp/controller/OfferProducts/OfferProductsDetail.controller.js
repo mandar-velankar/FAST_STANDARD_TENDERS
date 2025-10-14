@@ -2573,7 +2573,7 @@ sap.ui.define([
 
             const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
 
-            const discount = Number(event.getSource().getValue());
+            const discount = Number((event.getSource().getValue())?.replace(/\\.0+$/, '').replace(/%$/, ''));
             const bindingContext = event.getSource().getBindingContext();
             const discountConditionObj = bindingContext.getObject();
 
