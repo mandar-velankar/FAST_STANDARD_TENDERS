@@ -2495,7 +2495,13 @@ sap.ui.define([
 		onCancelDiscountCondition: async function(event){
 			const dialog = await this.getPriceConditionRappelDialog();
 			if(this.defaultModel.hasPendingChanges()){
-				this.defaultModel.resetChanges(null, false, true);
+				const pendingChanges = this.defaultModel.getPendingChanges();
+				Object.keys(pendingChanges).forEach((key) => {
+					if (key.startsWith("DiscountConditionView")) {
+						const path = `/${key}`; 
+						this.defaultModel.resetChanges([path], undefined, true);
+					}
+				});
 			}
 			dialog.close(); 
 		},
