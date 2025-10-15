@@ -2935,10 +2935,12 @@ sap.ui.define([
 			}
 			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
 			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
+			let PACKFACTOR = offerProduct?.PACKFACTOR;
+			let UnitPerPack = offerProduct?.UnitPerPack;
 			BusyIndicator.show(1);
 			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
 				method:"POST", 
-				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode },
+				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode, "packFactor": PACKFACTOR, "UoM": UnitPerPack },
 				success: this.onGetSAPSalesOrderSimulationSuccess.bind(this),
 				error: this.onGetSAPSalesOrderSimulationFail.bind(this)
 			});
