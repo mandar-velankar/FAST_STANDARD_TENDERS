@@ -2925,7 +2925,7 @@ sap.ui.define([
 
 		},
 
-		onGetCurrentPrice: function(event){
+		onGetCurrentPrice: async function(event){
 			const instituteID = this.getModel("ui").getProperty(`/SelectedInstituteID`);
 			const customerID = this.getModel("ui").getProperty(`/SelectedCustomerID`);
 						
@@ -2933,7 +2933,7 @@ sap.ui.define([
 				MessageBox.error("Please select an Institute before proceeding.");
 				return;
 			}
-			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
+			let offerProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
 			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
 			let PACKFACTOR = offerProduct?.PACKFACTOR;
 			let UnitPerPack = offerProduct?.UnitPerPack;
