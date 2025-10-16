@@ -1002,6 +1002,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1121,6 +1122,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},	
@@ -1154,6 +1156,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 		},
@@ -1185,6 +1188,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 
 			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
+				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
 				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
 			}
 			
@@ -2313,9 +2317,12 @@ sap.ui.define([
 		},
 
 		onRappelFormCancelBtnPress:function(event){
+			const form = this.byId(`idPricingForm`);
+			let priceObj = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext()?.getObject();
 			this.getModel("ui").setProperty('/RappelForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionRappelView"], "priceCondRappel");
-			this.defaultModel.resetChanges();
+			this.defaultModel.resetChanges();			
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
 
 		onRappelFormSaveBtnPress: function(event) {
@@ -2456,6 +2463,16 @@ sap.ui.define([
 			const volumeTresholdTable = this.byId("idVolumeTreshold");
 			const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
 
+			const transientContexts = [];
+			const currentItems = volumeTresholdTable.getItems();
+
+			currentItems.forEach(item => {
+				const ctx = item.getBindingContext();
+				if (ctx && ctx.isTransient()) {
+					transientContexts.push(ctx);
+				}
+			});
+
 			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
 
 			// Unbind and rebind items
@@ -2467,13 +2484,27 @@ sap.ui.define([
 				groupId: "RappelForm"
 			});
 
+			volumeTresholdTable.attachEventOnce("updateFinished", () => {
+				transientContexts.forEach(ctx => {
+					const newItem = itemsBindingInfo.template.clone();
+					newItem.setBindingContext(ctx);
+					volumeTresholdTable.addItem(newItem);
+				});
+			});
+
 			dialog.open();
 		},
 
 		onCancelDiscountCondition: async function(event){
 			const dialog = await this.getPriceConditionRappelDialog();
 			if(this.defaultModel.hasPendingChanges()){
-				this.defaultModel.resetChanges(null, false, true);
+				const pendingChanges = this.defaultModel.getPendingChanges();
+				Object.keys(pendingChanges).forEach((key) => {
+					if (key.startsWith("DiscountConditionView")) {
+						const path = `/${key}`; 
+						this.defaultModel.resetChanges([path], undefined, true);
+					}
+				});
 			}
 			dialog.close(); 
 		},
@@ -2551,7 +2582,7 @@ sap.ui.define([
 
             const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
 
-            const discount = Number(event.getSource().getValue());
+            const discount = Number((event.getSource().getValue())?.replace(/\\.0+$/, '').replace(/%$/, ''));
             const bindingContext = event.getSource().getBindingContext();
             const discountConditionObj = bindingContext.getObject();
 
@@ -2625,11 +2656,14 @@ sap.ui.define([
         },
 
 		_onSubmitChangesRappelFormSuccess: function(res){
+			const form = this.byId(`idPricingForm`);
+			let priceObj = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext()?.getObject();
 			this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/priceCondRappel").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty('/RappelForm/editMode', false);
-				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");				
+				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");		
+				this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);				
 				this.refreshRappelForm();
 			}
 						
@@ -2903,7 +2937,7 @@ sap.ui.define([
 
 		},
 
-		onGetCurrentPrice: function(event){
+		onGetCurrentPrice: async function(event){
 			const instituteID = this.getModel("ui").getProperty(`/SelectedInstituteID`);
 			const customerID = this.getModel("ui").getProperty(`/SelectedCustomerID`);
 						
@@ -2911,12 +2945,14 @@ sap.ui.define([
 				MessageBox.error("Please select an Institute before proceeding.");
 				return;
 			}
-			let offerProduct = this.getModel("st").getProperty("/OfferProduct");
+			let offerProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
 			let materialNumber = offerProduct?.ACTIVE_MATERIAL_NUMBERS?.split(",")[0].trim() || "";
+			let PACKFACTOR = offerProduct?.PACKFACTOR;
+			let UnitPerPack = offerProduct?.UnitPerPack;
 			BusyIndicator.show(1);
 			this.getModel().callFunction("/getSAPSalesOrderSimulation", {
 				method:"POST", 
-				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode },
+				urlParameters: {"offerID": this.sOfferId, "tenderID": this.sObjectId, "productCode": this.productId, "instituteID": instituteID, "customerID": customerID, "materialNumber": materialNumber, "countryCode": this.sCountryCode, "packFactor": PACKFACTOR, "UoM": UnitPerPack },
 				success: this.onGetSAPSalesOrderSimulationSuccess.bind(this),
 				error: this.onGetSAPSalesOrderSimulationFail.bind(this)
 			});

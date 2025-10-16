@@ -1036,12 +1036,12 @@ sap.ui.define([
                 ]
             })
 			const {Custom_String_3, InstituteID} = await this.stState.getService().getTender(this.tenderId);
-			const InstituteNames = Custom_String_3.split(";")
 			const orFilters = []
 			let andFilters = []
 			let oFilters;
 			
 			if (Custom_String_3) {
+				const InstituteNames = Custom_String_3.split(";")
 				andFilters = [
 					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
 					new Filter("InstituteID", FilterOperator.NE, InstituteID),
@@ -1063,7 +1063,7 @@ sap.ui.define([
 				oFilters = [new Filter(andFilters, true)];
 			}
             list.bindItems({
-				path: Custom_String_3 == '' ? "/PT_TMINST" : '/InstitutesInGroup',
+				path: !Custom_String_3 ? "/PT_TMINST" : '/InstitutesInGroup',
 				template: template,
 				filters: oFilters,
 				events:{
@@ -1084,23 +1084,32 @@ sap.ui.define([
             try{
 				const InstituteGroupMultiInputTokens = this.byId("idAwardedInstituteGroupMultiSelect").getTokens();
 				const InstituteGroupListDialog = this.byId("idAwardedInstituteGroupDialog");
-
 				const items = event.getParameter("data")?.results;
+				const tenderPath = this.getModel().createKey("/TenderMasterView", {
+					TenderID: this.tenderId,
+					OfferID: this.offerId
+				});
+
+				const selectedInstituteID = this.getModel().getObject(tenderPath)?.InstituteID;
+				const selectedInstitute = selectedInstituteID && await this.stState.getService().getInstitute(selectedInstituteID, this.countryCode);
+				
 				if (items && items.length > 0 && items[0].ParentInstituteID) {
 					const parentInst = await this.stState.getService().getInstitute(items?.[0].ParentInstituteID, this.countryCode);
-					InstituteGroupListDialog.addItem(new sap.m.ColumnListItem({
-						cells: [
-							new sap.m.Text({
-								text: parentInst.InstituteName,
-								customData: [
-									new sap.ui.core.CustomData({
-										key: "InstituteID",
-										value: parentInst.InstituteID
-									})
-								]
-							}),
-						]
-					}));
+					if (selectedInstitute.InstituteType === "Buying Group") {
+						InstituteGroupListDialog.addItem(new sap.m.ColumnListItem({
+							cells: [
+								new sap.m.Text({
+									text: parentInst.InstituteName,
+									customData: [
+										new sap.ui.core.CustomData({
+											key: "InstituteID",
+											value: parentInst.InstituteID
+										})
+									]
+								}),
+							]
+						}));
+					}
 				}
 
 				InstituteGroupMultiInputTokens.forEach(selectedItem => {
@@ -1161,9 +1170,9 @@ sap.ui.define([
             const startDate = this.byId('idContractStartDate').getDateValue();
 			const endDate = new Date(startDate);
             const durationSelect = parseInt(this.byId("idContractDuration").getSelectedKey(), 10);
-			endDate.setDate(0);
+			// endDate.setDate(0);
 			let formettedEndDate = new Date(endDate.setMonth(endDate.getMonth() + durationSelect));
-			formettedEndDate.setDate(formettedEndDate.getDate() + 1);
+			formettedEndDate.setDate(formettedEndDate.getDate());
 			
 			context.getModel().setProperty("ContractEndDate", formettedEndDate, context);
 			context.getModel().refresh()
