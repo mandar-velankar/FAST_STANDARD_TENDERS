@@ -342,7 +342,7 @@ sap.ui.define([
 				this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
 				prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
-				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_6", this.productScope); //for mandatory field check in sta-service
 				this.defaultModel.submitChanges({
 					error: this._onSubmitChangesFail.bind(this),
 					success: this._onSubmitChangesTenderFormSuccess.bind(this),

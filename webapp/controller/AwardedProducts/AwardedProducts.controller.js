@@ -63,6 +63,7 @@ sap.ui.define([
 		},
 
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode, productScope}) {
+			this.stState = this.getOwnerComponent().getModel("st");
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
@@ -337,7 +338,10 @@ sap.ui.define([
 
 			const startDate = startDatePicker.getDateValue();
 			const endDate = endDatePicker.getDateValue();
-
+			
+			const dateFormatter = new this.customTypes.date()
+			const formattedStartDate = dateFormatter.formatValue(startDate);
+			const formattedEndDate = dateFormatter.formatValue(endDate);
 			// Clear previous state
 			startDatePicker.setValueState("None");
 			endDatePicker.setValueState("None");
@@ -363,7 +367,7 @@ sap.ui.define([
 			try {
 				this.getModel().callFunction("/updateFinalContractStartEndDate", {
 					method:"POST", 
-					urlParameters: {"OfferID": this.offerId, "ContractStartDate": startDate.toISOString().split("T")[0], "ContractEndDate": endDate.toISOString().split("T")[0]},
+					urlParameters: {"OfferID": this.offerId, "ContractStartDate": formattedStartDate, "ContractEndDate": formattedEndDate},
 					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this),
 					error: this.onUpdateFinalContractStartEndDateFail.bind(this)
 				});
@@ -452,7 +456,37 @@ sap.ui.define([
 			} else {
 				MessageBox.error("No Fast Contract available for this Offer.");
 			}
-		}
+		},
 
+
+		onMenuSetAllProductWonLostItemSelected: async function(evt){
+			BusyIndicator.show(1);
+			try {
+				const selectedItem = evt.getParameter("item");
+
+				//Getting saved awarded products 
+				const awardedProducts = await this.stState.getService().getAwardedProducts(this.offerId);
+				
+				//Updating existing awarded product's Outcome
+				const promisses = awardedProducts.map(product => {
+					const mappedAwardedProduct = {
+						...product, 
+						Outcome: selectedItem.getText()
+					};
+
+					return this.stState.getService().updateAwardedProduct(product.OfferID, product.ProductCode, mappedAwardedProduct);
+				});
+				//Sending request
+				await Promise.all(promisses);
+
+				//Refreshing Master tender and Awarded products table bindings
+				this.getOwnerComponent().getEventBus().publish("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent");
+				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
+				BusyIndicator.hide();
+			} catch (error) {
+				MessageBox.error(error?.message || "Something went wrong");
+				BusyIndicator.hide();
+			}
+		},
     });
 })

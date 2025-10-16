@@ -113,6 +113,7 @@ sap.ui.define([
 
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
+			this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._bindInstituteItems, this);
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -138,6 +139,7 @@ sap.ui.define([
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
+			this._bindInstituteItems();
 			this.onLanguageChange();
 			// this.setFilter(oEvent);
 			const userInfo = await this.stState.getService().getUserInfo(userID);
@@ -266,6 +268,69 @@ sap.ui.define([
 				templateShareable: true
 			});
 		},
+
+		_bindInstituteItems: function () {
+			const oSelectInstitute = this.byId("idSelectInstitute");
+			if (oSelectInstitute) {
+				oSelectInstitute.destroyItems();
+				oSelectInstitute.destroyAggregation();
+				// Force the loadItems event manually
+				this.onLoadInstitutes({ getSource: () => oSelectInstitute });
+			}
+		},
+
+		onLoadInstitutes: function (oEvent) {
+            const oComboBox = oEvent.getSource();
+            const oModel = this.getView().getModel(); // Get your OData V2 model
+            const sPath = "/PT_TMINST"; // The path to your entity set
+			const controller = this;
+			const selectedInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter") || "All";
+
+            const aFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode,
+					caseSensitive: false
+				})
+			];
+
+            // --- Get Sorters ---
+            const aSorters = [new Sorter("InstituteName", false)]; // Sort by Name ascending
+            // --- Perform Manual OData Read ---
+            oModel.read(sPath, {
+                sorters: aSorters,
+                filters: aFilters,
+                success: function (oData) {
+					
+                    if (oData && oData.results) {
+						oData.results.unshift({
+							InstituteID: "All",
+							InstituteName: "All",
+							CustomerID: ""
+						})
+                        oData.results.forEach(function (oItemData) {
+                            // Check if item already exists (important to avoid duplicates)
+                            var bExists = oComboBox.getItems().some(function(oExistingItem) {
+                                return oExistingItem.getKey() === oItemData.InstituteID;
+                            });
+
+                            if (!bExists) {
+                                oComboBox.addItem(new sap.ui.core.ListItem({
+                                    key: oItemData.InstituteID,
+                                    text: oItemData.InstituteName,
+									additionalText: oItemData.CustomerID
+                                }));
+                            }
+                        });
+                    }
+					controller.getView().getModel('st').setProperty("/SelectedInstituteIDFilter", selectedInstituteID);
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error loading more items:", oError);
+                }
+            });
+        }, 
 
 		_bindTable: function (table, sCountryCode, sProductScope) {
 			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
@@ -856,7 +921,7 @@ sap.ui.define([
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
-			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
+			newTenderObj.Custom_String_6 = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
 			newTenderObj.SubmittedOn = new Date().toISOString();
 			delete newTenderObj.ParentInstituteID; //specific for Taiwan
 
@@ -983,6 +1048,19 @@ sap.ui.define([
 					let searchFilters = this.andFilters.splice(this.andFilters.length-1, 1);
 					this.andFilters.unshift(searchFilters[0]);
 				}
+
+				// Institute 
+				const oSelectedInstitute = this.byId("idSelectInstitute");
+				const sInstituteID = oSelectedInstitute.getSelectedItem()?.getKey() || this.getModel('st').getProperty("/SelectedInstituteIDFilter");
+				if (sInstituteID && sInstituteID.toLowerCase() !== 'all') {
+					this.andFilters.push(new Filter({
+						path: "InstituteID",
+						operator: FilterOperator.EQ,
+						value1: sInstituteID,
+						caseSensitive: false
+					}));
+				}
+
 				const oFilters = new Filter(this.andFilters, true);
 				// this._oList.getBinding("items").aFilters = []
 				//Binding to table with the filters and the sorters

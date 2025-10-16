@@ -254,11 +254,11 @@ sap.ui.define([
 			})
 		},
 		getInstituteInContract: function ({Custom_String_3,InstituteID,CountryCode}) {
-			const InstituteNames = Custom_String_3.split(";")
 			const orFilters = []
 			let andFilters = []
 			let oFilters;
 			if (Custom_String_3) {
+				const InstituteNames = Custom_String_3.split(";")
 				andFilters = [
 					new Filter("ParentInstituteID", FilterOperator.EQ, InstituteID ),
 					new Filter("InstituteID", FilterOperator.NE, InstituteID),
@@ -406,7 +406,6 @@ sap.ui.define([
 				});
 			})
 		},
-		
 		getTemplateIDByName: function (name) {
 			return new Promise((resolve, reject) => {
 				this.model.read("/ExcelTemplate",
@@ -448,6 +447,7 @@ sap.ui.define([
 				});
 			});
         },
+		
 		getStandardTenderPriceConditionView: function (tenderID,offerID,productID) {
 			return new Promise((resolve, reject) => {
 				this.model.read("/StandardTenderPriceConditionView",
@@ -477,9 +477,38 @@ sap.ui.define([
 					filters: filters,
 					success: function (res) {
 						resolve(type ? res?.results[0] : res?.results);
+					},
+				});
+			});
+		},
+		
+		getAwardedProducts: async function (offerID) {
+			const filters = [
+				new Filter("OfferID",FilterOperator.EQ, offerID),
+			]
+			return new Promise((resolve, reject) => {
+				this.model.read('/AwardedProductFormView', {
+					filters: filters,
+					success: function (res) {
+						resolve(res?.results); 
 					}
 				});
 			})
 		},
+
+		updateAwardedProduct: function (offerId, productCode, data) {
+			const sKey = this.model.createKey("/AwardedProductFormView", {
+				OfferID: offerId,
+				ProductCode: productCode,
+				LotID: 1
+			});
+			return new Promise((resolve, reject) => {
+				this.model.update(sKey, data, {
+					success: function (res) {
+						resolve(true);
+					},
+				});
+			});
+		}
     });
 });
