@@ -2317,9 +2317,12 @@ sap.ui.define([
 		},
 
 		onRappelFormCancelBtnPress:function(event){
+			const form = this.byId(`idPricingForm`);
+			let priceObj = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext()?.getObject();
 			this.getModel("ui").setProperty('/RappelForm/editMode', false);
 			this.cancelPendingChanges(["PriceConditionRappelView"], "priceCondRappel");
-			this.defaultModel.resetChanges();
+			this.defaultModel.resetChanges();			
+			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
 
 		onRappelFormSaveBtnPress: function(event) {
@@ -2653,11 +2656,14 @@ sap.ui.define([
         },
 
 		_onSubmitChangesRappelFormSuccess: function(res){
+			const form = this.byId(`idPricingForm`);
+			let priceObj = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext()?.getObject();
 			this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
 			const hasErrorMessages =  this.getModel("messages").getProperty("/priceCondRappel").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty('/RappelForm/editMode', false);
-				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");				
+				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");		
+				this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);				
 				this.refreshRappelForm();
 			}
 						
