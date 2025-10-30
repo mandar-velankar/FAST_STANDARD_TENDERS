@@ -542,14 +542,23 @@ sap.ui.define([
 		},
 	
 		onPriceWithFOCFormSaveBtnPress: function(event){
-			const hasErrorMessages =  this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
+			const form = this.byId(`idPricingForm`);
+			const messages = this.getMessages(["PriceConditionPriceWithFOCView"]);
+			const region = form?.getBindingContext().getProperty("Region");
+			const offerPriceErrMessage = messages.find(el => el.getTarget().includes("OfferPrice"));
+
+			if (region.includes("PACA") && offerPriceErrMessage) {
+				this.oMessageManager.removeMessages(offerPriceErrMessage);
+				this.removeMessages(offerPriceErrMessage, "priceCondPrice");
+			}
+
+			const hasErrorMessages = this.getMessages(["PriceConditionPriceWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
 			this.setMessageSection(["PriceConditionPriceWithFOCView"], "priceCondPrice");
 			/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
 			 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
 			 * thus below is the temporary solution until we find a permanent fix
 			*/
-			const form = this.byId(`idPricingForm`);
 			let value = this.byId("idPriceWithFOCOfferPrice")?.getProperty("value");
 			this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
 			this.defaultModel.submitChanges({
@@ -588,6 +597,15 @@ sap.ui.define([
 
 
 		onDiscountWithFOCFormSaveBtnPress: function(event){
+			const form = this.byId(`idPricingForm`);
+			const messages = this.getMessages(["PriceConditionDiscountWithFOCView"]);
+			const region = form?.getBindingContext().getProperty("Region");
+			const offerPriceErrMessage = messages.find(el => el.getTarget().includes("OfferPrice"));
+
+			if (region.includes("PACA") && offerPriceErrMessage) {
+				this.oMessageManager.removeMessages(offerPriceErrMessage);
+				this.removeMessages(offerPriceErrMessage, "priceCondPrice");
+			}
 			const hasErrorMessages =  this.getMessages(["PriceConditionDiscountWithFOCView"]).length > 0;
 			if(hasErrorMessages) return;
 			this.setMessageSection(["PriceConditionDiscountWithFOCView"], "priceCondPrice");
@@ -713,18 +731,28 @@ sap.ui.define([
 
 		onPricingFormSaveBtnPress: function(event){
 			if (this.getTargets(["PriceCondition"]).length > 0) {
-				const hasErrorMessages =  this.getMessages([
+				const messages = this.getMessages([
 					"idOfferPrice", 
 					"PriceConditionPriceView",
 					"PriceConditionDiscountView"
-				]).length > 0;
+				])
+				const hasErrorMessages =  messages.length > 0;
 				this.setMessageSection(["idOfferPrice", "PriceConditionPriceView", "PriceConditionDiscountView"], "priceCondPrice");
 				/** If the input field with live change has type 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType' 
 				 * when user only edits the single digit of the existing value, the model submit changes not capturing this value
 				 * thus below is the temporary solution until we find a permanent fix
 				*/
 				const form = this.byId(`idPricingForm`);
+				const region = form?.getBindingContext().getProperty("Region");
+				const offerPriceErrMessage = messages.find(el => el.getTarget().includes("OfferPrice"));
 				let value = this.byId("idOfferPrice")?.getProperty("value");
+
+				// for PACA region offer price error message is just a warning so we remove it on save
+				if (region.includes("PACA") && offerPriceErrMessage) {
+					this.oMessageManager.removeMessages(offerPriceErrMessage);
+					this.removeMessages(offerPriceErrMessage, "priceCondPrice");
+				}
+
 				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/OfferPrice", Number(value.replace(/[^\d.]/g, '')));
 				this.defaultModel.submitChanges({
 					error: this._onSubmitChangesFail.bind(this),
@@ -926,9 +954,9 @@ sap.ui.define([
 			context.getModel().setProperty("Discount", discount, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
-			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL' && !priceObj.Region?.includes("PACA")){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
-				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
+				this.validatePriceWithFOCForm(context, property, { offerPrice, basePrice });
 			}
 		},
 
@@ -1046,9 +1074,9 @@ sap.ui.define([
 			context.getModel().setProperty("OfferPrice", offerPrice, context);
 			context.getModel().setProperty("NetPrice", netPrice, context);
 
-			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL' && !priceObj.Region?.includes("PACA")){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
-				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
+				this.validatePriceWithFOCForm(context, property, { offerPrice, basePrice });
 			}
 		},	
 
@@ -1080,9 +1108,9 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 			
-			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL' && !priceObj.Region?.includes("PACA")){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
-				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
+				this.validatePriceWithFOCForm(context, property, { offerPrice, basePrice });
 			}
 		},
 		
@@ -1112,9 +1140,9 @@ sap.ui.define([
 			context.getModel().setProperty("NetPrice", netPrice, context);
 			context.getModel().setProperty("NetOfferPrice", netOfferPrice, context);
 
-			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL' && !priceObj.Region?.includes("PACA")){
+			if(priceObj.CountryCode !== 'AU' && priceObj.CountryCode !== 'PL'){
 				if (priceObj.CountryCode.includes("HM") && !basePrice) return;
-				this.validatePriceWithFOCForm(context, { offerPrice, basePrice });
+				this.validatePriceWithFOCForm(context, property, { offerPrice, basePrice });
 			}
 			
 		},
@@ -1267,7 +1295,7 @@ sap.ui.define([
 			return netOfferPrice;
 		},
 
-		validatePriceWithFOCForm: function(context, { offerPrice, basePrice }){
+		validatePriceWithFOCForm: function(context, property, { offerPrice, basePrice }){
 			const priceObj = context.getObject();
 
 			// Error messages
@@ -1277,7 +1305,8 @@ sap.ui.define([
 
 			// Rules
 			const isOfferPriceHigher = Number(offerPrice) > Number(basePrice);
-			if(isOfferPriceHigher && !errorMessage){
+			const isOfferPriceLowerFloorPrice = Number(offerPrice) < Number(priceObj.PricingPolicyValue);
+			if(!priceObj.Region?.includes("PACA") && isOfferPriceHigher && !errorMessage){
 				this.oMessageManager.addMessages(new Message({
 					message: "Offer Price should not be greater than Base Price.",
 					type: MessageType.Error,
@@ -1285,7 +1314,15 @@ sap.ui.define([
 					processor: this.getView().getModel()
 				}));
 				this.setMessageSection(["PriceConditionPriceWithFOCView","PriceConditionDiscountView","PriceConditionPriceView", "PriceConditionDiscountWithFOCView"], "priceCondPrice");
-			}else if(!isOfferPriceHigher && errorMessage){
+			}else if(priceObj.Region?.includes("PACA") && property && isOfferPriceLowerFloorPrice && !errorMessage){
+				this.oMessageManager.addMessages(new Message({
+					message: "Offer Price is lower than the Floor Price.",
+					type: MessageType.Error,
+					target: target,
+					processor: this.getView().getModel()
+				}));
+				this.setMessageSection(["PriceConditionPriceWithFOCView","PriceConditionDiscountView","PriceConditionPriceView", "PriceConditionDiscountWithFOCView"], "priceCondPrice");
+			}else if((!isOfferPriceHigher || !isOfferPriceLowerFloorPrice) && errorMessage){
 				this.oMessageManager.removeMessages(errorMessage);
 				this.removeMessages(errorMessage, "priceCondPrice");
 			}
