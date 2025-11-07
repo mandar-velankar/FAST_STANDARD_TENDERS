@@ -628,7 +628,10 @@ sap.ui.define([
 			const tableBinding = table.getBinding("items");
 			const tenderMangerObject = tableBinding?.getContexts()?.map(el => el?.getObject())?.find(el => el.ApproverType === 'TM');
 			const {products} = await this.stState.getService().getOfferProducts(this.offerId);
-			
+			payload = {
+				...payload,
+				SenderComment: tenderMangerObject.SenderComment
+			}
 			const promises = products.map(pr => this.stState.getService().updateApprovalTypeStatus(payload, {
 				OfferId: tenderMangerObject.OfferId,
 				productcode: pr.ProductCode,
