@@ -223,7 +223,7 @@ sap.ui.define([
 			messages.map(message => {
 				const regex = /\/([^(/]+)(?:\([^)]*\))?\/([^/]+)/;
 				const match = messages[0].aFullTargets[0].match(regex);
-				const messageKey = `${match[1]}.${match[2]}.Message`;
+				const messageKey = match ? `${match[1]}.${match[2]}.Message` : "";
 				const tranlation = resourceModel.getResourceBundle().getText(messageKey);
 
 				// by default getText returns messageKey if translation is not found
