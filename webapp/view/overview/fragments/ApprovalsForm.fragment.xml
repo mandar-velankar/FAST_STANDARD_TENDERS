@@ -15,6 +15,20 @@
 											<content>
 												<Title text="Mandatory/Optional approvals" level="H2"/>
 												<ToolbarSpacer />
+												<Button 
+													text="Approve" 
+													type="Emphasized"
+													press=".onApproveTMApprovalType" 
+													visible="{= ${em>/Detail/OverviewTab/Approval/isPolandTMApproveButtonVisible} }"
+													enabled="{= ${st>/SelectedCountry} === 'PL' &amp;&amp; ${ui>/isOfferHavingOnlyTMApproverTypePending}}"
+												/>
+												<Button 
+													text="Reject" 
+													type="Reject"
+													press=".onRejectTMApprovalType" 
+													visible="{= ${em>/Detail/OverviewTab/Approval/isPolandTMApproveButtonVisible} }"
+													enabled="{= ${st>/SelectedCountry} === 'PL' &amp;&amp; ${ui>/isOfferHavingOnlyTMApproverTypePending}}"
+												/>
 											</content>
 										</OverflowToolbar>
 								</headerToolbar>

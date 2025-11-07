@@ -1132,8 +1132,8 @@ sap.ui.define([
 
 				// Awaiting TM Approval status should be visible in case if user role is either Sales Manager or Tender Manager
 				if (
-					!userRoles.includes(userRole.toLowerCase().split(" ").join("").trim()) && 
-					status.toLowerCase().split(" ").join("").trim() === "awaitingtmapproval"
+					!userRoles.includes(userRole?.toLowerCase()?.split(" ")?.join("")?.trim()) && 
+					status?.toLowerCase()?.split(" ")?.join("")?.trim() === "awaitingtmapproval"
 				) {
 					return false;
 				}
