@@ -130,7 +130,20 @@
 														width="100%" 
 														valueState="{= ${SenderComment}.length > 500 ? 'Warning' : 'None' }" 
 														valueLiveUpdate="false" liveChange="handleLiveChange" 
-														enabled="{= ${ApprovalStatus} !== 'Waiting' &amp;&amp; ${ApprovalStatus} !== 'Processing' &amp;&amp; ${ApprovalStatus} !== 'Cancelling'}"/>
+														enabled="{= 
+															(
+																${st>/SelectedCountry} === 'PL' &amp;&amp; 
+																${ui>/isOfferHavingOnlyTMApproverTypePending} &amp;&amp; 
+																${ApproverType} === 'TM' &amp;&amp; 
+																${ApprovalStatus} === 'Waiting'
+															) || 
+															(
+																${ApprovalStatus} !== 'Waiting' &amp;&amp; 
+																${ApprovalStatus} !== 'Processing' &amp;&amp; 
+																${ApprovalStatus} !== 'Cancelling'
+															)
+														}" 
+											/>
 											
 											<!-- Approver's Comment  -->
 											<TextArea value="{ApproverComment}" 
