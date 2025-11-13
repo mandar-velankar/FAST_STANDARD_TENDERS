@@ -510,6 +510,25 @@ sap.ui.define([
 					},
 				});
 			});
-		}
+		},
+
+		onGetContractMngtDateConstraints: function (TenderID, OfferID, CountryCode, ProductPackIDs) {
+			return new Promise((resolve, reject) => {
+				this.model.callFunction("/getContractMngtDateConstraints", {
+					method:"GET", 
+					urlParameters: {TenderID, OfferID, CountryCode, ProductPackIDs},
+					success: (data) => {
+						resolve({
+							minDate: new Date(data.minDate)
+						});
+					},
+					error: (err) => {
+						resolve({
+							minDate: ""
+						});
+					}
+				});
+			})
+		},
     });
 });

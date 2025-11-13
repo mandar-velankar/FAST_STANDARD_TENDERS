@@ -64,6 +64,10 @@ sap.ui.define(
                 return aAppConfig;
             },
 
+            getContractMngtDateConstraints: function (TenderID, OfferID, CountryCode, ProductPackIDs){
+                return this.getService().onGetContractMngtDateConstraints(TenderID, OfferID, CountryCode, ProductPackIDs);
+            },
+
             // read: function (type, keys) {
             //     switch (type) {
             //         case 'MASTER':

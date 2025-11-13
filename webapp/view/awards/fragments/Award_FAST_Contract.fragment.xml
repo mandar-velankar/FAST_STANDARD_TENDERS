@@ -26,9 +26,9 @@
                     }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender'}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    minDate="{st>/ContractStartDate}"
+                    minDate="{st>/ContractMngtDateConstraints/minDate}"
                 />
             </HBox>
 
@@ -49,9 +49,9 @@
                     }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender'}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    minDate="{st>/ContractStartDate}"
+                    minDate="{st>/ContractMngtDateConstraints/minDate}"
                 />
             </HBox>
         </VBox>
