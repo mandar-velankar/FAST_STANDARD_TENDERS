@@ -16,8 +16,10 @@ sap.ui.define([
 	"sap/m/TableSelectDialog",
 	"sap/m/Column",
 	"sap/m/Text",
-	"sap/ui/core/BusyIndicator"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text, BusyIndicator) {
+	"sap/ui/core/BusyIndicator",
+	"sap/m/Link",
+	"sap/m/HBox"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text, BusyIndicator, Link, HBox) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -265,6 +267,7 @@ sap.ui.define([
 		_bindForm(formName){
 			const entity = this.templateStateData.detailDetailOfferProductConfig.countryTemplate.getTemplate().getForm().getEntity();
 			const form = this.byId(`id${formName}`);
+			const that = this;
 			let path = "";
 			if (this.sObjectId) {
 				path = this.getOwnerComponent().getModel().createKey(`/${entity}`, {
@@ -280,6 +283,22 @@ sap.ui.define([
 				});
 				path = newEntryContext.getPath();
 			}
+
+			if (this.sCountryCode === 'ES') {
+				// Add an event delegate to the form to execute code after it has been rendered
+				// This ensures that any DOM-dependent or aggregation-dependent changes
+				// (like adding dynamic links or tokens) happen after the SAPUI5 form has finished rendering.
+				form.addEventDelegate({
+					onAfterRendering: () => {
+						// Call the custom method to add clickable links for contract numbers
+						// This method should handle creating Links or Tokens dynamically
+						// and attaching event handlers (e.g., navigation on press)
+						that.onAddContractLinks();
+					}
+				});
+			}
+
+
 
 			form.bindElement({
 				path: path,
@@ -3266,6 +3285,44 @@ sap.ui.define([
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 						
 		},
-		
+
+		onAddContractLinks: function () {
+			const form = this.byId("idProductForm");
+			const binding = form.getBindingContext();
+			const product = binding?.getObject();
+			const contractElement = form.getAggregation("formContainers")?.[0].getAggregation("formElements")
+						.find(el => el.getAggregation("label") === "Contract");
+
+			const elementFields = contractElement.getFields();
+
+			if (Array.isArray(elementFields) && elementFields.length > 0) return
+			
+			contractElement.removeAllFields()
+			if (product?.Custom_String_1) {
+				const contractInfo = product.Custom_String_1.split(":");
+				const fastContractID = contractInfo?.[0];
+				const contracts = contractInfo?.[1].split(",");
+				const hbox = new sap.m.HBox({
+					items: [] // start with empty, we will add links dynamically
+				});
+				contracts
+				.map(c => c.trim())
+				.filter(Boolean)
+				.forEach(c => {
+					const contract = c.split(';');
+					const url = window.location.href.split('#')[0];
+					const href = `${url}#/conditioncontract&/ccma/detail/${fastContractID}/detail-detail/${contract?.[1]}/${contract?.[2]}/ThreeColumnsMidExpanded`;
+					const link = new Link({
+						text: contract?.[0],
+						href,
+						target: "_blank"
+					});
+					link.addStyleClass("sapUiSmallMarginEnd");
+					hbox.addItem(link);
+				});
+
+				contractElement.addField(hbox);
+			}
+		}
     });
 });
