@@ -64,8 +64,8 @@ sap.ui.define(
                 return aAppConfig;
             },
 
-            getContractMngtDateConstraints: function (TenderID, OfferID, CountryCode, ProductPackIDs){
-                return this.getService().onGetContractMngtDateConstraints(TenderID, OfferID, CountryCode, ProductPackIDs);
+            getContractMngtDateConstraints: function (TenderID, OfferID, CountryCode){
+                return this.getService().onGetContractMngtDateConstraints(TenderID, OfferID, CountryCode);
             },
 
             // read: function (type, keys) {

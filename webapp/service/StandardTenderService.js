@@ -512,19 +512,19 @@ sap.ui.define([
 			});
 		},
 
-		onGetContractMngtDateConstraints: function (TenderID, OfferID, CountryCode, ProductPackIDs) {
+		onGetContractMngtDateConstraints: function (TenderID, OfferID, CountryCode) {
 			return new Promise((resolve, reject) => {
 				this.model.callFunction("/getContractMngtDateConstraints", {
 					method:"GET", 
-					urlParameters: {TenderID, OfferID, CountryCode, ProductPackIDs},
+					urlParameters: {TenderID, OfferID, CountryCode},
 					success: (data) => {
 						resolve({
-							minDate: new Date(data.minDate)
+							minDate: new Date(data.minDate || null) 
 						});
 					},
 					error: (err) => {
 						resolve({
-							minDate: ""
+							minDate: null
 						});
 					}
 				});

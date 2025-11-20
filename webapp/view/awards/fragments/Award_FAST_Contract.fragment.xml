@@ -22,7 +22,7 @@
                     value="{
                         path :'st>/ContractStartDate', 
                         type: 'sap.ui.model.type.Date', 
-                        formatOptions: { pattern: 'yyyy-MM-dd', UTC: true }
+                        formatOptions: { pattern: 'dd.MM.yyyy', UTC: true }
                     }"
                     change=".onContractDateChange"
                     width="10rem"
@@ -45,7 +45,7 @@
                     value="{
                         path :'st>/ContractEndDate', 
                         type: 'sap.ui.model.type.Date', 
-                        formatOptions: { pattern: 'yyyy-MM-dd', UTC: true }
+                        formatOptions: { pattern: 'dd.MM.yyyy', UTC: true }
                     }"
                     change=".onContractDateChange"
                     width="10rem"

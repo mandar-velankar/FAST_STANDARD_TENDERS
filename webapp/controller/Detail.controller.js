@@ -216,9 +216,8 @@ sap.ui.define([
 				!this.selectedOfferHasBinding() && this._bindView();
 				
 				// Needed for Spain Overview screen to immediately display price condition informations
+				const contractMngtDateConstraints = this.sCountryCode === 'ES' ? await this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode) : null;
 				const offerProducts = await this.stState.getOfferProductValidation(this.sOfferId);
-				const productPackIDs = Array.isArray(offerProducts) ? offerProducts.map(pr => pr.PRODUCTID).join(',') : '';
-				const contractMngtDateConstraints = this.sCountryCode === 'ES' ? await this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode, productPackIDs) : null;
 				this.getModel("st").setProperty("/OfferProductsValidations", offerProducts);
 				this.getModel("st").setProperty("/ContractMngtDateConstraints", contractMngtDateConstraints);
 			}.bind(this));
