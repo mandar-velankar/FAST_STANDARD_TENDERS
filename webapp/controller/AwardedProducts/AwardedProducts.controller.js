@@ -389,6 +389,15 @@ sap.ui.define([
 		onCreateAllFASTContracts: function () {
 			BusyIndicator.show(0);
 			const allProductsWithOutcomeWon = this.getModel("st").getProperty("/AllProductsWithOutcomeWon");
+			const startDatePicker = this.byId("contractStartDate");
+			const endDatePicker = this.byId("contractEndDate");
+
+			const startDate = startDatePicker.getDateValue();
+			const endDate = endDatePicker.getDateValue();
+			
+			const dateFormatter = new this.customTypes.date()
+			const formattedStartDate = dateFormatter.formatValue(startDate);
+			const formattedEndDate = dateFormatter.formatValue(endDate);
 
 			if (allProductsWithOutcomeWon && allProductsWithOutcomeWon.length === 0) {
 				MessageBox.error("No Products with outcome 'Won' found.");
@@ -397,7 +406,7 @@ sap.ui.define([
 
 			this.getView().getModel().callFunction("/createAllFastConditionContracts", {
 				method:"POST", 
-				urlParameters: {"OfferID": this.offerId},
+				urlParameters: {"OfferID": this.offerId, "ContractStartDate": formattedStartDate, "ContractEndDate": formattedEndDate},
 				success: this.createAllFastConditionContractsSuccess.bind(this),
 				error: this.createAllFastConditionContractsFail.bind(this)
 			})

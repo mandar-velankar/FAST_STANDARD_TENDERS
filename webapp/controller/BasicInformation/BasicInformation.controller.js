@@ -269,8 +269,8 @@ sap.ui.define([
 			const timelineElements = timelineContainer.getAggregation("formElements");
 			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
 		
-			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Effective Date");
-			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Expiry Date");
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract Start Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract End Date");
 		
 			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
 			const tenderType2Element = instituteTypeElements.find(el =>	el.getAggregation("label") === "Tender Type 2");

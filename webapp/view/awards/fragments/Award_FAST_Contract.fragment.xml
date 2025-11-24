@@ -22,13 +22,13 @@
                     value="{
                         path :'st>/ContractStartDate', 
                         type: 'sap.ui.model.type.Date', 
-                        formatOptions: { pattern: 'yyyy-MM-dd', UTC: true }
+                        formatOptions: { pattern: 'dd.MM.yyyy', UTC: true }
                     }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender'}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    minDate="{st>/ContractStartDate}"
+                    minDate="{st>/ContractMngtDateConstraints/minDate}"
                 />
             </HBox>
 
@@ -45,13 +45,13 @@
                     value="{
                         path :'st>/ContractEndDate', 
                         type: 'sap.ui.model.type.Date', 
-                        formatOptions: { pattern: 'yyyy-MM-dd', UTC: true }
+                        formatOptions: { pattern: 'dd.MM.yyyy', UTC: true }
                     }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode}}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender'}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    minDate="{st>/ContractStartDate}"
+                    minDate="{st>/ContractMngtDateConstraints/minDate}"
                 />
             </HBox>
         </VBox>

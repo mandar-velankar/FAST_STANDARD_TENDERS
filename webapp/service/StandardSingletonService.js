@@ -116,8 +116,8 @@ sap.ui.define([
 			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
 		
 			// Find specific elements (Effective Date, Expiry Date, Tender Types)
-			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Effective Date");
-			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Expiry Date");
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract Start Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract End Date");
 		
 			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
 			const tenderType2Element = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type 2");
@@ -394,7 +394,7 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotations, savedAwardedProductsCount) {
+        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotations, savedAwardedProductsCount, tender) {
 
 			const isQuotationSaved = (savedQuotations?.count > 0 && savedAwardedProductsCount.count > 0);
 			const isOverviewTabVisible = !!status;

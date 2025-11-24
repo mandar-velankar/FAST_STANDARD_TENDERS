@@ -208,6 +208,7 @@ sap.ui.define([
 				const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 				const UserInfo = this.stState.getProperty('/UserInfo');
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
+				this.getModel("st").setProperty("/SelectedTender", selectedTender);
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
@@ -215,8 +216,10 @@ sap.ui.define([
 				!this.selectedOfferHasBinding() && this._bindView();
 				
 				// Needed for Spain Overview screen to immediately display price condition informations
+				const contractMngtDateConstraints = this.sCountryCode === 'ES' ? await this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode) : null;
 				const offerProducts = await this.stState.getOfferProductValidation(this.sOfferId);
 				this.getModel("st").setProperty("/OfferProductsValidations", offerProducts);
+				this.getModel("st").setProperty("/ContractMngtDateConstraints", contractMngtDateConstraints);
 			}.bind(this));
 		},
 
