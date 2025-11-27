@@ -212,6 +212,7 @@ sap.ui.define([
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
+				StandardSingletonService.setIsMultiDistributorEnabledPerProduct(["CO"].includes(this.sCountryCode) || selectedTender?.Region?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi'));
 				await this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				!this.selectedOfferHasBinding() && this._bindView();
 				
