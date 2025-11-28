@@ -42,12 +42,15 @@ sap.ui.define([
 			this.offerId = offerId;
 			this.countryCode = countryCode;
 			this.selectedTab = iconTabfilter.getKey();
+			const today = new Date();
+        	const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
 
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				editMode: false,
-				minDate: new Date(),
+				minDate: today,
+				maxDate: maxDate,
 				OverviewForm:{
 					editMode: false
 				},
