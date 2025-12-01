@@ -18,8 +18,9 @@ sap.ui.define([
 	"sap/m/Text",
 	"sap/ui/core/BusyIndicator",
 	"sap/m/Link",
-	"sap/m/HBox"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text, BusyIndicator, Link, HBox) {
+	"sap/m/HBox",
+	"../../service/StandardSingletonService",
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Message, library, Context, Fragment, Token, ColumnListItem, Sorter, MessageBox, TableSelectDialog, Column, Text, BusyIndicator, Link, HBox, StandardSingletonService) {
 	"use strict";
 
 	var MessageType = library.MessageType;
@@ -284,7 +285,7 @@ sap.ui.define([
 				path = newEntryContext.getPath();
 			}
 
-			if (this.sCountryCode === 'ES') {
+			
 				// Add an event delegate to the form to execute code after it has been rendered
 				// This ensures that any DOM-dependent or aggregation-dependent changes
 				// (like adding dynamic links or tokens) happen after the SAPUI5 form has finished rendering.
@@ -293,10 +294,15 @@ sap.ui.define([
 						// Call the custom method to add clickable links for contract numbers
 						// This method should handle creating Links or Tokens dynamically
 						// and attaching event handlers (e.g., navigation on press)
-						that.onAddContractLinks();
+						if (this.sCountryCode === 'ES') {
+							that.onAddContractLinks();
+						}
+						if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
+							StandardSingletonService.onSetDistributorNameTokens(form);
+						}
 					}
 				});
-			}
+			
 
 
 
@@ -612,9 +618,13 @@ sap.ui.define([
 		},
 
 		onOfferDetailFormCancelBtnPress: function(event){
+			const form = this.byId(`idProductForm`);
 			this.getModel("ui").setProperty('/ProductForm/editMode', false);
 			this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 			this.defaultModel.resetChanges();
+			if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
+				StandardSingletonService.onSetDistributorNameTokens(form);
+			}
 		},
 	
 		onPriceWithFOCFormSaveBtnPress: function(event){
