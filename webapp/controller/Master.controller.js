@@ -100,13 +100,17 @@ sap.ui.define([
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			const today = new Date();
+        	const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
 
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				TenderForm:{
 					editMode: true	
-				}
+				},
+				minDate: today,
+				maxDate: maxDate
 			});
 	
 			this.setModel(oModel, "ui");

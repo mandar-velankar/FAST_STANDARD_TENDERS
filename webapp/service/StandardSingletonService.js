@@ -69,6 +69,14 @@ sap.ui.define([
 			this.tenderID = tenderID;
 		},
 
+		setIsMultiDistributorEnabledPerProduct: function(isEnabled){
+            this.isMultiDistributorEnabledPerProduct = isEnabled;
+        },
+
+		getIsMultiDistributorEnabledPerProduct: function(){
+			return this.isMultiDistributorEnabledPerProduct;
+		},
+
 		onChangeOutcome: function (event, StandardSingletonService) {
 			const source = event.getSource();
 			const formElements = source.getParent().getParent().getAggregation("formElements");
@@ -321,6 +329,40 @@ sap.ui.define([
 			}
 		},
 
+		onChangeDistributor: async function (originalInputField, selectedItems, StandardSingletonService) {
+			if (!(originalInputField instanceof sap.m.MultiInput) || !StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) return;
+
+			const ctx = originalInputField.getBindingContext();
+			const path = ctx.getPath();
+			const defaultModel = originalInputField.getModel();
+			const inputBindingPath = originalInputField.getBinding("value")?.getPath() || "Custom_String_6";
+			const distributors = selectedItems.map(item => item.getBindingContext().getObject().DistributorID).join(',');
+
+			defaultModel.setProperty(`${path}/${inputBindingPath}`, distributors);
+		},
+
+		onSetDistributorNameTokens: async function (form) {
+			const distributorField = form.getAggregation("formContainers")?.[0]?.getAggregation("formElements")?.find(el => el.getAggregation("label") === "Distributors")?.getFields()?.[0];
+
+			if (!(distributorField instanceof sap.m.MultiInput) || !this.getIsMultiDistributorEnabledPerProduct()) return;
+			const defaultModel = form.getModel();
+			const countryCode = this.getCountryCode();
+			const countryDistributors = await this.getCountryDistributors(countryCode, defaultModel);
+			const product = form?.getBindingContext()?.getObject();
+			const inputBindingPath = distributorField.getBinding("value")?.getPath() || "Custom_String_6";
+			const selectedDistributors = (product[inputBindingPath] && product?.[inputBindingPath]?.split(',')) || [];
+			let tokens = [];
+			
+			distributorField.removeAllTokens();
+			if (selectedDistributors.length > 0) {
+				tokens = selectedDistributors.map(dist => {
+					const existingDistributor = countryDistributors.find(cd => cd.DistributorID == dist);
+					return new Token({ key: existingDistributor?.DistributorID, text: existingDistributor?.DistributorName, editable: false});
+				});
+			}
+			distributorField.setTokens(tokens);
+		},
+
 		getInstituteBranchs: async function (selectedItem, countryCode, originalInputField) {
 			return new Promise((resolve, reject) => {
 				originalInputField.getModel().read('/InstituteInBranchView', {
@@ -367,6 +409,23 @@ sap.ui.define([
 					],
 					success: function (res) {
 						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.Name}` : `${acc}${curr.Name}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
+
+		getCountryDistributors: async function (countryCode, defaultModel) {
+			return new Promise((resolve, reject) => {
+				defaultModel.read('/MasterDistributors', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+					],
+					success: function (res) {
+						resolve(res.results)
 					},
 
 					error: function (err) {
