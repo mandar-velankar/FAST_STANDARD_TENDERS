@@ -530,5 +530,22 @@ sap.ui.define([
 				});
 			})
 		},
+
+		getCountryDistributors: async function (countryCode) {
+			return new Promise((resolve, reject) => {
+				this.model.read('/MasterDistributors', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+					],
+					success: function (res) {
+						resolve(res.results)
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
     });
 });

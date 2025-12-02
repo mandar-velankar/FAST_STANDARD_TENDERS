@@ -199,6 +199,9 @@ sap.ui.define([
 				StandardSingletonService.setBU(selectedOfferProduct?.BU);
 			}
 
+			const countryDistributors = await this.stState.getService().getCountryDistributors(this.sCountryCode);
+			StandardSingletonService.setCountryDistributors(countryDistributors);
+
 			this.setSelectedTabKey();
 
 			this.getModel().metadataLoaded().then( async function() {
