@@ -3361,8 +3361,7 @@ sap.ui.define([
 			contractElement.removeAllFields()
 			if (product?.Custom_String_1) {
 				const contractInfo = product.Custom_String_1.split(":");
-				const fastContractID = contractInfo?.[0];
-				const contracts = contractInfo?.[1].split(",");
+				const contracts = contractInfo?.[0].split(",");
 				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
@@ -3373,9 +3372,9 @@ sap.ui.define([
 					const contract = c.split(';');
 					let baseUrl = window.location.origin + window.location.pathname;
 					baseUrl = baseUrl.replace(/index\.html$/, "");
-					const href = `${baseUrl}app/#/conditioncontract&/ccma/detail/${fastContractID}/TwoColumnsMidExpanded`;
+					const href = `${baseUrl}#/conditioncontract&/ccma/detail/${contract?.[0]}/detail-detail/${contract?.[2]}/${contract?.[3]}/ThreeColumnsMidExpanded`;
 					const link = new Link({
-						text: contract?.[0],
+						text: contract?.[1],
 						href,
 						target: "_blank"
 					});
