@@ -36,6 +36,7 @@ sap.ui.define([
 
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getOwnerComponent().getEventBus().subscribe("PriceConditionFormChannel", "UpdatePriceConditionForm", this.handleUpdatePriceConditionForm, this);
+			this.getOwnerComponent().getEventBus().subscribe("OfferProductsDetailChannel", "UpdateOfferProductsDetailForm", this.handleUpdateOfferProductsDetailForm, this);
 			// /*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
 			// this.setModel(this.paState.getModel(), "pa");
 
@@ -2282,6 +2283,13 @@ sap.ui.define([
 				oModel.read(sPath);
 		},
 
+		handleUpdateOfferProductsDetailForm: function () {
+			let oContext = this.byId('idProductForm').getBindingContext();
+			let sPath = oContext.getPath();
+			let oModel = this.getModel();
+				oModel.read(sPath);
+		},
+
 		setSpainMaxPriceFieldVisibility: async function () {
 			const form = this.byId("idProductForm");
 			const ctx = form.getBindingContext();
@@ -3355,7 +3363,7 @@ sap.ui.define([
 				const contractInfo = product.Custom_String_1.split(":");
 				const fastContractID = contractInfo?.[0];
 				const contracts = contractInfo?.[1].split(",");
-				const hbox = new sap.m.HBox({
+				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
 				contracts
@@ -3363,8 +3371,9 @@ sap.ui.define([
 				.filter(Boolean)
 				.forEach(c => {
 					const contract = c.split(';');
-					const url = window.location.href.split('#')[0];
-					const href = `${url}#/conditioncontract&/ccma/detail/${fastContractID}/detail-detail/${contract?.[1]}/${contract?.[2]}/ThreeColumnsMidExpanded`;
+					let baseUrl = window.location.origin + window.location.pathname;
+					baseUrl = baseUrl.replace(/index\.html$/, "");
+					const href = `${baseUrl}app/#/conditioncontract&/ccma/detail/${fastContractID}/TwoColumnsMidExpanded`;
 					const link = new Link({
 						text: contract?.[0],
 						href,
