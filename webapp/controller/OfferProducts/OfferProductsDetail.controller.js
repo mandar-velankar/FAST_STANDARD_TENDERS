@@ -3354,9 +3354,9 @@ sap.ui.define([
 			const contractElement = form.getAggregation("formContainers")?.[0].getAggregation("formElements")
 						.find(el => el.getAggregation("label") === "Contract");
 
-			const elementFields = contractElement.getFields();
+			// const elementFields = contractElement.getFields();
 
-			if (Array.isArray(elementFields) && elementFields.length > 0) return
+			// if (Array.isArray(elementFields) && elementFields.length > 0) return
 			
 			contractElement.removeAllFields()
 			if (product?.Custom_String_1) {
