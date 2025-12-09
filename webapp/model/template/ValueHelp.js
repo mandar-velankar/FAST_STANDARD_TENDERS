@@ -62,7 +62,8 @@ sap.ui.define([
                 const isTokenExists = originalInputFieldItems.some(token => token.getText() === itemText);
                 if (!isTokenExists) {
                   const oToken = new Token({
-                    text: itemText
+                    text: itemText,
+                    editable: StandardSingletonService.getIsMultiDistributorEnabledPerProduct() ? false : true
                   });
                   originalInputField.addToken(oToken);
                 }

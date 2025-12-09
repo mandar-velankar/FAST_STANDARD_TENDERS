@@ -36,6 +36,7 @@ sap.ui.define([
 
 			this.getRouter().getRoute("offerProductDetail").attachPatternMatched(this._onObjectMatched, this);
 			this.getOwnerComponent().getEventBus().subscribe("PriceConditionFormChannel", "UpdatePriceConditionForm", this.handleUpdatePriceConditionForm, this);
+			this.getOwnerComponent().getEventBus().subscribe("OfferProductsDetailChannel", "UpdateOfferProductsDetailForm", this.handleUpdateOfferProductsDetailForm, this);
 			// /*this.paState = this.getOwnerComponent().getState(this.getOwnerComponent().PA);
 			// this.setModel(this.paState.getModel(), "pa");
 
@@ -192,7 +193,8 @@ sap.ui.define([
 				PriceWithFOCForm:{
 					editMode: false,
 					mainPriceConditionID: null
-				}
+				},
+				ProductDistributors: []
 			});
 	
 			this.setModel(oModel, "ui");
@@ -209,6 +211,7 @@ sap.ui.define([
 			this._bindView();
 			this._bindForm("ProductForm");
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+			this._bindDistributorsMultiInput();
 			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
 			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
 			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
@@ -298,7 +301,7 @@ sap.ui.define([
 							that.onAddContractLinks();
 						}
 						if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
-							StandardSingletonService.onSetDistributorNameTokens(form);
+							this._bindDistributorsMultiInput();
 						}
 					}
 				});
@@ -318,6 +321,47 @@ sap.ui.define([
 		onProductFormDataReceived: function(event){
 			const product = event.getParameter('data');
 			this.setUOM(product.UnitPerPack);
+			this.setMultiInputDistributors(product.Custom_String_6);
+			
+		},
+
+		setMultiInputDistributors: function (distributorIds) {
+			if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
+				const productDistributorIds = distributorIds ? distributorIds.split(',').map(d => d.trim()) : [];
+				const countryDistributors = StandardSingletonService.getCountryDistributors();
+				const productDistributors = productDistributorIds.map(id => {
+					const distributor = countryDistributors.find(d => d.DistributorID == id);
+					return {
+						DistributorID: id,
+						DistributorName: distributor ? distributor.DistributorName : ""
+					};
+				});
+				this.getModel("ui").setProperty("/ProductDistributors", productDistributors);
+			}
+		},
+
+		_bindDistributorsMultiInput() {
+			if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
+				const form = this.byId(`idProductForm`);
+				const product = form?.getBindingContext()?.getObject();
+				const distributorsMultiInput = form.getAggregation("formContainers")?.[0]?.getAggregation("formElements")?.find(el => el.getAggregation("label") === "Distributors")?.getFields()?.[0];
+				if (distributorsMultiInput) {
+					const oTokenTemplate = new Token({
+						key: "{ui>DistributorID}",
+						text: "{ui>DistributorName}",
+						editable: false
+					});
+
+					// Bind tokens aggregation dynamically
+					distributorsMultiInput.bindAggregation("tokens", {
+						path: "ui>/ProductDistributors",
+						template: oTokenTemplate,
+						templateShareable: false
+					});
+
+					this.setMultiInputDistributors(product?.Custom_String_6);
+				}
+			}
 		},
 
 		_bindTable: async function (tenderId, offerId,  countryCode, productCode) {
@@ -623,7 +667,7 @@ sap.ui.define([
 			this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
 			this.defaultModel.resetChanges();
 			if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
-				StandardSingletonService.onSetDistributorNameTokens(form);
+				this._bindDistributorsMultiInput();
 			}
 		},
 	
@@ -2239,6 +2283,13 @@ sap.ui.define([
 				oModel.read(sPath);
 		},
 
+		handleUpdateOfferProductsDetailForm: function () {
+			let oContext = this.byId('idProductForm').getBindingContext();
+			let sPath = oContext.getPath();
+			let oModel = this.getModel();
+				oModel.read(sPath);
+		},
+
 		setSpainMaxPriceFieldVisibility: async function () {
 			const form = this.byId("idProductForm");
 			const ctx = form.getBindingContext();
@@ -3303,16 +3354,15 @@ sap.ui.define([
 			const contractElement = form.getAggregation("formContainers")?.[0].getAggregation("formElements")
 						.find(el => el.getAggregation("label") === "Contract");
 
-			const elementFields = contractElement.getFields();
+			// const elementFields = contractElement.getFields();
 
-			if (Array.isArray(elementFields) && elementFields.length > 0) return
+			// if (Array.isArray(elementFields) && elementFields.length > 0) return
 			
 			contractElement.removeAllFields()
 			if (product?.Custom_String_1) {
 				const contractInfo = product.Custom_String_1.split(":");
-				const fastContractID = contractInfo?.[0];
-				const contracts = contractInfo?.[1].split(",");
-				const hbox = new sap.m.HBox({
+				const contracts = contractInfo?.[0].split(",");
+				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
 				contracts
@@ -3320,10 +3370,11 @@ sap.ui.define([
 				.filter(Boolean)
 				.forEach(c => {
 					const contract = c.split(';');
-					const url = window.location.href.split('#')[0];
-					const href = `${url}#/conditioncontract&/ccma/detail/${fastContractID}/detail-detail/${contract?.[1]}/${contract?.[2]}/ThreeColumnsMidExpanded`;
+					let baseUrl = window.location.origin + window.location.pathname;
+					baseUrl = baseUrl.replace(/index\.html$/, "");
+					const href = `${baseUrl}#/conditioncontract&/ccma/detail/${contract?.[0]}/detail-detail/${contract?.[2]}/${contract?.[3]}/ThreeColumnsMidExpanded`;
 					const link = new Link({
-						text: contract?.[0],
+						text: contract?.[1],
 						href,
 						target: "_blank"
 					});
