@@ -233,6 +233,7 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			let hasCurrentPricingReceived = this.getModel("ui").getProperty("/PricingForm/hasCurrentPricingReceived");
 			if(this.sCountryCode === 'ES'){
 				const currentPriceConditionType = await this.getCurrentPricingConditionType();
 				this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
@@ -252,7 +253,8 @@ sap.ui.define([
 					],
 					success: function (res) {						
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
-						priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
+						//priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
+						priceCondition = hasCurrentPricingReceived ? controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType")) : priceCondition || res?.results.find(el => el.isMain === true) : res?.results.find(el => el.isMain === true);
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -2283,6 +2285,19 @@ sap.ui.define([
 				oModel.read(sPath);
 		},
 
+		updatePriceConditionForm: function (conditionType) {
+			let entityName = `/PriceCondition${conditionType}View`
+			const path = this.getModel().createKey(entityName, {
+				"OfferID": this.sOfferId,
+				"TenderID": this.sObjectId,
+				"ProductCode": this.productId,
+				"ConditionType": conditionType
+			});
+			let oModel = this.getModel();
+				oModel.read(path);
+		},
+
+
 		handleUpdateOfferProductsDetailForm: function () {
 			let oContext = this.byId('idProductForm').getBindingContext();
 			let sPath = oContext.getPath();
@@ -3083,6 +3098,7 @@ sap.ui.define([
 			this.getSavedPriceConditionType().then((priceConditionType) => {
 				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 				this.loadPriceCondition();
+				this.updatePriceConditionForm(priceConditionType);
 			});
 			BusyIndicator.hide();
 		},
@@ -3124,6 +3140,7 @@ sap.ui.define([
 
 		onSpainPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 			this.cancelPendingChanges(["PriceConditionDescuentoComercialView", "PriceConditionPVLView", "PriceConditionPrecioNetoView"], "priceCondPrice");
 			
 			// reload saved condition type
@@ -3141,6 +3158,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasCurrentPricingReceived`, false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionPrecioNetoView"], "priceCondPrice");
@@ -3190,6 +3208,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionDescuentoComercialView"], "priceCondPrice");
@@ -3248,6 +3267,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
@@ -3307,6 +3327,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasCurrentPricingReceived`, false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
@@ -3335,6 +3356,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasCurrentPricingReceived`, false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionRentalView"], "priceCondPrice");
