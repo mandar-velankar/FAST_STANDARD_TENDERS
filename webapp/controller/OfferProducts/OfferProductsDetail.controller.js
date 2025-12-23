@@ -1707,7 +1707,9 @@ sap.ui.define([
 		},
 
 		onLoadPriceConditionSuccess: function(form){
-			const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
+			const context = this.sCountryCode === 'ES' ? form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || form.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || form.getElementBinding()?.getBoundContext() : form.getElementBinding().getBoundContext();
+			const priceCondition = context?.getObject();
+			this.updatePriceConditionForm(priceCondition?.ConditionType);
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
 			let classification = this.getModel("ui").getProperty("/Classification");
