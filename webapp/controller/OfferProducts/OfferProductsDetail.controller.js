@@ -2728,7 +2728,7 @@ sap.ui.define([
 
 			const useConfidential = priceConditionRappelView.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceConditionRappelView.ConfidentialPrice) : parseFloat(priceConditionRappelView.PVL);
-			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = basePrice;
 			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 
@@ -2780,7 +2780,7 @@ sap.ui.define([
 					const isUnit = uom === "Unit";
                     const useConfidential = mainPriceCondition.ConfidentialDiscount !== 0;
 					const basePrice = useConfidential ? parseFloat(mainPriceCondition.ConfidentialPrice) : parseFloat(mainPriceCondition.PVL);
-					let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+					let correctPrice = basePrice;
         
                     mainPrice = rappelPriceCondition.RoyalDecree === "Yes" ? Number((correctPrice * (1 - mainPriceCondition.RoyalDecreePercentage)).toFixed(2)) : correctPrice;     
 
@@ -2833,7 +2833,7 @@ sap.ui.define([
 
 			const useConfidential = priceObj.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
-			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = basePrice;
 			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 			let confidentialPrice = useConfidential ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
@@ -2876,31 +2876,27 @@ sap.ui.define([
 			let errorText = "";
 		
 			if (classification === "Tender") {
-				if (newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
-					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)
-				)) {
+				if ((newNetPriceWithoutTaxBeforeDeductionRD > maxPrice) && (newNetPriceWithoutTaxBeforeDeductionRD > pvl)) 
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than the maximum price and PVL.";
 				}
 		
-				if (!isInvalid && newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
-					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice)
-				)) {
+				if (!isInvalid && (newNetPriceWithoutTaxBeforeDeductionRD > maxPrice) && (newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice))
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than the maximum price and confidential price.";
 				}
 		
 			} else if (classification === "Commercial Agreement") {
-				if ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)) {
+				if (newNetPriceWithoutTaxBeforeDeductionRD > pvl) 
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than PVL.";
 				}
 		
-				if (!isInvalid && ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice))) {
+				if (!isInvalid && (newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice)) 
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than the confidential price.";
 				}
@@ -2941,7 +2937,7 @@ sap.ui.define([
 
 			let royalDecreeValue = 0;
 			const basePrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
-			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = basePrice;
 			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
@@ -3244,7 +3240,7 @@ sap.ui.define([
 			const pvlPricingObj = oBoundContext.getObject();
 
 			const basePrice = pvlPricingObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPricingObj.ConfidentialPrice) : parseFloat(pvlPricingObj.PVL);
-			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			const correctPrice = basePrice;
 
 			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
 			pvlPricingObj.NetPriceWithoutTax = correctPrice;
@@ -3304,7 +3300,7 @@ sap.ui.define([
 			const desEspecialPricingObj = oBoundContext.getObject();
 
 			const basePrice = desEspecialPricingObj.ConfidentialDiscount !== 0 ? parseFloat(desEspecialPricingObj.ConfidentialPrice) : parseFloat(desEspecialPricingObj.PVL);
-			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			const correctPrice = basePrice;
 
 			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
 			desEspecialPricingObj.ESDiscount = 1;
