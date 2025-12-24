@@ -254,7 +254,7 @@ sap.ui.define([
 					success: function (res) {						
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
 						//priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
-						priceCondition = hasCurrentPricingReceived ? controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType")) : priceCondition || res?.results.find(el => el.isMain === true) : res?.results.find(el => el.isMain === true);
+						priceCondition = hasCurrentPricingReceived ? controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType")) : priceCondition : priceCondition || res?.results.find(el => el.isMain === true);
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
