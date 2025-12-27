@@ -2460,6 +2460,7 @@ sap.ui.define([
 		},
 
 		onRappelFormSaveBtnPress: function(event) {
+			this.validateRappelForm();
 			const hasErrorMessages = this.getMessages(["PriceConditionRappelView"]).length > 0;
 			if (hasErrorMessages) return;
 
@@ -2507,6 +2508,47 @@ sap.ui.define([
 				success: this._onSubmitChangesRappelFormSuccess.bind(this),
 				groupId: "RappelForm"
 			});
+		},
+
+		validateRappelForm: function () {
+			const form = this.byId("idRapelForm");
+			const model = this.getView().getModel();
+			const contextPath = form.getObjectBinding() ? form.getObjectBinding().getPath() : "";
+			const data = contextPath ? model.getProperty(contextPath) : {};
+
+			// Clear all previous messages for this section
+			const oldMessages = this.getMessages(["PriceConditionRappelView"]);
+			oldMessages.forEach(msg => {
+				this.oMessageManager.removeMessages(msg);
+				this.removeMessages(msg, "priceCondRappel");
+			});
+
+			const addMessage = (property, text) => {
+				const msg = new Message({
+					message: text,
+					type: MessageType.Error,
+					target: `${contextPath}/${property}`,
+					processor: model
+				});
+				this.oMessageManager.addMessages(msg);
+				this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
+			};
+
+			// Validate Inputs
+			if (!data.PVL) addMessage("PVL", "Please enter PVL");
+			if (data.ConfidentialDiscount > 0 && !data.ConfidentialPrice)
+				addMessage("ConfidentialPrice", "Please enter Confidential Price");
+			if (!data.MainPrice) addMessage("MainPrice", "Please enter Main Condition Price");
+
+			// Validate Selects
+			if (!data.Liquidation) addMessage("Liquidation", "Please select Liquidation");
+			if (!data.PriceConditionCode) addMessage("PriceConditionCode", "Please select Price Condition Code");
+			if (!data.Settlement_ID) addMessage("Settlement_ID", "Please select Settlement");
+			if (!data.MarketIncentiveID) addMessage("MarketIncentiveID", "Please select Market Incentive ID");
+
+			// Validate DatePicker
+			if (!data.RefundDate) addMessage("RefundDate", "Please select Refund Date");
+
 		},
 				
 		// UUID generation function
