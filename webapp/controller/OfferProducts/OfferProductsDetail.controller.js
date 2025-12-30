@@ -233,6 +233,7 @@ sap.ui.define([
 			this.loadPriceCondition();
 		},		
 		getSavedPriceConditionType: async function () {
+			let hasCurrentPricingReceived = this.getModel("ui").getProperty("/PricingForm/hasCurrentPricingReceived");
 			if(this.sCountryCode === 'ES'){
 				const currentPriceConditionType = await this.getCurrentPricingConditionType();
 				this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
@@ -252,7 +253,10 @@ sap.ui.define([
 					],
 					success: function (res) {						
 						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
-						priceCondition = priceCondition ? priceCondition : (controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : (res?.results.find(el => countryDefaultPriceConditionType[controller.sCountryCode] ? el.isMain == true && el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : el.isMain == true))); 
+						//priceCondition = priceCondition ? priceCondition : (controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : (res?.results.find(el => countryDefaultPriceConditionType[controller.sCountryCode] ? el.isMain == true && el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : el.isMain == true))); 
+						//priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
+						priceCondition = controller.sCountryCode === 'ES' ? (hasCurrentPricingReceived ? res?.results.find(el => el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType")) : priceCondition) : (priceCondition || res?.results.find(el => el.isMain === true && (countryDefaultPriceConditionType[controller.sCountryCode] ? el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : true)));
+						controller.setMainPriceCondition(priceCondition);
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -1705,7 +1709,9 @@ sap.ui.define([
 		},
 
 		onLoadPriceConditionSuccess: function(form){
-			const priceCondition = form.getElementBinding()?.getBoundContext()?.getObject();
+			const context = this.sCountryCode === 'ES' ? form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || form.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || form.getElementBinding()?.getBoundContext() : form.getElementBinding().getBoundContext();
+			const priceCondition = context?.getObject();
+			if(this.sCountryCode === 'ES')this.updatePriceConditionForm(priceCondition?.ConditionType);
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
 			let classification = this.getModel("ui").getProperty("/Classification");
@@ -2283,6 +2289,19 @@ sap.ui.define([
 				oModel.read(sPath);
 		},
 
+		updatePriceConditionForm: function (conditionType) {
+			let entityName = `/PriceCondition${conditionType}View`
+			const path = this.getModel().createKey(entityName, {
+				"OfferID": this.sOfferId,
+				"TenderID": this.sObjectId,
+				"ProductCode": this.productId,
+				"ConditionType": conditionType
+			});
+			let oModel = this.getModel();
+				oModel.read(path);
+		},
+
+
 		handleUpdateOfferProductsDetailForm: function () {
 			let oContext = this.byId('idProductForm').getBindingContext();
 			let sPath = oContext.getPath();
@@ -2443,6 +2462,7 @@ sap.ui.define([
 		},
 
 		onRappelFormSaveBtnPress: function(event) {
+			this.validateRappelForm();
 			const hasErrorMessages = this.getMessages(["PriceConditionRappelView"]).length > 0;
 			if (hasErrorMessages) return;
 
@@ -2490,6 +2510,47 @@ sap.ui.define([
 				success: this._onSubmitChangesRappelFormSuccess.bind(this),
 				groupId: "RappelForm"
 			});
+		},
+
+		validateRappelForm: function () {
+			const form = this.byId("idRapelForm");
+			const model = this.getView().getModel();
+			const contextPath = form.getObjectBinding() ? form.getObjectBinding().getPath() : "";
+			const data = contextPath ? model.getProperty(contextPath) : {};
+
+			// Clear all previous messages for this section
+			const oldMessages = this.getMessages(["PriceConditionRappelView"]);
+			oldMessages.forEach(msg => {
+				this.oMessageManager.removeMessages(msg);
+				this.removeMessages(msg, "priceCondRappel");
+			});
+
+			const addMessage = (property, text) => {
+				const msg = new Message({
+					message: text,
+					type: MessageType.Error,
+					target: `${contextPath}/${property}`,
+					processor: model
+				});
+				this.oMessageManager.addMessages(msg);
+				this.setMessageSection(["PriceConditionRappelView"], "priceCondRappel");
+			};
+
+			// Validate Inputs
+			if (!data.PVL) addMessage("PVL", "Please enter PVL");
+			if (data.ConfidentialDiscount > 0 && !data.ConfidentialPrice)
+				addMessage("ConfidentialPrice", "Please enter Confidential Price");
+			if (!data.MainPrice) addMessage("MainPrice", "Please enter Main Condition Price");
+
+			// Validate Selects
+			if (!data.Liquidation) addMessage("Liquidation", "Please select Liquidation");
+			if (!data.PriceConditionCode) addMessage("PriceConditionCode", "Please select Price Condition Code");
+			if (!data.Settlement_ID) addMessage("Settlement_ID", "Please select Settlement");
+			if (!data.MarketIncentiveID) addMessage("MarketIncentiveID", "Please select Market Incentive ID");
+
+			// Validate DatePicker
+			if (!data.RefundDate) addMessage("RefundDate", "Please select Refund Date");
+
 		},
 				
 		// UUID generation function
@@ -2711,7 +2772,7 @@ sap.ui.define([
 
 			const useConfidential = priceConditionRappelView.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceConditionRappelView.ConfidentialPrice) : parseFloat(priceConditionRappelView.PVL);
-			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = basePrice;
 			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 
@@ -2763,7 +2824,7 @@ sap.ui.define([
 					const isUnit = uom === "Unit";
                     const useConfidential = mainPriceCondition.ConfidentialDiscount !== 0;
 					const basePrice = useConfidential ? parseFloat(mainPriceCondition.ConfidentialPrice) : parseFloat(mainPriceCondition.PVL);
-					let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+					let correctPrice = basePrice;
         
                     mainPrice = rappelPriceCondition.RoyalDecree === "Yes" ? Number((correctPrice * (1 - mainPriceCondition.RoyalDecreePercentage)).toFixed(2)) : correctPrice;     
 
@@ -2816,7 +2877,7 @@ sap.ui.define([
 
 			const useConfidential = priceObj.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
-			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = basePrice;
 			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 			let confidentialPrice = useConfidential ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
@@ -2859,31 +2920,27 @@ sap.ui.define([
 			let errorText = "";
 		
 			if (classification === "Tender") {
-				if (newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
-					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)
-				)) {
+				if ((newNetPriceWithoutTaxBeforeDeductionRD > maxPrice) && (newNetPriceWithoutTaxBeforeDeductionRD > pvl)) 
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than the maximum price and PVL.";
 				}
 		
-				if (!isInvalid && newNetPriceWithoutTaxBeforeDeductionRD > maxPrice && (
-					(isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice)
-				)) {
+				if (!isInvalid && (newNetPriceWithoutTaxBeforeDeductionRD > maxPrice) && (newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice))
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than the maximum price and confidential price.";
 				}
 		
 			} else if (classification === "Commercial Agreement") {
-				if ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (pvl / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > pvl)) {
+				if (newNetPriceWithoutTaxBeforeDeductionRD > pvl) 
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than PVL.";
 				}
 		
-				if (!isInvalid && ((isUnit && newNetPriceWithoutTaxBeforeDeductionRD > (confidentialPrice / packFactor)) ||
-					(isPack && newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice))) {
+				if (!isInvalid && (newNetPriceWithoutTaxBeforeDeductionRD > confidentialPrice)) 
+				{
 					isInvalid = true;
 					errorText = "Net price w/o tax must be lower than the confidential price.";
 				}
@@ -2924,7 +2981,7 @@ sap.ui.define([
 
 			let royalDecreeValue = 0;
 			const basePrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
-			let correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			let correctPrice = basePrice;
 			correctPrice = this.formatter.roundToSixDecimalPlaces(correctPrice);
 
 			let confidentialPrice = priceObj.ConfidentialDiscount !== 0 ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
@@ -3083,6 +3140,7 @@ sap.ui.define([
 			this.getSavedPriceConditionType().then((priceConditionType) => {
 				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
 				this.loadPriceCondition();
+				this.updatePriceConditionForm(priceConditionType);
 			});
 			BusyIndicator.hide();
 		},
@@ -3124,6 +3182,7 @@ sap.ui.define([
 
 		onSpainPricingFormCancelBtnPress: function(event){
 			this.getModel("ui").setProperty('/PricingForm/editMode', false);
+			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 			this.cancelPendingChanges(["PriceConditionDescuentoComercialView", "PriceConditionPVLView", "PriceConditionPrecioNetoView"], "priceCondPrice");
 			
 			// reload saved condition type
@@ -3141,6 +3200,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasCurrentPricingReceived`, false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionPrecioNetoView"], "priceCondPrice");
@@ -3190,6 +3250,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionDescuentoComercialView"], "priceCondPrice");
@@ -3223,7 +3284,7 @@ sap.ui.define([
 			const pvlPricingObj = oBoundContext.getObject();
 
 			const basePrice = pvlPricingObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPricingObj.ConfidentialPrice) : parseFloat(pvlPricingObj.PVL);
-			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			const correctPrice = basePrice;
 
 			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
 			pvlPricingObj.NetPriceWithoutTax = correctPrice;
@@ -3248,6 +3309,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionPVLView"], "priceCondPrice");
@@ -3282,7 +3344,7 @@ sap.ui.define([
 			const desEspecialPricingObj = oBoundContext.getObject();
 
 			const basePrice = desEspecialPricingObj.ConfidentialDiscount !== 0 ? parseFloat(desEspecialPricingObj.ConfidentialPrice) : parseFloat(desEspecialPricingObj.PVL);
-			const correctPrice = isUnit ? basePrice / packFactor : basePrice;
+			const correctPrice = basePrice;
 
 			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
 			desEspecialPricingObj.ESDiscount = 1;
@@ -3307,6 +3369,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasCurrentPricingReceived`, false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionDescuentoEspecialView"], "priceCondPrice");
@@ -3335,6 +3398,7 @@ sap.ui.define([
 			]);
 			if(!hasErrorMessages){
 				this.getModel("ui").setProperty(`/PricingForm/editMode`, false);
+				this.getModel("ui").setProperty(`/PricingForm/hasCurrentPricingReceived`, false);
 				this.getModel("ui").setProperty(`/RappelForm/hasMainPriceCondition`, true);
 				this.getModel("ui").setProperty(`/FocForm/hasMainPriceCondition`, true);
 				this.cancelPendingChanges(["PriceConditionRentalView"], "priceCondPrice");

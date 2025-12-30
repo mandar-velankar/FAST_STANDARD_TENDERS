@@ -76,10 +76,10 @@ sap.ui.define([
 			await this.approvalButtonEnableCheck();
 			await this.assignWordTemplates();
 			await this.assignExcelTemplates();
-			const selectedTender = await this.stState.getService().getTender(this.tenderId);
+			this.selectedTender = await this.stState.getService().getTender(this.tenderId);
 			this.countryCode === "ES" && this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
 			
-			this.getModel("ui").setProperty("/Classification", selectedTender?.Classification);
+			//this.getModel("ui").setProperty("/Classification", this.selectedTender?.Classification);
 		},
 
 		onCloseApprovalDialog: function(){
@@ -553,6 +553,7 @@ sap.ui.define([
 		
 		createNewAwardedProducts: function () {
 			const offerProductInfoTable = this.byId("idProductInformationTable");
+			const classification = this.selectedTender?.Classification;
 			const itemContexts = offerProductInfoTable.getBinding("items").getContexts();
 			itemContexts.forEach(prod => {
 				const product = prod.getObject();
@@ -569,6 +570,7 @@ sap.ui.define([
 						AwardedPrice: this.countryCode === 'TW' ? product.NET_PRICE : product.OFFER_PRICE,
 						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
+						Outcome: this.countryCode === 'ES' ? classification === 'Commercial Agreement' ? 'Won' : null : null,
 					},
 					groupId: "AwardedProduct"
 				})
