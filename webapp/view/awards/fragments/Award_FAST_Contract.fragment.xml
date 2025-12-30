@@ -26,7 +26,7 @@
                     }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender'}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender' &amp;&amp; !${st>/fastCCMContractId}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
                     minDate="{st>/ContractMngtDateConstraints/minDate}"
                     maxDate="{ui>/maxDate}"
@@ -50,7 +50,7 @@
                     }"
                     change=".onContractDateChange"
                     width="10rem"
-                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender'}"
+                    enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender' &amp;&amp; !${st>/fastCCMContractId}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
                     minDate="{st>/ContractMngtDateConstraints/minDate}"
                     maxDate="{ui>/maxDate}"
@@ -62,7 +62,7 @@
         <!-- RIGHT SIDE: Set All Product Outcome button -->
             <Button
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate}}"
+                    enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate} &amp;&amp; !${st>/fastCCMContractId}}"
                     press=".onCreateAllFASTContracts"
                     text="{i18n>CreateAllFASTContracts}"
                     class="sapUiTinyMarginEnd"
