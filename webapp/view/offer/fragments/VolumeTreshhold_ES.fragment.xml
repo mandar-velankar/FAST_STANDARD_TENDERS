@@ -1,0 +1,71 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+
+	<Dialog title="Volume Treshhold" >
+		<buttons>
+			<Button text="{i18n>VolumeTreshholdFragment.Apply}" press=".onApplyDiscountCondition" />
+            <Button text="{i18n>VolumeTreshholdFragment.Cancel}" press=".onCancelDiscountCondition"/>
+		</buttons>
+
+        <Table id="idVolumeTreshold" items="{
+                path: '/DiscountConditionView',
+                groupId: 'RappelForm'
+            }">
+            <headerToolbar>
+                <OverflowToolbar>
+                    <content>
+                        <ToolbarSpacer />
+						<Button icon="sap-icon://sort" press=".onSortDiscountCondition"/>
+                        <Button icon="sap-icon://add" press=".onAddNewDiscountCondition"/>
+                    </content>
+                </OverflowToolbar>
+            </headerToolbar>
+            <columns>
+                <Column>
+                    <Text text="{i18n>VolumeTreshholdFragment.Volume}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>VolumeTreshholdFragment.Discount}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>VolumeTreshholdFragment.Tax}"/>
+                </Column>
+                <Column>
+                    <Text text="{i18n>VolumeTreshholdFragment.NetPriceWithoutTax}"/>
+                </Column>    
+                <Column>
+                    <Text text="{i18n>VolumeTreshholdFragment.NetPricewithTax}"/>
+                </Column>  
+                <Column>
+                    <Text text="{i18n>VolumeTreshholdFragment.Action}"/>
+                </Column>            
+            </columns>
+            <ColumnListItem>
+                <cells>
+                    <HBox >
+                        <Text text=">=" wrapping="false" class="sapUiSmallMarginTop"/>
+                        <Input value="{Volume}" fieldWidth="80%"/>
+                    </HBox>
+                    <Input value="{
+									parts: [ 'Discount', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" fieldWidth="80%" liveChange=".calculateNetPricesRappel"/>
+                    <Input value="{
+									parts: [ 'Tax', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+								}" enabled="false" fieldWidth="80%"/>
+                    <Input value="{
+									parts: ['NetPriceWithoutTax', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" enabled="false" fieldWidth="80%"/>
+                    <Input value="{
+									parts: ['NetPriceWithTax', 'Currency', 'Region', 'CountryCode'],
+									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
+								}" enabled="false" fieldWidth="80%"/>
+                    <Button icon="sap-icon://delete" press=".onDeleteDiscountCondition"/>
+                </cells>
+            </ColumnListItem>
+        </Table>
+   	</Dialog>	
+</core:FragmentDefinition>

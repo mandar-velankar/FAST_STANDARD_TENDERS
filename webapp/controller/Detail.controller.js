@@ -110,7 +110,7 @@ sap.ui.define([
 			const xmlView = tab.getXMLView();
 			const viewFolder = tab.title.toLowerCase().split(" ").join("");
 			const language = this.getModel("appView").getProperty("/language");
-			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder === "pricerequest"? "tender" : viewFolder}.views.${xmlView.getName()}`;
+			const viewName = `com.bayer.tender.statenderapp.view.${viewFolder === "pricerequest" || viewFolder === "basicinformation" ? "tender" : viewFolder}.views.${xmlView.getName()}`;
 			const viewData = {
 				objectId:this.sObjectId,
 				offerId:this.sOfferId,
@@ -199,6 +199,9 @@ sap.ui.define([
 				StandardSingletonService.setBU(selectedOfferProduct?.BU);
 			}
 
+			const countryDistributors = await this.stState.getService().getCountryDistributors(this.sCountryCode);
+			StandardSingletonService.setCountryDistributors(countryDistributors);
+
 			this.setSelectedTabKey();
 
 			this.getModel().metadataLoaded().then( async function() {
@@ -208,11 +211,19 @@ sap.ui.define([
 				const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 				const UserInfo = this.stState.getProperty('/UserInfo');
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
+				this.getModel("st").setProperty("/SelectedTender", selectedTender);
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
+				StandardSingletonService.setIsMultiDistributorEnabledPerProduct(["CO"].includes(this.sCountryCode) || selectedTender?.Region?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi'));
 				await this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				!this.selectedOfferHasBinding() && this._bindView();
+				
+				// Needed for Spain Overview screen to immediately display price condition informations
+				const contractMngtDateConstraints = this.sCountryCode === 'ES' ? await this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode) : null;
+				const offerProducts = await this.stState.getOfferProductValidation(this.sOfferId);
+				this.getModel("st").setProperty("/OfferProductsValidations", offerProducts);
+				this.getModel("st").setProperty("/ContractMngtDateConstraints", contractMngtDateConstraints);
 			}.bind(this));
 		},
 

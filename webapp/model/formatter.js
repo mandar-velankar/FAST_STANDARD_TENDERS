@@ -116,6 +116,18 @@ sap.ui.define([
 					stringToReplace	= originalString;
 					replacementString = "With Maximum Price";
 					break;
+				case 'precioneto'	:
+					stringToReplace	= originalString;
+					replacementString = "Precio Neto";
+					break;
+				case 'descuentocomercial'	:
+					stringToReplace	= originalString;
+					replacementString = "Descuento Comercial";
+					break;
+				case 'descuentoespecial'	:
+					stringToReplace	= originalString;
+					replacementString = "Descuento Especial";
+					break;
 				default:
 					return originalString;
 			}
@@ -137,6 +149,12 @@ sap.ui.define([
 
 		truncToFourDecimalPlaces: function(number) {
 			const factor = 10000; // 10^4 for four decimal places
+			const result = Math.round(number * factor) / factor;
+			return result;
+		},
+
+		roundToSixDecimalPlaces: function(number) {
+			const factor = 1000000;
 			const result = Math.round(number * factor) / factor;
 			return result;
 		},
@@ -180,6 +198,97 @@ sap.ui.define([
                 return today;
             }
         },
+		outcome: function(grossMargin){
+            if(!grossMargin){return};
+            let newGrossMargin =  grossMargin * 100;
+            if (parseFloat(newGrossMargin) >= parseFloat('40%')) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+		formatESProductOutcomeIcon: function (grossMargin) {
+			const outcome = this.outcome(grossMargin);
+			return outcome ? "sap-icon://sys-enter-2" : "sap-icon://error"
+		},
+		formatESProductOutcomeState: function (grossMargin) {
+			const outcome = this.outcome(grossMargin);
+			return outcome ? "Success" : "Error"
+		},
+		formatInstitutesInGroupAndRegionsTextArea: function (data, countryCode) {
+			if (!data || !countryCode) return "";
+			const separators = {
+				"NL": ";"
+			}
+			return data.split(separators[countryCode] ? separators[countryCode] : ",").join(",\n");
+		},
+
+		formatTextAreaRowSize: function (data, countryCode) {
+			if (!data || !countryCode) return 0;
+			const separators = {
+				"NL": ";"
+			}
+			const list = data.split(separators[countryCode] ? separators[countryCode] : ",");
+			return list.length <= 10 ? list.length : 10; 
+		},
+
+		formVisibilityOfInstIngroup: function (data, countryCode) {
+			if (!data) return false;
+			const separators = {
+				"NL": ";"
+			}
+			return data.split(separators[countryCode] ? separators[countryCode] : ",").length > 0;
+		},
+
+		priceTwoOrFour: function(price, currency, unit) {
+			if (!price){
+				return "";
+			}
+			var oNumberFormat = NumberFormat.getFloatInstance({
+				maxFractionDigits: unit !== "Pack" ? 4 : 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			var oValue = oNumberFormat.format(parseFloat(price));
+			if (!currency){
+				return oValue;
+			}
+			return oValue + " "+ currency;
+		},
+
+		statusPrice:  function (isLowest) {
+			try {
+				if (isLowest === 1){
+					return "Error";
+				}
+				return "None";
+			} catch (err) {
+				return "None";
+			}
+		},
+
+		hasAdditionalCondition: function(sorter, additionalConditions){
+			if(!sorter || !additionalConditions) return 'No';
+			return additionalConditions.some(cond => cond.SORTER === sorter) ? 'Yes' : 'No';
+		},
+
+		price: function(price, currency) {
+			if (!price){
+				return "";
+			}
+			var oNumberFormat = NumberFormat.getFloatInstance({
+				maxFractionDigits: 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			var oValue = oNumberFormat.format(parseFloat(price));
+			if (currency === undefined){
+				return oValue;
+			}
+			return oValue + " "+ currency;
+		},
 
 		formatInstitutesInGroupAndRegionsTextArea: function (data, countryCode) {
 			if (!data || !countryCode) return "";

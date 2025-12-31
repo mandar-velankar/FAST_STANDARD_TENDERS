@@ -69,6 +69,22 @@ sap.ui.define([
 			this.tenderID = tenderID;
 		},
 
+		setIsMultiDistributorEnabledPerProduct: function(isEnabled){
+            this.isMultiDistributorEnabledPerProduct = isEnabled;
+        },
+
+		getIsMultiDistributorEnabledPerProduct: function(){
+			return this.isMultiDistributorEnabledPerProduct;
+		},
+
+		setCountryDistributors: function(countryDistributors){
+			this.countryDistributors = countryDistributors;
+		},
+
+		getCountryDistributors: function(){
+			return this.countryDistributors;
+		},
+
 		onChangeOutcome: function (event, StandardSingletonService) {
 			const source = event.getSource();
 			const formElements = source.getParent().getParent().getAggregation("formElements");
@@ -95,6 +111,56 @@ sap.ui.define([
                 source.getSelectedKey() === 'No' || source.getSelectedKey() == '' ? itemBinding.setProperty("enabled", false) : itemBinding.setProperty("enabled", true);
             }     
         },
+
+		onChangeClassification: function (event, StandardSingletonService) {
+			const countryCode = StandardSingletonService.CountryCode;
+			if (countryCode !== 'ES') {
+				return;
+			}
+		
+			const selectedClassification = event.getValue();
+			const formContainers = event.getParent().getParent().getParent().getAggregation("formContainers");
+		
+			// Find Timeline Section
+			const timelineContainer = formContainers.find(container => container.getAggregation("title") === "Timeline");
+		
+			// Find Institute & Type Section
+			const instituteTypeContainer = formContainers.find(container => container.getAggregation("title") === "Institute & Type");
+		
+			// Get all form elements from the sections
+			const timelineElements = timelineContainer.getAggregation("formElements");
+			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
+		
+			// Find specific elements (Effective Date, Expiry Date, Tender Types)
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract Start Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract End Date");
+		
+			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
+			const tenderType2Element = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type 2");
+		
+			if (selectedClassification === 'Commercial Agreement') {
+				// Show only EffectiveDate and ExpiryDate in Timeline
+				timelineElements.forEach(el => {
+					el.setVisible(false);
+				});
+				effectiveDateElement.setVisible(true);
+				expiryDateElement.setVisible(true);
+		
+				tenderTypeElement.setVisible(false);
+				tenderType2Element.setVisible(false);
+			} else if (selectedClassification === 'Tender') {
+				// Show all fields in Timeline except EffectiveDate/ExpiryDate
+				timelineElements.forEach(el => {
+					el.setVisible(true);
+				});
+				effectiveDateElement.setVisible(false);
+				expiryDateElement.setVisible(false);
+		
+				tenderTypeElement.setVisible(true);
+				tenderType2Element.setVisible(true);
+			}
+		},
+		
 
 		onChangeQuotationInstitute: function (originalInputField, selectedItem, StandardSingletonService) {
             const paymentTermsBinding = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")[2].getAggregation("formElements").find(el => el.getAggregation("label") === "Payment Term")?.getAggregation("fields")[0].getBinding("items");
@@ -155,6 +221,16 @@ sap.ui.define([
 					!bBuyingGroupSelected && institutesInGroup.getFields()[0].removeAllTokens();
 					institutesInGroup.setVisible(true);
 					break
+				case "ES": 
+					const regionsMultiSelectField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+					regionsMultiSelectField.setVisible(selectedItem.ChannelName === "Region(s)");
+
+					// originalInputField.getModel().setProperty(`${path}/State`, undefined);
+					regionsMultiSelectField.getFields()[0].removeAllTokens()
+					break;
 				default:
 					break;
 			}
@@ -192,6 +268,17 @@ sap.ui.define([
 						institutesInGroupField.getFields()[0]?.addToken(new Token({key: value, text:value}));
 					}
 						
+					break;
+				case "ES": 
+				const instituteRegion = await StandardSingletonService.getRegionByID(selectedItem, countryCode, defaultModel);
+				const regionsMultiSelectField = originalInputField.getParent().getParent().getParent().getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+					regionsMultiSelectField.getFields()[0].removeAllTokens();
+
+					for(const value of instituteRegion.split(",")){
+						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
 					break;
 				default:
 					break;
@@ -250,6 +337,18 @@ sap.ui.define([
 			}
 		},
 
+		onChangeDistributor: async function (originalInputField, selectedItems, StandardSingletonService) {
+			if (!(originalInputField instanceof sap.m.MultiInput) || !StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) return;
+
+			const ctx = originalInputField.getBindingContext();
+			const path = ctx.getPath();
+			const defaultModel = originalInputField.getModel();
+			const inputBindingPath = originalInputField.getBinding("value")?.getPath() || "Custom_String_6";
+			const distributors = selectedItems.map(item => item.getBindingContext().getObject().DistributorID).join(',');
+
+			defaultModel.setProperty(`${path}/${inputBindingPath}`, distributors);
+		},
+
 		getInstituteBranchs: async function (selectedItem, countryCode, originalInputField) {
 			return new Promise((resolve, reject) => {
 				originalInputField.getModel().read('/InstituteInBranchView', {
@@ -287,6 +386,25 @@ sap.ui.define([
 			});
 		},
 
+		getRegionByID: async function (selectedItem, countryCode, defaultModel) {
+			return new Promise((resolve, reject) => {
+				defaultModel.read('/CountryRegionsTableView', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+						new Filter("ID", "EQ", selectedItem?.RegionID),
+					],
+					success: function (res) {
+						resolve(res.results.reduce((acc,curr)=> acc ? `${acc};${curr.Name}` : `${acc}${curr.Name}`, ''))
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
+
+
         // onChangeProductIncluded: function (event) {
         //     const source = event.getSource();
         //     const itemBinding = source.getParent().getParent().getAggregation("formElements")?.find(el => el.getAggregation("label") === "Comment")?.getAggregation("fields")[0];
@@ -305,7 +423,7 @@ sap.ui.define([
 		 * @returns {Object} An object with properties indicating visibility and enablement settings.
 		 */
 
-        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotations, savedAwardedProductsCount) {
+        getEnablementObject: function (status, isProductDeclined, stTenderRoles, UserInfo, CountryCode, savedQuotations, savedAwardedProductsCount, tender) {
 
 			const isQuotationSaved = (savedQuotations?.count > 0 && savedAwardedProductsCount.count > 0);
 			const isOverviewTabVisible = !!status;

@@ -16,7 +16,8 @@ sap.ui.define([
 	"sap/m/Button",
 	"sap/m/Dialog",
 	"sap/m/Bar",
-	"sap/m/Text"
+	"sap/m/Text",
+	"../model/datatypes/CustomDateType",
 ], function (
 	Controller, 
 	History, 
@@ -35,7 +36,8 @@ sap.ui.define([
 	Button,
 	Dialog,
 	Bar,
-	Text
+	Text,
+	CustomDateType
 	) {
 	"use strict";
 
@@ -48,6 +50,7 @@ sap.ui.define([
 			number: CustomNumberType,
 			decimal: CustomDecimalType,
 			currency: CustomCurrencyType,
+			date: CustomDateType
 		},
 
 		/**
@@ -256,6 +259,7 @@ sap.ui.define([
 			let isVisible = "";
 			switch (tabName) {
 				case "Tender":
+				case "Basic Information":
 				case "Price Request":
 				case "價格要求":
 				case "Przetarg":

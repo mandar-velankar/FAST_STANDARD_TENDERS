@@ -100,13 +100,17 @@ sap.ui.define([
 
 			// activate automatic message generation for complete view
 			this.oMessageManager.registerObject(this.getView(), true);
+			const today = new Date();
+        	const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
 
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				TenderForm:{
 					editMode: true	
-				}
+				},
+				minDate: today,
+				maxDate: maxDate
 			});
 	
 			this.setModel(oModel, "ui");
@@ -782,6 +786,7 @@ sap.ui.define([
 			this.getModel().setProperty(`${sElemBindingPath}/SubmittedBy`, userFullName);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractLength`, 12);
 			this.getModel().setProperty(`${sElemBindingPath}/ContractExtenseion`, 0);
+			this.getModel().setProperty(`${sElemBindingPath}/createdAt`, today);
 			this.getModel().setProperty(`${sElemBindingPath}/Classification`,classificationObj[this.countryCode]? classificationObj[this.countryCode]: '');
 			this.getModel().setProperty(`${sElemBindingPath}/CountryCode`, sCountryCode);
 			if(this.countryCode === 'TW'){
@@ -790,6 +795,9 @@ sap.ui.define([
 			}
 			if (userInfo?.Role === 'KAM' && this.countryCode === 'PL') {
 				this.getModel().setProperty(`${sElemBindingPath}/Custom_String_1`, userInfo.UserName);
+			}
+			if (this.countryCode === 'ES') {
+				this.getModel().setProperty(`${sElemBindingPath}/TenderChannel`, 'Direct');
 			}
 		},
 		onCloseTenderCreationDialog: function () {
@@ -882,7 +890,7 @@ sap.ui.define([
 			const hasErrorMessages = this.getMessages([ctxPath]).length > 0;
 			this.setMessageSection([ctxPath], "newTenderMsg");
 			if (!hasErrorMessages) {
-				MessageToast.show("Tender has been successfully created");
+				MessageToast.show(newTenderCtx.getObject()?.Classification + " has been successfully created");
 				this.cancelPendingChanges(["TenderFormView"], "newTenderMsg");
 				this.onCloseTenderCreationDialog();
 				this._showDetail(newTenderCtx.getObject());
@@ -925,7 +933,7 @@ sap.ui.define([
 			newTenderObj.TenderNo = oStandModel.getProperty("/NextTenderNo");
 			newTenderObj.TENDER_TYPE_ID = 1; //default set to not specified
 			newTenderObj.TenderChannel = oBoundContext.getObject().TenderChannel ? oBoundContext.getObject().TenderChannel : 'Distributor';
-			newTenderObj.ExternalID = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
+			newTenderObj.Custom_String_6 = this.getView().getModel('st').getProperty("/SelectedProductScope"); //for mandatory field check in sta-service
 			newTenderObj.SubmittedOn = new Date().toISOString();
 			delete newTenderObj.ParentInstituteID; //specific for Taiwan
 

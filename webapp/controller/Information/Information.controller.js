@@ -43,17 +43,29 @@ sap.ui.define([
 			this.offerId = offerId;
 			this.countryCode = countryCode;
 			this.selectedTab = iconTabfilter.getKey();
+			const today = new Date();
+        	const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
 
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				editMode: false,
-				minDate: new Date(),
+				minDate: today,
+				maxDate: maxDate,
 				OverviewForm:{
 					editMode: false
 				},
 				enableApprovalButton: false,
 				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch'),
+				OverviewPriceConditionTableSpain: {
+					pvl: [],
+					precioNeto: [],
+					descuentoComercial: [],
+					descuentoEspecial: [],
+					rappel: [],
+					foc: [],
+					rental: []
+				},
 				isOfferHavingOnlyTMApproverTypePending: false
 			});
 			
@@ -64,7 +76,10 @@ sap.ui.define([
 			await this.approvalButtonEnableCheck();
 			await this.assignWordTemplates();
 			await this.assignExcelTemplates();
+			this.selectedTender = await this.stState.getService().getTender(this.tenderId);
+			this.countryCode === "ES" && this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
 			
+			//this.getModel("ui").setProperty("/Classification", this.selectedTender?.Classification);
 		},
 
 		onCloseApprovalDialog: function(){
@@ -176,6 +191,7 @@ sap.ui.define([
 			this.bindFields();
 			if(this.offerId && this.offerId !== "NA"){await this.bindProductFOCInformationTable(this.countryCode, this.offerId);}
 			await this.approvalButtonEnableCheck();
+			this.countryCode === "ES" && this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
 			//this.getOwnerComponent().getModel().refresh(true);			
 		},
 		bindForm: async function (tabName) {
@@ -537,6 +553,7 @@ sap.ui.define([
 		
 		createNewAwardedProducts: function () {
 			const offerProductInfoTable = this.byId("idProductInformationTable");
+			const classification = this.selectedTender?.Classification;
 			const itemContexts = offerProductInfoTable.getBinding("items").getContexts();
 			itemContexts.forEach(prod => {
 				const product = prod.getObject();
@@ -553,6 +570,7 @@ sap.ui.define([
 						AwardedPrice: this.countryCode === 'TW' ? product.NET_PRICE : product.OFFER_PRICE,
 						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
+						Outcome: this.countryCode === 'ES' ? classification === 'Commercial Agreement' ? 'Won' : null : null,
 					},
 					groupId: "AwardedProduct"
 				})
@@ -586,6 +604,113 @@ sap.ui.define([
 				this.getModel("ui").setProperty("/StandardTenderFOCInformation", data.results);
 			})
 		},
+
+		/**
+		 * This method creates entities to be used for the binding of the Price Condition 
+		 * tables on the Quotation tab for Spain.
+		 */
+		_createPriceConditionTableEntitiesOnQuotationTabForSpain: function(){ 
+			const uiModel = this.getModel("ui");
+			const OfferProductValidation = this.stState.getProperty("/OfferProductsValidations");
+
+			const tableData = {
+				pvl: [],
+				precioNeto: [],
+				descuentoComercial: [],
+				descuentoEspecial: [],
+				rappel: [],
+				foc: [],
+				rental: []
+			};
+
+			// create PriceConditionTableEntities
+			OfferProductValidation.forEach(prd => {
+				const priceConditions = prd.PriceCondition.results;
+				priceConditions.forEach(pc => {
+					const data = {
+						SORTER: prd.SORTER,
+						PRODUCTNAME: prd.PRODUCTNAME,
+						PACKSIZE: prd.PACKSIZE,
+						REQUESTED_QUANTITY: prd.REQUESTED_QUANTITY,
+						REQ_PRICE_UNIT_OFFER_CURRENCY: prd.REQ_PRICE_UNIT_OFFER_CURRENCY,
+						CURRENCY: prd.CURRENCY || "",
+						IS_LOWEST: prd.IS_LOWEST,
+						REQ_PRICE_PACK_OFFER_CURRENCY: prd.REQ_PRICE_PACK_OFFER_CURRENCY,
+						GROSS_SALES_OFFER_CURRENCY: prd.GROSS_SALES_OFFER_CURRENCY,
+						PAID_VOLUME: prd.PAID_VOLUME,
+						UNIT: prd.UNIT,
+						PriceCondition: pc
+					};
+					const conditionType = formatter.replaceString(pc.PriceConditionClassification.ConditionType);
+					switch(conditionType){
+						case "PVL": tableData.pvl.push(data);
+									break;
+						case "Precio Neto": tableData.precioNeto.push(data);
+									break;
+						case "Descuento Comercial": tableData.descuentoComercial.push(data);
+									break;
+						case "Descuento Especial": tableData.descuentoEspecial.push(data);
+									break;
+						case "Rappel": tableData.rappel.push(data);
+									break;
+						case "FOC": tableData.foc.push(data);
+									break;
+						case "Rental": tableData.rental.push(data);
+									break;
+						default : console.error(`ConditionType ${conditionType} does not exist`); 
+									break;
+					}
+				});
+			});
+
+
+			// add Tax to each DiscountCondition entity
+			tableData.rappel.forEach(rappelCondition => {
+				rappelCondition.PriceCondition.DiscountCondition.results = rappelCondition.PriceCondition.DiscountCondition.results.map(dc => ({...dc, Tax: rappelCondition.PriceCondition.Tax}))
+			});
+
+			// flatten/unpack foc entities
+			tableData.foc = [].concat.apply([], tableData.foc.map(focCondition => focCondition.PriceCondition.FreeGoodsOther.results.map(foc => ({...focCondition, ...foc}))));
+			
+			this.stState.setProperty("/OverviewPriceConditionTableSpain", tableData);
+		},
+
+		/**
+		 * Click handler for VolumeTreshhold fragment on the Quotation page
+		 * @param {*} oEvent 
+		 */
+		onVolumeTreshholdPress: function(oEvent){
+			const that = this;
+            const oView = this.getView();
+			const oContext = oEvent.getSource().getParent().getBindingContext('st');
+
+            // create dialog lazily
+            if (!this.pDialog) {
+                this.pDialog = Fragment.load({
+                    id: oView.getId(),
+                    name: "com.bayer.tender.statenderapp.view.overview.fragments.VolumeTreshhold_ES_Display",
+                    controller: this
+                }).then(function (oDialog) {
+                    // connect dialog to the root view of this component (models, lifecycle)
+                    oView.addDependent(oDialog);
+                    oDialog.setModel(that.stState, "st");
+                    return oDialog;
+                });
+            }
+
+            this.pDialog.then(function (oDialog) {
+				const oTable = this.byId("idVolumeTresholdDisplay");
+				oTable.setBindingContext(oContext, "st");
+                oDialog.open();
+            }.bind(this));
+
+        },
+
+
+		onCancelDiscountCondition:function(){
+			const dialog = this.byId("idESVolumeThresholdDialog");
+            if(dialog) dialog.close();
+        },
 
 		getPolandOffersWithOnlyTMPending: async function () {
 			const uiModel = this.getModel("ui");
