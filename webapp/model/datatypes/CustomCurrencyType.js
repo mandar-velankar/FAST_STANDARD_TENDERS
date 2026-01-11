@@ -35,13 +35,36 @@ sap.ui.define([
 			return `${oCurrencyFormat.format(Number(parts[0] ?? 0))} ${parts[1] ?? ''}` ;
         },
 
-        parseValue: function(oValue) {
-            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
-                // minFractionDigits: 2,
-                // maxFractionDigits: 2
-            });
-            return oCurrencyFormat.parse(oValue);
+        parseValue: function (oValue) {
+            if (!oValue) {
+                return null;
+            }
 
+            // Remove currency text and spaces
+            let sValue = oValue.replace(/[^\d.,\-]/g, "");
+
+            const hasDot = sValue.includes(".");
+            const hasComma = sValue.includes(",");
+
+            // Case 1: NL grouped format → 1.798,75
+            if (hasDot && hasComma && sValue.lastIndexOf(".") < sValue.lastIndexOf(",")) {
+                sValue = sValue
+                    .replace(/\./g, "")   // remove grouping dots
+                    .replace(",", ".");   // decimal comma → dot
+            }
+            // Case 2: NL ungrouped decimal → 4,72
+            else if (!hasDot && hasComma) {
+                sValue = sValue.replace(",", ".");
+            }
+
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance();
+            const vParsed = oCurrencyFormat.parse(sValue);
+
+            if (vParsed === null) {
+                throw new ValidateException("Invalid currency format");
+            }
+
+            return vParsed;
         },
 
         validateValue: function(oValue) {
