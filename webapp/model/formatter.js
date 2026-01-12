@@ -289,6 +289,19 @@ sap.ui.define([
 				"NL": ";"
 			}
 			return data.split(separators[countryCode] ? separators[countryCode] : ",").length > 0;
+		},
+
+		floatNoUnit: function(value){
+			let oLocale = new sap.ui.core.Locale("en-US"); //force the same number format for all countries (also if browser language is german, . will be . as decimal)
+			var oNumberFormat = sap.ui.core.format.NumberFormat.getFloatInstance({
+				maxFractionDigits: 2,
+				minFractionDigits: 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			},oLocale);
+			var oValue = oNumberFormat.format(parseFloat(value));
+			return oValue;
 		}
 	};
 });
