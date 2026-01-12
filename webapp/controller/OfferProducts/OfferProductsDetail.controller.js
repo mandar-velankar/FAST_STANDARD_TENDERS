@@ -225,6 +225,7 @@ sap.ui.define([
 			if(countryCode === 'ES'){
 				this.bindProfitabilityForm();
 				this.bindRappelForm();
+				this.bindProductTypeProfitabilityTable()
 				await this.setSpainMaxPriceFieldVisibility();
 				await this.getSettlements();
 				await this.getMarketIncentiveID();
@@ -948,6 +949,10 @@ sap.ui.define([
 				OfferID: this.sOfferId
 			});
 			this.getOwnerComponent().getModel().read(path);
+			
+			if (this.sCountryCode === 'ES') {
+				this.bindProductTypeProfitabilityTable();
+			}
 
 			// this.defaultModel.refresh(true);
 		},
@@ -3444,6 +3449,53 @@ sap.ui.define([
 
 				contractElement.addField(hbox);
 			}
+		},
+
+		bindProductTypeProfitabilityTable: function () {
+			const table = this.byId("idTableConsolidatedProductProfitability");
+
+			const template = new sap.m.ColumnListItem({
+				vAlign: "Middle",
+				cells: [
+					new sap.m.Text({ text: "{ProductType}" }),
+					new sap.m.Text({
+						text: {
+							path: "NPV_GrossMargin",
+							formatter: this.formatter.floatNoUnit
+						}
+					}),
+					new sap.m.Text({
+						text: {
+							path: "NPV_NetSales",
+							formatter: this.formatter.floatNoUnit
+						}
+					}),
+					new sap.m.Text({
+						text: {
+							path: "NPV_Cogs",
+							formatter: this.formatter.floatNoUnit
+						}
+					}),
+					new sap.m.Text({
+						text: {
+							path: "Profitability",
+							formatter: this.formatter.formatPercentage
+						}
+					})
+				]
+			});
+
+			const filters = [
+				new sap.ui.model.Filter("CountryCode", sap.ui.model.FilterOperator.EQ, this.sCountryCode),
+				new sap.ui.model.Filter("OfferId", sap.ui.model.FilterOperator.EQ, this.sOfferId)
+			];
+
+			table.bindItems({
+				path: "/ProductTypeProfitability",
+				template: template,
+				filters: filters
+			});
 		}
+
     });
 });
