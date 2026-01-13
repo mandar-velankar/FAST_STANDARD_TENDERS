@@ -1017,16 +1017,27 @@ sap.ui.define([
 		 * @param {string} conditionType - The condition type.
 		 */
 		onPricingFormLiveChange:function(event, conditonType){
-			let value = event.getParameter("newValue");
-			if(!value){value = '0';}
-			const type = event.getSource().getBinding('value').getType();
-			value = value.replace(/(?<=\d),(?=\d{3}(\.|$))/g, '');
-			const parsedValue = type.getModelFormat().parse(value);
-			const property = event.getSource().getBindingPath("value");
-			const context = event.getSource().getBindingContext();
+			const oSource = event.getSource();
+			let value;
+
+			if (oSource.isA("sap.m.Input")) {
+				value = event.getParameter("newValue");
+				if (!value) {
+					value = "0";
+				}
+				const type = oSource.getBinding("value").getType();
+				value = value.replace(/(?<=\d),(?=\d{3}(\.|$))/g, "");
+				value = type.getModelFormat().parse(value);
+			} else if (oSource.isA("sap.m.CheckBox")) {
+				value = event.getParameter("selected") ? "1" : "0";
+			}
+
+			const property = oSource.getBindingPath("value") || oSource.getBindingPath("selected");
+			const context = oSource.getBindingContext();
+
 			this.calculatePricingFormFields({
 				conditonType,
-				value: parsedValue,
+				value: value,
 				property,
 				context
 			});
@@ -2877,6 +2888,18 @@ sap.ui.define([
 
 			let netPriceWithoutTaxAfterDeductionRD = 0;
 			let royalDecreeValue = 0;
+			let additionalDiscount = 0;
+			let priceConditionCode = priceObj.PriceConditionCode;
+
+			if (property?.toLowerCase().includes("royaldecreeincl")) {
+				if (value === "0") {
+					priceConditionCode = "YP10";
+				} else {
+					priceConditionCode = "YP11";
+				}
+			}
+
+			const isYP11 = priceConditionCode === 'YP11';
 
 			const useConfidential = priceObj.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
@@ -2886,12 +2909,25 @@ sap.ui.define([
 			let confidentialPrice = useConfidential ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
 			confidentialPrice = this.formatter.roundToSixDecimalPlaces(confidentialPrice);
 
-			let additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			if (isYP11 && priceObj.RoyalDecreePercentage_1) {
+				additionalDiscount = 1 - newNetPriceWithoutTaxBeforeDeductionRD / correctPrice / (1 - priceObj.RoyalDecreePercentage_1);
+			} else {
+				additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			}
+
 			additionalDiscount = this.formatter.roundToSixDecimalPlaces(additionalDiscount);
 			
-			netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1));
+			if (isYP11) {
+				netPriceWithoutTaxAfterDeductionRD = newNetPriceWithoutTaxBeforeDeductionRD;
+			} else {
+				netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1));
+			}
+
 			netPriceWithoutTaxAfterDeductionRD = this.formatter.roundToSixDecimalPlaces(netPriceWithoutTaxAfterDeductionRD);
-			royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+			if (!isYP11) {
+				royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+			}
+			
 			royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
 
 			let netPriceWithTax = (netPriceWithoutTaxAfterDeductionRD * (1 + Number(priceObj.Tax)));
@@ -2902,6 +2938,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithoutTaxAfterDeductionRD", netPriceWithoutTaxAfterDeductionRD, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+			context.getModel().setProperty("PriceConditionCode", priceConditionCode, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 

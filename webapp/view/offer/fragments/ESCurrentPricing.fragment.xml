@@ -106,13 +106,13 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.royalDecreeIncl}"
-                        visible="false"
+                        visible="{= ${ConditionType} === 'PrecioNeto'}"
                     >
                         <form:fields>
                             <CheckBox
                                 enabled="false"
                                 selected="{RoyalDecreeIncl}"
-                                visible="false"
+                                visible="{= ${ConditionType} === 'PrecioNeto'}"
                             />
                         </form:fields>
                     </form:FormElement>
@@ -154,16 +154,26 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceBeforeRC}"
-                        visible="{= ${ConditionType} === 'PrecioNeto'}"
-                    >
+                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${YP11} === null }">
                         <form:fields>
                             <Input
                                 fieldGroupIds="priceInputPrecioNeto"
                                 value="{ parts: ['YP10', 'Currency','', 'CountryCode'], 
-                        			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
+                                        type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${ConditionType} === 'PrecioNeto'}"
-                            />
+                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${YP11} === null }"/>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement
+                        label="{i18n>ESPricingFragment.NetPriceBeforeRC}"
+                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${YP11} !== null }">
+                        <form:fields>
+                            <Input
+                                fieldGroupIds="priceInputPrecioNeto"
+                                value="{ parts: ['YP11', 'Currency','', 'CountryCode'], 
+                                        type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
+                                enabled="false"
+                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${YP11} !== null }"/>
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement

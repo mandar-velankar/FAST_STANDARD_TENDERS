@@ -108,13 +108,14 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.royalDecreeIncl}"
-                        visible="false"
+                        visible="{= ${ConditionType} === 'PrecioNeto'}"
                     >
                         <form:fields>
                             <CheckBox
-                                enabled="false"
+                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                 selected="{RoyalDecreeIncl}"
-                                visible="false"
+                                visible="{= ${ConditionType} === 'PrecioNeto'}"
+                                select=".onPricingFormLiveChange($event, 'PrecioNeto')"
                             />
                             <!-- visible="{= ${RoyalDecree} === 'No' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                  select=".onPricingFormLiveChange($event, 'PrecioNeto')" -->
