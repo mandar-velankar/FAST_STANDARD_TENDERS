@@ -119,7 +119,10 @@
 					<ToolbarSpacer/>
 					<Button text="{i18n>SalesReport}" visible="{= ${st>/SelectedCountry} === 'PL'}" press=".onOpenSalesReportScreen"/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
-					<Button text ="{= ${st>/SelectedCountry} === 'NL'? 'New Price Request' :'New Tender'}" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+					<Button
+						text="{path: 'st>/SelectedCountry', formatter: '.formatCreateTenderButtonText'}"
+						icon="sap-icon://add"
+						press=".onOpenCreateTenderDialog" />
 					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
 					<Button icon="sap-icon://download" text="Download CSV" press=".onDownloadZuelligExtractCSV" visible="{= ${accessControl>/standardtenderAccess/ZuelligExtract}}"/>
 					<Button icon="sap-icon://download" text="Extract Offers" press=".onDownloadExtractOffers" visible="{= ${st>/SelectedCountry} === 'NL'}"/>

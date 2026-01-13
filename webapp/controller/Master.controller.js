@@ -1146,8 +1146,30 @@ sap.ui.define([
 					return false;
 				}
 			}
-			return true
+			return true;
+		},
+		
+		formatCreateTenderButtonText: function(sCountry) {
+			const oBundle = this?.getView()?.getModel("i18n")?.getResourceBundle();
+
+			if (!oBundle) {
+				return "New Tender";
+			}
+
+			if (!sCountry) {
+				return oBundle.getText("NewTender");
+			}
+
+			switch (sCountry) {
+				case "NL":
+					return oBundle.getText("NLNewTender");
+				case "ES":
+					return oBundle.getText("ESNewTender");
+				default:
+					return oBundle.getText("NewTender");
+			}
 		}
+
 	});
 
 });
