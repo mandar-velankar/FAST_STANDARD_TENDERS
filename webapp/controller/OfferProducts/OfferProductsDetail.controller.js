@@ -224,8 +224,8 @@ sap.ui.define([
 			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);
 			if(countryCode === 'ES'){
 				this.bindProfitabilityForm();
-				this.bindRappelForm();
-				this.bindProductTypeProfitabilityTable()
+				this.bindProductTypeProfitabilityTable();
+				await this.bindRappelForm();
 				await this.setSpainMaxPriceFieldVisibility();
 				await this.getSettlements();
 				await this.getMarketIncentiveID();
