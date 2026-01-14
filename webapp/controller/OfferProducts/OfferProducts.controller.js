@@ -791,19 +791,36 @@ sap.ui.define([
 			const that = this;
 
 			if (!this.valueHelpSelectBrandDialog) {
-				this.valueHelpSelectBrandDialog = new sap.m.SelectDialog(this.createId("idValueHelpSelectBrandDialog"), {
+				this.valueHelpSelectBrandDialog = new sap.m.TableSelectDialog(this.createId("idValueHelpSelectBrandDialog"), {
 					title: "Brand Name",
 					multiSelect: true,
+					contentWidth: '250px',
 					rememberSelections: false,
 					items: {
 						path: "ui>/OfferProductTable/countryBrands",
 						sorter: new Sorter("BRAND_NAME", false),
-						template: new sap.m.StandardListItem({
-							title: "{ui>BRAND_NAME}",
-							description: "{ui>BRAND_ID}",
-							selected: "{ui>SELECTED}"
+						template: new sap.m.ColumnListItem({
+							cells: [
+								new sap.m.VBox({
+									items: [
+										new sap.m.Text({
+											text: "{ui>BRAND_NAME}",
+											wrapping: false,
+											additionalStyleClasses: "sapUiSmallMarginBottom"
+										}),
+										new sap.m.Text({
+											text: "{ui>BRAND_ID}",
+											wrapping: false,
+											maxLines: 1
+										})
+									]
+								})
+							]
 						})
 					},
+					columns: [
+						new sap.m.Column({ header: new sap.m.Text({ text: "Brand Name" }) })
+					],
 					liveChange: function (event) {
 						let sValue = event.getParameter("value");
 						const oFilter = [
