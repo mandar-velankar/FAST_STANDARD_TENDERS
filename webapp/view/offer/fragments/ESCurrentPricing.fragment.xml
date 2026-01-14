@@ -93,14 +93,14 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecree}"
-                        visible="{= !${RoyalDecreeIncl} }"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['YD06', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} }"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
                             />
                         </form:fields>
                     </form:FormElement>
