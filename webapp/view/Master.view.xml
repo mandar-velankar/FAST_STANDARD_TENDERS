@@ -92,6 +92,17 @@
 					</Select>
 
 					<Label
+						text="Institute Type"
+						labelFor="idSelectInstituteType"
+					/>
+					<Select 
+						id="idSelectInstituteType"
+						selectedKey="{st>/SelectedInstituteType}"
+						change=".onChangeCountryInstituteType">
+						<core:Item key="{ChannelName}" text="{ChannelName}"/>
+					</Select>
+
+					<Label
 						text="Institute"
 						labelFor="idSelectInstitute"
 					/>
