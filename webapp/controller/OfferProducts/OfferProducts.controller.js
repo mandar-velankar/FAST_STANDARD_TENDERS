@@ -1546,7 +1546,7 @@ sap.ui.define([
 		OfferProductColumnVisibility: function (title) {
 			const obj = this.byId('idOfferProductsTable')?.getBindingContext()?.getObject();
 			const tenderPath = this.getModel().createKey('/TenderFormView', {
-				TenderID: this.objectId || obj.TenderID
+				TenderID: obj?.TenderID || this.objectId
 			});
 			const tender = this.getModel().getObject(tenderPath) || obj;
 			if (!tender || !title) return true;
