@@ -291,11 +291,11 @@ sap.ui.define([
 				path = newEntryContext.getPath();
 			}
 
-			
 				// Add an event delegate to the form to execute code after it has been rendered
 				// This ensures that any DOM-dependent or aggregation-dependent changes
 				// (like adding dynamic links or tokens) happen after the SAPUI5 form has finished rendering.
-				form.addEventDelegate({
+				
+				const formDelegate = {
 					onAfterRendering: () => {
 						// Call the custom method to add clickable links for contract numbers
 						// This method should handle creating Links or Tokens dynamically
@@ -306,8 +306,10 @@ sap.ui.define([
 						if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
 							this._bindDistributorsMultiInput();
 						}
+						form.removeEventDelegate(formDelegate);
 					}
-				});
+				}
+			form.addEventDelegate(formDelegate);
 			
 
 
