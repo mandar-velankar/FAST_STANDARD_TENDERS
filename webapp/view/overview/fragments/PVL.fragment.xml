@@ -1,0 +1,126 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+    <Table 
+        id="idPVLOverviewTable"
+        visible="{= ${st>/OverviewPriceConditionTableSpain/pvl}.length > 0}"
+        items="{
+            path: 'st>/OverviewPriceConditionTableSpain/pvl',
+            sorter: [{path: 'SORTER', descending: false}]
+        }"
+        inset="false" 
+        class="sapFDynamicPageAlignContent" 
+        contextualWidth="auto"
+        alternateRowColors="true" 
+    >   
+        <headerToolbar>
+            <OverflowToolbar>
+                <content>
+                    <Title text="{i18n>ESOverviewPVLFragment.PVL}" level="H2"/>
+                    <ToolbarSpacer />
+                </content>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.ID}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.Product}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.PackFactor}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.Qty}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.UnitPrice}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.PackPrice}"/>
+            </Column>    
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.PVL}"/>
+            </Column>   
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.PriceCondition}"/>
+            </Column> 
+            <Column visible="{= ${ui>/Classification} === 'Commercial Agreement'}">
+                <Text text="{i18n>ESOverviewPVLFragment.Rappel}"/>
+            </Column> 
+            <Column visible="{= ${ui>/Classification} === 'Commercial Agreement'}">
+                <Text text="{i18n>ESOverviewPVLFragment.FOC}"/>
+            </Column>  
+            <Column>
+                <Text text="{i18n>ESOverviewPVLFragment.Total}"/>
+            </Column>              
+        </columns>
+        <ColumnListItem>
+            <cells>
+                <!-- Contract ID -->
+                <Text text="{path :'st>SORTER'}"/>
+                
+                <!-- Article Name -->
+                <Text text="{path :'st>PRODUCTNAME'}"/>
+
+                <!-- Pack Factor -->
+                <Text text="{path :'st>PACKSIZE'}"/>
+
+                <!-- Quantity -->
+                <Text text="{st>PAID_VOLUME} {st>UNIT}"/>
+
+                <!-- Unit Price -->
+                <ObjectStatus
+                    text="{parts: [
+                        {path: 'st>REQ_PRICE_UNIT_OFFER_CURRENCY'}, 
+                        {path: 'st>CURRENCY'}
+                    ], formatter:'.formatter.priceTwoOrFour'}"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- Pack Price -->
+                <ObjectStatus text="{parts: [ {path: 'st>REQ_PRICE_PACK_OFFER_CURRENCY'},  {path: 'st>CURRENCY'} ], formatter:'.formatter.price'}"
+                    state="{ parts:[{path:'st>IS_LOWEST'}], formatter: '.formatter.statusPrice'}"
+                />
+
+                <!-- PVL -->
+                <Text text="{parts: [
+                    {path: 'st>PriceCondition/PVL'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+
+                <!-- Price Condition -->
+                <Text text="{
+                    path :'st>PriceCondition/PriceConditionClassification/ConditionType',
+                    formatter: '.formatter.replaceString'
+                }"/>
+
+                <!-- Rappel -->
+                <Text text="{ 
+                        parts:[
+                            {path:'st>SORTER'},
+                            {path:'st>/OverviewPriceConditionTableSpain/rappel'}
+                        ], 
+                        formatter: '.formatter.hasAdditionalCondition'
+                    }"
+                />
+
+                <!-- FOC -->
+                <Text text="{ 
+                        parts:[
+                            {path:'st>SORTER'},
+                            {path:'st>/OverviewPriceConditionTableSpain/foc'}
+                        ], 
+                        formatter: '.formatter.hasAdditionalCondition'
+                    }"
+                />
+                <!-- Total -->
+                <Text text="{parts: [
+                    {path: 'st>GROSS_SALES_OFFER_CURRENCY'}, 
+                    {path: 'st>CURRENCY'}
+                ], formatter:'.formatter.price'}"/>
+            </cells>
+        </ColumnListItem>
+    </Table>
+</core:FragmentDefinition>

@@ -39,7 +39,7 @@ sap.ui.define([
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
 
-			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request") return;
+			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request" && this.selectedTab !== "Basic Information") return;
 			 // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
 
 			this.defaultModel = this.getOwnerComponent().getModel();
@@ -102,6 +102,7 @@ sap.ui.define([
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						const classification = form?.getElementBinding()?.getBoundContext()?.getProperty("Classification");
 						const manager = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_1");
 						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
@@ -109,6 +110,11 @@ sap.ui.define([
 						}else if (this.countryCode === "NL") {
 							this.setInstitutesinGroupFieldVisible(form, cs);
 							this.setRemovedStaticManagerItem(form, manager);
+						}
+
+						if(this.countryCode === "ES" && classification){
+							this.applyClassificationLogic(classification, form);
+							this.setRegionsFieldVisible(form, instituteType);
 						}
 
 						if(cs){
@@ -125,6 +131,7 @@ sap.ui.define([
 						let multiInputCustomField = this.getMultiInputCustomField(this.countryCode, form);
 						let cs  =  form?.getElementBinding()?.getBoundContext()?.getProperty(`${multiInputCustomField.customFieldName}`);
 						const instituteType = form?.getElementBinding()?.getBoundContext()?.getProperty("InstituteType");
+						const classification = form?.getElementBinding()?.getBoundContext()?.getProperty("Classification");
 						const manager = form?.getElementBinding()?.getBoundContext()?.getProperty("Custom_String_1");
 						multiInputCustomField.control?.removeAllTokens();
 						if (this.countryCode === "GB") {
@@ -132,6 +139,11 @@ sap.ui.define([
 						}else if (this.countryCode === "NL") {
 							this.setInstitutesinGroupFieldVisible(form, cs);
 							this.setRemovedStaticManagerItem(form, manager);
+						}
+
+						if(this.countryCode === "ES" && classification){
+							this.applyClassificationLogic(classification, form);
+							this.setRegionsFieldVisible(form, instituteType);
 						}
 
 						if(cs){
@@ -243,6 +255,47 @@ sap.ui.define([
 
 			institutesInGroup.setVisible(!!cs);
 		},
+
+		applyClassificationLogic: function (classification, form) {
+			const formContainers = form.getAggregation("formContainers");
+		
+			// Find Timeline Section
+			const timelineContainer = formContainers.find(container => container.getAggregation("title") === "Timeline");
+		
+			// Find Institute & Type Section
+			const instituteTypeContainer = formContainers.find(container => container.getAggregation("title") === "Institute & Type");
+		
+			// Get all form elements from the sections
+			const timelineElements = timelineContainer.getAggregation("formElements");
+			const instituteTypeElements = instituteTypeContainer.getAggregation("formElements");
+		
+			const effectiveDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract Start Date");
+			const expiryDateElement = timelineElements.find(el => el.getAggregation("label") === "Contract End Date");
+		
+			const tenderTypeElement = instituteTypeElements.find(el => el.getAggregation("label") === "Tender Type");
+			const tenderType2Element = instituteTypeElements.find(el =>	el.getAggregation("label") === "Tender Type 2");
+		
+			// Apply logic based on classification
+			if (classification === 'Commercial Agreement') {
+				timelineElements.forEach(el => {
+					el.setVisible(false);
+				});
+				effectiveDateElement.setVisible(true);
+				expiryDateElement.setVisible(true);
+		
+				tenderTypeElement.setVisible(false);
+				tenderType2Element.setVisible(false);
+			} else if (classification === 'Tender') {
+				timelineElements.forEach(el => {
+					el.setVisible(true);
+				});
+				effectiveDateElement.setVisible(false);
+				expiryDateElement.setVisible(false);
+		
+				tenderTypeElement.setVisible(true);
+				tenderType2Element.setVisible(true);
+			}
+		},
 		/**
 		 * This method binds a given table to its entity from the ui configuration template.
 		 * FYI: the table ID in the View is a concatination of "id" + tableName
@@ -289,7 +342,7 @@ sap.ui.define([
 				this.oMessageManager.removeMessages(messages); // This is needed to clear unwanted messages in the MessageManager
 				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + `/${multiInputCustomField.customFieldName}`, multiInputCustomField.control?.getTokens()?.reduce((prev,token,idx)=>
 				prev?`${prev}${separator}${token.getText()}`:token.getText(),""));
-				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/ExternalID", this.productScope); //for mandatory field check in sta-service
+				this.defaultModel.setProperty(form?.getBindingContext()?.getPath() + "/Custom_String_6", this.productScope); //for mandatory field check in sta-service
 				this.defaultModel.submitChanges({
 					error: this._onSubmitChangesFail.bind(this),
 					success: this._onSubmitChangesTenderFormSuccess.bind(this),
@@ -319,21 +372,38 @@ sap.ui.define([
 		onTenderFormCancelBtnPress: function(event){
 			this.cancelPendingChanges(["TenderFormView"], "basicInfoMsg");	
 			this.getModel("ui").setProperty('/TenderForm/editMode', false);
+			const tenderForm = this.byId("idTenderForm");
+			const obj = tenderForm.getBindingContext().getObject();
 
 			if (this.countryCode === "TW") {
-				const tenderForm = this.byId("idTenderForm");
-
 				const tenderInstituteTypeContainer = this.templateStateData.detailConfig.countryTemplate.getTemplate().getTab("Tender").getXMLView().getFormByName("TenderForm").getFormContainerByName("Institute & Type");
 				const InstituteInBranchConfigField = tenderInstituteTypeContainer.getFormElementByName("Institute In Branch");
 
 				const instInBranchField = tenderForm.getAggregation("formContainers")
 						.find(el => el.getAggregation("title") === tenderInstituteTypeContainer?.title || el.getAggregation("title") === tenderInstituteTypeContainer?.titleLocale).getAggregation("formElements")
 						.find(el => el.getAggregation("label") === InstituteInBranchConfigField?.label || el.getAggregation("label") === InstituteInBranchConfigField?.labelLocale).getFields()[0];
-				const obj = tenderForm.getBindingContext().getObject();
+						
 				instInBranchField.removeAllTokens();
 				for(const value of obj.Custom_String_3.split(",")){
 					instInBranchField.addToken(new Token({key: value, text:value}));
 				}
+			}
+
+			if (this.countryCode === "GB" || this.countryCode === "ES") {
+				const regionsMultiSelectField = tenderForm.getAggregation("formContainers")
+					.find(el => el.getAggregation("title") === "Institute & Type").getAggregation("formElements")
+					.find(el => el.getAggregation("label") === "Regions");
+
+				if (obj.InstituteType === "Region(s)") {
+					regionsMultiSelectField && regionsMultiSelectField.setVisible(true);
+					regionsMultiSelectField.getFields()[0].removeAllTokens();
+					for(const value of obj.Custom_String_2.split(",")){
+						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
+					}
+				}else {
+					regionsMultiSelectField && regionsMultiSelectField.setVisible(false);
+				}
+				
 			}
 		},
 		

@@ -375,7 +375,6 @@ sap.ui.define([
 				});
 			});
 		},
-
 		getSavedQuotations: async function (OfferID) {
 			return new Promise((resolve, reject) => {
 				this.model.read("/PT_TMQUTO", {
@@ -448,7 +447,41 @@ sap.ui.define([
 				});
 			});
         },
+		
+		getStandardTenderPriceConditionView: function (tenderID,offerID,productID) {
+			return new Promise((resolve, reject) => {
+				this.model.read("/StandardTenderPriceConditionView",
+				{
+					filters: [
+						new Filter ("TenderID", FilterOperator.EQ, tenderID),
+						new Filter ("OfferID", FilterOperator.EQ, offerID),
+						new Filter ("ProductCode", FilterOperator.EQ, productID)
+					],
+					success: function (res) {
+						resolve(res?.results);
+					},
+				});
+			});
+		},
 
+		getBankGuarantee: async function (tenderID, type) {
+			return new Promise((resolve, reject) => {
+				const filters = [
+					new Filter("TenderID", "EQ", tenderID)
+				];
+
+				if (type) {
+					filters.push(new Filter("Type", "EQ", type))
+				}
+				this.model.read("/BankGuarantees", {
+					filters: filters,
+					success: function (res) {
+						resolve(type ? res?.results[0] : res?.results);
+					},
+				});
+			});
+		},
+		
 		getAwardedProducts: async function (offerID) {
 			const filters = [
 				new Filter("OfferID",FilterOperator.EQ, offerID),
@@ -476,6 +509,77 @@ sap.ui.define([
 					},
 				});
 			});
-		}
+		},
+
+		getPolandOffersWithOnlyTMPending: function (offerId) {
+			const sKey = this.model.createKey("/PolandOffersWithOnlyTMPending", {
+				OfferID: offerId
+			});
+			return new Promise((resolve, reject) => {
+				this.model.read(sKey, {
+					success: function (res) {
+						resolve(res);
+					},
+					error: function (err) {
+						resolve(undefined);
+					}
+				});
+			});
+		},
+		
+		updateApprovalTypeStatus: function (data, params) {
+			const sKey = this.model.createKey("/PT_TMAPPRST", {
+				OfferId: params.OfferId,
+				productcode: params.productcode,
+				ApproverEmailID: params.ApproverEmailID,
+				Active: params.Active,
+				Statustime: params.Statustime,
+				ApproverType: params.ApproverType,
+				LotID: params.LotID,
+			});
+			return new Promise((resolve, reject) => {
+				this.model.update(sKey, data, {
+					success: function (res) {
+						resolve(true);
+					},
+				});
+			});
+		},
+		
+		onGetContractMngtDateConstraints: function (TenderID, OfferID, CountryCode) {
+			return new Promise((resolve, reject) => {
+				this.model.callFunction("/getContractMngtDateConstraints", {
+					method:"GET", 
+					urlParameters: {TenderID, OfferID, CountryCode},
+					success: (data) => {
+						resolve({
+							minDate: new Date(data.minDate || null) 
+						});
+					},
+					error: (err) => {
+						resolve({
+							minDate: null
+						});
+					}
+				});
+			})
+		},
+
+		getCountryDistributors: async function (countryCode) {
+			return new Promise((resolve, reject) => {
+				this.model.read('/MasterDistributors', {
+					filters: [
+						new Filter("CountryCode", "EQ", countryCode),
+					],
+					success: function (res) {
+						resolve(res.results)
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
     });
 });

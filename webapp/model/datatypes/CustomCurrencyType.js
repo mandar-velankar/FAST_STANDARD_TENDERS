@@ -27,8 +27,8 @@ sap.ui.define([
             }
 
             const oCurrencyFormat = NumberFormat.getCurrencyInstance({
-                    minFractionDigits: parts[3]?.includes('HM') ? 4 : parts[2] === 'MEA' ? 3 : 2,
-                    maxFractionDigits: parts[3]?.includes('HM') ? 4 : parts[2] === 'MEA' ? 3 : 2,
+                    minFractionDigits: parts[3] === 'ES' ? 6 : parts[3]?.includes('HM') ? 4 : parts[2] === 'MEA' ? 3 : 2,
+                    maxFractionDigits: parts[3] === 'ES' ? 6 : parts[3]?.includes('HM') ? 4 : parts[2] === 'MEA' ? 3 : 2,
                     groupingSeparator: countryGroupingSeparators[parts[3]] ? countryGroupingSeparators[parts[3]] : ",",
                     decimalSeparator: countryDecimalSeparators[parts[3]] ? countryDecimalSeparators[parts[3]] : "."
                 });

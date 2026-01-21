@@ -1,0 +1,74 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:up="sap.uxap"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
+    xmlns:t="sap.ui.table"
+    xmlns:l="sap.ui.layout"
+    xmlns:mvc="sap.ui.core.mvc"
+>
+    <Dialog
+        id="idGetCurrentPriceDialog"
+        title="Get Current Price"
+        contentWidth="600px"
+        contentHeight="220px"
+    >
+        <form:Form
+            id="idGetCurrentPriceForm"
+            editable="true"
+        >
+            <form:layout>
+                <form:ResponsiveGridLayout
+                    labelSpanXL="1"
+                    labelSpanL="1"
+                    labelSpanM="1"
+                    labelSpanS="3"
+                    adjustLabelSpan="false"
+                    emptySpanXL="3"
+                    emptySpanL="3"
+                    emptySpanM="3"
+                    emptySpanS="1"
+                    columnsXL="1"
+                    columnsL="1"
+                    columnsM="1"
+                    singleContainerFullSize="true"
+                />
+            </form:layout>
+            <form:formContainers>
+                <form:FormContainer>
+                    <form:formElements>
+                        <form:FormElement label="Institute Type">
+                            <form:fields>
+                                <Input
+                                    value="{ui>/InstituteType}"
+                                    enabled="false"
+                                />
+                            </form:fields>
+                        </form:FormElement>
+                        <form:FormElement label="Institute Name">
+                            <Input
+                                id="idInstitutes"
+                                value="{ui>/SelectedInstituteName}"
+                                showValueHelp="true"
+                                valueHelpRequest=".onOpenInstituteValueHelp"
+                                placeholder="Select Institute"
+                            />
+                        </form:FormElement>
+                    </form:formElements>
+                </form:FormContainer>
+            </form:formContainers>
+        </form:Form>
+        <buttons>
+            <Button
+                text="Run"
+                type="Emphasized"
+                press=".onGetCurrentPrice"
+            />
+            <Button
+                text="Cancel"
+                press=".onCloseGetCurrentPriceDialog"
+            />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

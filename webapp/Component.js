@@ -71,7 +71,11 @@ sap.ui.define([
 				"ComplianceOfficerView",
 				"GlobalStrategicMarketingView",
 				"SupplyManagementView",
-				"MEACHNotificationMail"
+				"MEACHNotificationMail",
+				"ProfitabilityCalcParamView",
+				"RappelForm",
+				"BankGuarantees",
+				"PT_TMBDPR"
 			]));
 			oModel.setChangeGroups({
 				"TenderFormView": {
@@ -134,6 +138,21 @@ sap.ui.define([
 				"PriceConditionWithMaximumPriceView": {
 					groupId: "PricingForm",
 				},
+				"PriceConditionDescuentoComercialView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionPVLView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionRentalView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionDescuentoEspecialView": {
+					groupId: "PricingForm",
+				},
+				"PriceConditionPrecioNetoView": {
+					groupId: "PricingForm",
+				},
 				"FreeGoodsOther": {
 					groupId: "PricingForm",  
 				},
@@ -184,6 +203,18 @@ sap.ui.define([
 				},
 				"MEACHOutbox": {
 					groupId: "MEACHNotificationMail"
+				},
+				"ProfitabilityCalcParamView":{
+					groupId: "ProfitabilityCalcParamView"
+				},
+				"PriceConditionRappelView":{
+					groupId: "RappelForm"
+				},
+				"BankGuarantees": {
+					groupId: "BankGuarantees"
+				},
+				"PT_TMBDPR": {
+					groupId: "PT_TMBDPR"
 				}
 			});
 		},
