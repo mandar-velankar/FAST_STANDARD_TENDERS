@@ -76,8 +76,10 @@ sap.ui.define([
 
         getCountryCode: function () {
             if (HashChanger) {
+                const host = window.location.host;
                 const hash = HashChanger.getInstance().getHash();
-                this.countryCode = hash ? hash.split('/')?.[1] : "";
+                const countryCodeIndex = !host.includes("localhost") && !host.includes("port") ? 3 : 1;
+                this.countryCode = hash ? hash.split('/')?.[countryCodeIndex] : "";
             }
         },
 
