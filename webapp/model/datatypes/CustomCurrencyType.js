@@ -1,10 +1,12 @@
 sap.ui.define([
     "sap/ui/model/CompositeType",
     "sap/ui/model/ValidateException",
-    "sap/ui/core/format/NumberFormat"
-], function (CompositeType,ValidateException,NumberFormat) {
+    "sap/ui/core/format/NumberFormat",
+    "sap/ui/core/routing/HashChanger",
+], function (CompositeType,ValidateException,NumberFormat, HashChanger) {
     "use strict";
 
+    this.countryCode = '';
     /*const oCurrencyFormat = NumberFormat.getCurrencyInstance({
         minFractionDigits: 2,
         maxFractionDigits: 2
@@ -35,19 +37,48 @@ sap.ui.define([
 			return `${oCurrencyFormat.format(Number(parts[0] ?? 0))} ${parts[1] ?? ''}` ;
         },
 
-        parseValue: function(oValue) {
-            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
-                // minFractionDigits: 2,
-                // maxFractionDigits: 2
-            });
-            return oCurrencyFormat.parse(oValue);
+        parseValue: function (oValue) {
+            this.getCountryCode();
 
+            if (!oValue) {
+                return null;
+            }
+
+            const countryGroupingSeparators = {
+                NL: '.',
+                PL: ' '
+            };
+
+            const countryDecimalSeparators = {
+                NL: ',',
+                PL: ','
+            };
+
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+                groupingSeparator: countryGroupingSeparators[this.countryCode] ?? ",",
+                decimalSeparator: countryDecimalSeparators[this.countryCode] ?? "."
+            });
+
+            const vParsed = oCurrencyFormat.parse(oValue);
+
+            if (vParsed === null) {
+                throw new ValidateException("Invalid currency format");
+            }
+
+            return vParsed;
         },
 
         validateValue: function(oValue) {
             // if(oValue > 1) {
             //     throw new ValidateException("Not a valid Currency!");
             // }
+        },
+
+        getCountryCode: function () {
+            if (HashChanger) {
+                const hash = HashChanger.getInstance().getHash();
+                this.countryCode = hash ? hash.split('/')?.[1] : "";
+            }
         },
 
         /**
