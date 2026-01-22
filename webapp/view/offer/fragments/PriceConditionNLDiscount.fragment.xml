@@ -79,7 +79,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: ['NLPriceConditionType/0/Discount', 'CountryCode'],
+									parts: ['NLPriceConditionType_1_Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -91,7 +91,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NLPriceConditionType/0/OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									parts: ['NLPriceConditionType_1_OfferPrice', 'Currency', 'Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
@@ -110,7 +110,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: ['NLPriceConditionType/1/Discount', 'CountryCode'],
+									parts: ['NLPriceConditionType_2_Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -122,7 +122,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NLPriceConditionType/1/OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									parts: ['NLPriceConditionType_2_OfferPrice', 'Currency', 'Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
@@ -141,7 +141,7 @@
 						<form:fields>
 							<Input
 								value="{
-									parts: ['NLPriceConditionType/2/Discount', 'CountryCode'],
+									parts: ['NLPriceConditionType_3_Discount', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
@@ -153,7 +153,7 @@
 						<form:fields>
 							<Input 
 								value="{
-									parts: ['NLPriceConditionType/2/OfferPrice', 'Currency', 'Region', 'CountryCode'],
+									parts: ['NLPriceConditionType_3_OfferPrice', 'Currency', 'Region', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'	
 								}" 
 								enabled="false"
