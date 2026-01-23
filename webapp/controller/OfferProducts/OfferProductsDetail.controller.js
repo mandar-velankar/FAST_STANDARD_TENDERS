@@ -3039,9 +3039,14 @@ sap.ui.define([
 
 			let netPriceBeforeRC = correctPrice * (1 - discount);
 			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
+				
+			if(priceObj.RoyalDecreePercentage_1){
+				netPriceBeforeRC = correctPrice * (1 - discount - priceObj.RoyalDecreePercentage_1);				
+				royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1;
+			}else{
+				netPriceBeforeRC = correctPrice * (1 - discount);
+			}
 			
-			netPriceBeforeRC = correctPrice * (1 - discount) * (1 - priceObj.RoyalDecreePercentage_1);				
-			royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1 * (1 - discount);
 			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
 			royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
 
