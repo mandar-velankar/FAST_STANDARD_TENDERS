@@ -252,10 +252,18 @@ sap.ui.define([
 						new Filter("ProductCode", "EQ", this.productId),
 						new Filter("ProductCode", "EQ", this.productId)
 					],
-					success: function (res) {						
-						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
-						//priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
-						priceCondition = hasCurrentPricingReceived ? controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType")) : priceCondition : priceCondition || res?.results.find(el => el.isMain === true);
+					success: function (res) {	
+						const results = res?.results || [];
+
+						let priceCondition = results.find(el => el.hasPriceCondition === true && el.isMain === true);
+
+						if (controller.sCountryCode === "ES" && (hasCurrentPricingReceived || !priceCondition)) {
+							priceCondition = results.find(el =>	el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType"));
+						}
+
+						if (!priceCondition) {
+							priceCondition = results.find(el => el.isMain === true);
+						}
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -1727,7 +1735,7 @@ sap.ui.define([
 		onLoadPriceConditionSuccess: function(form){
 			const context = this.sCountryCode === 'ES' ? form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || form.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || form.getElementBinding()?.getBoundContext() : form.getElementBinding().getBoundContext();
 			const priceCondition = context?.getObject();
-			if(this.sCountryCode === 'ES')this.updatePriceConditionForm(priceCondition?.ConditionType);
+			if(this.sCountryCode === 'ES' && context) this.updatePriceConditionForm(priceCondition?.ConditionType);
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
 			let classification = this.getModel("ui").getProperty("/Classification");
