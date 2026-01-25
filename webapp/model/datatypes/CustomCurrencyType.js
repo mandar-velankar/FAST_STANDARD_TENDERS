@@ -1,10 +1,12 @@
 sap.ui.define([
     "sap/ui/model/CompositeType",
     "sap/ui/model/ValidateException",
-    "sap/ui/core/format/NumberFormat"
-], function (CompositeType,ValidateException,NumberFormat) {
+    "sap/ui/core/format/NumberFormat",
+    "sap/ui/core/routing/HashChanger",
+], function (CompositeType,ValidateException,NumberFormat, HashChanger) {
     "use strict";
 
+    this.countryCode = '';
     /*const oCurrencyFormat = NumberFormat.getCurrencyInstance({
         minFractionDigits: 2,
         maxFractionDigits: 2
@@ -36,29 +38,28 @@ sap.ui.define([
         },
 
         parseValue: function (oValue) {
+            this.getCountryCode();
+
             if (!oValue) {
                 return null;
             }
 
-            // Remove currency text and spaces
-            let sValue = oValue.replace(/[^\d.,\-]/g, "");
+            const countryGroupingSeparators = {
+                NL: '.',
+                PL: ' '
+            };
 
-            const hasDot = sValue.includes(".");
-            const hasComma = sValue.includes(",");
+            const countryDecimalSeparators = {
+                NL: ',',
+                PL: ','
+            };
 
-            // Case 1: NL grouped format → 1.798,75
-            if (hasDot && hasComma && sValue.lastIndexOf(".") < sValue.lastIndexOf(",")) {
-                sValue = sValue
-                    .replace(/\./g, "")   // remove grouping dots
-                    .replace(",", ".");   // decimal comma → dot
-            }
-            // Case 2: NL ungrouped decimal → 4,72
-            else if (!hasDot && hasComma) {
-                sValue = sValue.replace(",", ".");
-            }
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+                groupingSeparator: countryGroupingSeparators[this.countryCode] ?? ",",
+                decimalSeparator: countryDecimalSeparators[this.countryCode] ?? "."
+            });
 
-            const oCurrencyFormat = NumberFormat.getCurrencyInstance();
-            const vParsed = oCurrencyFormat.parse(sValue);
+            const vParsed = oCurrencyFormat.parse(oValue);
 
             if (vParsed === null) {
                 throw new ValidateException("Invalid currency format");
@@ -71,6 +72,15 @@ sap.ui.define([
             // if(oValue > 1) {
             //     throw new ValidateException("Not a valid Currency!");
             // }
+        },
+
+        getCountryCode: function () {
+            if (HashChanger) {
+                const host = window.location.host;
+                const hash = HashChanger.getInstance().getHash();
+                const countryCodeIndex = !host.includes("localhost") && !host.includes("port") ? 3 : 1;
+                this.countryCode = hash ? hash.split('/')?.[countryCodeIndex] : "";
+            }
         },
 
         /**
