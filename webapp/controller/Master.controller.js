@@ -143,6 +143,7 @@ sap.ui.define([
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
+			this._bindInstituteTypes();
 			this._bindInstituteItems();
 			this.onLanguageChange();
 			// this.setFilter(oEvent);
@@ -281,6 +282,72 @@ sap.ui.define([
 			});
 		},
 
+		_bindInstituteTypes: function () {
+			const oSelectInstituteType = this.byId("idSelectInstituteType");
+			if (oSelectInstituteType) {
+				oSelectInstituteType.destroyItems();
+				oSelectInstituteType.destroyAggregation();
+				// Force the loadItems event manually
+				this.onLoadInstituteTypes({ getSource: () => oSelectInstituteType });
+			}
+		},
+
+		onLoadInstituteTypes: function (oEvent) {
+            const oSelect = oEvent.getSource();
+            const oModel = this.getView().getModel(); // Get your OData V2 model
+            const sPath = "/CountryInstituteTypeView"; // The path to your entity set
+			const controller = this;
+			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
+			this.getModel('st').setProperty("/SelectedInstituteIDFilter", "All");
+
+            const aFilters = [
+				new Filter({
+					path: "CountryCode",
+					operator: FilterOperator.EQ,
+					value1: this.countryCode,
+					caseSensitive: false
+				})
+			];
+
+            // --- Perform Manual OData Read ---
+            oModel.read(sPath, {
+                filters: aFilters,
+                success: function (oData) {
+					
+                    if (oData && oData.results) {
+						oData.results.unshift({
+							ChannelName: "All",
+							ChannelCountry: controller.countryCode,
+							CountryCode: controller.countryCode
+						})
+                        oData.results.forEach(function (oItemData) {
+                            // Check if item already exists (important to avoid duplicates)
+                            var bExists = oSelect.getItems().some(function(oExistingItem) {
+                                return oExistingItem.getKey() === oItemData.ChannelName;
+                            });
+
+                            if (!bExists) {
+                                oSelect.addItem(new sap.ui.core.ListItem({
+                                    key: oItemData.ChannelName,
+                                    text: oItemData.ChannelName
+                                }));
+                            }
+                        });
+                    }
+					controller.getView().getModel('st').setProperty("/SelectedInstituteType", selectedInstituteType);
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error loading more items:", oError);
+                }
+            });
+        }, 
+
+		onChangeCountryInstituteType: function () {
+			this.getModel('st').setProperty("/SelectedInstituteIDFilter", "All");
+			this._bindInstituteItems();
+			this.setFilter()
+		},
+
 		_bindInstituteItems: function () {
 			const oSelectInstitute = this.byId("idSelectInstitute");
 			if (oSelectInstitute) {
@@ -297,6 +364,7 @@ sap.ui.define([
             const sPath = "/PT_TMINST"; // The path to your entity set
 			const controller = this;
 			const selectedInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter") || "All";
+			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
 
             const aFilters = [
 				new Filter({
@@ -306,6 +374,17 @@ sap.ui.define([
 					caseSensitive: false
 				})
 			];
+
+			if (selectedInstituteType && selectedInstituteType !== 'All') {
+				aFilters.push(
+					new Filter({
+						path: "InstituteType",
+						operator: FilterOperator.EQ,
+						value1: selectedInstituteType,
+						caseSensitive: false
+					})
+				)
+			} 
 
             // --- Get Sorters ---
             const aSorters = [new Sorter("InstituteName", false)]; // Sort by Name ascending
@@ -1052,6 +1131,18 @@ sap.ui.define([
 				}));
 			}
 
+			const oSelectedInstituteType = this.byId("idSelectInstituteType");
+			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
+			const instituteType = oSelectedInstituteType.getSelectedItem()?.getKey();
+			if (instituteType && instituteType.toLowerCase() !== 'all') {
+				this.andFilters.push(new Filter({
+					path: "InstituteType",
+					operator: FilterOperator.Contains,
+					value1: instituteType,
+					caseSensitive: false
+				}));
+			}
+
 
 			if (this.andFilters.length > 0) {
 				this._oList.getBinding('items').aApplicationFilters = [];
@@ -1146,8 +1237,30 @@ sap.ui.define([
 					return false;
 				}
 			}
-			return true
+			return true;
+		},
+		
+		formatCreateTenderButtonText: function(sCountry) {
+			const oBundle = this?.getView()?.getModel("i18n")?.getResourceBundle();
+
+			if (!oBundle) {
+				return "New Tender";
+			}
+
+			if (!sCountry) {
+				return oBundle.getText("NewTender");
+			}
+
+			switch (sCountry) {
+				case "NL":
+					return oBundle.getText("NLNewTender");
+				case "ES":
+					return oBundle.getText("ESNewTender");
+				default:
+					return oBundle.getText("NewTender");
+			}
 		}
+
 	});
 
 });
