@@ -97,7 +97,7 @@
                 enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
             >
                 <menu>
-                    <Menu>
+                    <Menu itemSelected="onMenuSetAllProductWonLostItemSelected">
                         <MenuItem text="Won" />
                         <MenuItem text="Lost" />
                     </Menu>
