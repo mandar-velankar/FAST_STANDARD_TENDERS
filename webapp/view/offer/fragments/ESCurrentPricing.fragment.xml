@@ -118,13 +118,13 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeApplies}"
-                        visible="{= !${RoyalDecreeIncl} }"
+                        visible="{= ${RoyalDecree} === 'Yes' }"
                     >
                         <form:fields>
                             <Select
                                 selectedKey="{= ${RoyalDecree} ? ${RoyalDecree} : 'No'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} }"
+                                visible="{= ${RoyalDecree} === 'Yes' }"
                             >
                                 <items>
                                     <core:Item
@@ -178,27 +178,27 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeValue}"
-                        visible="{= !${RoyalDecreeIncl} }"
+                        visible="{= ${RoyalDecree} === 'Yes' }"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['RoyalDecreeValue', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} }"
+                                visible="{= ${RoyalDecree} === 'Yes' }"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceAfterRC}"
-                        visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['NETPRICEWITHOUTTAXAFTERDEDUCTIONRD', 'Currency','', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                             />
                         </form:fields>
                     </form:FormElement>
