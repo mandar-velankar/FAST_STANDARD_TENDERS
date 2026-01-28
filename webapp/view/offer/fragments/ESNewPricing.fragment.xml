@@ -174,14 +174,14 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeValue}"
-                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['RoyalDecreeValue', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
                             />
                         </form:fields>
                     </form:FormElement>

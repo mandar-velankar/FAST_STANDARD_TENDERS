@@ -2949,6 +2949,7 @@ sap.ui.define([
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 			context.getModel().setProperty("PriceConditionCode", priceConditionCode, context);
+			context.getModel().setProperty("NetPrice", netPriceWithoutTaxAfterDeductionRD, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 
@@ -3057,6 +3058,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithoutTax", netPriceBeforeRC, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+			context.getModel().setProperty("NetPrice", netPriceBeforeRC, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
@@ -3070,6 +3072,7 @@ sap.ui.define([
             let annualValue = (monthlyRent * 12) * reqestedVolume;
 
 			context.getModel().setProperty("AnnualValue", annualValue, context);
+			context.getModel().setProperty("NetPrice", annualValue, context);
         },
 
 		onPricingFormGetPricingDataBtnPress: function(event){
