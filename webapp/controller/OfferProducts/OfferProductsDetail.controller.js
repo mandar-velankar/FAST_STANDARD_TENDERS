@@ -3224,7 +3224,7 @@ sap.ui.define([
 			const oDefaultModel = form.getModel();
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 			const precioNetoPricingObj = oBoundContext.getObject();
-
+			oDefaultModel.resetChanges();
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPrecioNetoView", {
 				properties: precioNetoPricingObj,
 				groupId: "PricingForm"
@@ -3286,7 +3286,7 @@ sap.ui.define([
 			const oDefaultModel = form.getModel();
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 			const desComercialPricingObj = oBoundContext.getObject();
-
+			oDefaultModel.resetChanges();
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoComercialView", {
 				properties: desComercialPricingObj,
 				groupId: "PricingForm"
@@ -3346,6 +3346,8 @@ sap.ui.define([
 
 			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
 			pvlPricingObj.NetPriceWithoutTax = correctPrice;
+
+			oDefaultModel.resetChanges();
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPVLView", {
 				properties: pvlPricingObj,
@@ -3407,7 +3409,8 @@ sap.ui.define([
 			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
 			desEspecialPricingObj.ESDiscount = 1;
 
-
+			oDefaultModel.resetChanges();
+			
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoEspecialView", {
 				properties: desEspecialPricingObj,
 				groupId: "PricingForm"
