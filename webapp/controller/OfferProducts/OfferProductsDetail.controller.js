@@ -261,6 +261,11 @@ sap.ui.define([
 							priceCondition = results.find(el =>	el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType"));
 						}
 
+						if (!priceCondition && controller.sCountryCode !== "ES") {
+  							const defaultType = countryDefaultPriceConditionType?.[controller.sCountryCode];
+							priceCondition = results.find(el =>  el?.isMain === true && (defaultType ? el?.ConditionType === defaultType : true));
+						}
+
 						if (!priceCondition) {
 							const defaultType = countryDefaultPriceConditionType?.[controller.sCountryCode];
 							priceCondition = results.find(el => el.isMain === true && (defaultType ? el.ConditionType === defaultType : true));
@@ -2946,6 +2951,7 @@ sap.ui.define([
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 			context.getModel().setProperty("PriceConditionCode", priceConditionCode, context);
+			context.getModel().setProperty("NetPrice", netPriceWithoutTaxAfterDeductionRD, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 
@@ -3054,6 +3060,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithoutTax", netPriceBeforeRC, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+			context.getModel().setProperty("NetPrice", netPriceBeforeRC, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
@@ -3067,6 +3074,7 @@ sap.ui.define([
             let annualValue = (monthlyRent * 12) * reqestedVolume;
 
 			context.getModel().setProperty("AnnualValue", annualValue, context);
+			context.getModel().setProperty("NetPrice", annualValue, context);
         },
 
 		onPricingFormGetPricingDataBtnPress: function(event){
@@ -3218,7 +3226,7 @@ sap.ui.define([
 			const oDefaultModel = form.getModel();
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 			const precioNetoPricingObj = oBoundContext.getObject();
-
+			oDefaultModel.resetChanges();
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPrecioNetoView", {
 				properties: precioNetoPricingObj,
 				groupId: "PricingForm"
@@ -3280,7 +3288,7 @@ sap.ui.define([
 			const oDefaultModel = form.getModel();
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 			const desComercialPricingObj = oBoundContext.getObject();
-
+			oDefaultModel.resetChanges();
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoComercialView", {
 				properties: desComercialPricingObj,
 				groupId: "PricingForm"
@@ -3340,6 +3348,8 @@ sap.ui.define([
 
 			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
 			pvlPricingObj.NetPriceWithoutTax = correctPrice;
+
+			oDefaultModel.resetChanges();
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPVLView", {
 				properties: pvlPricingObj,
@@ -3401,7 +3411,8 @@ sap.ui.define([
 			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
 			desEspecialPricingObj.ESDiscount = 1;
 
-
+			oDefaultModel.resetChanges();
+			
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoEspecialView", {
 				properties: desEspecialPricingObj,
 				groupId: "PricingForm"

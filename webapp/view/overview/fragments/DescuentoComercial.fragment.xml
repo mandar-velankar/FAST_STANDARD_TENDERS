@@ -134,7 +134,9 @@
                 ], formatter:'.formatter.price'}"/>
 
                 <!-- Discount -->
-                <Text text="{path :'st>PriceCondition/Discount', type:'.types.percentdecimal'} %"/>
+                <Text text="{
+                    parts :['st>PriceCondition/Discount', 'st>PriceCondition/COUNTRY_CODE'], 
+                    type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"/>
 
                 <!-- Monthly Rent -->
                 <ObjectStatus text="{parts: [ {path: 'st>PriceCondition/results/0/MonthlyRentPerUnit'},  {path: 'st>CURRENCY'} ], formatter:'.formatter.price'}"
