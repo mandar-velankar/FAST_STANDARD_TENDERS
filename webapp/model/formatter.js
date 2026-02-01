@@ -215,6 +215,30 @@ sap.ui.define([
 			const outcome = this.outcome(grossMargin);
 			return outcome ? "Success" : "Error"
 		},
+		formatInstitutesInGroupAndRegionsTextArea: function (data, countryCode) {
+			if (!data || !countryCode) return "";
+			const separators = {
+				"NL": ";"
+			}
+			return data.split(separators[countryCode] ? separators[countryCode] : ",").join(",\n");
+		},
+
+		formatTextAreaRowSize: function (data, countryCode) {
+			if (!data || !countryCode) return 0;
+			const separators = {
+				"NL": ";"
+			}
+			const list = data.split(separators[countryCode] ? separators[countryCode] : ",");
+			return list.length <= 10 ? list.length : 10; 
+		},
+
+		formVisibilityOfInstIngroup: function (data, countryCode) {
+			if (!data) return false;
+			const separators = {
+				"NL": ";"
+			}
+			return data.split(separators[countryCode] ? separators[countryCode] : ",").length > 0;
+		},
 
 		priceTwoOrFour: function(price, currency, unit) {
 			if (!price){

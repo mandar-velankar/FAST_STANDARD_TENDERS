@@ -242,7 +242,15 @@ sap.ui.define([
 				}),
 				template: new Item({
 					key: "{Status}",
-					text: "{Status}"
+					text: "{Status}",
+					enabled: {
+						parts: [
+							'Status',
+							'st>/SelectedCountry',
+							'st>/UserInfo/Role'
+						],
+						formatter: this.enableOfferStatus.bind(this)
+					}
 				}),
 				templateShareable: true
 			});
@@ -1113,12 +1121,13 @@ sap.ui.define([
 			const oSelectStatus = this.byId("idSlctStatus");
 			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
 			const sStatus = oSelectStatus.getSelectedItem()?.getKey();
+			const isPolandAwaitingTMApprovalSelected = sCountryCode === "PL" && sStatus?.toLowerCase()?.split(" ")?.join("")?.trim() === "awaitingtmapproval";
 			if (sStatus && sStatus.toLowerCase() !== 'all') {
 				this.andFilters.push(new Filter({
 					path: "STATUS",
-					operator: FilterOperator.Contains,
+					operator: isPolandAwaitingTMApprovalSelected ? FilterOperator.EQ : FilterOperator.Contains,
 					value1: sStatus,
-					caseSensitive: false
+					caseSensitive: isPolandAwaitingTMApprovalSelected ? true : false
 				}));
 			}
 
@@ -1214,6 +1223,23 @@ sap.ui.define([
 			}, bReplace);
 		},
 
+		enableOfferStatus: function (status, countryCode, userRole) {
+			if (countryCode === "PL") {
+				const userRoles = [
+					"tendermanager"
+				];
+
+				// Awaiting TM Approval status should be visible in case if user role is either Sales Manager or Tender Manager
+				if (
+					!userRoles.includes(userRole?.toLowerCase()?.split(" ")?.join("")?.trim()) && 
+					status?.toLowerCase()?.split(" ")?.join("")?.trim() === "awaitingtmapproval"
+				) {
+					return false;
+				}
+			}
+			return true;
+		},
+		
 		formatCreateTenderButtonText: function(sCountry) {
 			const oBundle = this?.getView()?.getModel("i18n")?.getResourceBundle();
 

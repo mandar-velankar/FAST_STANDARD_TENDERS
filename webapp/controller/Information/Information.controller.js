@@ -7,8 +7,9 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"sap/ui/model/Context",
 	"sap/ui/core/Fragment",
-	"sap/ui/model/Sorter"
-], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Context, Fragment, Sorter) {
+	"sap/ui/model/Sorter",
+	"sap/ui/core/BusyIndicator"
+], function (BaseController, JSONModel, formatter, mobileLibrary, Filter, FilterOperator, Context, Fragment, Sorter, BusyIndicator) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -64,7 +65,8 @@ sap.ui.define([
 					rappel: [],
 					foc: [],
 					rental: []
-				}
+				},
+				isOfferHavingOnlyTMApproverTypePending: false
 			});
 			
 			this.setModel(oModel, "ui");
@@ -333,6 +335,8 @@ sap.ui.define([
 			await this._createApprovalsDialog();
 			await this._bindApprovalsTable();
 			await this._bindApprovalsForm();
+			this.countryCode === "PL" && await this.getPolandOffersWithOnlyTMPending();
+
 
 			this.getView().setBusy(false);
 		},
@@ -708,5 +712,65 @@ sap.ui.define([
             if(dialog) dialog.close();
         },
 
+		getPolandOffersWithOnlyTMPending: async function () {
+			const uiModel = this.getModel("ui");
+			const offer = await this.stState.getService().getPolandOffersWithOnlyTMPending(this.offerId);
+			uiModel.setProperty("/isOfferHavingOnlyTMApproverTypePending", !!offer);
+		},
+
+		onApproveTMApprovalType: async function (event) {
+			try {
+				BusyIndicator.show(1);
+				const payload = {
+					ApprovalStatus: "Approved"
+				}
+
+				await this._updateTMApproverType(payload);
+				BusyIndicator.hide();
+			} catch (error) {
+				BusyIndicator.hide();
+				return error;
+			}
+		},
+
+		onRejectTMApprovalType: async function (event) {
+			try {
+				BusyIndicator.show(1)
+				const payload = {
+					ApprovalStatus: "Rejected"
+				}
+
+				await this._updateTMApproverType(payload);
+				BusyIndicator.hide();
+			} catch (error) {
+				BusyIndicator.hide();
+				return error;
+			}
+		},
+
+		_updateTMApproverType: async function (payload) {
+			const table = this.byId("idMandatoryTable");
+			const tableBinding = table.getBinding("items");
+			const tenderMangerObject = tableBinding?.getContexts()?.map(el => el?.getObject())?.find(el => el.ApproverType === 'TM');
+			const {products} = await this.stState.getService().getOfferProducts(this.offerId);
+			payload = {
+				...payload,
+				SenderComment: tenderMangerObject.SenderComment
+			}
+			const promises = products.map(pr => this.stState.getService().updateApprovalTypeStatus(payload, {
+				OfferId: tenderMangerObject.OfferId,
+				productcode: pr.ProductCode,
+				ApproverEmailID: tenderMangerObject.ApproverEmailID,
+				Active: tenderMangerObject.Active,
+				Statustime: tenderMangerObject.Statustime,
+				ApproverType: tenderMangerObject.ApproverType,
+				LotID: 1
+			}));
+
+			await Promise.all(promises);
+			await this.getPolandOffersWithOnlyTMPending();
+			tableBinding.refresh();
+			this.getModel('em').setProperty("/Detail/OverviewTab/Approval/isPolandTMApproveButtonVisible", false);
+		}
 	})
 });

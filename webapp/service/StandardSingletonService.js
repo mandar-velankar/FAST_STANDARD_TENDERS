@@ -455,6 +455,7 @@ sap.ui.define([
 			const isAwardedTabAccessGrantedForPolishUSer =  UserInfo.Role === 'Tender Manager' || UserInfo.Role === 'Sales Manager';
 			const isAwardedTabVisible = CountryCode === 'PL' ? isAwardedTabAccessGrantedForPolishUSer && checkCopyOfferBtn : checkCopyOfferBtn && !stTenderRoles.LimitedPricingTabAccess;
 			const isAwardedProductDetailPageEditable = CountryCode === 'PL' ? isAwardedTabAccessGrantedForPolishUSer && isAwardDetailEnabled : isAwardDetailEnabled;
+			const isPolandTMApproveButtonVisible = CountryCode === 'PL' && status === "Awaiting Approval" && UserInfo.Role === 'Tender Manager';
 
 			return {
 				Detail: {
@@ -490,7 +491,8 @@ sap.ui.define([
 						Approval: {
 							enableApprovalButton: isApprovalButtonEnabled,
 							enableSendApprovalBtn: isSendApprovalBtnEnabled,
-							enableCancelApprovalBtn: isCancelApprovalBtnEnabled
+							enableCancelApprovalBtn: isCancelApprovalBtnEnabled,
+							isPolandTMApproveButtonVisible: isPolandTMApproveButtonVisible
 						}
 					},
 					AwardTab: {

@@ -147,7 +147,7 @@
                 <Panel 
                     expandable="true" 
                     headerText="{i18n>OfferProductsDetailView.ProfitabilityCalculationParameters}"
-                    visible="{= ${ui>/ProfitabilityForm/Division} === 'Radiology'}" 
+                    visible="{= ${ui>/ProfitabilityForm/Division} === 'Radiology' &amp;&amp; ${st>/SelectedCountry} === 'ES'}" 
                 >
                     <core:Fragment fragmentName="com.bayer.tender.statenderapp.view.offer.fragments.ProfitabilityCalcValues" type="XML" />
 				</Panel>

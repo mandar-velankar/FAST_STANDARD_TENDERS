@@ -375,7 +375,6 @@ sap.ui.define([
 				});
 			});
 		},
-
 		getSavedQuotations: async function (OfferID) {
 			return new Promise((resolve, reject) => {
 				this.model.read("/PT_TMQUTO", {
@@ -512,6 +511,41 @@ sap.ui.define([
 			});
 		},
 
+		getPolandOffersWithOnlyTMPending: function (offerId) {
+			const sKey = this.model.createKey("/PolandOffersWithOnlyTMPending", {
+				OfferID: offerId
+			});
+			return new Promise((resolve, reject) => {
+				this.model.read(sKey, {
+					success: function (res) {
+						resolve(res);
+					},
+					error: function (err) {
+						resolve(undefined);
+					}
+				});
+			});
+		},
+		
+		updateApprovalTypeStatus: function (data, params) {
+			const sKey = this.model.createKey("/PT_TMAPPRST", {
+				OfferId: params.OfferId,
+				productcode: params.productcode,
+				ApproverEmailID: params.ApproverEmailID,
+				Active: params.Active,
+				Statustime: params.Statustime,
+				ApproverType: params.ApproverType,
+				LotID: params.LotID,
+			});
+			return new Promise((resolve, reject) => {
+				this.model.update(sKey, data, {
+					success: function (res) {
+						resolve(true);
+					},
+				});
+			});
+		},
+		
 		onGetContractMngtDateConstraints: function (TenderID, OfferID, CountryCode) {
 			return new Promise((resolve, reject) => {
 				this.model.callFunction("/getContractMngtDateConstraints", {

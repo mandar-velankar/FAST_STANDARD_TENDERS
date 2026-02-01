@@ -77,7 +77,14 @@
 						change=".setFilter" 
 					>
 						<!-- items binding see controller -->
-						<core:Item key="{Status}" text="{Status}"/>
+						<core:Item key="{Status}" text="{Status}" enabled="{
+							parts: [
+								'Status',
+								'st>/SelectedCountry',
+								'st>/UserInfo/Role'
+							],
+							formatter: '.enableOfferStatus'
+						}"/>
 					</Select>
 
 					<Label

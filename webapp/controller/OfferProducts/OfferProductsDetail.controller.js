@@ -261,6 +261,11 @@ sap.ui.define([
 							priceCondition = results.find(el =>	el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType"));
 						}
 
+						if (!priceCondition && controller.sCountryCode !== "ES") {
+  							const defaultType = countryDefaultPriceConditionType?.[controller.sCountryCode];
+							priceCondition = results.find(el =>  el?.isMain === true && (defaultType ? el?.ConditionType === defaultType : true));
+						}
+
 						if (!priceCondition) {
 							priceCondition = results.find(el => el.isMain === true);
 						}
@@ -2246,38 +2251,34 @@ sap.ui.define([
 			const priceObj = context.getObject();
 			const objPath = context.getPath();
 			if(!property) return;
-			const pathIndex = property.split('/')[1];
-			const nlPrice = priceObj.NLPriceConditionType[pathIndex];
-			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
-			let discount = property?.toLowerCase().includes("discount") ? value : nlPrice.Discount;
+			const pathIndex = property.split('_')[1];
+			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType_${pathIndex}_ContractDuration`);
+			const nlPriceDiscount = this.getModel().getProperty(`${objPath}/NLPriceConditionType_${pathIndex}_Discount`);
+			let discount = property?.toLowerCase().includes("discount") ? value : nlPriceDiscount;
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let offerPrice = Number((parseFloat(priceObj.masterPriceAIP) * (1 - discount)).toFixed(2));
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
-			const NLPriceConditionType = priceObj.NLPriceConditionType;
-			NLPriceConditionType[pathIndex].OfferPrice = offerPrice;
-			NLPriceConditionType[pathIndex].NetPrice = netPrice;
-			NLPriceConditionType[pathIndex].ContractDuration = contractDuration;
-			context.getModel().setProperty(`NLPriceConditionType`, NLPriceConditionType, context);
+			context.getModel().setProperty(`NLPriceConditionType_${pathIndex}_OfferPrice`, offerPrice || 0, context);
+			context.getModel().setProperty(`NLPriceConditionType_${pathIndex}_NetPrice`, netPrice || 0, context);
+			context.getModel().setProperty(`NLPriceConditionType_${pathIndex}_ContractDuration`, contractDuration, context);
 		},
 
 		calculateNetherlandsPriceConditionType: function ({property, value, context}) {
 			const priceObj = context.getObject();
 			const objPath = context.getPath();
 			if(!property) return;
-			const pathIndex = property.split('/')[1];
-			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType/${pathIndex}/ContractDuration`);
+			const pathIndex = property.split('_')[1];
+			const contractDuration = this.getModel().getProperty(`${objPath}/NLPriceConditionType_${pathIndex}_ContractDuration`);
 			let offerPrice = property?.toLowerCase().includes("offerprice") ? parseFloat(value).toFixed(2) : Number(this.byId("idOfferPrice").getValue().replace(/[^\d.]/g, ''));
 			let deductions = property?.toLowerCase().includes("deductions") ? value : priceObj.Deductions;
 			let discount = (parseFloat(priceObj.masterPriceAIP) - parseFloat(offerPrice)) / priceObj.masterPriceAIP;
 			discount = this.formatter.truncToFourDecimalPlaces(discount);
 			let netPrice = offerPrice * (1 - deductions);
 			netPrice = this.formatter.truncToTwoDecimalPlaces(netPrice);
-			const NLPriceConditionType = priceObj.NLPriceConditionType;
-			NLPriceConditionType[pathIndex].Discount = discount;
-			NLPriceConditionType[pathIndex].NetPrice = netPrice;
-			NLPriceConditionType[pathIndex].ContractDuration = contractDuration;
-			context.getModel().setProperty(`NLPriceConditionType`, NLPriceConditionType, context);
+			context.getModel().setProperty(`NLPriceConditionType_${pathIndex}_Discount`, discount || 0, context);
+			context.getModel().setProperty(`NLPriceConditionType_${pathIndex}_NetPrice`, netPrice || 0, context);
+			context.getModel().setProperty(`NLPriceConditionType_${pathIndex}_ContractDuration`, contractDuration, context);
 		},
 
 		calculatePolandSpecialPriceConditionType: function ({property, value, context}) {
