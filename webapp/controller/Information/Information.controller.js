@@ -567,7 +567,7 @@ sap.ui.define([
 						AwardedProduct: product.PRODUCTNAME,
 						AwardedCompany: "Bayer",
 						UoM: product.UNIT,
-						AwardedPrice: this.countryCode === 'TW' ? product.NET_PRICE : product.OFFER_PRICE,
+						AwardedPrice: this.countryCode === 'TW' || this.countryCode === 'ES' ? product.NET_PRICE : product.OFFER_PRICE,
 						AwardedQty: product.REQUESTED_QUANTITY,
 						ErrorInSubmission: "No",
 						Outcome: this.countryCode === 'ES' ? classification === 'Commercial Agreement' ? 'Won' : null : null,
