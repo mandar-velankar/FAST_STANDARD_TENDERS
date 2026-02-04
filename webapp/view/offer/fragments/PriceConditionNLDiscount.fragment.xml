@@ -62,7 +62,9 @@
 					<form:FormElement label="{i18n>PriceConditionNLPricingFragment.AIP}">
 						<form:fields>
 							<Input value="{
-										parts: ['masterPriceAIP', 'Currency', 'Region', 'CountryCode'],
+										parts: ['masterPriceAIP', 'Currency', 'Region', 'CountryCode',  {
+											value: 'AIP'
+										}],
 										type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 									}" 
 									enabled="false"
