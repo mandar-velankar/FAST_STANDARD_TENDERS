@@ -209,6 +209,31 @@
                     <form:FormElement>
                         <form:label>
                             <Label
+                                text="{i18n>BrandLevelRappel}"
+                                required="false"
+                            />
+                        </form:label>
+                        <form:fields>
+                            <Select
+                                selectedKey="{BrandLevelRappel}"
+                                enabled="{= ${ui>/RappelForm/enableBrandLevelRappel} &amp;&amp; ${ui>/RappelForm/editMode}}"
+                            >
+                                <items>
+                                    <core:Item
+                                        key="No"
+                                        text="No"
+                                    />
+                                    <core:Item
+                                        key="Yes"
+                                        text="Yes"
+                                    />
+                                </items>
+                            </Select>
+                        </form:fields>
+                    </form:FormElement>
+                    <form:FormElement>
+                        <form:label>
+                            <Label
                                 text="{i18n>Settlement}"
                                 required="true"
                             />

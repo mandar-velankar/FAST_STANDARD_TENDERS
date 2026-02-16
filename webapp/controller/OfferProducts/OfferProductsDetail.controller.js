@@ -182,7 +182,8 @@ sap.ui.define([
 					settlements: null,
 					MarketIncentive: null,
 					instituteType: "",
-					PriceConditionID: null
+					PriceConditionID: null,
+					enableBrandLevelRappel: false
 				},
 				FocForm:{
 					hasFocPriceCondition: false,
@@ -208,6 +209,7 @@ sap.ui.define([
 			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
 			let offerProduct = await this.stState.getService().getOfferProduct(sOfferId, productCode);
 			this.getModel("st").setProperty("/OfferProduct", offerProduct);
+			this.setBrandLevelRappelEnablement(offerProduct);
 			this._bindView();
 			this._bindForm("ProductForm");
 			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
@@ -3556,7 +3558,25 @@ sap.ui.define([
 				template: template,
 				filters: filters
 			});
+		},
+
+		setBrandLevelRappelEnablement: function(offerProduct) {
+			// Normalize values to lowercase
+			const unitPerPack = (offerProduct?.UnitPerPack || "").trim().toLowerCase();
+			const brandName = (offerProduct?.BrandName || "").trim().toLowerCase();
+
+			// Enablement condition
+			const bEnable =
+				unitPerPack === "unit" &&
+				(brandName === "jivi" || brandName === "kovaltry");
+
+			// Set the property in the UI model
+			this.getModel("ui").setProperty(
+				"/RappelForm/enableBrandLevelRappel",
+				bEnable
+			);
 		}
+
 
     });
 });
