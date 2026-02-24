@@ -110,7 +110,8 @@ sap.ui.define([
 					editMode: true	
 				},
 				minDate: today,
-				maxDate: maxDate
+				maxDate: maxDate,
+				isDefaultSortDescending: true
 			});
 	
 			this.setModel(oModel, "ui");
@@ -344,21 +345,35 @@ sap.ui.define([
             });
         }, 
 
+		getCountryDefaultSorters: function () {
+			switch (this.countryCode) {
+				case "PL":
+					return [
+						new Sorter({
+							path: 'BidDueDate', 
+							descending: true
+						})
+					];
+				default:
+					return [
+						new Sorter({
+							path: 'TenderID', 
+							descending: true
+						}),
+						new Sorter({
+							path: 'OfferID', 
+							descending: true
+						})
+					];
+			}
+		},
+
 		_bindTable: function (table, sCountryCode, sProductScope) {
 			// const oCountrySelectedItem =  this.byId("idSlctCountry").getItems()[0];
 			// const sCountryCode = oCountrySelectedItem?.getKey();
 			const oFilterCountry = new Filter("CountryCode", FilterOperator.EQ, sCountryCode);
 			const oFilterProductScope = new Filter("ProductScope", FilterOperator.EQ, sProductScope === 'ConsumerHealth' ? 'Consumer Health' : sProductScope);
-			const sorters = [
-				new Sorter({
-					path: 'TenderID', 
-					descending: true
-				}),
-				new Sorter({
-					path: 'OfferID', 
-					descending: true
-				})
-			]
+			const sorters = this.getCountryDefaultSorters();
 
 			const cols = this.templateStateData.masterConfig.countryTemplate.getTemplate().getTable().getColumns();
 			const controller = this;

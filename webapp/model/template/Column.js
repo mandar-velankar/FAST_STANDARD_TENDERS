@@ -19,7 +19,7 @@ sap.ui.define(["../BaseObject", "./Control", "sap/m/ViewSettingsItem"], function
       return this.title;
     },
 
-    generateViewSettingsItem: function (index, i18nModel) {
+    generateViewSettingsItem: function (index, i18nModel, isViewSettingsControlSelected) {
       let key = this.getControl().getPropertiesAsObject().text.replace(/{|}/g, '');
       if(key.includes("path")){
         key = key.split(',').find(e=>e.includes('path')).split("'")[1];
@@ -28,7 +28,7 @@ sap.ui.define(["../BaseObject", "./Control", "sap/m/ViewSettingsItem"], function
       return new ViewSettingsItem({
         'key': key, 
         'text': text,
-        'selected': index === 0 
+        'selected': isViewSettingsControlSelected 
       });
     },
 
