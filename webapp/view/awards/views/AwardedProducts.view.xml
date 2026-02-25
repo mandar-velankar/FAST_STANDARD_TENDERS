@@ -25,6 +25,12 @@
 					<Column >
 						<Label text="{i18n>Product}" wrapping="true"/>
 					</Column>
+					<Column visible="{= ${st>/SelectedTender/Region} === 'PACAWI'}">
+						<Label text="{i18n>AwardedVolume}" wrapping="true"/>
+					</Column>
+					<Column visible="{= ${st>/SelectedTender/Region} === 'PACAWI'}">
+						<Label text="{i18n>TotalAwardedPrice}" wrapping="true"/>
+					</Column>
 					<Column >
 						<Label text="{i18n>Outcome}" wrapping="true"/>
 					</Column>
@@ -33,6 +39,17 @@
 					<ColumnListItem press="onAwardedProductPress" detailPress="onAwardedProductPress">
 						<cells>
 							<Text text="{AwardedProduct}"/>	
+							<Text text="{AwardedQty}"/>	
+							<Text text="{
+								path: 'TotalAwardedPrice', 
+								type: 'sap.ui.model.odata.type.Double', 
+								formatOptions: { 
+									showMeasure: false, 
+									preserveDecimals: false, 
+									minFractionDigits: 3, 
+									maxFractionDigits: 3
+								}
+							}"/>	
 							<Text text="{Outcome}"/>					
 						</cells>
 					</ColumnListItem>
