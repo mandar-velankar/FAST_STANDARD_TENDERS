@@ -5,6 +5,7 @@
 	<ViewSettingsDialog
 		id="viewSettingsDialog"
 		confirm=".onConfirmViewSettingsDialog"
+		sortDescending="{ui>/isDefaultSortDescending}"
 		sortItems="{
 			path:'template>/masterConfig/countryTemplate/template/table/columns',
 			factory:'.sorterFactory',
