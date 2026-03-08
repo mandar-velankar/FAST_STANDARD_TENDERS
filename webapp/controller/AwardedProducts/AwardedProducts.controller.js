@@ -113,6 +113,8 @@ sap.ui.define([
 			this.templateStateData = this.templateState.getData();
 			this.bindTable();
 			this.hasExistingFASTContract(this.tenderId, this.offerId);
+			const allPriceConditionTypesRental = await this.hasAllPriceConditionTypesRental();
+			this.getModel("st").setProperty("/AllPriceConditionTypesRental", allPriceConditionTypesRental);
 		},
 
 		bindTable: function () {
@@ -500,5 +502,30 @@ sap.ui.define([
 				BusyIndicator.hide();
 			}
 		},
+
+		hasAllPriceConditionTypesRental: async function () {
+			return new Promise((resolve, reject) => {
+				this.getModel().read("/StandardTenderPriceConditionView", {
+					filters: [
+						new Filter("OfferID", "EQ", this.offerId)
+					],
+					success: function (res) {	
+						const results = res?.results || [];
+
+						let priceConditions = results.find(el => el.hasPriceCondition === true && el.isMain === true);
+
+						const normalized = Array.isArray(priceConditions) ? priceConditions : priceConditions ? [priceConditions] : [];
+
+						const allPriceConditionTypesRental = normalized.length > 0 && normalized.every(pc => pc?.ConditionType === 'Rental');
+
+						resolve(allPriceConditionTypesRental);
+					},
+					error: function (err) {
+						reject(err)
+					}
+				})
+			})
+		},
+		
     });
 })

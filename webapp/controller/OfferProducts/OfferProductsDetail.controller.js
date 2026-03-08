@@ -252,12 +252,24 @@ sap.ui.define([
 						new Filter("ProductCode", "EQ", this.productId),
 						new Filter("ProductCode", "EQ", this.productId)
 					],
-					success: function (res) {						
-						let priceCondition = res?.results.find(el => el.hasPriceCondition == true && el.isMain === true);
-						//priceCondition = priceCondition ? priceCondition : (controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : (res?.results.find(el => countryDefaultPriceConditionType[controller.sCountryCode] ? el.isMain == true && el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : el.isMain == true))); 
-						//priceCondition = priceCondition ? priceCondition : controller.sCountryCode === 'ES' ? res?.results.find(el => el.ConditionType == controller.getModel("st").getProperty("/CurrentPriceConditionType")) : res?.results.find(el => el.isMain == true); 
-						priceCondition = controller.sCountryCode === 'ES' ? (hasCurrentPricingReceived ? res?.results.find(el => el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType")) : priceCondition) : (priceCondition || res?.results.find(el => el.isMain === true && (countryDefaultPriceConditionType[controller.sCountryCode] ? el.ConditionType === countryDefaultPriceConditionType[controller.sCountryCode] : true)));
-						controller.setMainPriceCondition(priceCondition);
+					success: function (res) {	
+						const results = res?.results || [];
+
+						let priceCondition = results.find(el => el.hasPriceCondition === true && el.isMain === true);
+
+						if (controller.sCountryCode === "ES" && (hasCurrentPricingReceived || !priceCondition)) {
+							priceCondition = results.find(el =>	el.ConditionType === controller.getModel("st").getProperty("/CurrentPriceConditionType"));
+						}
+
+						if (!priceCondition && controller.sCountryCode !== "ES") {
+  							const defaultType = countryDefaultPriceConditionType?.[controller.sCountryCode];
+							priceCondition = results.find(el =>  el?.isMain === true && (defaultType ? el?.ConditionType === defaultType : true));
+						}
+
+						if (!priceCondition) {
+							const defaultType = countryDefaultPriceConditionType?.[controller.sCountryCode];
+							priceCondition = results.find(el => el.isMain === true && (defaultType ? el.ConditionType === defaultType : true));
+						}
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
 						resolve(priceCondition?.ConditionType);
@@ -293,11 +305,11 @@ sap.ui.define([
 				path = newEntryContext.getPath();
 			}
 
-			
 				// Add an event delegate to the form to execute code after it has been rendered
 				// This ensures that any DOM-dependent or aggregation-dependent changes
 				// (like adding dynamic links or tokens) happen after the SAPUI5 form has finished rendering.
-				form.addEventDelegate({
+				
+				const formDelegate = {
 					onAfterRendering: () => {
 						// Call the custom method to add clickable links for contract numbers
 						// This method should handle creating Links or Tokens dynamically
@@ -308,8 +320,10 @@ sap.ui.define([
 						if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
 							this._bindDistributorsMultiInput();
 						}
+						form.removeEventDelegate(formDelegate);
 					}
-				});
+				}
+			form.addEventDelegate(formDelegate);
 			
 
 
@@ -1019,16 +1033,27 @@ sap.ui.define([
 		 * @param {string} conditionType - The condition type.
 		 */
 		onPricingFormLiveChange:function(event, conditonType){
-			let value = event.getParameter("newValue");
-			if(!value){value = '0';}
-			const type = event.getSource().getBinding('value').getType();
-			value = value.replace(/(?<=\d),(?=\d{3}(\.|$))/g, '');
-			const parsedValue = type.getModelFormat().parse(value);
-			const property = event.getSource().getBindingPath("value");
-			const context = event.getSource().getBindingContext();
+			const oSource = event.getSource();
+			let value;
+
+			if (oSource.isA("sap.m.Input")) {
+				value = event.getParameter("newValue");
+				if (!value) {
+					value = "0";
+				}
+				const type = oSource.getBinding("value").getType();
+				value = value.replace(/(?<=\d),(?=\d{3}(\.|$))/g, "");
+				value = type.getModelFormat().parse(value);
+			} else if (oSource.isA("sap.m.CheckBox")) {
+				value = event.getParameter("selected") ? "1" : "0";
+			}
+
+			const property = oSource.getBindingPath("value") || oSource.getBindingPath("selected");
+			const context = oSource.getBindingContext();
+
 			this.calculatePricingFormFields({
 				conditonType,
-				value: parsedValue,
+				value: value,
 				property,
 				context
 			});
@@ -1716,7 +1741,7 @@ sap.ui.define([
 		onLoadPriceConditionSuccess: function(form){
 			const context = this.sCountryCode === 'ES' ? form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || form.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || form.getElementBinding()?.getBoundContext() : form.getElementBinding().getBoundContext();
 			const priceCondition = context?.getObject();
-			if(this.sCountryCode === 'ES')this.updatePriceConditionForm(priceCondition?.ConditionType);
+			if(this.sCountryCode === 'ES' && context) this.updatePriceConditionForm(priceCondition?.ConditionType);
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
 			let classification = this.getModel("ui").getProperty("/Classification");
@@ -2875,6 +2900,18 @@ sap.ui.define([
 
 			let netPriceWithoutTaxAfterDeductionRD = 0;
 			let royalDecreeValue = 0;
+			let additionalDiscount = 0;
+			let priceConditionCode = priceObj.PriceConditionCode;
+
+			if (property?.toLowerCase().includes("royaldecreeincl")) {
+				if (value === "0") {
+					priceConditionCode = "YP10";
+				} else {
+					priceConditionCode = "YP11";
+				}
+			}
+
+			const isYP11 = priceConditionCode === 'YP11';
 
 			const useConfidential = priceObj.ConfidentialDiscount !== 0;
 			const basePrice = useConfidential ? parseFloat(priceObj.ConfidentialPrice) : parseFloat(priceObj.PVL);
@@ -2884,12 +2921,25 @@ sap.ui.define([
 			let confidentialPrice = useConfidential ? parseFloat(priceObj.PVL) * (1 - priceObj.ConfidentialDiscount) : 0;
 			confidentialPrice = this.formatter.roundToSixDecimalPlaces(confidentialPrice);
 
-			let additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			if (isYP11 && priceObj.RoyalDecreePercentage_1) {
+				additionalDiscount = 1 - newNetPriceWithoutTaxBeforeDeductionRD / correctPrice / (1 - priceObj.RoyalDecreePercentage_1);
+			} else {
+				additionalDiscount = (correctPrice - newNetPriceWithoutTaxBeforeDeductionRD) / correctPrice;
+			}
+
 			additionalDiscount = this.formatter.roundToSixDecimalPlaces(additionalDiscount);
 			
-			netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1));
+			if (isYP11) {
+				netPriceWithoutTaxAfterDeductionRD = newNetPriceWithoutTaxBeforeDeductionRD;
+			} else {
+				netPriceWithoutTaxAfterDeductionRD = (newNetPriceWithoutTaxBeforeDeductionRD * (1 - priceObj.RoyalDecreePercentage_1));
+			}
+
 			netPriceWithoutTaxAfterDeductionRD = this.formatter.roundToSixDecimalPlaces(netPriceWithoutTaxAfterDeductionRD);
-			royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+			if (!isYP11) {
+				royalDecreeValue = (newNetPriceWithoutTaxBeforeDeductionRD - netPriceWithoutTaxAfterDeductionRD);
+			}
+			
 			royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
 
 			let netPriceWithTax = (netPriceWithoutTaxAfterDeductionRD * (1 + Number(priceObj.Tax)));
@@ -2900,6 +2950,8 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithoutTaxAfterDeductionRD", netPriceWithoutTaxAfterDeductionRD, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+			context.getModel().setProperty("PriceConditionCode", priceConditionCode, context);
+			context.getModel().setProperty("NetPrice", netPriceWithoutTaxAfterDeductionRD, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 
@@ -2990,9 +3042,14 @@ sap.ui.define([
 
 			let netPriceBeforeRC = correctPrice * (1 - discount);
 			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
+				
+			if(priceObj.RoyalDecreePercentage_1){
+				netPriceBeforeRC = correctPrice * (1 - discount - priceObj.RoyalDecreePercentage_1);				
+				royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1;
+			}else{
+				netPriceBeforeRC = correctPrice * (1 - discount);
+			}
 			
-			netPriceBeforeRC = correctPrice * (1 - discount) * (1 - priceObj.RoyalDecreePercentage_1);				
-			royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1 * (1 - discount);
 			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
 			royalDecreeValue = this.formatter.roundToSixDecimalPlaces(royalDecreeValue);
 
@@ -3003,6 +3060,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithoutTax", netPriceBeforeRC, context);
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
+			context.getModel().setProperty("NetPrice", netPriceBeforeRC, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
@@ -3016,6 +3074,7 @@ sap.ui.define([
             let annualValue = (monthlyRent * 12) * reqestedVolume;
 
 			context.getModel().setProperty("AnnualValue", annualValue, context);
+			context.getModel().setProperty("NetPrice", annualValue, context);
         },
 
 		onPricingFormGetPricingDataBtnPress: function(event){
@@ -3167,7 +3226,7 @@ sap.ui.define([
 			const oDefaultModel = form.getModel();
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 			const precioNetoPricingObj = oBoundContext.getObject();
-
+			oDefaultModel.resetChanges();
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPrecioNetoView", {
 				properties: precioNetoPricingObj,
 				groupId: "PricingForm"
@@ -3229,7 +3288,7 @@ sap.ui.define([
 			const oDefaultModel = form.getModel();
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
 			const desComercialPricingObj = oBoundContext.getObject();
-
+			oDefaultModel.resetChanges();
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoComercialView", {
 				properties: desComercialPricingObj,
 				groupId: "PricingForm"
@@ -3289,6 +3348,8 @@ sap.ui.define([
 
 			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
 			pvlPricingObj.NetPriceWithoutTax = correctPrice;
+
+			oDefaultModel.resetChanges();
 
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionPVLView", {
 				properties: pvlPricingObj,
@@ -3350,7 +3411,8 @@ sap.ui.define([
 			desEspecialPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(desEspecialPricingObj.Tax))).toFixed(2));
 			desEspecialPricingObj.ESDiscount = 1;
 
-
+			oDefaultModel.resetChanges();
+			
 			const oNewBindingCtx = oDefaultModel.createEntry("/PriceConditionDescuentoEspecialView", {
 				properties: desEspecialPricingObj,
 				groupId: "PricingForm"
