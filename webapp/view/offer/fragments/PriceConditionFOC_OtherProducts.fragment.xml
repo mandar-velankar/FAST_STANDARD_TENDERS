@@ -52,6 +52,10 @@
                 <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.UoM}"/>
                 </Column>
+                <Column
+                    visible="{= ${st>/SelectedTender/Region} === 'PACAWI'}">
+                    <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOC}"/>
+                </Column>
                 <Column>
                     <Text text="{i18n>PriceConditionFOC_OtherProductsFragment.FOCQuantity}"/>
                 </Column>
@@ -88,6 +92,15 @@
                             ${FreeGoodsOther_ABS_PCT} === 'PCT' ? '%': ${ui>/FocForm/UOM}
                         }">
                     </Text> 
+                    <Input  
+                        value="{
+                            parts:['FreeGoodsOther_STP_FOC_Percentage', 'st>/SelectedCountry'],
+                            type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+                        }" 
+                        liveChange=".onCalculateFOCBonus($event, 'FOCPercentage')"
+                        enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP'}"
+                        visible="{= ${st>/SelectedTender/Region} === 'PACAWI'}"
+                    />
                     <HBox>
                         <Input  
                             value="{
@@ -104,6 +117,9 @@
                                 ${FreeGoodsOther_ABS_PCT} === 'ABS' || 
                                 ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false 
                             }"
+                            enabled="{= ${st>/SelectedTender/Region} === 'PACAWI'
+                                ? ${FreeGoodsOther_ABS_PCT} !== 'STP'
+                                : true }"
                         />
                         <Input  
                             value="{
@@ -115,19 +131,37 @@
                             }"
                         /> 
                     </HBox>
-                    <Input
-                        value="{
-                                path:'FreeGoodsOther_Step',
-                                type: 'sap.ui.model.type.Integer',
-									formatOptions: { 
-										maxFractionDigits: 0,
-										minFractionDigits: 0, 
-										groupingEnabled: true, 
-										groupingSeparator: ','
-									}
-                                }" 
-                        enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
-                    />
+                    <HBox >
+                        <Input
+                            value="{
+                                    path:'FreeGoodsOther_Step',
+                                    type: 'sap.ui.model.type.Integer',
+                                        formatOptions: { 
+                                            maxFractionDigits: 0,
+                                            minFractionDigits: 0, 
+                                            groupingEnabled: true, 
+                                            groupingSeparator: ','
+                                        }
+                                    }" 
+                            enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
+                            visible="{= ${st>/SelectedTender/Region} !== 'PACAWI'}"
+                        />
+                        <Input
+                            value="{
+                                    path:'FreeGoodsOther_Step',
+                                    type: 'sap.ui.model.type.Integer',
+                                        formatOptions: { 
+                                            maxFractionDigits: 0,
+                                            minFractionDigits: 0, 
+                                            groupingEnabled: true, 
+                                            groupingSeparator: ','
+                                        }
+                                    }" 
+                            enabled="{= ${FreeGoodsOther_ABS_PCT} === 'STP' ? true : false }"
+                            liveChange=".onCalculateFOCBonus($event, 'FreeGoodsOther_Step')"
+                            visible="{= ${st>/SelectedTender/Region} === 'PACAWI'}"
+                        />
+                    </HBox>
                     <Button 
                         icon="sap-icon://delete" 
                         press=".onButtonDeleteOtherProductPress"
