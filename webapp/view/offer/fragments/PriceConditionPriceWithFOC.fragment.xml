@@ -121,6 +121,7 @@
 								}" 
 								enabled="{ui>/PricingForm/editMode}"
 								liveChange=".onPricingFormLiveChange($event, 'PriceWithFOC')"
+								required="{= ${CountryCode} === 'PK'}"
 							/>
 						</form:fields>
 					</form:FormElement>
