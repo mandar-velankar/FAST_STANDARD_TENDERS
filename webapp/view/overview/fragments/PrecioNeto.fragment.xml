@@ -121,9 +121,9 @@
                     {path: 'st>CURRENCY'}
                 ], formatter:'.formatter.price'}"/>
 
-                <!-- NetPriceWithTaxAfterRD -->
+                <!-- NetPriceWithTax -->
                 <Text text="{parts: [
-                    {path: 'st>PriceCondition/NetPriceWithTaxAfterDeductionRD'}, 
+                    {path: 'st>PriceCondition/NetPriceWithTax'}, 
                     {path: 'st>CURRENCY'}
                 ], formatter:'.formatter.price'}"/>
 

@@ -3557,6 +3557,42 @@ sap.ui.define([
 				template: template,
 				filters: filters
 			});
+		},
+
+		setBrandLevelRappelEnablement: function(offerProduct) {
+			// Normalize values to lowercase
+			const unitPerPack = (offerProduct?.UnitPerPack || "").trim().toLowerCase();
+			const brandName = (offerProduct?.BrandName || "").trim().toLowerCase();
+
+			// Enablement condition
+			const bEnable =
+				unitPerPack === "unit" &&
+				(brandName === "jivi" || brandName === "kovaltry");
+
+			// Set the property in the UI model
+			this.getModel("ui").setProperty(
+				"/RappelForm/enableBrandLevelRappel",
+				bEnable
+			);
+		},
+
+		onCalculateFOCBonus: function (event, property) {
+			const stModel = this.getModel('st');
+			const region = stModel.getProperty('/SelectedTender/Region');
+			const source = event.getSource();
+			const value = event.getParameter('value');
+			const context = source.getBindingContext();
+			const object = context.getObject();
+
+			const customPercentageType = new this.customTypes.percentage;
+
+			if (region === 'PACAWI') {
+				const stepFOCPercentage = parseFloat(property.includes('FOCPercentage') ? customPercentageType.parseValue(value)?.[0] : object.FreeGoodsOther_STP_FOC_Percentage) || 0;
+				const focMinQty = parseFloat(property.includes('FreeGoodsOther_Step') ? value : object.FreeGoodsOther_Step) || 0;
+				const focBonus = focMinQty * stepFOCPercentage;
+				
+				context.getModel().setProperty("FreeGoodsOther", focBonus, context);
+			}
 		}
 
     });
