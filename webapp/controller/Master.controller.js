@@ -369,19 +369,42 @@ sap.ui.define([
 			const oComboBox = this.byId("idSelectInstitute");
 
 			if (oComboBox) {
-				// Only skip reload if already bound AND not forced
 				if (oComboBox.getBinding("items") && !bForceReload) {
 					return;
 				}
 
-				// Clear previous binding when forcing reload
 				if (bForceReload) {
-					oComboBox.unbindItems();
-					oComboBox.setModel(null, "institutes");
+					oComboBox.destroyItems();
+					this._institutesCached = false;
 				}
 
-				this.onLoadInstitutes({ getSource: () => oComboBox });
+				// Attach to the click event
+				if (!oComboBox._loadEventsAttached) {
+					oComboBox.attachBrowserEvent("click", () => {
+						this.onComboBoxDropdownOpen();
+					});
+					oComboBox._loadEventsAttached = true;
+				}
+
+				console.log("ComboBox initialized");
 			}
+		},
+
+		onComboBoxDropdownOpen: function () {
+			const oComboBox = this.byId("idSelectInstitute");
+
+			if (this._institutesLoading) {
+				console.log("Already loading institutes...");
+				return;
+			}
+
+			if (this._institutesCached) {
+				console.log("Using cached institutes");
+				return;
+			}
+
+			this._institutesLoading = true;
+			this.onLoadInstitutes({ getSource: () => oComboBox });
 		},
 
 		onLoadInstitutes: function (oEvent) {
@@ -394,6 +417,7 @@ sap.ui.define([
 			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
 
 			oComboBox.setBusy(true);
+			oComboBox.setBusyIndicatorDelay(0);
 
 			const aFilters = [
 				new sap.ui.model.Filter({
@@ -419,6 +443,8 @@ sap.ui.define([
 				new sap.ui.model.Sorter("InstituteName", false)
 			];
 
+			console.log("Loading institutes...");
+
 			oModel.read(sPath, {
 				filters: aFilters,
 				sorters: aSorters,
@@ -428,35 +454,61 @@ sap.ui.define([
 
 				success: function (oData) {
 					if (oData && oData.results) {
+						console.log("Total institutes from backend:", oData.results.length);
 
-						oData.results.unshift({
-							InstituteID: "All",
-							InstituteName: "All",
-							CustomerID: ""
-						});
+						// Add "All" option
+						oComboBox.addItem(new sap.ui.core.ListItem({
+							key: "All",
+							text: "All",
+							additionalText: ""
+						}));
 
-						const oJsonModel = new sap.ui.model.json.JSONModel(oData.results);
-						oComboBox.setModel(oJsonModel, "institutes");
+						// Load items in chunks
+						const aResults = oData.results;
+						const iChunkSize = 2500;
+						let iIndex = 0;
+						let iStartTime = Date.now();
 
-						oComboBox.bindItems({
-							path: "institutes>/",
-							template: new sap.ui.core.ListItem({
-								key: "{institutes>InstituteID}",
-								text: "{institutes>InstituteName}",
-								additionalText: "{institutes>CustomerID}"
-							})
-						});
+						const addItemsInChunks = () => {
+							const iEndIndex = Math.min(iIndex + iChunkSize, aResults.length);
+
+							for (let i = iIndex; i < iEndIndex; i++) {
+								oComboBox.addItem(new sap.ui.core.ListItem({
+									key: aResults[i].InstituteID,    
+									text: aResults[i].InstituteName,        
+									additionalText: aResults[i].CustomerID  
+								}));
+							}
+
+							const iTimeElapsed = Date.now() - iStartTime;
+							console.log(`Chunk ${Math.ceil((iIndex + 1) / iChunkSize)}: Added ${Math.min(iChunkSize, aResults.length - iIndex)} items. Time: ${iTimeElapsed}ms`);
+
+							iIndex = iEndIndex;
+
+							if (iIndex < aResults.length) {
+								setTimeout(addItemsInChunks, 20);
+							} else {
+								const iTotalTime = Date.now() - iStartTime;
+								console.log(`ALL ITEMS LOADED: ${oComboBox.getItems().length} total items in ${iTotalTime}ms`);
+								
+								controller._institutesCached = true;
+								controller._institutesLoading = false;
+								
+								oComboBox.setBusy(false);
+							}
+						};
+
+						addItemsInChunks();
 					}
 
 					controller.getView().getModel("st")
 						.setProperty("/SelectedInstituteIDFilter", selectedInstituteID);
-
-					oComboBox.setBusy(false);
 				},
 
 				error: function (oError) {
 					console.error("Error loading institutes:", oError);
 					oComboBox.setBusy(false);
+					controller._institutesLoading = false;
 				}
 			});
 		},
