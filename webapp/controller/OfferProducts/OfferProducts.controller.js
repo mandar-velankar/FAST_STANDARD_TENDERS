@@ -62,25 +62,21 @@ sap.ui.define([
 			this.getOwnerComponent().getEventBus().subscribe("OfferFormViewChannel", "updateOfferForm", this.setVisibleWithMaxPrice, this);
 		},
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
-			// get state data
-			this.templateState = this.getOwnerComponent().getModel("template");
-			this.templateStateData = this.templateState.getData();
-			this.oOwnerComponent = this.getOwnerComponent();
-			this.oRouter = this.oOwnerComponent.getRouter();
-
-			this.defaultModel = this.getOwnerComponent().getModel();
-			
-			//this.getView().getBindingContext("template"); // get current tab data
-			// await this.getOwnerComponent().getModel().metadataLoaded();
+			// Store parameters immediately
 			this.objectId = objectId;
 			this.offerID = offerId;
 			this.countryCode = countryCode;
 			this.productScope = productScope;
 			this.selectedTab = iconTabfilter.getKey();
-			const {productCount} = await this.stState.getService().getOfferProducts(offerId);
-			const selectedOffer = await this.stState.getService().getOffer(offerId);
-			this.tenderName = selectedOffer?.TenderName;
-			this.division = selectedOffer?.Division;
+		
+			// Get models
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			this.oOwnerComponent = this.getOwnerComponent();
+			this.oRouter = this.oOwnerComponent.getRouter();
+			this.defaultModel = this.getOwnerComponent().getModel();
+		
+			//Initialize model
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
@@ -90,40 +86,71 @@ sap.ui.define([
 				isCopiedOffer: false,
 				matchedHaematologyCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-HM$/g)?.[0],
 				matchedConsumerHealthCountryCode: !!this.countryCode.match(/^[A-Za-z]{2,}-CH$/g)?.[0],
-				OfferForm:{
-					editMode: false
-				},
-				ComplianceOfficer:{
-                    editMode: false
-				},
-				GlobalStrategicMarketing:{
-                    editMode: false
-				},
-				SupplyManagement:{
-                    editMode: false
-				},
-				
-				OfferProductTable:{
+				OfferForm: { editMode: false },
+				ComplianceOfficer: { editMode: false },
+				GlobalStrategicMarketing: { editMode: false },
+				SupplyManagement: { editMode: false },
+				OfferProductTable: {
 					enableDeleteProductButton: false,
 					editMode: false,
 					tableSelectionMode: 'SingleSelectMaster',
-					count: productCount,
-					source: selectedOffer?.Custom_String_1
+					count: 0,
+					source: ""
 				}			
 			});
-	
+		
 			this.setModel(oModel, "ui");
-
-			await this.setVisibleWithMaxPrice();
+		
+			// Bind all views (INSTANT)
 			this._bindForm("OfferForm", this.objectId, this.offerID, this.selectedTab, "OfferformInfo");
-			// specific for haematology countries
-            if(this.getModel("ui").getProperty("/matchedHaematologyCountryCode")){
-                this.bindAllHaematologyForms(this.objectId, this.offerID);
-			}
 			this._bindTable("OfferProductsTable", this.objectId, this.offerID);
-			if (this.offerID && this.offerID !== "NA") this._bindText("TotalAmountOfferProducts");
+			if (this.offerID && this.offerID !== "NA") {
+				this._bindText("TotalAmountOfferProducts");
+			}
+		
+			// Load data in parallel (BACKGROUND)
+			this._loadOfferProductsData();
 			
 		},
+
+		/**
+		 * Load all data in parallel
+		 * Old: await getOfferProducts() then await getOffer() = sequential
+		 * New: await Promise.all([getOfferProducts(), getOffer()]) = parallel
+		 */
+		_loadOfferProductsData: async function() {
+			try {
+				// Fetch both in parallel instead of sequential
+				const [
+					productsData,
+					selectedOffer
+				] = await Promise.all([
+					this.stState.getService().getOfferProducts(this.offerID),  
+					this.stState.getService().getOffer(this.offerID)          
+				]);
+		
+				// Update UI with loaded data
+				const { productCount } = productsData;
+				
+				this.getModel("ui").setProperty("/OfferProductTable/count", productCount);
+				this.getModel("ui").setProperty("/OfferProductTable/source", selectedOffer?.Custom_String_1);
+		
+				this.tenderName = selectedOffer?.TenderName;
+				this.division = selectedOffer?.Division;
+		
+				// Set max price visibility after data loads
+				await this.setVisibleWithMaxPrice();
+		
+				// Haematology-specific binding (if needed)
+				if (this.getModel("ui").getProperty("/matchedHaematologyCountryCode")) {
+					this.bindAllHaematologyForms(this.objectId, this.offerID);
+				}
+		
+			} catch (error) {
+				console.error("Error loading offer products:", error);
+			}
+		},
+
 		_onObjectMatched: async function (oEvent) {
 			this.offerID = oEvent.getParameter("arguments").offerId;
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
