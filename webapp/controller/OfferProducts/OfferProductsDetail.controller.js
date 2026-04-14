@@ -3102,12 +3102,27 @@ sap.ui.define([
 
 		onOpenInstituteValueHelp: async function (event) {
 			const source = event.getSource();
+			const instituteType = this.getModel("ui").getProperty("/InstituteType");
+
+			let instituteTypeFilters = [
+				new Filter("InstituteType", FilterOperator.EQ, instituteType)
+			];
+
+			// include Public Account institute type if Region(s) is selected
+			if (instituteType === "Region(s)") {
+				instituteTypeFilters.push(
+					new Filter("InstituteType", FilterOperator.EQ, "Public Account")
+				);
+			}
 		
 			const filters = [
 				new Filter("CountryCode", FilterOperator.EQ, this.sCountryCode),
 				new Filter("CustomerID", FilterOperator.NE, null),
 				new Filter("CustomerID", FilterOperator.NE, 0),
-				new Filter("InstituteType", FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
+				new Filter({
+					filters: instituteTypeFilters,
+					and: false // OR between InstituteTypes
+				})
 			];
 		
 			// Define the dialog
