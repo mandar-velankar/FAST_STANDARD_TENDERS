@@ -148,14 +148,60 @@ sap.ui.define([
 				ProductCode: this.productId,
 				LotID: "1"
 			});
-			const awardedProduct = await this.stState.getService().getAwardedProduct(this.offerId, this.productId)
-			this.bindContractDurationSelect(awardedProduct)
+
 			this._bindView(awardedProductPath);
 			this.bindForm(awardedProductPath);
 			this.bindTable(this.offerId, this.productId);
 			this.setInitialWholeSalerMultiInputTokens();
-			this.countryCode == 'NL' && await this.getAwardedContractDurations()
-			this.countryCode == 'PL' && await this.getPolandAwardedContractInformation();
+
+			this._loadAwardedProductData();
+		},
+
+		/**
+		 * Load all data in parallel
+		 * Old: await getAwardedProduct() then await country-specific
+		 * New: Promise.all for parallel execution
+		 */
+		_loadAwardedProductData: async function() {
+			try {
+				//Fetch awarded product and country-specific data in parallel
+				const [awardedProduct, awardedContractDurations, polandData] = await Promise.all([
+					this.stState.getService().getAwardedProduct(this.offerId, this.productId),
+					
+					// NL-specific (conditional)
+					this.countryCode === 'NL' 
+						? this.getAwardedContractDurations()
+						: Promise.resolve(null),
+					
+					// PL-specific (conditional)
+					this.countryCode === 'PL'
+						? this.getPolandAwardedContractInformation()
+						: Promise.resolve(null)
+				]);
+		
+				// Update UI with awarded product
+				if (awardedProduct) {
+					this.bindContractDurationSelect(awardedProduct);
+				}
+		
+				// Update UI with country-specific data as it arrives
+				if (awardedContractDurations && this.countryCode === 'NL') {
+					// NL data ready
+					this.getModel("ui").setProperty("/AwardedContractDurations", awardedContractDurations);
+				}
+		
+				if (polandData && this.countryCode === 'PL') {
+					// PL data ready
+					this.getModel("ui").setProperty("/PolandData", polandData);
+				}
+		
+				// All data loaded
+				this.getModel("ui").setProperty("/busy", false);
+		
+			} catch (error) {
+				console.error("Error loading awarded product data:", error);
+				this.getModel("ui").setProperty("/busy", false);
+			}
 		},
 
 		getPolandAwardedContractInformation: async function(){

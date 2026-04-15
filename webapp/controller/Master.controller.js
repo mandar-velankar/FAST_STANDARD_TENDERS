@@ -118,7 +118,7 @@ sap.ui.define([
 
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
-			this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._onInstitutesFilterUpdate, this);
+			this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._bindInstituteItems, this);
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -360,158 +360,92 @@ sap.ui.define([
 			this.setFilter()
 		},
 
-		_onInstitutesFilterUpdate: function () {
-			// Force reload when coming from EventBus
-			this._bindInstituteItems(true);
-		},
-
-		_bindInstituteItems: function (bForceReload = false) {
-			const oComboBox = this.byId("idSelectInstitute");
-
-			if (oComboBox) {
-				if (oComboBox.getBinding("items") && !bForceReload) {
-					return;
-				}
-
-				if (bForceReload) {
-					oComboBox.destroyItems();
-					this._institutesCached = false;
-				}
-
-				// Attach to the click event
-				if (!oComboBox._loadEventsAttached) {
-					oComboBox.attachBrowserEvent("click", () => {
-						this.onComboBoxDropdownOpen();
-					});
-					oComboBox._loadEventsAttached = true;
-				}
-
-				console.log("ComboBox initialized");
+		_bindInstituteItems: function () {
+			const oSelectInstitute = this.byId("idSelectInstitute");
+			if (oSelectInstitute) {
+				oSelectInstitute.destroyItems();
+				oSelectInstitute.destroyAggregation();
+				// Force the loadItems event manually
+				this.onLoadInstitutes({ getSource: () => oSelectInstitute });
 			}
-		},
-
-		onComboBoxDropdownOpen: function () {
-			const oComboBox = this.byId("idSelectInstitute");
-
-			if (this._institutesLoading) {
-				console.log("Already loading institutes...");
-				return;
-			}
-
-			if (this._institutesCached) {
-				console.log("Using cached institutes");
-				return;
-			}
-
-			this._institutesLoading = true;
-			this.onLoadInstitutes({ getSource: () => oComboBox });
 		},
 
 		onLoadInstitutes: function (oEvent) {
-			const oComboBox = oEvent.getSource();
-			const oModel = this.getView().getModel();
-			const sPath = "/PT_TMINST";
+            const oComboBox = oEvent.getSource();
+            const oModel = this.getView().getModel(); // Get your OData V2 model
+            const sPath = "/PT_TMINST"; // The path to your entity set
 			const controller = this;
-
 			const selectedInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter") || "All";
 			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
 
-			oComboBox.setBusy(true);
-			oComboBox.setBusyIndicatorDelay(0);
-
 			const aFilters = [
-				new sap.ui.model.Filter({
+				new Filter({
 					path: "CountryCode",
-					operator: sap.ui.model.FilterOperator.EQ,
+					operator: FilterOperator.EQ,
 					value1: this.countryCode,
 					caseSensitive: false
 				})
 			];
 
-			if (selectedInstituteType && selectedInstituteType !== "All") {
+			// Only exclude Ship-To when NO specific selection
+			if (!selectedInstituteType || selectedInstituteType === 'All') {
 				aFilters.push(
-					new sap.ui.model.Filter({
+					new Filter({
 						path: "InstituteType",
-						operator: sap.ui.model.FilterOperator.EQ,
+						operator: FilterOperator.NE,
+						value1: 'Ship-To'
+					})
+				);
+			}
+
+			// If user selected a specific type → apply only EQ
+			if (selectedInstituteType && selectedInstituteType !== 'All') {
+				aFilters.push(
+					new Filter({
+						path: "InstituteType",
+						operator: FilterOperator.EQ,
 						value1: selectedInstituteType,
 						caseSensitive: false
 					})
 				);
 			}
 
-			const aSorters = [
-				new sap.ui.model.Sorter("InstituteName", false)
-			];
+            // --- Get Sorters ---
+            const aSorters = [new Sorter("InstituteName", false)]; // Sort by Name ascending
+            // --- Perform Manual OData Read ---
+            oModel.read(sPath, {
+                sorters: aSorters,
+                filters: aFilters,
+                success: function (oData) {
+					
+                    if (oData && oData.results) {
+						oData.results.unshift({
+							InstituteID: "All",
+							InstituteName: "All",
+							CustomerID: ""
+						})
+                        oData.results.forEach(function (oItemData) {
+                            // Check if item already exists (important to avoid duplicates)
+                            var bExists = oComboBox.getItems().some(function(oExistingItem) {
+                                return oExistingItem.getKey() === oItemData.InstituteID;
+                            });
 
-			console.log("Loading institutes...");
-
-			oModel.read(sPath, {
-				filters: aFilters,
-				sorters: aSorters,
-				urlParameters: {
-					"$select": "InstituteID,InstituteName,CustomerID"
-				},
-
-				success: function (oData) {
-					if (oData && oData.results) {
-						console.log("Total institutes from backend:", oData.results.length);
-
-						// Add "All" option
-						oComboBox.addItem(new sap.ui.core.ListItem({
-							key: "All",
-							text: "All",
-							additionalText: ""
-						}));
-
-						// Load items in chunks
-						const aResults = oData.results;
-						const iChunkSize = 2500;
-						let iIndex = 0;
-						let iStartTime = Date.now();
-
-						const addItemsInChunks = () => {
-							const iEndIndex = Math.min(iIndex + iChunkSize, aResults.length);
-
-							for (let i = iIndex; i < iEndIndex; i++) {
-								oComboBox.addItem(new sap.ui.core.ListItem({
-									key: aResults[i].InstituteID,    
-									text: aResults[i].InstituteName,        
-									additionalText: aResults[i].CustomerID  
-								}));
-							}
-
-							const iTimeElapsed = Date.now() - iStartTime;
-							console.log(`Chunk ${Math.ceil((iIndex + 1) / iChunkSize)}: Added ${Math.min(iChunkSize, aResults.length - iIndex)} items. Time: ${iTimeElapsed}ms`);
-
-							iIndex = iEndIndex;
-
-							if (iIndex < aResults.length) {
-								setTimeout(addItemsInChunks, 20);
-							} else {
-								const iTotalTime = Date.now() - iStartTime;
-								console.log(`ALL ITEMS LOADED: ${oComboBox.getItems().length} total items in ${iTotalTime}ms`);
-								
-								controller._institutesCached = true;
-								controller._institutesLoading = false;
-								
-								oComboBox.setBusy(false);
-							}
-						};
-
-						addItemsInChunks();
-					}
-
-					controller.getView().getModel("st")
-						.setProperty("/SelectedInstituteIDFilter", selectedInstituteID);
-				},
-
-				error: function (oError) {
-					console.error("Error loading institutes:", oError);
-					oComboBox.setBusy(false);
-					controller._institutesLoading = false;
-				}
-			});
-		},
+                            if (!bExists) {
+                                oComboBox.addItem(new sap.ui.core.ListItem({
+                                    key: oItemData.InstituteID,
+                                    text: oItemData.InstituteName,
+									additionalText: oItemData.CustomerID
+                                }));
+                            }
+                        });
+                    }
+					controller.getView().getModel('st').setProperty("/SelectedInstituteIDFilter", selectedInstituteID);
+                }.bind(this),
+                error: function (oError) {
+                    console.error("Error loading more items:", oError);
+                }
+            });
+        }, 
 
 		getCountryDefaultSorters: function () {
 			switch (this.countryCode) {

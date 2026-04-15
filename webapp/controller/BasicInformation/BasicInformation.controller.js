@@ -34,44 +34,40 @@ sap.ui.define([
 		},
 		onBeforeShow:async function(iconTabfilter,{objectId, offerId, countryCode, productScope}){
 			
+			// Store parameters
 			this.objectId = objectId;
 			this.offerId = offerId;
 			this.selectedTab = iconTabfilter.getKey();
 			this.countryCode = countryCode;
-
-			if (this.selectedTab !== "Tender" && this.selectedTab !== "Price Request" && this.selectedTab !== "Basic Information") return;
-			 // TODO: this check is needed because onBeforeShow method is also triggered from other tabs. Wouter will implement a solution for this.
-
+			this.productScope = productScope;
+		
+			// Check valid tabs BEFORE fetching data
+			if (!["Tender", "Price Request", "Basic Information"].includes(this.selectedTab)) {
+				return; // Exit early without fetching
+			}
+		
+			// Get models
 			this.defaultModel = this.getOwnerComponent().getModel();
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
-			this.productScope = productScope; 
-			this.selectedTender = await this.stState.getService().getTender(this.objectId);
-			//this.getView().getBindingContext("template"); // get current tab data
-			// await this.getOwnerComponent().getModel().metadataLoaded();
-
-			this.oAwardCriteriaTable = this.getView().byId("idAwardCriteria");
-			
-
+		
+			// Initialize model
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				editMode: false,
-				AwardCriteria:{
-					editMode: false
-				},
-				TenderForm:{
-					editMode: false	
-				}
+				AwardCriteria: { editMode: false },
+				TenderForm: { editMode: false }	
 			});
-	
+		
 			this.setModel(oModel, "ui");
-
+		
+			// Bind views
 			this._bindForm("TenderForm");
 			this._bindTable("AwardCriteria");
-
-			// this.getView().setModel(new JSONModel({data: "0.34"}), "test");
+		
+			this.selectedTender = await this.stState.getService().getTender(this.objectId);
 		},
 
 		/**

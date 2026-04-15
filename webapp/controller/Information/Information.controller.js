@@ -30,31 +30,31 @@ sap.ui.define([
 
 		},
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode}) {
+			// Store parameters
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
 			this.oRouter = this.oOwnerComponent.getRouter();
-
 			this.defaultModel = this.getOwnerComponent().getModel();
 			
-			//this.getView().getBindingContext("template"); // get current tab data
-			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.tenderId = objectId;
 			this.offerId = offerId;
 			this.countryCode = countryCode;
 			this.selectedTab = iconTabfilter.getKey();
+			this.stState = this.getOwnerComponent().getModel("st");
+		
+			// Calculate dates
 			const today = new Date();
-        	const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
-
+			const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
+		
+			// Initialize model
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				editMode: false,
 				minDate: today,
 				maxDate: maxDate,
-				OverviewForm:{
-					editMode: false
-				},
+				OverviewForm: { editMode: false },
 				enableApprovalButton: false,
 				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch'),
 				OverviewPriceConditionTableSpain: {
@@ -68,18 +68,57 @@ sap.ui.define([
 				},
 				isOfferHavingOnlyTMApproverTypePending: false
 			});
-			
+		
 			this.setModel(oModel, "ui");
-
+		
+			//Bind views
 			this.bindFields();
-			if(this.offerId && this.offerId !== "NA") {await this.bindProductFOCInformationTable(this.countryCode, this.offerId);}			
-			await this.approvalButtonEnableCheck();
-			await this.assignWordTemplates();
-			await this.assignExcelTemplates();
-			this.selectedTender = await this.stState.getService().getTender(this.tenderId);
-			this.countryCode === "ES" && this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
-			
-			//this.getModel("ui").setProperty("/Classification", this.selectedTender?.Classification);
+		
+			// Load all data in parallel
+			this._loadInformationData();
+		},
+
+		_loadInformationData: async function() {
+			try {	
+				const [
+					focInfo,
+					tenderData,
+					approvalCheck,
+					wordTemplates,
+					excelTemplates,
+					// Spain-specific (if needed)
+					spainConstraints
+				] = await Promise.all([
+					this.offerId && this.offerId !== "NA" 
+						? this.bindProductFOCInformationTable(this.countryCode, this.offerId)
+						: Promise.resolve(null),
+					
+					this.stState.getService().getTender(this.tenderId), 
+					this.approvalButtonEnableCheck(),                  
+					this.assignWordTemplates(),                  
+					this.assignExcelTemplates(),            
+					
+					// Spain-specific data (conditional)
+					this.countryCode === "ES" 
+						? this.stState.getContractMngtDateConstraints(this.tenderId, this.offerId, this.countryCode)
+						: Promise.resolve(null)
+				]);
+		
+				// Store tender data
+				this.selectedTender = tenderData;
+		
+				// Update approval status
+				this.getModel("ui").setProperty("/enableApprovalButton", approvalCheck);
+		
+				// Spain-specific logic
+				if (this.countryCode === "ES" && spainConstraints) {
+					this.getModel("st").setProperty("/ContractMngtDateConstraints", spainConstraints);
+					this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
+				}
+		
+			} catch (error) {
+				console.error("Error loading information:", error);
+			}
 		},
 
 		onCloseApprovalDialog: function(){
