@@ -143,20 +143,9 @@ sap.ui.define([
 		},
 
 		onBeforeShow:async function(sObjectId, sOfferId, countryCode, productCode){
-			// get state data
-			this.templateState = this.getOwnerComponent().getModel("template");
-			this.templateStateData = this.templateState.getData();
-			
-			//this.getView().getBindingContext("template"); // get current tab data
-			// await this.getOwnerComponent().getModel().metadataLoaded();
-			this.objectId = sObjectId;
-			this.offerId = sOfferId;
-			//this.selectedTab = iconTabfilter.getKey();
-			
-			this.defaultModel = this.getOwnerComponent().getModel();
 
 			const oModel = new JSONModel({
-				busy: false,
+				busy: true,
 				delay: 0,
 				editMode: false,
 				currency: "EUR",
@@ -196,43 +185,91 @@ sap.ui.define([
 				},
 				ProductDistributors: []
 			});
-	
 			this.setModel(oModel, "ui");
-			this.offerStatus = await this.stState.getOfferStatus(sOfferId);
-			const currentPriceConditionType = await this.getCurrentPricingConditionType();
-			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
-			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
-			const priceConditionType = await this.getSavedPriceConditionType();
-			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
-			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
-			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
-			let offerProduct = await this.stState.getService().getOfferProduct(sOfferId, productCode);
-			this.getModel("st").setProperty("/OfferProduct", offerProduct);
+			// get state data
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			this.objectId = sObjectId;
+			this.offerId = sOfferId;
+			this.defaultModel = this.getOwnerComponent().getModel();
+
+			// Bind critical views NOW - user sees data sooner
 			this._bindView();
 			this._bindForm("ProductForm");
-			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+			
+			const criticalDataPromises = [
+				this.stState.getOfferStatus(sOfferId),
+				this.getCurrentPricingConditionType(),
+				this.stState.getService().getTender(sObjectId)
+			];
+
+			const [offerStatus, currentPriceConditionType, selectedTender] = await Promise.all(criticalDataPromises);
+
+			// Update model with critical data
+			this.offerStatus = offerStatus;
+
+			// Bind remaining views
 			this._bindDistributorsMultiInput();
-			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
-			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
-			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+
+			if (countryCode === 'ES') {
+				// Defer Spain-specific operations - run without awaiting
+				this._loadSpainSpecificData();
+			}
+
+			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
+			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
 			this.getModel("ui").setProperty("/InstituteType", selectedTender?.InstituteType);
 			this.getModel("ui").setProperty("/Classification", selectedTender?.Classification);
 			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedTender?.InstituteName);
 			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedTender?.InstituteID);
 			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedTender?.CustomerID);
-			const standardTenderPriceConditionViews = await this.stState.getService().getStandardTenderPriceConditionView(sObjectId, sOfferId, productCode);
-			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);
-			if(countryCode === 'ES'){
+
+			// These can run in parallel while UI is rendering
+			const secondaryDataPromises = [
+				this.getSavedPriceConditionType(),
+				this.stState.getService().getOffer(sOfferId),
+				this.stState.getService().getOfferProduct(sOfferId, productCode),
+				this.getInstituteView(selectedTender?.InstituteID, countryCode),
+				this.stState.getService().getStandardTenderPriceConditionView(sObjectId, sOfferId, productCode)
+			];
+
+			const [priceConditionType, selectedOffer, offerProduct, parentInstitute, standardTenderPriceConditionViews] = 
+				await Promise.all(secondaryDataPromises);
+
+			// Update with secondary data
+			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
+			this.getModel("st").setProperty("/OfferProduct", offerProduct);
+			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);			
+
+			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+
+			// Load price condition in background
+			this.loadPriceCondition();
+
+			this.getModel("ui").setProperty("/busy", false);
+		},
+		/**
+		 * DEFERRED: Spain-specific operations run after critical path
+		 * These don't block the initial page load
+		 */
+		_loadSpainSpecificData: function() {
+			// Run these operations without awaiting - let them complete in background
+			Promise.all([
+				this.bindRappelForm(),
+				this.setSpainMaxPriceFieldVisibility(),
+				this.getSettlements(),
+				this.getMarketIncentiveID()
+			]).then(() => {
+				// Once background data arrives, update forms
 				this.bindProfitabilityForm();
 				this.bindProductTypeProfitabilityTable();
-				await this.bindRappelForm();
-				await this.setSpainMaxPriceFieldVisibility();
-				await this.getSettlements();
-				await this.getMarketIncentiveID();
-			} 
-			// this._bindText("ProductPackNameOfferProductDetail");
-			this.loadPriceCondition();
-		},		
+			}).catch(error => {
+				console.warn("Spain-specific data load failed:", error);
+			});
+		},
+
 		getSavedPriceConditionType: async function () {
 			let hasCurrentPricingReceived = this.getModel("ui").getProperty("/PricingForm/hasCurrentPricingReceived");
 			if(this.sCountryCode === 'ES'){
@@ -505,6 +542,7 @@ sap.ui.define([
 		
 
 		handleClose: function() {
+			this.getView().unbindElement();
 			let oNextUIState = "";
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
                 // No item should be selected on list after detail page is closed
@@ -3102,12 +3140,27 @@ sap.ui.define([
 
 		onOpenInstituteValueHelp: async function (event) {
 			const source = event.getSource();
+			const instituteType = this.getModel("ui").getProperty("/InstituteType");
+
+			let instituteTypeFilters = [
+				new Filter("InstituteType", FilterOperator.EQ, instituteType)
+			];
+
+			// include Public Account institute type if Region(s) is selected
+			if (instituteType === "Region(s)") {
+				instituteTypeFilters.push(
+					new Filter("InstituteType", FilterOperator.EQ, "Public Account")
+				);
+			}
 		
 			const filters = [
 				new Filter("CountryCode", FilterOperator.EQ, this.sCountryCode),
 				new Filter("CustomerID", FilterOperator.NE, null),
 				new Filter("CustomerID", FilterOperator.NE, 0),
-				new Filter("InstituteType", FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
+				new Filter({
+					filters: instituteTypeFilters,
+					and: false // OR between InstituteTypes
+				})
 			];
 		
 			// Define the dialog

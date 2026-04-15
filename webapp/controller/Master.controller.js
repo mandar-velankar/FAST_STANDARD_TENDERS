@@ -145,7 +145,7 @@ sap.ui.define([
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
 			this._bindInstituteTypes();
-			this._bindInstituteItems();
+			this._bindInstituteItems(true);
 			this.onLanguageChange();
 			// this.setFilter(oEvent);
 			const userInfo = await this.stState.getService().getUserInfo(userID);
@@ -212,21 +212,32 @@ sap.ui.define([
 
 		_bindBrandItems: function (sCountryCode) {
 			const oSelectBrands = this.byId("idSlctBrand");
-			oSelectBrands?.bindItems({
-				path: "/CountryTenderBrands",
-				filters: [
-					new Filter("COUNTRYCODE", FilterOperator.EQ, sCountryCode)
-				],
-				sorter: new Sorter({
-					path: 'BRANDNAME',
-					descending: false
-				}),
-				template: new sap.ui.core.Item({
-					key: "{BRANDID}",
-					text: "{BRANDNAME}"
-				}),
-				templateShareable: true
-			});
+
+			if (!oSelectBrands) return;
+
+			let oBinding = oSelectBrands.getBinding("items");
+
+			// First time: create binding
+			if (!oBinding) {
+				oSelectBrands.bindItems({
+					path: "/CountryTenderBrands",
+					sorter: new sap.ui.model.Sorter("BRANDNAME", false),
+					template: new sap.ui.core.Item({
+						key: "{BRANDID}",
+						text: "{BRANDNAME}"
+					}),
+					templateShareable: true
+				});
+
+				oBinding = oSelectBrands.getBinding("items");
+			}
+
+			// Only update filter (FAST, no rebind)
+			const aFilters = [
+				new sap.ui.model.Filter("COUNTRYCODE", sap.ui.model.FilterOperator.EQ, sCountryCode)
+			];
+
+			oBinding.filter(aFilters);
 		},
 
 		_bindStatusses: function (sCountryCode) {
@@ -345,7 +356,7 @@ sap.ui.define([
 
 		onChangeCountryInstituteType: function () {
 			this.getModel('st').setProperty("/SelectedInstituteIDFilter", "All");
-			this._bindInstituteItems();
+			this._bindInstituteItems(true);
 			this.setFilter()
 		},
 
@@ -367,7 +378,7 @@ sap.ui.define([
 			const selectedInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter") || "All";
 			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
 
-            const aFilters = [
+			const aFilters = [
 				new Filter({
 					path: "CountryCode",
 					operator: FilterOperator.EQ,
@@ -376,6 +387,18 @@ sap.ui.define([
 				})
 			];
 
+			// Only exclude Ship-To when NO specific selection
+			if (!selectedInstituteType || selectedInstituteType === 'All') {
+				aFilters.push(
+					new Filter({
+						path: "InstituteType",
+						operator: FilterOperator.NE,
+						value1: 'Ship-To'
+					})
+				);
+			}
+
+			// If user selected a specific type → apply only EQ
 			if (selectedInstituteType && selectedInstituteType !== 'All') {
 				aFilters.push(
 					new Filter({
@@ -384,8 +407,8 @@ sap.ui.define([
 						value1: selectedInstituteType,
 						caseSensitive: false
 					})
-				)
-			} 
+				);
+			}
 
             // --- Get Sorters ---
             const aSorters = [new Sorter("InstituteName", false)]; // Sort by Name ascending
