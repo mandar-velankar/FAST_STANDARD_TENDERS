@@ -145,7 +145,7 @@ sap.ui.define([
 		onBeforeShow:async function(sObjectId, sOfferId, countryCode, productCode){
 
 			const oModel = new JSONModel({
-				busy: true,
+				busy: false,
 				delay: 0,
 				editMode: false,
 				currency: "EUR",
@@ -208,15 +208,6 @@ sap.ui.define([
 			// Update model with critical data
 			this.offerStatus = offerStatus;
 
-			// Bind remaining views
-			this._bindDistributorsMultiInput();
-			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
-
-			if (countryCode === 'ES') {
-				// Defer Spain-specific operations - run without awaiting
-				this._loadSpainSpecificData();
-			}
-
 			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
 			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
 			this.getModel("ui").setProperty("/InstituteType", selectedTender?.InstituteType);
@@ -243,12 +234,18 @@ sap.ui.define([
 			this.getModel("st").setProperty("/OfferProduct", offerProduct);
 			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);			
 
-			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
-
 			// Load price condition in background
 			this.loadPriceCondition();
 
-			this.getModel("ui").setProperty("/busy", false);
+			if (countryCode === 'ES') {
+				// Defer Spain-specific operations - run without awaiting
+				this._loadSpainSpecificData();
+			}
+
+			// Bind remaining views
+			this._bindDistributorsMultiInput();
+			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
 		},
 		/**
 		 * DEFERRED: Spain-specific operations run after critical path
@@ -256,18 +253,15 @@ sap.ui.define([
 		 */
 		_loadSpainSpecificData: function() {
 			// Run these operations without awaiting - let them complete in background
+			this.bindProfitabilityForm();
+			this.bindProductTypeProfitabilityTable();
+
 			Promise.all([
 				this.bindRappelForm(),
 				this.setSpainMaxPriceFieldVisibility(),
 				this.getSettlements(),
 				this.getMarketIncentiveID()
-			]).then(() => {
-				// Once background data arrives, update forms
-				this.bindProfitabilityForm();
-				this.bindProductTypeProfitabilityTable();
-			}).catch(error => {
-				console.warn("Spain-specific data load failed:", error);
-			});
+			]);
 		},
 
 		getSavedPriceConditionType: async function () {
