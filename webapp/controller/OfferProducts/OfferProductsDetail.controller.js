@@ -2984,6 +2984,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 			context.getModel().setProperty("PriceConditionCode", priceConditionCode, context);
 			context.getModel().setProperty("NetPrice", netPriceWithoutTaxAfterDeductionRD, context);
+			context.getModel().setProperty("QuotationPriceConditionCode", priceConditionCode, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 
@@ -3093,7 +3094,7 @@ sap.ui.define([
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 			context.getModel().setProperty("NetPrice", netPriceBeforeRC, context);
-			context.getModel().setProperty("PriceConditionCode", 'YD02', context);
+			context.getModel().setProperty("QuotationPriceConditionCode", 'YD02', context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
