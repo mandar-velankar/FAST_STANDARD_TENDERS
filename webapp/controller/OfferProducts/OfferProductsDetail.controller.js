@@ -2697,7 +2697,7 @@ sap.ui.define([
 
 		onPriceConditionRappelDialogLoaded: function(priceConditionRappelView, dialog){
 			const volumeTresholdTable = this.byId("idVolumeTreshold");
-			const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
+			const itemsBinding = volumeTresholdTable.getBinding("items");
 
 			const transientContexts = [];
 			const currentItems = volumeTresholdTable.getItems();
@@ -2711,22 +2711,26 @@ sap.ui.define([
 
 			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
 
-			// Unbind and rebind items
-			volumeTresholdTable.unbindItems();
-			volumeTresholdTable.bindItems({
-				path : itemsBindingInfo.path,
-				template : itemsBindingInfo.template,
-				filters : filter,
-				groupId: "RappelForm"
-			});
-
-			volumeTresholdTable.attachEventOnce("updateFinished", () => {
-				transientContexts.forEach(ctx => {
-					const newItem = itemsBindingInfo.template.clone();
-					newItem.setBindingContext(ctx);
-					volumeTresholdTable.addItem(newItem);
+			if (itemsBinding) {
+				itemsBinding.filter(filter);
+				if (transientContexts.length > 0) {
+					itemsBinding.attachEventOnce("dataReceived", () => {
+						transientContexts.forEach(ctx => {
+							const newItem = volumeTresholdTable.getBindingInfo("items").template.clone();
+							newItem.setBindingContext(ctx);
+							volumeTresholdTable.insertItem(newItem);
+						});
+					});
+				}
+			} else {
+				const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
+				volumeTresholdTable.bindItems({
+					path : itemsBindingInfo.path,
+					template : itemsBindingInfo.template,
+					filters : filter,
+					groupId: "RappelForm"
 				});
-			});
+			}
 
 			dialog.open();
 		},
@@ -2765,9 +2769,33 @@ sap.ui.define([
 		onDeleteDiscountCondition: function(event){
 			const selectedItem = event.getSource().getParent();
 			const context = selectedItem.getBindingContext();
+			const table = this.byId("idVolumeTreshold");
+			
+			// Capture ALL transient contexts EXCEPT the one being deleted
+			const allItems = table.getItems();
+			const remainingTransientContexts = [];
+			allItems.forEach(item => {
+				const ctx = item.getBindingContext();
+				if (ctx && ctx.isTransient() && ctx !== context) {
+					remainingTransientContexts.push(ctx);
+				}
+			});
+			
 			if(context.isTransient()){
-				this.defaultModel.resetChanges([context.getPath()], undefined, true);
-			}else{
+				table.removeItem(selectedItem);
+				
+				if (remainingTransientContexts.length > 0) {
+					table.attachEventOnce("updateFinished", () => {
+						remainingTransientContexts.forEach(ctx => {
+							const newItem = table.getBindingInfo("items").template.clone();
+							newItem.setBindingContext(ctx);
+							table.insertItem(newItem);
+						});
+					});
+				}
+				
+				this.defaultModel.resetChanges([context.getPath()]);
+			} else {
 				this.defaultModel.remove(context.getPath());
 			}
 		},
