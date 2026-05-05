@@ -2761,6 +2761,7 @@ sap.ui.define([
 			context.getModel().setProperty("Tax", priceConditionRappelView?.Tax, context);
 			context.getModel().setProperty("NetPriceWithoutTax", 0, context);
 			context.getModel().setProperty("NetPriceWithTax", 0, context);
+			context.getModel().setProperty("CountryCode", this.sCountryCode, context);
 			const newItem = table.getBindingInfo("items").template.clone();
 			newItem.setBindingContext(context)
 			table.insertItem(newItem);
