@@ -2872,6 +2872,7 @@ sap.ui.define([
 
             bindingContext.getModel().setProperty("NetPriceWithoutTax", NetPriceWithoutTax, bindingContext);
 			bindingContext.getModel().setProperty("NetPriceWithTax", NetPriceWithTax, bindingContext);
+			bindingContext.getModel().setProperty("Discount", event.getSource().getValue() / 100, bindingContext);
 
         },
 
