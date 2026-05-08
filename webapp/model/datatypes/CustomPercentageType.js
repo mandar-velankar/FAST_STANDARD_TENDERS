@@ -17,8 +17,8 @@ sap.ui.define([
                 return "";
             }
             const oPercentFormat = NumberFormat.getPercentInstance({
-                minFractionDigits: parts[1] === 'AU' ? 4 : 2,
-                maxFractionDigits: parts[2] === 'AU' ? 4 : 2,
+                minFractionDigits: parts[1] === 'AU' ? 4 : (parts[2] ?? 2),
+                maxFractionDigits: parts[1] === 'AU' ? 4 : (parts[3] ?? 2),
                 groupingEnabled: true,
 				groupingSeparator: ",",
 				decimalSeparator: ".",
