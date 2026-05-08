@@ -72,7 +72,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['AdditionalDiscount', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'AdditionalDiscount' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${ConditionType} === 'PrecioNeto'}"
@@ -85,7 +90,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['ESDiscount', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'ESDiscount' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'DescuentoComercial' }"
                                 liveChange=".onPricingFormLiveChange($event, 'DescuentoComercial')"
@@ -99,7 +109,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['RoyalDecreePercentage_1', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'RoyalDecreePercentage_1' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','PVL'].includes(${ConditionType})}"

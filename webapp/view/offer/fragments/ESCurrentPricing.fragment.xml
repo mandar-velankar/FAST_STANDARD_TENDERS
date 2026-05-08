@@ -71,7 +71,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['YD75', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'YD75' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${ConditionType} === 'PrecioNeto'}"
@@ -84,7 +89,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['YD02', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'YD02' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${ConditionType} === 'DescuentoComercial'}"
@@ -97,7 +107,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['YD06', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'YD06' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','PVL'].includes(${ConditionType})}"
