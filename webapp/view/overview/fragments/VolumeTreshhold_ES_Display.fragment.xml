@@ -31,7 +31,12 @@
                         <Input value="{st>Volume}" fieldWidth="80%" enabled="false"/>
                     </HBox>
                     <Input value="{
-									parts: [ 'st>Discount', 'st>/SelectedCountry'],
+									parts: [ 
+                                        {path: 'st>Discount'}, 
+                                        {path: 'st>/SelectedCountry'},
+                                        {value: '3'},
+                                        {value: '3'}
+                                    ],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" enabled="false" fieldWidth="80%" />
                     <Input value="{parts:['st>Tax', 'st>/SelectedCountry'], type:'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}" enabled="false" fieldWidth="80%"/>
