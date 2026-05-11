@@ -38,6 +38,20 @@ sap.ui.define([
 			return oPercentFormat.format(value);
 		},
 
+		formatPercentageWithFallback: function(value, countryCode, minDecimals, maxDecimals) {
+			if (value === null || value === undefined || value === '') {
+				return '100.000%';
+			}
+			var oPercentFormat = NumberFormat.getPercentInstance({
+				minFractionDigits: minDecimals ?? 3,
+				maxFractionDigits: maxDecimals ?? 3,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			return oPercentFormat.format(Number(value));
+		},
+
 		formatFloat: function(value){
 			if(!value) return;
 			return floatInstance.format(value);

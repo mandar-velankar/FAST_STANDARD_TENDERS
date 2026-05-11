@@ -124,7 +124,15 @@
                 ], formatter:'.formatter.price'}"/>
 
                 <!-- Discount -->
-                <Text text="{= ${st>PriceCondition/Discount} ? ${path :'st>PriceCondition/Discount', type:'.types.percent'} + '%' : Number(100).toFixed(2) + '%'}"/>
+                <Text text="{
+                    parts: [
+                        {path: 'st>PriceCondition/Discount'},
+                        {path: 'st>PriceCondition/CountryCode'},
+                        {value: '3'},
+                        {value: '3'}
+                    ],
+                    formatter: '.formatter.formatPercentageWithFallback'
+                }"/>
 
                 <!-- Rappel -->
                 <Text text="{ 
