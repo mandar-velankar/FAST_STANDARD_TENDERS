@@ -48,7 +48,12 @@
                         <Input value="{Volume}" fieldWidth="80%"/>
                     </HBox>
                     <Input value="{
-									parts: [ 'Discount', 'CountryCode'],
+									parts: [ 
+                                        {path: 'Discount'}, 
+                                        {path: 'CountryCode'},
+                                        {value: '3'},
+                                        {value: '3'}
+                                    ],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" fieldWidth="80%" liveChange=".calculateNetPricesRappel"/>
                     <Input value="{

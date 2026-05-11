@@ -135,7 +135,12 @@
 
                 <!-- Discount -->
                 <Text text="{
-                    parts :['st>PriceCondition/Discount', 'st>PriceCondition/COUNTRY_CODE'], 
+                    parts :[
+                        { path: 'st>PriceCondition/Discount' },
+                        { path: 'st>PriceCondition/COUNTRY_CODE'},
+                        { value: '3' },
+                        { value: '3' }
+                    ], 
                     type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"/>
 
                 <!-- Monthly Rent -->
