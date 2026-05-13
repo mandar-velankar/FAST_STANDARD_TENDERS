@@ -2735,6 +2735,14 @@ sap.ui.define([
 			dialog.open();
 		},
 
+		onDiscountValueChange: function(event){
+			const source = event.getSource();
+			const binding = source.getBinding("value");
+			const rawValue = source.getValue();
+			const parsed = binding.getType().parseValue(rawValue);
+			source.getBindingContext().setProperty("Discount", parsed[0]);
+		},
+
 		onCancelDiscountCondition: async function(event){
 			const dialog = await this.getPriceConditionRappelDialog();
 			if(this.defaultModel.hasPendingChanges()){
