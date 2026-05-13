@@ -2737,10 +2737,10 @@ sap.ui.define([
 
 		onDiscountValueChange: function(event){
 			const source = event.getSource();
-			const binding = source.getBinding("value");
+			const context = source.getBindingContext();
 			const rawValue = source.getValue();
-			const parsed = binding.getType().parseValue(rawValue);
-			source.getBindingContext().setProperty("Discount", parsed[0]);
+			const parsed = new this.customTypes.percentage().parseValue(rawValue);
+			context.getModel().setProperty("Discount", parsed?.[0] || 0, context);
 		},
 
 		onCancelDiscountCondition: async function(event){
