@@ -2848,6 +2848,20 @@ sap.ui.define([
 
 		onApplyDiscountCondition: async function(event){	
 			const dialog = await this.getPriceConditionRappelDialog();
+			const table = this.byId("idVolumeTreshold");
+			const controller = this;
+    
+			// Force all Discount values to update model before closing
+			// Don't rely on binding.getType() which may have null oModel
+			table.getItems().forEach(item => {
+				const discountInput = item.getCells()[1];
+				if (discountInput && discountInput.isA("sap.m.Input")) {
+					const context = discountInput.getBindingContext();
+					const rawValue = discountInput.getValue();
+					const parsed = new controller.customTypes.percentage().parseValue(rawValue);
+					context.getModel().setProperty("Discount", parsed[0], context);
+				}
+			});
 			dialog.close();
 		},
 
