@@ -2696,38 +2696,27 @@ sap.ui.define([
 
 
 		onPriceConditionRappelDialogLoaded: function(priceConditionRappelView, dialog){
+
 			const volumeTresholdTable = this.byId("idVolumeTreshold");
 			const itemsBinding = volumeTresholdTable.getBinding("items");
 
-			const transientContexts = [];
-			const currentItems = volumeTresholdTable.getItems();
-
-			currentItems.forEach(item => {
-				const ctx = item.getBindingContext();
-				if (ctx && ctx.isTransient()) {
-					transientContexts.push(ctx);
-				}
-			});
-
-			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
+			const filter = new Filter(
+				"PriceConditionID",
+				FilterOperator.EQ,
+				priceConditionRappelView?.PriceConditionID
+			);
 
 			if (itemsBinding) {
 				itemsBinding.filter(filter);
-				if (transientContexts.length > 0) {
-					itemsBinding.attachEventOnce("dataReceived", () => {
-						transientContexts.forEach(ctx => {
-							const newItem = volumeTresholdTable.getBindingInfo("items").template.clone();
-							newItem.setBindingContext(ctx);
-							volumeTresholdTable.insertItem(newItem);
-						});
-					});
-				}
 			} else {
-				const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
+
+				const itemsBindingInfo =
+					volumeTresholdTable.getBindingInfo("items");
+
 				volumeTresholdTable.bindItems({
-					path : itemsBindingInfo.path,
-					template : itemsBindingInfo.template,
-					filters : filter,
+					path: itemsBindingInfo.path,
+					template: itemsBindingInfo.template,
+					filters: filter,
 					groupId: "RappelForm"
 				});
 			}
@@ -2760,50 +2749,26 @@ sap.ui.define([
 		onAddNewDiscountCondition: function(event){
 			const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
 			const table = this.byId("idVolumeTreshold");
-			const context = this.defaultModel.createEntry("/DiscountConditionView", {
-				groupId: "RappelForm"
+			const binding = table.getBinding("items");
+
+			const context = binding.create({
+				Volume: 0,
+				Discount: 0,
+				PriceConditionID: priceConditionRappelView?.PriceConditionID,
+				Tax: priceConditionRappelView?.Tax,
+				NetPriceWithoutTax: 0,
+				NetPriceWithTax: 0,
+				CountryCode: this.sCountryCode
 			});
-			context.getModel().setProperty("Volume", 0, context);
-			context.getModel().setProperty("Discount", 0, context);
-			context.getModel().setProperty("PriceConditionID", priceConditionRappelView?.PriceConditionID, context);
-			context.getModel().setProperty("Tax", priceConditionRappelView?.Tax, context);
-			context.getModel().setProperty("NetPriceWithoutTax", 0, context);
-			context.getModel().setProperty("NetPriceWithTax", 0, context);
-			context.getModel().setProperty("CountryCode", this.sCountryCode, context);
-			const newItem = table.getBindingInfo("items").template.clone();
-			newItem.setBindingContext(context)
-			table.insertItem(newItem);
 		},
 
 		onDeleteDiscountCondition: function(event){
+
 			const selectedItem = event.getSource().getParent();
 			const context = selectedItem.getBindingContext();
-			const table = this.byId("idVolumeTreshold");
-			
-			// Capture ALL transient contexts EXCEPT the one being deleted
-			const allItems = table.getItems();
-			const remainingTransientContexts = [];
-			allItems.forEach(item => {
-				const ctx = item.getBindingContext();
-				if (ctx && ctx.isTransient() && ctx !== context) {
-					remainingTransientContexts.push(ctx);
-				}
-			});
-			
-			if(context.isTransient()){
-				table.removeItem(selectedItem);
-				
-				if (remainingTransientContexts.length > 0) {
-					table.attachEventOnce("updateFinished", () => {
-						remainingTransientContexts.forEach(ctx => {
-							const newItem = table.getBindingInfo("items").template.clone();
-							newItem.setBindingContext(ctx);
-							table.insertItem(newItem);
-						});
-					});
-				}
-				
-				this.defaultModel.resetChanges([context.getPath()]);
+
+			if (context.isTransient()) {
+				context.delete();
 			} else {
 				this.defaultModel.remove(context.getPath());
 			}
@@ -2848,20 +2813,6 @@ sap.ui.define([
 
 		onApplyDiscountCondition: async function(event){	
 			const dialog = await this.getPriceConditionRappelDialog();
-			const table = this.byId("idVolumeTreshold");
-			const controller = this;
-    
-			// Force all Discount values to update model before closing
-			// Don't rely on binding.getType() which may have null oModel
-			table.getItems().forEach(item => {
-				const discountInput = item.getCells()[1];
-				if (discountInput && discountInput.isA("sap.m.Input")) {
-					const context = discountInput.getBindingContext();
-					const rawValue = discountInput.getValue();
-					const parsed = new controller.customTypes.percentage().parseValue(rawValue);
-					context.getModel().setProperty("Discount", parsed[0], context);
-				}
-			});
 			dialog.close();
 		},
 

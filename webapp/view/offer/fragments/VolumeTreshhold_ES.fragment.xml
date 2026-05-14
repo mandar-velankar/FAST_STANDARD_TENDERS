@@ -55,7 +55,7 @@
                                         {value: '3'}
                                     ],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
-								}" fieldWidth="80%" liveChange=".calculateNetPricesRappel" change=".onDiscountValueChange"/>
+								}" fieldWidth="80%" change=".calculateNetPricesRappel"/>
                     <Input value="{
 									parts: [ 'Tax', 'CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
