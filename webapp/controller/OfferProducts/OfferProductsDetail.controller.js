@@ -2695,23 +2695,39 @@ sap.ui.define([
 		},
 
 
-		onPriceConditionRappelDialogLoaded: function(priceConditionRappelView, dialog){
+		onPriceConditionRappelDialogLoaded: function (
+			priceConditionRappelView,
+			dialog
+		) {
 
 			const volumeTresholdTable = this.byId("idVolumeTreshold");
 			const itemsBinding = volumeTresholdTable.getBinding("items");
 
-			const filter = new Filter(
-				"PriceConditionID",
-				FilterOperator.EQ,
-				priceConditionRappelView?.PriceConditionID
-			);
+			const transientContexts = [];
+			const currentItems = volumeTresholdTable.getItems();
+
+			currentItems.forEach(item => {
+				const ctx = item.getBindingContext();
+				if (ctx && ctx.isTransient()) {
+					transientContexts.push(ctx);
+				}
+			});
+
+			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
 
 			if (itemsBinding) {
 				itemsBinding.filter(filter);
+				if (transientContexts.length > 0) {
+					itemsBinding.attachEventOnce("dataReceived", () => {
+						transientContexts.forEach(ctx => {
+							const newItem = volumeTresholdTable.getBindingInfo("items").template.clone();
+							newItem.setBindingContext(ctx);
+							volumeTresholdTable.insertItem(newItem);
+						});
+					});
+				}
 			} else {
-
-				const itemsBindingInfo =
-					volumeTresholdTable.getBindingInfo("items");
+				const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
 
 				volumeTresholdTable.bindItems({
 					path: itemsBindingInfo.path,
@@ -2749,17 +2765,24 @@ sap.ui.define([
 		onAddNewDiscountCondition: function(event){
 			const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
 			const table = this.byId("idVolumeTreshold");
-			const binding = table.getBinding("items");
-
-			const context = binding.create({
-				Volume: 0,
-				Discount: 0,
-				PriceConditionID: priceConditionRappelView?.PriceConditionID,
-				Tax: priceConditionRappelView?.Tax,
-				NetPriceWithoutTax: 0,
-				NetPriceWithTax: 0,
-				CountryCode: this.sCountryCode
+			const context = this.defaultModel.createEntry("/DiscountConditionView", {
+				groupId: "RappelForm"
 			});
+			context.getModel().setProperty("Volume", 0, context);
+			context.getModel().setProperty("Discount", 0, context);
+			context.getModel().setProperty("PriceConditionID", priceConditionRappelView?.PriceConditionID, context);
+			context.getModel().setProperty("Tax", priceConditionRappelView?.Tax, context);
+			context.getModel().setProperty("NetPriceWithoutTax", 0, context);
+			context.getModel().setProperty("NetPriceWithTax", 0, context);
+			context.getModel().setProperty("CountryCode", this.sCountryCode, context);
+			const newItem = table.getBindingInfo("items").template.clone();
+			newItem.setBindingContext(context)
+			table.insertItem(newItem);
+		},
+
+		formatDiscount: function (value) {
+			if (!value || isNaN(parseFloat(value))) return '0.000%';
+			return value ? (value * 100).toFixed(3) + "%" : "";
 		},
 
 		onDeleteDiscountCondition: function(event){
@@ -2823,7 +2846,8 @@ sap.ui.define([
             const discount = Number((event.getSource().getValue())?.replace(/\\.0+$/, '').replace(/%$/, ''));
             const bindingContext = event.getSource().getBindingContext();
             const discountConditionObj = bindingContext.getObject();
-
+			const customPercentageType = new this.customTypes.percentage;
+			
             let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
             let instType = this.getModel("ui").getProperty("/InstituteType");
             let packFactor =  oProductPrice.PACKFACTOR;
@@ -2845,6 +2869,7 @@ sap.ui.define([
 
             bindingContext.getModel().setProperty("NetPriceWithoutTax", NetPriceWithoutTax, bindingContext);
 			bindingContext.getModel().setProperty("NetPriceWithTax", NetPriceWithTax, bindingContext);
+			bindingContext.getModel().setProperty("Discount", customPercentageType.parseValue(discount)?.[0], bindingContext);
 
         },
 
@@ -2911,7 +2936,6 @@ sap.ui.define([
 			const form = this.byId("idRapelForm");
 			form.getElementBinding()?.refresh();
 		},
-
 		/**
 		 * Calculate price condition type.
 		 *
