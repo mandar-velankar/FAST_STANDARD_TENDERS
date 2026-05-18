@@ -215,6 +215,9 @@ sap.ui.define([
 				},
 				"PT_TMBDPR": {
 					groupId: "PT_TMBDPR"
+				},
+				"DiscountCondition": {
+					groupId: "RappelForm"
 				}
 			});
 		},
