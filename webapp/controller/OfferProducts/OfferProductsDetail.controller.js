@@ -2702,7 +2702,7 @@ sap.ui.define([
 			priceConditionRappelView,
 			dialog
 		) {
-			const discountConditions = await this.stState.getService().getDiscountConditions(priceConditionRappelView?.PriceConditionID);	
+			const discountConditions = priceConditionRappelView?.PriceConditionID ? await this.stState.getService().getDiscountConditions(priceConditionRappelView?.PriceConditionID) : [];	
 			this._setVolumeTresholdTableData(discountConditions);
 			dialog.open();
 		},
@@ -2785,20 +2785,35 @@ sap.ui.define([
 
 			tableData.forEach(item => {
 				if (!item.ID) {
-					this.defaultModel.createEntry("/DiscountConditionView", {
-						properties: item,
-						groupId: "RappelForm"
-					})
+					if (item._pendingChangeCtx) {
+						item._pendingChangeCtx.getModel().setProperty("Discount", item.Discount, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`Volume`, item.Volume, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`Discount`, item.Discount, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`NetPriceWithoutTax`, item.NetPriceWithoutTax, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`NetPriceWithTax`, item.NetPriceWithTax, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`PriceConditionID`, item.PriceConditionID, item._pendingChangeCtx);
+					}else {
+						const ctx = this.defaultModel.createEntry("/DiscountConditionView", {
+							properties: item,
+							groupId: "RappelForm"
+						});
+						item._pendingChangeCtx = ctx;
+					}
 				}else {
 					const key = this.defaultModel.createKey("/DiscountCondition", {
 						ID: item.ID,
 					});
-					
-					this.defaultModel.setProperty(`${key}/Volume`, item.Volume);
-					this.defaultModel.setProperty(`${key}/Discount`, item.Discount);
-					this.defaultModel.setProperty(`${key}/NetPriceWithoutTax`, item.NetPriceWithoutTax);
-					this.defaultModel.setProperty(`${key}/NetPriceWithTax`, item.NetPriceWithTax);
-					this.defaultModel.setProperty(`${key}/PriceCondition_ID`, item.PriceConditionID);
+
+					this.defaultModel.update(key, {
+						Volume: item.Volume,
+						Discount: item.Discount,
+						NetPriceWithoutTax: item.NetPriceWithoutTax,
+						NetPriceWithTax: item.NetPriceWithTax,
+						PriceCondition_ID: item.PriceConditionID
+					}, {
+						groupId: "RappelForm",
+						merge: true
+					});
 				}
 			})
 
@@ -2810,6 +2825,8 @@ sap.ui.define([
 					groupId: "RappelForm"
 				})
 			});
+
+			uiModel.refresh();
 		},
 
 		onSortDiscountCondition:function(){
