@@ -1,0 +1,39 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <TableSelectDialog
+        id="idSelectInstituteDialog"
+        contentWidth="32rem"
+        contentHeight="26rem"
+        draggable="true"
+        resizable="true"
+        title="Select Institute"
+        noDataText="No Institutes Found"
+        search=".handleInstituteSearch"
+        liveChange=".handleInstituteSearch"
+        confirm=".handleInstituteConfirm"
+        multiSelect="false"
+        items="{
+            path:'/TenderMasterInstituteView',
+            parameters:{
+                $select:'InstituteID,InstituteName,CustomerID'
+            }
+        }">
+        <columns>
+            <Column>
+                <Text text="Institute"/>
+            </Column>
+            <Column>
+                <Text text="Customer"/>
+            </Column>
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text text="{InstituteName}" />
+                    <Text text="{CustomerID}" />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </TableSelectDialog>
+</core:FragmentDefinition>
