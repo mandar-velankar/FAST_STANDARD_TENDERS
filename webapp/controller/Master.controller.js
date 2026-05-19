@@ -118,7 +118,7 @@ sap.ui.define([
 
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
-			this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._bindInstituteItems, this);
+			//this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._bindInstituteItems, this);
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -140,12 +140,10 @@ sap.ui.define([
 			// 		caseSensitive: false
 			// 	}));
 			// }
-
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
 			this._bindInstituteTypes();
-			this._bindInstituteItems(true);
 			this.onLanguageChange();
 			// this.setFilter(oEvent);
 			const userInfo = await this.stState.getService().getUserInfo(userID);
@@ -352,100 +350,194 @@ sap.ui.define([
                     console.error("Error loading more items:", oError);
                 }
             });
-        }, 
+        },
+		
+		onInstituteInputChange: function (oEvent) {
+			const sValue = oEvent.getParameter("value");
+			const oState = this.getModel("st");
+			// user cleared input
+			if (!sValue) {
+				oState.setProperty("/SelectedInstituteIDFilter", "All");
+				oState.setProperty("/SelectedInstituteName", "All");
+				this.setFilter();
+				return;
+			}
+		},
 
 		onChangeCountryInstituteType: function () {
-			this.getModel('st').setProperty("/SelectedInstituteIDFilter", "All");
-			this._bindInstituteItems(true);
-			this.setFilter()
-		},
+			const oStateModel = this.getModel("st");
 
-		_bindInstituteItems: function () {
-			const oSelectInstitute = this.byId("idSelectInstitute");
-			if (oSelectInstitute) {
-				oSelectInstitute.destroyItems();
-				oSelectInstitute.destroyAggregation();
-				// Force the loadItems event manually
-				this.onLoadInstitutes({ getSource: () => oSelectInstitute });
+			// Reset selected institute when type changes
+			oStateModel.setProperty("/SelectedInstituteIDFilter", "All");
+			oStateModel.setProperty("/SelectedInstituteName", "");
+
+			// Clear input field
+			this.byId("idSelectInstitute").setValue("");
+
+			// Refresh master table
+			this.setFilter();
+
+			// If dialog already exists refresh its filters
+			if (this.byId("idSelectInstituteDialog")) {
+
+				const aFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, this.countryCode)
+				];
+
+				const selectedInstituteType = oStateModel.getProperty("/SelectedInstituteType");
+
+				if (selectedInstituteType && selectedInstituteType !== "All") {
+
+					aFilters.push(
+						new Filter("InstituteType",FilterOperator.EQ, selectedInstituteType)
+					);
+				}
+
+				this.byId("idSelectInstituteDialog").getBinding("items")?.filter(aFilters);
 			}
 		},
 
-		onLoadInstitutes: function (oEvent) {
-            const oComboBox = oEvent.getSource();
-            const oModel = this.getView().getModel(); // Get your OData V2 model
-            const sPath = "/PT_TMINST"; // The path to your entity set
-			const controller = this;
-			const selectedInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter") || "All";
-			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
+		onInstituteValueHelpRequest: function (oEvent) {
+			this._oInstituteInput = oEvent.getSource();
+			this.getInstituteDialog().then(this.onInstituteDialogLoaded.bind(this));
+		},
 
-			const aFilters = [
-				new Filter({
-					path: "CountryCode",
-					operator: FilterOperator.EQ,
-					value1: this.countryCode,
-					caseSensitive: false
-				})
+
+		getInstituteDialog: function () {
+			const oView = this.getView();
+
+			if (!this.dialogInstitute) {
+				this.dialogInstitute = Fragment.load({
+					id: oView.getId(),
+					name: "com.bayer.tender.statenderapp.view.tender.fragments.SelectInstitute",
+					controller: this
+				}).then(function (oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			return this.dialogInstitute;
+		},
+
+
+		onInstituteDialogLoaded: function (oDialog) {
+			const oStateModel =	this.getView().getModel("st");
+
+			let aFilters = [
+				new Filter("CountryCode", FilterOperator.EQ, this.countryCode)
 			];
 
-			// Only exclude Ship-To when NO specific selection
-			if (!selectedInstituteType || selectedInstituteType === 'All') {
+			const selectedInstituteType = oStateModel.getProperty("/SelectedInstituteType");
+
+			if (selectedInstituteType && selectedInstituteType !== "All") {
+				aFilters.push(
+					new Filter("InstituteType", FilterOperator.EQ, selectedInstituteType)
+				);
+			}
+
+			oDialog.getBinding("items")?.filter(aFilters);
+			oDialog.open();
+		},
+
+
+		handleInstituteSearch: function (oEvent) {
+			const sValue = oEvent.getParameter("value");
+			const oStateModel = this.getView().getModel("st");
+
+			const aFilters = [
+				new Filter(
+					"CountryCode",
+					FilterOperator.EQ,
+					this.countryCode
+				)
+			];
+
+			const selectedInstituteType =
+				oStateModel.getProperty("/SelectedInstituteType");
+
+			if (
+				selectedInstituteType &&
+				selectedInstituteType !== "All"
+			) {
+				aFilters.push(
+					new Filter(
+						"InstituteType",
+						FilterOperator.EQ,
+						selectedInstituteType
+					)
+				);
+			}
+
+			// Search filters
+			if (sValue) {
+
+				let aSearchFilters = [];
+
+				// If value is numeric → search numeric fields only
+				if (!isNaN(Number(sValue))) {
+
+					aSearchFilters.push(
+						new Filter(
+							"CustomerID",
+							FilterOperator.EQ,
+							Number(sValue)
+						)
+					);
+
+					aSearchFilters.push(
+						new Filter(
+							"InstituteID",
+							FilterOperator.EQ,
+							Number(sValue)
+						)
+					);
+
+				} else {
+
+					// Text fields only
+					aSearchFilters.push(
+						new Filter(
+							"InstituteName",
+							FilterOperator.Contains,
+							sValue
+						)
+					);
+
+				}
+
+				// OR condition
 				aFilters.push(
 					new Filter({
-						path: "InstituteType",
-						operator: FilterOperator.NE,
-						value1: 'Ship-To'
+						filters: aSearchFilters,
+						and: false
 					})
 				);
 			}
 
-			// If user selected a specific type → apply only EQ
-			if (selectedInstituteType && selectedInstituteType !== 'All') {
-				aFilters.push(
-					new Filter({
-						path: "InstituteType",
-						operator: FilterOperator.EQ,
-						value1: selectedInstituteType,
-						caseSensitive: false
-					})
-				);
+			oEvent.getSource().getBinding("items").filter(aFilters);
+		},
+
+		handleInstituteConfirm: function (oEvent) {
+			const oSelectedItem = oEvent.getParameter("selectedItem");
+			const oStateModel = this.getModel("st");
+
+			if (!oSelectedItem) {
+				oState.setProperty("/SelectedInstituteIDFilter", "All");
+        		oState.setProperty("/SelectedInstituteName", "");
+				this.setFilter();
+				return;
 			}
 
-            // --- Get Sorters ---
-            const aSorters = [new Sorter("InstituteName", false)]; // Sort by Name ascending
-            // --- Perform Manual OData Read ---
-            oModel.read(sPath, {
-                sorters: aSorters,
-                filters: aFilters,
-                success: function (oData) {
-					
-                    if (oData && oData.results) {
-						oData.results.unshift({
-							InstituteID: "All",
-							InstituteName: "All",
-							CustomerID: ""
-						})
-                        oData.results.forEach(function (oItemData) {
-                            // Check if item already exists (important to avoid duplicates)
-                            var bExists = oComboBox.getItems().some(function(oExistingItem) {
-                                return oExistingItem.getKey() === oItemData.InstituteID;
-                            });
+			const oInstitute = oSelectedItem.getBindingContext().getObject();
+			oStateModel.setProperty("/SelectedInstituteIDFilter", oInstitute.InstituteID);
+			oStateModel.setProperty("/SelectedInstituteName", oInstitute.InstituteName);
 
-                            if (!bExists) {
-                                oComboBox.addItem(new sap.ui.core.ListItem({
-                                    key: oItemData.InstituteID,
-                                    text: oItemData.InstituteName,
-									additionalText: oItemData.CustomerID
-                                }));
-                            }
-                        });
-                    }
-					controller.getView().getModel('st').setProperty("/SelectedInstituteIDFilter", selectedInstituteID);
-                }.bind(this),
-                error: function (oError) {
-                    console.error("Error loading more items:", oError);
-                }
-            });
-        }, 
+			this._oInstituteInput.setValue(oInstitute.InstituteName);
+
+			//refresh master table
+			this.setFilter();
+		},
 
 		getCountryDefaultSorters: function () {
 			switch (this.countryCode) {
@@ -1192,9 +1284,9 @@ sap.ui.define([
 				}
 
 				// Institute 
-				const oSelectedInstitute = this.byId("idSelectInstitute");
-				const sInstituteID = oSelectedInstitute.getSelectedItem()?.getKey() || this.getModel('st').getProperty("/SelectedInstituteIDFilter");
-				if (sInstituteID && sInstituteID.toLowerCase() !== 'all') {
+				//const oSelectedInstitute = this.byId("idSelectInstitute");
+				const sInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter");
+				if (sInstituteID && String(sInstituteID).toLowerCase() !== "all") {
 					this.andFilters.push(new Filter({
 						path: "InstituteID",
 						operator: FilterOperator.EQ,

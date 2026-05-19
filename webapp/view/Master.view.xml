@@ -110,22 +110,17 @@
 					</Select>
 
 					<Label
-						text="Institute"
+						text="Institute Name"
 						labelFor="idSelectInstitute"
 					/>
-					<ComboBox
+					<Input
 						id="idSelectInstitute"
-						selectedKey="{st>/SelectedInstituteIDFilter}"
-						showSecondaryValues= "true"
-						filterSecondaryValues="true"
-						change=".setFilter"
-					>
-						<core:ListItem
-							text="{InstituteName}"
-							key="{InstituteID}"
-							additionalText="{CustomerID}"
-						/>
-					</ComboBox>
+						width="12rem"
+						value="{st>/SelectedInstituteName}"
+						showValueHelp="true"
+						valueHelpRequest=".onInstituteValueHelpRequest"
+						change=".onInstituteInputChange"
+						editable="true"/>
 
 					<ToolbarSpacer/>
 					<Button text="{i18n>SalesReport}" visible="{= ${st>/SelectedCountry} === 'PL'}" press=".onOpenSalesReportScreen"/>
