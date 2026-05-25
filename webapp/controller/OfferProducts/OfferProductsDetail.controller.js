@@ -183,7 +183,10 @@ sap.ui.define([
 					editMode: false,
 					mainPriceConditionID: null
 				},
-				ProductDistributors: []
+				ProductDistributors: [],
+				DiscountCondition: {
+					tableData: []
+				}
 			});
 			this.setModel(oModel, "ui");
 			// get state data
@@ -2695,110 +2698,135 @@ sap.ui.define([
 		},
 
 
-		onPriceConditionRappelDialogLoaded: function(priceConditionRappelView, dialog){
-			const volumeTresholdTable = this.byId("idVolumeTreshold");
-			const itemsBinding = volumeTresholdTable.getBinding("items");
-
-			const transientContexts = [];
-			const currentItems = volumeTresholdTable.getItems();
-
-			currentItems.forEach(item => {
-				const ctx = item.getBindingContext();
-				if (ctx && ctx.isTransient()) {
-					transientContexts.push(ctx);
-				}
-			});
-
-			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
-
-			if (itemsBinding) {
-				itemsBinding.filter(filter);
-				if (transientContexts.length > 0) {
-					itemsBinding.attachEventOnce("dataReceived", () => {
-						transientContexts.forEach(ctx => {
-							const newItem = volumeTresholdTable.getBindingInfo("items").template.clone();
-							newItem.setBindingContext(ctx);
-							volumeTresholdTable.insertItem(newItem);
-						});
-					});
-				}
-			} else {
-				const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
-				volumeTresholdTable.bindItems({
-					path : itemsBindingInfo.path,
-					template : itemsBindingInfo.template,
-					filters : filter,
-					groupId: "RappelForm"
-				});
-			}
-
+		onPriceConditionRappelDialogLoaded: async function (
+			priceConditionRappelView,
+			dialog
+		) {
+			const discountConditions = priceConditionRappelView?.PriceConditionID ? await this.stState.getService().getDiscountConditions(priceConditionRappelView?.PriceConditionID) : [];	
+			this._setVolumeTresholdTableData(discountConditions);
 			dialog.open();
+		},
+
+		_setVolumeTresholdTableData: function(discountConditions){
+			const uiModel = this.getModel("ui");
+			const existingData = uiModel.getProperty("/DiscountCondition/tableData");
+			const currentTableData = existingData.length > 0 ? existingData : discountConditions || [];
+
+			uiModel.setProperty("/DiscountCondition/tableData", currentTableData);
+			uiModel.setProperty("/DiscountCondition/originalData", Object.assign([], discountConditions));
+			 
+		},
+
+		onDiscountValueChange: function(event){
+			const source = event.getSource();
+			const context = source.getBindingContext();
+			const rawValue = source.getValue();
+			const parsed = new this.customTypes.percentage().parseValue(rawValue);
+			context.getModel().setProperty("Discount", parsed?.[0] || 0, context);
 		},
 
 		onCancelDiscountCondition: async function(event){
 			const dialog = await this.getPriceConditionRappelDialog();
-			if(this.defaultModel.hasPendingChanges()){
-				const pendingChanges = this.defaultModel.getPendingChanges();
-				Object.keys(pendingChanges).forEach((key) => {
-					if (key.startsWith("DiscountConditionView")) {
-						const path = `/${key}`; 
-						this.defaultModel.resetChanges([path], undefined, true);
-					}
-				});
-			}
+			const uiModel = this.getModel("ui");
+			const originalData = uiModel.getProperty("/DiscountCondition/originalData") || [];
+
+
+			this.cancelPendingChanges(["DiscountConditionView", "DiscountCondition"], "priceCondRappel");	
+			uiModel.setProperty("/DiscountCondition/tableData", originalData);
+			uiModel.setProperty("/DiscountCondition/deletedItems", []);
+			uiModel.refresh();
 			dialog.close(); 
 		},
 
 		onAddNewDiscountCondition: function(event){
+			this._refreshVolumeTresholdTable();
 			const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
-			const table = this.byId("idVolumeTreshold");
-			const context = this.defaultModel.createEntry("/DiscountConditionView", {
-				groupId: "RappelForm"
-			});
-			context.getModel().setProperty("Volume", 0, context);
-			context.getModel().setProperty("Discount", 0, context);
-			context.getModel().setProperty("PriceConditionID", priceConditionRappelView?.PriceConditionID, context);
-			context.getModel().setProperty("Tax", priceConditionRappelView?.Tax, context);
-			context.getModel().setProperty("NetPriceWithoutTax", 0, context);
-			context.getModel().setProperty("NetPriceWithTax", 0, context);
-			context.getModel().setProperty("CountryCode", this.sCountryCode, context);
-			const newItem = table.getBindingInfo("items").template.clone();
-			newItem.setBindingContext(context)
-			table.insertItem(newItem);
+			const newItem = {
+				"Volume": 0,
+				"Discount": 0,
+				"PriceConditionID": priceConditionRappelView?.PriceConditionID,
+				"Tax": priceConditionRappelView?.Tax,
+				"NetPriceWithoutTax": 0,
+				"NetPriceWithTax": 0,
+				"CountryCode": this.sCountryCode,
+			};
+			
+			this.getModel('ui').getProperty("/DiscountCondition/tableData").unshift(newItem);
+			this.getModel('ui').refresh();
+			
+		},
+
+		formatDiscount: function (value) {
+			if (!value || isNaN(parseFloat(value))) return '0.000%';
+			return value ? (value * 100).toFixed(3) + "%" : "";
 		},
 
 		onDeleteDiscountCondition: function(event){
+			this._refreshVolumeTresholdTable();
 			const selectedItem = event.getSource().getParent();
-			const context = selectedItem.getBindingContext();
-			const table = this.byId("idVolumeTreshold");
-			
-			// Capture ALL transient contexts EXCEPT the one being deleted
-			const allItems = table.getItems();
-			const remainingTransientContexts = [];
-			allItems.forEach(item => {
-				const ctx = item.getBindingContext();
-				if (ctx && ctx.isTransient() && ctx !== context) {
-					remainingTransientContexts.push(ctx);
-				}
-			});
-			
-			if(context.isTransient()){
-				table.removeItem(selectedItem);
-				
-				if (remainingTransientContexts.length > 0) {
-					table.attachEventOnce("updateFinished", () => {
-						remainingTransientContexts.forEach(ctx => {
-							const newItem = table.getBindingInfo("items").template.clone();
-							newItem.setBindingContext(ctx);
-							table.insertItem(newItem);
+			const context = selectedItem.getBindingContext('ui');
+			const itemObject = context.getObject();
+			const uiModel = this.getModel("ui");
+			const deletedItems = uiModel.getProperty("/DiscountCondition/deletedItems") || [];
+
+			if (itemObject.ID) {
+				uiModel.setProperty("/DiscountCondition/deletedItems", [...deletedItems, itemObject.ID]);
+			}
+			const index = context.getPath().split("/").pop();
+			const tableData = uiModel.getProperty("/DiscountCondition/tableData");
+			tableData.splice(index, 1);
+			uiModel.refresh();
+		},
+
+		_preapareDiscountConditionDataForSaving: function(){
+			const uiModel = this.getModel("ui");
+			const tableData = uiModel.getProperty("/DiscountCondition/tableData") || [];
+			const deletedItems = uiModel.getProperty("/DiscountCondition/deletedItems") || [];
+
+			tableData.forEach(item => {
+				if (!item.ID) {
+					if (item._pendingChangeCtx) {
+						item._pendingChangeCtx.getModel().setProperty("Discount", item.Discount, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`Volume`, item.Volume, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`Discount`, item.Discount, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`NetPriceWithoutTax`, item.NetPriceWithoutTax, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`NetPriceWithTax`, item.NetPriceWithTax, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`PriceConditionID`, item.PriceConditionID, item._pendingChangeCtx);
+					}else {
+						const ctx = this.defaultModel.createEntry("/DiscountConditionView", {
+							properties: item,
+							groupId: "RappelForm"
 						});
+						item._pendingChangeCtx = ctx;
+					}
+				}else {
+					const key = this.defaultModel.createKey("/DiscountCondition", {
+						ID: item.ID,
+					});
+
+					this.defaultModel.update(key, {
+						Volume: item.Volume,
+						Discount: item.Discount,
+						NetPriceWithoutTax: item.NetPriceWithoutTax,
+						NetPriceWithTax: item.NetPriceWithTax,
+						PriceCondition_ID: item.PriceConditionID
+					}, {
+						groupId: "RappelForm",
+						merge: true
 					});
 				}
-				
-				this.defaultModel.resetChanges([context.getPath()]);
-			} else {
-				this.defaultModel.remove(context.getPath());
-			}
+			})
+
+			deletedItems.forEach(id => {
+				const key = this.defaultModel.createKey("/DiscountConditionView", {
+					ID: id,
+				});
+				this.defaultModel.remove(key, {
+					groupId: "RappelForm"
+				})
+			});
+
+			uiModel.refresh();
 		},
 
 		onSortDiscountCondition:function(){
@@ -2840,17 +2868,40 @@ sap.ui.define([
 
 		onApplyDiscountCondition: async function(event){	
 			const dialog = await this.getPriceConditionRappelDialog();
+			this._refreshVolumeTresholdTable();
+			this._preapareDiscountConditionDataForSaving();
 			dialog.close();
 		},
 
-		calculateNetPricesRappel: async function(event){ 
+		_refreshVolumeTresholdTable: function(){
+			const table = this.byId('idVolumeTreshold')
+			const aggregations = table.getAggregation('items');
+			
+			aggregations.forEach(item => {
+				const volumeInput = item.getCells()?.[0].getAggregation('items')?.[1];
+				const discountInput = item.getCells()[1];
+				const discountValue = discountInput.getValue();
+				const volumeValue = volumeInput.getValue();
+				const context = item.getBindingContext('ui');
+				if (context) {
+					const obj = context.getObject();
+					context.getModel().setProperty("Discount", parseFloat(discountValue) / 100, context);
+					context.getModel().setProperty("Volume", parseFloat(volumeValue), context);
+				}
+			});
+		},
+
+		calculateNetPricesRappel: function(event){ 
 
             const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
 
+			const uiModel = this.getModel("ui");
             const discount = Number((event.getSource().getValue())?.replace(/\\.0+$/, '').replace(/%$/, ''));
-            const bindingContext = event.getSource().getBindingContext();
+            const bindingContext = event.getSource().getBindingContext('ui');
+			const bindingCtxPath = bindingContext.getPath();
             const discountConditionObj = bindingContext.getObject();
-
+			// const customPercentageType = new this.customTypes.percentage;
+			
             let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
             let instType = this.getModel("ui").getProperty("/InstituteType");
             let packFactor =  oProductPrice.PACKFACTOR;
@@ -2870,9 +2921,9 @@ sap.ui.define([
 			NetPriceWithTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithTax);
 
 
-            bindingContext.getModel().setProperty("NetPriceWithoutTax", NetPriceWithoutTax, bindingContext);
-			bindingContext.getModel().setProperty("NetPriceWithTax", NetPriceWithTax, bindingContext);
-
+            uiModel.setProperty(`${bindingCtxPath}/NetPriceWithoutTax`, NetPriceWithoutTax);
+			uiModel.setProperty(`${bindingCtxPath}/NetPriceWithTax`, NetPriceWithTax);
+			uiModel.refresh()
         },
 
 		calculateRoyalDecreeAppliesAndMainConditionPrice: function(mainPriceCondition){
@@ -2927,18 +2978,24 @@ sap.ui.define([
 			const hasErrorMessages =  this.getModel("messages").getProperty("/priceCondRappel").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty('/RappelForm/editMode', false);
-				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");		
+				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView", "DiscountCondition"], "priceCondRappel");		
 				this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);				
 				this.refreshRappelForm();
 			}
 						
 		},
 
-		refreshRappelForm: function(){
+		refreshRappelForm: async function(){
+			const uiModel = this.getModel("ui");
 			const form = this.byId("idRapelForm");
+			const rappelFormData = form.getBindingContext().getObject()
 			form.getElementBinding()?.refresh();
+			const discountConditions = await this.stState.getService().getDiscountConditions(rappelFormData?.PriceConditionID);
+			uiModel.setProperty("/DiscountCondition/tableData", discountConditions);
+			uiModel.setProperty("/DiscountCondition/originalData", Object.assign([], discountConditions));
+			uiModel.setProperty("/DiscountCondition/deletedItems", []);
+			uiModel.refresh();
 		},
-
 		/**
 		 * Calculate price condition type.
 		 *

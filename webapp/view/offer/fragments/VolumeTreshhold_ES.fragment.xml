@@ -9,8 +9,7 @@
 		</buttons>
 
         <Table id="idVolumeTreshold" items="{
-                path: '/DiscountConditionView',
-                groupId: 'RappelForm'
+                path: 'ui>/DiscountCondition/tableData'
             }">
             <headerToolbar>
                 <OverflowToolbar>
@@ -45,27 +44,27 @@
                 <cells>
                     <HBox >
                         <Text text=">=" wrapping="false" class="sapUiSmallMarginTop"/>
-                        <Input value="{Volume}" fieldWidth="80%"/>
+                        <Input value="{ui>Volume}" fieldWidth="80%"/>
                     </HBox>
                     <Input value="{
-									parts: [ 
-                                        {path: 'Discount'}, 
-                                        {path: 'CountryCode'},
-                                        {value: '3'},
-                                        {value: '3'}
-                                    ],
-									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
-								}" fieldWidth="80%" liveChange=".calculateNetPricesRappel"/>
+                        parts: [
+                            {path: 'ui>Discount'},
+                            {path: 'ui>CountryCode'},
+                            {value: '3'},
+                            {value: '3'}
+                        ],
+                        type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
+                    }" fieldWidth="80%" liveChange=".calculateNetPricesRappel"/>
                     <Input value="{
-									parts: [ 'Tax', 'CountryCode'],
+									parts: [ 'ui>Tax', 'ui>CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
 								}" enabled="false" fieldWidth="80%"/>
                     <Input value="{
-									parts: ['NetPriceWithoutTax', 'Currency', 'Region', 'CountryCode'],
+									parts: ['ui>NetPriceWithoutTax', 'ui>Currency', 'ui>Region', 'ui>CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" enabled="false" fieldWidth="80%"/>
                     <Input value="{
-									parts: ['NetPriceWithTax', 'Currency', 'Region', 'CountryCode'],
+									parts: ['ui>NetPriceWithTax', 'ui>Currency', 'ui>Region', 'ui>CountryCode'],
 									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'
 								}" enabled="false" fieldWidth="80%"/>
                     <Button icon="sap-icon://delete" press=".onDeleteDiscountCondition"/>
