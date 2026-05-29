@@ -1233,17 +1233,30 @@ sap.ui.define([
 			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
-				const brandsInOffer = await this.stState.getService().getBrandsInOffer(sBrandId, sCountryCode)
-				const filteredBrandsInOffer = sCountryCode === 'TW' ? brandsInOffer.filter(offerID => !offerID.includes('HIST')) : brandsInOffer;
-				const filters = [];
-				for(let offerID in filteredBrandsInOffer){
-					filters.push(new Filter({
-						path: "OfferID",
-						operator: FilterOperator.EQ,
-						value1: brandsInOffer[offerID]
+				if (sCountryCode === 'TW') {
+					const filters = [
+						new Filter({
+							path: "OfferID",
+							operator: FilterOperator.NotContains,
+							value1: 'HIST'
+						}),
+						new Filter({
+							path: "OfferBrandIDs",
+							operator: FilterOperator.Contains,
+							value1: sBrandId,
+							caseSensitive: false
+						})
+					];
+
+					this.andFilters.push(new Filter(filters, true));
+				}else {
+					this.andFilters.push(new Filter({
+						path: "OfferBrandIDs",
+						operator: FilterOperator.Contains,
+						value1: sBrandId,
+						caseSensitive: false
 					}));
 				}
-				this.andFilters.push(new Filter(filters, false));
 			}
 
 			// Status 
