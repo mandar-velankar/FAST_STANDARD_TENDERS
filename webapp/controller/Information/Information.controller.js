@@ -30,31 +30,31 @@ sap.ui.define([
 
 		},
 		onBeforeShow: async function (iconTabfilter,{objectId, offerId, countryCode}) {
+			// Store parameters
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.oOwnerComponent = this.getOwnerComponent();
 			this.oRouter = this.oOwnerComponent.getRouter();
-
 			this.defaultModel = this.getOwnerComponent().getModel();
 			
-			//this.getView().getBindingContext("template"); // get current tab data
-			// await this.getOwnerComponent().getModel().metadataLoaded();
 			this.tenderId = objectId;
 			this.offerId = offerId;
 			this.countryCode = countryCode;
 			this.selectedTab = iconTabfilter.getKey();
+			this.stState = this.getOwnerComponent().getModel("st");
+		
+			// Calculate dates
 			const today = new Date();
-        	const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
-
+			const maxDate = new Date(today.getFullYear() + 2, today.getMonth(), today.getDate());
+		
+			// Initialize model
 			const oModel = new JSONModel({
 				busy: false,
 				delay: 0,
 				editMode: false,
 				minDate: today,
 				maxDate: maxDate,
-				OverviewForm:{
-					editMode: false
-				},
+				OverviewForm: { editMode: false },
 				enableApprovalButton: false,
 				isCHCountrySelected: this.countryCode?.toLowerCase()?.includes('-ch'),
 				OverviewPriceConditionTableSpain: {
@@ -68,18 +68,57 @@ sap.ui.define([
 				},
 				isOfferHavingOnlyTMApproverTypePending: false
 			});
-			
+		
 			this.setModel(oModel, "ui");
-
+		
+			//Bind views
 			this.bindFields();
-			if(this.offerId && this.offerId !== "NA") {await this.bindProductFOCInformationTable(this.countryCode, this.offerId);}			
-			await this.approvalButtonEnableCheck();
-			await this.assignWordTemplates();
-			await this.assignExcelTemplates();
-			this.selectedTender = await this.stState.getService().getTender(this.tenderId);
-			this.countryCode === "ES" && this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
-			
-			//this.getModel("ui").setProperty("/Classification", this.selectedTender?.Classification);
+		
+			// Load all data in parallel
+			this._loadInformationData();
+		},
+
+		_loadInformationData: async function() {
+			try {	
+				const [
+					focInfo,
+					tenderData,
+					approvalCheck,
+					wordTemplates,
+					excelTemplates,
+					// Spain-specific (if needed)
+					spainConstraints
+				] = await Promise.all([
+					this.offerId && this.offerId !== "NA" 
+						? this.bindProductFOCInformationTable(this.countryCode, this.offerId)
+						: Promise.resolve(null),
+					
+					this.stState.getService().getTender(this.tenderId), 
+					this.approvalButtonEnableCheck(),                  
+					this.assignWordTemplates(),                  
+					this.assignExcelTemplates(),            
+					
+					// Spain-specific data (conditional)
+					this.countryCode === "ES" 
+						? this.stState.getContractMngtDateConstraints(this.tenderId, this.offerId, this.countryCode)
+						: Promise.resolve(null)
+				]);
+		
+				// Store tender data
+				this.selectedTender = tenderData;
+		
+				// Update approval status
+				this.getModel("ui").setProperty("/enableApprovalButton", approvalCheck);
+		
+				// Spain-specific logic
+				if (this.countryCode === "ES" && spainConstraints) {
+					this.getModel("st").setProperty("/ContractMngtDateConstraints", spainConstraints);
+					this._createPriceConditionTableEntitiesOnQuotationTabForSpain();
+				}
+		
+			} catch (error) {
+				console.error("Error loading information:", error);
+			}
 		},
 
 		onCloseApprovalDialog: function(){
@@ -544,49 +583,156 @@ sap.ui.define([
 			this.getModel().setProperty(`${path}/ApproverName`, selectedItem.ApproverName);
 		},
 
+		_submitOfferValidation: function() {
+			return new Promise((resolve) => {
+				const startTime = Date.now();
+				console.log(`[SubmitOfferValidation] START - ${new Date().toISOString()}`);
+				
+				if (this.getTargets(["OfferValidation"]).length > 0) {
+					this.setMessageSection(["OfferValidation"], "overviewTenderFormMsg");
+					
+					this.defaultModel.submitChanges({
+						groupId: "OverviewForm",
+						success: (res) => {
+							console.log(`[SubmitOfferValidation] SUCCESS - ${Date.now() - startTime}ms`);
+							this.onOverviewTenderFormSuccess(res);
+							resolve(true);
+						},
+						error: (err) => {
+							console.error(`[SubmitOfferValidation] ERROR - ${err.message} - ${Date.now() - startTime}ms`);
+							resolve(false);
+						}
+					});
+				} else {
+					console.warn(`[SubmitOfferValidation] No targets to save`);
+					this.onOverviewTenderFormCancelBtnPress();
+					resolve(false);
+				}
+			});
+		},
+
 		onSubmitQuotation: async function(){
-			this.cancelPendingChanges(["OfferValidation"], "OverviewForm");
-			this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true)
-			this.onOverviewTenderFormSaveBtnPress();
-			this.createNewAwardedProducts();
+			const startTime = Date.now();
+			console.log(`[SubmitQuotation] START - OfferID: ${this.offerId} - Timestamp: ${new Date().toISOString()}`);
+			
+			try {
+				this.cancelPendingChanges(["OfferValidation"], "OverviewForm");
+				this.defaultModel.setProperty(`/OfferValidation('${this.offerId}')/Submitted`, true);
+				
+				const saveSuccess = await this._submitOfferValidation();
+				
+				if (saveSuccess) {
+					console.log(`[SubmitQuotation] OfferValidation saved - ${Date.now() - startTime}ms`);
+					await this.createNewAwardedProducts(startTime);
+				} else {
+					console.error(`[SubmitQuotation] OfferValidation save failed - ${Date.now() - startTime}ms`);
+					sap.m.MessageBox.error("Failed to save quotation. Awarded products not created.");
+				}
+			} catch (error) {
+				console.error(`[SubmitQuotation] ERROR - ${error.message} - ${Date.now() - startTime}ms`);
+				sap.m.MessageBox.error("Error submitting quotation: " + error.message);
+			}
 		},
 		
-		createNewAwardedProducts: function () {
-			const offerProductInfoTable = this.byId("idProductInformationTable");
-			const classification = this.selectedTender?.Classification;
-			const itemContexts = offerProductInfoTable.getBinding("items").getContexts();
-			itemContexts.forEach(prod => {
-				const product = prod.getObject();
-				this.defaultModel.createEntry("/AwardedProducts", {
-					properties: {
-						TenderID: product.TENDER_ID,
-						OfferID: product.OFFER_ID,
-						CountryCode: product.COUNTRY_CODE,
-						LotID: product.LOTID,
-						ProductCode: product.PRODUCTID,
-						AwardedProduct: product.PRODUCTNAME,
-						AwardedCompany: "Bayer",
-						UoM: product.UNIT,
-						AwardedPrice: this.countryCode === 'TW' || this.countryCode === 'ES' ? product.NET_PRICE : product.OFFER_PRICE,
-						AwardedQty: product.REQUESTED_QUANTITY,
-						ErrorInSubmission: "No",
-						Outcome: this.countryCode === 'ES' ? classification === 'Commercial Agreement' ? 'Won' : null : null,
-					},
-					groupId: "AwardedProduct"
-				})
-			})
-			this.defaultModel.submitChanges({
-				success: this._onSubmitChangesNewAwardedProductsSuccess.bind(this),
-				groupId: "AwardedProduct"
-			})
+		createNewAwardedProducts: async function(parentStartTime) {
+			const startTime = Date.now();
+			console.log(`[CreateAwardedProducts] START - OfferID: ${this.offerId} - ${new Date().toISOString()}`);
 			
+			try {
+				const offerProductInfoTable = this.byId("idProductInformationTable");
+				
+				if (!offerProductInfoTable) {
+					console.error(`[CreateAwardedProducts] Table not found`);
+					sap.m.MessageBox.error("Product table not found");
+					return;
+				}
+				
+				await new Promise((resolve) => {
+					const checkBinding = () => {
+						const binding = offerProductInfoTable.getBinding("items");
+						if (binding && binding.isA("sap.ui.model.odata.v2.ODataListBinding")) {
+							const contexts = binding.getContexts();
+							if (contexts && contexts.length > 0) {
+								console.log(`[CreateAwardedProducts] Table binding ready - ${contexts.length} products`);
+								resolve();
+							} else {
+								console.warn(`[CreateAwardedProducts] Table binding ready but no products found`);
+								resolve();
+							}
+						} else {
+							setTimeout(checkBinding, 100);
+						}
+					};
+					checkBinding();
+				});
+				
+				const classification = this.selectedTender?.Classification;
+				const itemContexts = offerProductInfoTable.getBinding("items").getContexts();
+				
+				console.log(`[CreateAwardedProducts] Creating ${itemContexts.length} awarded products`);
+				
+				if (itemContexts.length === 0) {
+					console.warn(`[CreateAwardedProducts] No products to create`);
+					return;
+				}
+				
+				itemContexts.forEach((prod, index) => {
+					const product = prod.getObject();
+					console.log(`[CreateAwardedProducts] Product ${index + 1}/${itemContexts.length}: ${product.PRODUCTNAME}`);
+					
+					this.defaultModel.createEntry("/AwardedProducts", {
+						properties: {
+							TenderID: product.TENDER_ID,
+							OfferID: product.OFFER_ID,
+							CountryCode: product.COUNTRY_CODE,
+							LotID: product.LOTID,
+							ProductCode: product.PRODUCTID,
+							AwardedProduct: product.PRODUCTNAME,
+							AwardedCompany: "Bayer",
+							UoM: product.UNIT,
+							AwardedPrice: this.countryCode === 'TW' || this.countryCode === 'ES' 
+								? product.NET_PRICE 
+								: product.OFFER_PRICE,
+							AwardedQty: product.REQUESTED_QUANTITY,
+							ErrorInSubmission: "No",
+							Outcome: this.countryCode === 'ES' 
+								? classification === 'Commercial Agreement' ? 'Won' : null 
+								: null,
+						},
+						groupId: "AwardedProduct"
+					});
+				});
+				
+				await new Promise((resolve, reject) => {
+					this.defaultModel.submitChanges({
+						groupId: "AwardedProduct",
+						success: (res) => {
+							console.log(`[CreateAwardedProducts] SUCCESS - ${Date.now() - startTime}ms`);
+							this._onSubmitChangesNewAwardedProductsSuccess(res, parentStartTime);
+							resolve(res);
+						},
+						error: (err) => {
+							console.error(`[CreateAwardedProducts] ERROR - ${err.message} - ${Date.now() - startTime}ms`);
+							reject(err);
+						}
+					});
+				});
+			} catch (error) {
+				console.error(`[CreateAwardedProducts] EXCEPTION - ${error.message} - ${Date.now() - startTime}ms`);
+				sap.m.MessageBox.error("Failed to create awarded products: " + error.message);
+			}
 		},
-		_onSubmitChangesNewAwardedProductsSuccess: async function () {
+		_onSubmitChangesNewAwardedProductsSuccess: async function (res, parentStartTime) {
+			const startTime = parentStartTime || Date.now();
+			console.log(`[AwardedProductsSuccess] START - ${new Date().toISOString()}`);
+			
 			const offerStatus = await this.stState.getService().getOfferStatus(this.offerId);
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 			this.getOwnerComponent().getEventBus().publish("masterChannel", "statusChanged", {
 				offerStatus: offerStatus?.STATUS
 			});
+			
+			console.log(`[AwardedProductsSuccess] COMPLETE - Total time: ${Date.now() - startTime}ms - Status: ${offerStatus?.STATUS}`);
 		},
 
 		bindProductFOCInformationTable: async function(countryCode, offerId){

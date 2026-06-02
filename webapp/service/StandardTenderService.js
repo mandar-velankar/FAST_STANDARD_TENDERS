@@ -581,5 +581,22 @@ sap.ui.define([
 				});
 			});
 		},
+
+		getDiscountConditions: async function (priceConditionId) {
+			return new Promise((resolve, reject) => {
+				this.model.read('/DiscountConditionView', {
+					filters: [
+						new Filter("PriceConditionID", "EQ", priceConditionId),
+					],
+					success: function (res) {
+						resolve(res.results)
+					},
+
+					error: function (err) {
+
+					}
+				});
+			});
+		},
     });
 });

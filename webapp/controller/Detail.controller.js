@@ -179,52 +179,129 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: async function (oEvent) {
+			// Extract route parameters
 			this.sCountryCode = oEvent.getParameter("arguments").countryCode;
 			this.sProductScope = oEvent.getParameter("arguments").productScope;
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.sOfferId = oEvent.getParameter("arguments").offerId;
 			this.productId = oEvent.getParameter("arguments").productId;
 			this.layout = oEvent.getParameter("arguments").layout || "TwoColumnsMidExpanded";
+
+			// Get models (synchronous)
 			this.getModel("appView").setProperty("/layout", this.layout);
-			// this.getModel("appView").setProperty("/editable", false);
 			this.templateState = this.getOwnerComponent().getModel("template");
 			this.templateStateData = this.templateState.getData();
 			this.stState = this.getOwnerComponent().getModel("st");
-			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
 			this.defaultModel = this.getOwnerComponent().getModel();
-			if(this.productId){
-				const selectedOfferProduct = await this.stState.getService().getOfferProduct(this.sOfferId, this.productId);
-				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
-				StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
-				StandardSingletonService.setBU(selectedOfferProduct?.BU);
+
+			// Set country immediately
+			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
+
+			//Setup singleton data
+			this.setupSingletonData();
+
+			if (!this.selectedOfferHasBinding()) {
+				this._bindView();
 			}
+				
+			//Load metadata and remaining data
+			this.loadDetailPageData();
 
-			const countryDistributors = await this.stState.getService().getCountryDistributors(this.sCountryCode);
-			StandardSingletonService.setCountryDistributors(countryDistributors);
+		},
 
-			this.setSelectedTabKey();
+		/**
+		 * Setup singleton data - can run in background
+		 * Was: sequential getOfferProduct() then getOffer()
+		 * Now: parallel Promise.all
+		 */
+		setupSingletonData: async function() {
+			try {
+				if (this.productId) {
+					// Fetch both in parallel
+					const [selectedOfferProduct, selectedOffer] = await Promise.all([
+						this.stState.getService().getOfferProduct(this.sOfferId, this.productId),
+						this.stState.getService().getOffer(this.sOfferId)
+					]);
+					
+					// Set singleton data
+					StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
+					StandardSingletonService.setBU(selectedOfferProduct?.BU);
+				}
+		
+				// Fetch country distributors (parallel with above)
+				const countryDistributors = await this.stState.getService().getCountryDistributors(this.sCountryCode);
+				StandardSingletonService.setCountryDistributors(countryDistributors);
+		
+				this.setSelectedTabKey();
+		
+			} catch (error) {
+				console.warn("Error setting up singleton data:", error);
+				// Continue - this is background setup
+			}
+		},
 
-			this.getModel().metadataLoaded().then( async function() {
-				const OfferStatus = await this.stState.getOfferStatus(this.sOfferId);
-				const selectedTender = await this.stState.getService().getTender(this.sObjectId);
-				const selectedOffer = await this.stState.getService().getOffer(this.sOfferId);
+		/**
+		 * Load metadata and remaining detail page data
+		 * Was: metadataLoaded chain with sequential awaits
+		 * Now: parallel Promise.all for independent operations
+		 */
+		loadDetailPageData: async function() {
+			try {
+				// Wait for metadata to be ready
+				await this.getModel().metadataLoaded();
+		
+				// Fetch all data in parallel instead of sequential
+				const [
+					offerStatus,
+					selectedTender,
+					selectedOffer,
+					offerProductsValidation,
+					contractMngtConstraints
+				] = await Promise.all([
+					this.stState.getOfferStatus(this.sOfferId),
+					this.stState.getService().getTender(this.sObjectId),
+					this.stState.getService().getOffer(this.sOfferId),
+					this.stState.getOfferProductValidation(this.sOfferId),
+					this.sCountryCode === 'ES' 
+						? this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode)
+						: Promise.resolve(null)
+				]);
+		
+				// Get access control data (needed for updateVisibilityOfTabs)
 				const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 				const UserInfo = this.stState.getProperty('/UserInfo');
+		
+				// Update models with all fetched data at once
 				this.getModel("st").setProperty("/SelectedInstituteID", selectedTender?.InstituteID);
 				this.getModel("st").setProperty("/SelectedTender", selectedTender);
+				this.getModel("st").setProperty("/OfferProductsValidations", offerProductsValidation);
+				
+				if (contractMngtConstraints) {
+					this.getModel("st").setProperty("/ContractMngtDateConstraints", contractMngtConstraints);
+				}
+		
+				// Set singleton data (no duplicates)
 				StandardSingletonService.setTenderID(this.sObjectId);
 				StandardSingletonService.setParentInstituteID(selectedTender?.InstituteID);
 				StandardSingletonService.setSelectedOfferQuotationInstituteID(selectedOffer?.QuotationInstituteID);
-				StandardSingletonService.setIsMultiDistributorEnabledPerProduct(["CO"].includes(this.sCountryCode) || selectedTender?.Region?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi'));
-				await this.updateVisibilityOfTabs(this.iconTabBar, OfferStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
-				!this.selectedOfferHasBinding() && this._bindView();
-				
-				// Needed for Spain Overview screen to immediately display price condition informations
-				const contractMngtDateConstraints = this.sCountryCode === 'ES' ? await this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode) : null;
-				const offerProducts = await this.stState.getOfferProductValidation(this.sOfferId);
-				this.getModel("st").setProperty("/OfferProductsValidations", offerProducts);
-				this.getModel("st").setProperty("/ContractMngtDateConstraints", contractMngtDateConstraints);
-			}.bind(this));
+				StandardSingletonService.setIsMultiDistributorEnabledPerProduct(
+					["CO"].includes(this.sCountryCode) || 
+					selectedTender?.Region?.toLowerCase()?.split(' ')?.join('')?.trim()?.includes('pacawi')
+				);
+		
+				// Update tab visibility
+				await this.updateVisibilityOfTabs(
+					this.iconTabBar, 
+					offerStatus?.STATUS, 
+					{OfferID: this.sOfferId, ProductCode: this.productId}, 
+					stTenderRoles, 
+					UserInfo, 
+					this.sCountryCode
+				);
+		
+			} catch (error) {
+				console.error("Error loading detail page data:", error);
+			}
 		},
 
 		selectedOfferHasBinding: function(){

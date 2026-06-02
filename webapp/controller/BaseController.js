@@ -71,7 +71,22 @@ sap.ui.define([
 			const i18nModel = this.getModel("i18n");
 			const index = parseInt(context.getPath().split('/').pop());
 			const control = context.getObject();
-			return control.generateViewSettingsItem(index, i18nModel);
+			
+			const isViewSettingsControlSelected = this.getIsViewSettingControlSelected(control, index);
+			return control.generateViewSettingsItem(index, i18nModel, isViewSettingsControlSelected);
+		},
+
+		getIsViewSettingControlSelected: function (control, index) {
+			const countryCode = this.getModel('st').getProperty('/SelectedCountry');
+
+			switch (countryCode) {
+				case "PL":
+					const isBidDueDate = control?.getControl()?.getPropertiesAsObject()?.text?.includes('BidDueDate');
+					return isBidDueDate;
+				default:
+					return index === 0;
+			}
+
 		},
 
 		/**

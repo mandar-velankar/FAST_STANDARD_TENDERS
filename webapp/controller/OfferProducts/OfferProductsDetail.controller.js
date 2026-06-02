@@ -143,17 +143,6 @@ sap.ui.define([
 		},
 
 		onBeforeShow:async function(sObjectId, sOfferId, countryCode, productCode){
-			// get state data
-			this.templateState = this.getOwnerComponent().getModel("template");
-			this.templateStateData = this.templateState.getData();
-			
-			//this.getView().getBindingContext("template"); // get current tab data
-			// await this.getOwnerComponent().getModel().metadataLoaded();
-			this.objectId = sObjectId;
-			this.offerId = sOfferId;
-			//this.selectedTab = iconTabfilter.getKey();
-			
-			this.defaultModel = this.getOwnerComponent().getModel();
 
 			const oModel = new JSONModel({
 				busy: false,
@@ -195,46 +184,90 @@ sap.ui.define([
 					editMode: false,
 					mainPriceConditionID: null
 				},
-				ProductDistributors: []
+				ProductDistributors: [],
+				DiscountCondition: {
+					tableData: []
+				}
 			});
-	
 			this.setModel(oModel, "ui");
-			this.offerStatus = await this.stState.getOfferStatus(sOfferId);
-			const currentPriceConditionType = await this.getCurrentPricingConditionType();
-			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
-			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
-			const priceConditionType = await this.getSavedPriceConditionType();
-			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
-			const selectedOffer = await this.stState.getService().getOffer(this.offerId);
-			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
-			let offerProduct = await this.stState.getService().getOfferProduct(sOfferId, productCode);
-			this.getModel("st").setProperty("/OfferProduct", offerProduct);
-			this.setBrandLevelRappelEnablement(offerProduct);
+			// get state data
+			this.templateState = this.getOwnerComponent().getModel("template");
+			this.templateStateData = this.templateState.getData();
+			this.objectId = sObjectId;
+			this.offerId = sOfferId;
+			this.defaultModel = this.getOwnerComponent().getModel();
+
+			// Bind critical views NOW - user sees data sooner
 			this._bindView();
 			this._bindForm("ProductForm");
-			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
-			this._bindDistributorsMultiInput();
-			const selectedTender = await this.stState.getService().getTender(this.sObjectId);
-			const parentInstitute = await this.getInstituteView(selectedTender?.InstituteID, countryCode);
-			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+			
+			const criticalDataPromises = [
+				this.stState.getOfferStatus(sOfferId),
+				this.getCurrentPricingConditionType(),
+				this.stState.getService().getTender(sObjectId)
+			];
+
+			const [offerStatus, currentPriceConditionType, selectedTender] = await Promise.all(criticalDataPromises);
+
+			// Update model with critical data
+			this.offerStatus = offerStatus;
+
+			this.getModel("st").setProperty("/CurrentPriceConditionType", currentPriceConditionType);
+			this.getModel("st").setProperty("/hasESCurrentPriceCondition", !!currentPriceConditionType);
 			this.getModel("ui").setProperty("/InstituteType", selectedTender?.InstituteType);
 			this.getModel("ui").setProperty("/Classification", selectedTender?.Classification);
 			this.getModel("ui").setProperty(`/SelectedInstituteName`, selectedTender?.InstituteName);
 			this.getModel("ui").setProperty(`/SelectedInstituteID`, selectedTender?.InstituteID);
 			this.getModel("ui").setProperty(`/SelectedCustomerID`, selectedTender?.CustomerID);
-			const standardTenderPriceConditionViews = await this.stState.getService().getStandardTenderPriceConditionView(sObjectId, sOfferId, productCode);
-			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);
-			if(countryCode === 'ES'){
-				this.bindProfitabilityForm();
-				this.bindProductTypeProfitabilityTable();
-				await this.bindRappelForm();
-				await this.setSpainMaxPriceFieldVisibility();
-				await this.getSettlements();
-				await this.getMarketIncentiveID();
-			} 
-			// this._bindText("ProductPackNameOfferProductDetail");
+
+			// These can run in parallel while UI is rendering
+			const secondaryDataPromises = [
+				this.getSavedPriceConditionType(),
+				this.stState.getService().getOffer(sOfferId),
+				this.stState.getService().getOfferProduct(sOfferId, productCode),
+				this.getInstituteView(selectedTender?.InstituteID, countryCode),
+				this.stState.getService().getStandardTenderPriceConditionView(sObjectId, sOfferId, productCode)
+			];
+
+			const [priceConditionType, selectedOffer, offerProduct, parentInstitute, standardTenderPriceConditionViews] = 
+				await Promise.all(secondaryDataPromises);
+
+			// Update with secondary data
+			this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
+			this.getModel("ui").setProperty("/ProfitabilityForm/Division", selectedOffer?.Division);
+			this.getModel("st").setProperty("/OfferProduct", offerProduct);
+			this.getModel("st").setProperty("/StandardTenderPriceConditionViews", standardTenderPriceConditionViews);			
+
+			// Load price condition in background
 			this.loadPriceCondition();
-		},		
+
+			if (countryCode === 'ES') {
+				// Defer Spain-specific operations - run without awaiting
+				this._loadSpainSpecificData();
+			}
+
+			// Bind remaining views
+			this._bindDistributorsMultiInput();
+			this._bindTable(sObjectId, sOfferId, countryCode, productCode);
+			await this.getTaiwanInstituteInBranch(parentInstitute?.InstituteID, parentInstitute?.ParentInstituteID, countryCode);
+		},
+		/**
+		 * DEFERRED: Spain-specific operations run after critical path
+		 * These don't block the initial page load
+		 */
+		_loadSpainSpecificData: function() {
+			// Run these operations without awaiting - let them complete in background
+			this.bindProfitabilityForm();
+			this.bindProductTypeProfitabilityTable();
+
+			Promise.all([
+				this.bindRappelForm(),
+				this.setSpainMaxPriceFieldVisibility(),
+				this.getSettlements(),
+				this.getMarketIncentiveID()
+			]);
+		},
+
 		getSavedPriceConditionType: async function () {
 			let hasCurrentPricingReceived = this.getModel("ui").getProperty("/PricingForm/hasCurrentPricingReceived");
 			if(this.sCountryCode === 'ES'){
@@ -269,7 +302,8 @@ sap.ui.define([
 						}
 
 						if (!priceCondition) {
-							priceCondition = results.find(el => el.isMain === true);
+							const defaultType = countryDefaultPriceConditionType?.[controller.sCountryCode];
+							priceCondition = results.find(el => el.isMain === true && (defaultType ? el.ConditionType === defaultType : true));
 						}
 						controller.setMainPriceCondition(priceCondition);
 						controller.bindFOCMultiInputTokens(priceCondition)
@@ -506,6 +540,7 @@ sap.ui.define([
 		
 
 		handleClose: function() {
+			this.getView().unbindElement();
 			let oNextUIState = "";
 			this.getModel("appView").setProperty("/actionButtonsInfo/midColumn/fullScreen", false);
                 // No item should be selected on list after detail page is closed
@@ -2664,81 +2699,135 @@ sap.ui.define([
 		},
 
 
-		onPriceConditionRappelDialogLoaded: function(priceConditionRappelView, dialog){
-			const volumeTresholdTable = this.byId("idVolumeTreshold");
-			const itemsBindingInfo = volumeTresholdTable.getBindingInfo("items");
-
-			const transientContexts = [];
-			const currentItems = volumeTresholdTable.getItems();
-
-			currentItems.forEach(item => {
-				const ctx = item.getBindingContext();
-				if (ctx && ctx.isTransient()) {
-					transientContexts.push(ctx);
-				}
-			});
-
-			let filter = new Filter("PriceConditionID", FilterOperator.EQ, priceConditionRappelView?.PriceConditionID);
-
-			// Unbind and rebind items
-			volumeTresholdTable.unbindItems();
-			volumeTresholdTable.bindItems({
-				path : itemsBindingInfo.path,
-				template : itemsBindingInfo.template,
-				filters : filter,
-				groupId: "RappelForm"
-			});
-
-			volumeTresholdTable.attachEventOnce("updateFinished", () => {
-				transientContexts.forEach(ctx => {
-					const newItem = itemsBindingInfo.template.clone();
-					newItem.setBindingContext(ctx);
-					volumeTresholdTable.addItem(newItem);
-				});
-			});
-
+		onPriceConditionRappelDialogLoaded: async function (
+			priceConditionRappelView,
+			dialog
+		) {
+			const discountConditions = priceConditionRappelView?.PriceConditionID ? await this.stState.getService().getDiscountConditions(priceConditionRappelView?.PriceConditionID) : [];	
+			this._setVolumeTresholdTableData(discountConditions);
 			dialog.open();
+		},
+
+		_setVolumeTresholdTableData: function(discountConditions){
+			const uiModel = this.getModel("ui");
+			const existingData = uiModel.getProperty("/DiscountCondition/tableData");
+			const currentTableData = existingData.length > 0 ? existingData : discountConditions || [];
+
+			uiModel.setProperty("/DiscountCondition/tableData", currentTableData);
+			uiModel.setProperty("/DiscountCondition/originalData", Object.assign([], discountConditions));
+			 
+		},
+
+		onDiscountValueChange: function(event){
+			const source = event.getSource();
+			const context = source.getBindingContext();
+			const rawValue = source.getValue();
+			const parsed = new this.customTypes.percentage().parseValue(rawValue);
+			context.getModel().setProperty("Discount", parsed?.[0] || 0, context);
 		},
 
 		onCancelDiscountCondition: async function(event){
 			const dialog = await this.getPriceConditionRappelDialog();
-			if(this.defaultModel.hasPendingChanges()){
-				const pendingChanges = this.defaultModel.getPendingChanges();
-				Object.keys(pendingChanges).forEach((key) => {
-					if (key.startsWith("DiscountConditionView")) {
-						const path = `/${key}`; 
-						this.defaultModel.resetChanges([path], undefined, true);
-					}
-				});
-			}
+			const uiModel = this.getModel("ui");
+			const originalData = uiModel.getProperty("/DiscountCondition/originalData") || [];
+
+
+			this.cancelPendingChanges(["DiscountConditionView", "DiscountCondition"], "priceCondRappel");	
+			uiModel.setProperty("/DiscountCondition/tableData", originalData);
+			uiModel.setProperty("/DiscountCondition/deletedItems", []);
+			uiModel.refresh();
 			dialog.close(); 
 		},
 
 		onAddNewDiscountCondition: function(event){
+			this._refreshVolumeTresholdTable();
 			const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
-			const table = this.byId("idVolumeTreshold");
-			const context = this.defaultModel.createEntry("/DiscountConditionView", {
-				groupId: "RappelForm"
-			});
-			context.getModel().setProperty("Volume", 0, context);
-			context.getModel().setProperty("Discount", 0, context);
-			context.getModel().setProperty("PriceConditionID", priceConditionRappelView?.PriceConditionID, context);
-			context.getModel().setProperty("Tax", priceConditionRappelView?.Tax, context);
-			context.getModel().setProperty("NetPriceWithoutTax", 0, context);
-			context.getModel().setProperty("NetPriceWithTax", 0, context);
-			const newItem = table.getBindingInfo("items").template.clone();
-			newItem.setBindingContext(context)
-			table.insertItem(newItem);
+			const newItem = {
+				"Volume": 0,
+				"Discount": 0,
+				"PriceConditionID": priceConditionRappelView?.PriceConditionID,
+				"Tax": priceConditionRappelView?.Tax,
+				"NetPriceWithoutTax": 0,
+				"NetPriceWithTax": 0,
+				"CountryCode": this.sCountryCode,
+			};
+			
+			this.getModel('ui').getProperty("/DiscountCondition/tableData").unshift(newItem);
+			this.getModel('ui').refresh();
+			
+		},
+
+		formatDiscount: function (value) {
+			if (!value || isNaN(parseFloat(value))) return '0.000%';
+			return value ? (value * 100).toFixed(3) + "%" : "";
 		},
 
 		onDeleteDiscountCondition: function(event){
+			this._refreshVolumeTresholdTable();
 			const selectedItem = event.getSource().getParent();
-			const context = selectedItem.getBindingContext();
-			if(context.isTransient()){
-				this.defaultModel.resetChanges([context.getPath()], undefined, true);
-			}else{
-				this.defaultModel.remove(context.getPath());
+			const context = selectedItem.getBindingContext('ui');
+			const itemObject = context.getObject();
+			const uiModel = this.getModel("ui");
+			const deletedItems = uiModel.getProperty("/DiscountCondition/deletedItems") || [];
+
+			if (itemObject.ID) {
+				uiModel.setProperty("/DiscountCondition/deletedItems", [...deletedItems, itemObject.ID]);
 			}
+			const index = context.getPath().split("/").pop();
+			const tableData = uiModel.getProperty("/DiscountCondition/tableData");
+			tableData.splice(index, 1);
+			uiModel.refresh();
+		},
+
+		_preapareDiscountConditionDataForSaving: function(){
+			const uiModel = this.getModel("ui");
+			const tableData = uiModel.getProperty("/DiscountCondition/tableData") || [];
+			const deletedItems = uiModel.getProperty("/DiscountCondition/deletedItems") || [];
+
+			tableData.forEach(item => {
+				if (!item.ID) {
+					if (item._pendingChangeCtx) {
+						item._pendingChangeCtx.getModel().setProperty("Discount", item.Discount, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`Volume`, item.Volume, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`Discount`, item.Discount, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`NetPriceWithoutTax`, item.NetPriceWithoutTax, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`NetPriceWithTax`, item.NetPriceWithTax, item._pendingChangeCtx);
+						item._pendingChangeCtx.getModel().setProperty(`PriceConditionID`, item.PriceConditionID, item._pendingChangeCtx);
+					}else {
+						const ctx = this.defaultModel.createEntry("/DiscountConditionView", {
+							properties: item,
+							groupId: "RappelForm"
+						});
+						item._pendingChangeCtx = ctx;
+					}
+				}else {
+					const key = this.defaultModel.createKey("/DiscountCondition", {
+						ID: item.ID,
+					});
+
+					this.defaultModel.update(key, {
+						Volume: item.Volume,
+						Discount: item.Discount,
+						NetPriceWithoutTax: item.NetPriceWithoutTax,
+						NetPriceWithTax: item.NetPriceWithTax,
+						PriceCondition_ID: item.PriceConditionID
+					}, {
+						groupId: "RappelForm",
+						merge: true
+					});
+				}
+			})
+
+			deletedItems.forEach(id => {
+				const key = this.defaultModel.createKey("/DiscountConditionView", {
+					ID: id,
+				});
+				this.defaultModel.remove(key, {
+					groupId: "RappelForm"
+				})
+			});
+
+			uiModel.refresh();
 		},
 
 		onSortDiscountCondition:function(){
@@ -2780,17 +2869,40 @@ sap.ui.define([
 
 		onApplyDiscountCondition: async function(event){	
 			const dialog = await this.getPriceConditionRappelDialog();
+			this._refreshVolumeTresholdTable();
+			this._preapareDiscountConditionDataForSaving();
 			dialog.close();
 		},
 
-		calculateNetPricesRappel: async function(event){ 
+		_refreshVolumeTresholdTable: function(){
+			const table = this.byId('idVolumeTreshold')
+			const aggregations = table.getAggregation('items');
+			
+			aggregations.forEach(item => {
+				const volumeInput = item.getCells()?.[0].getAggregation('items')?.[1];
+				const discountInput = item.getCells()[1];
+				const discountValue = discountInput.getValue();
+				const volumeValue = volumeInput.getValue();
+				const context = item.getBindingContext('ui');
+				if (context) {
+					const obj = context.getObject();
+					context.getModel().setProperty("Discount", parseFloat(discountValue) / 100, context);
+					context.getModel().setProperty("Volume", parseFloat(volumeValue), context);
+				}
+			});
+		},
+
+		calculateNetPricesRappel: function(event){ 
 
             const priceConditionRappelView = this.getModel("st").getProperty("/selectedPriceConditionRappelView");
 
+			const uiModel = this.getModel("ui");
             const discount = Number((event.getSource().getValue())?.replace(/\\.0+$/, '').replace(/%$/, ''));
-            const bindingContext = event.getSource().getBindingContext();
+            const bindingContext = event.getSource().getBindingContext('ui');
+			const bindingCtxPath = bindingContext.getPath();
             const discountConditionObj = bindingContext.getObject();
-
+			// const customPercentageType = new this.customTypes.percentage;
+			
             let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
             let instType = this.getModel("ui").getProperty("/InstituteType");
             let packFactor =  oProductPrice.PACKFACTOR;
@@ -2810,9 +2922,9 @@ sap.ui.define([
 			NetPriceWithTax = this.formatter.roundToSixDecimalPlaces(NetPriceWithTax);
 
 
-            bindingContext.getModel().setProperty("NetPriceWithoutTax", NetPriceWithoutTax, bindingContext);
-			bindingContext.getModel().setProperty("NetPriceWithTax", NetPriceWithTax, bindingContext);
-
+            uiModel.setProperty(`${bindingCtxPath}/NetPriceWithoutTax`, NetPriceWithoutTax);
+			uiModel.setProperty(`${bindingCtxPath}/NetPriceWithTax`, NetPriceWithTax);
+			uiModel.refresh()
         },
 
 		calculateRoyalDecreeAppliesAndMainConditionPrice: function(mainPriceCondition){
@@ -2867,18 +2979,24 @@ sap.ui.define([
 			const hasErrorMessages =  this.getModel("messages").getProperty("/priceCondRappel").length > 0;
 			if (!hasErrorMessages) {
 				this.getModel("ui").setProperty('/RappelForm/editMode', false);
-				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView"], "priceCondRappel");		
+				this.cancelPendingChanges(["PriceConditionRappelView","DiscountConditionView", "DiscountCondition"], "priceCondRappel");		
 				this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);				
 				this.refreshRappelForm();
 			}
 						
 		},
 
-		refreshRappelForm: function(){
+		refreshRappelForm: async function(){
+			const uiModel = this.getModel("ui");
 			const form = this.byId("idRapelForm");
+			const rappelFormData = form.getBindingContext().getObject()
 			form.getElementBinding()?.refresh();
+			const discountConditions = await this.stState.getService().getDiscountConditions(rappelFormData?.PriceConditionID);
+			uiModel.setProperty("/DiscountCondition/tableData", discountConditions);
+			uiModel.setProperty("/DiscountCondition/originalData", Object.assign([], discountConditions));
+			uiModel.setProperty("/DiscountCondition/deletedItems", []);
+			uiModel.refresh();
 		},
-
 		/**
 		 * Calculate price condition type.
 		 *
@@ -2953,6 +3071,7 @@ sap.ui.define([
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 			context.getModel().setProperty("PriceConditionCode", priceConditionCode, context);
 			context.getModel().setProperty("NetPrice", netPriceWithoutTaxAfterDeductionRD, context);
+			context.getModel().setProperty("QuotationPriceConditionCode", priceConditionCode, context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 
@@ -3062,6 +3181,7 @@ sap.ui.define([
 			context.getModel().setProperty("RoyalDecreeValue", royalDecreeValue, context);
 			context.getModel().setProperty("NetPriceWithTax", netPriceWithTax, context);
 			context.getModel().setProperty("NetPrice", netPriceBeforeRC, context);
+			context.getModel().setProperty("QuotationPriceConditionCode", 'YD02', context);
 
 			this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceObj);
 		},
@@ -3103,12 +3223,27 @@ sap.ui.define([
 
 		onOpenInstituteValueHelp: async function (event) {
 			const source = event.getSource();
+			const instituteType = this.getModel("ui").getProperty("/InstituteType");
+
+			let instituteTypeFilters = [
+				new Filter("InstituteType", FilterOperator.EQ, instituteType)
+			];
+
+			// include Public Account institute type if Region(s) is selected
+			if (instituteType === "Region(s)") {
+				instituteTypeFilters.push(
+					new Filter("InstituteType", FilterOperator.EQ, "Public Account")
+				);
+			}
 		
 			const filters = [
 				new Filter("CountryCode", FilterOperator.EQ, this.sCountryCode),
 				new Filter("CustomerID", FilterOperator.NE, null),
 				new Filter("CustomerID", FilterOperator.NE, 0),
-				new Filter("InstituteType", FilterOperator.EQ, this.getModel("ui").getProperty("/InstituteType"))
+				new Filter({
+					filters: instituteTypeFilters,
+					and: false // OR between InstituteTypes
+				})
 			];
 		
 			// Define the dialog
