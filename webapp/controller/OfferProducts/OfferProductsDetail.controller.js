@@ -171,7 +171,8 @@ sap.ui.define([
 					settlements: null,
 					MarketIncentive: null,
 					instituteType: "",
-					PriceConditionID: null
+					PriceConditionID: null,
+					enableBrandLevelRappel: false
 				},
 				FocForm:{
 					hasFocPriceCondition: false,
@@ -3731,6 +3732,7 @@ sap.ui.define([
 				context.getModel().setProperty("FreeGoodsOther", focBonus, context);
 			}
 		}
+
 
     });
 });
