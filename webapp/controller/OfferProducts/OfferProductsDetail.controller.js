@@ -375,7 +375,9 @@ sap.ui.define([
 			const product = event.getParameter('data');
 			this.setUOM(product.UnitPerPack);
 			this.setMultiInputDistributors(product.Custom_String_6);
-			
+			if (this.sCountryCode === 'ES') {
+				this.onAddContractLinks();
+			}
 		},
 
 		setMultiInputDistributors: function (distributorIds) {
