@@ -497,11 +497,12 @@ sap.ui.define([
 
 					// Text fields only
 					aSearchFilters.push(
-						new Filter(
-							"InstituteName",
-							FilterOperator.Contains,
-							sValue
-						)
+						new Filter({
+							path: "InstituteName",
+							operator: FilterOperator.Contains,
+							value1: sValue,
+							caseSensitive: false
+						})
 					);
 
 				}
