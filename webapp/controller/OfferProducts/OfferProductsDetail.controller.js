@@ -2957,7 +2957,13 @@ sap.ui.define([
                     mainPrice = 0;
                 }
 
-                if(mainPriceCondition.ConditionType === "Rental" || mainPriceCondition.ConditionType === "PVL")
+				if(mainPriceCondition.ConditionType === "PVL")
+                {
+					mainPrice = mainPriceCondition.NetPriceWithoutTax;     
+
+                }
+
+                if(mainPriceCondition.ConditionType === "Rental")
                 {
                     let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
 					let packFactor =  oProductPrice.PACKFACTOR;
