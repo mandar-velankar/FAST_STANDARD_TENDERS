@@ -105,7 +105,7 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecree}"
-                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','PVL'].includes(${ConditionType})}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
                     >
                         <form:fields>
                             <Input
@@ -117,7 +117,7 @@
                                 ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','PVL'].includes(${ConditionType})}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
                             />
                         </form:fields>
                     </form:FormElement>
@@ -138,13 +138,13 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeApplies}"
-                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','DescuentoEspecial','PVL'].includes(${ConditionType})}" 
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}" 
                     >
                         <form:fields>
                             <Select
                                 selectedKey="{= ${RoyalDecree} ? ${RoyalDecree} : 'No'}"
                                 enabled="false"
-                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','DescuentoEspecial','PVL'].includes(${ConditionType})}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}"
                             >
                                 <items>
                                     <core:Item
@@ -176,27 +176,27 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceBeforeRC}"
-                        visible="{= ${ConditionType} === 'DescuentoComercial'}"
+                        visible="{= ${ConditionType} === 'DescuentoComercial' || ${ConditionType} === 'PVL'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['NetPriceWithoutTax', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${ConditionType} === 'DescuentoComercial'}"
+                                visible="{= ${ConditionType} === 'DescuentoComercial' || ${ConditionType} === 'PVL'}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeValue}"
-                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; !['Rental','DescuentoEspecial','PVL'].includes(${ConditionType})}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['RoyalDecreeValue', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; !['Rental','DescuentoEspecial','PVL'].includes(${ConditionType})}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}"
                             />
                         </form:fields>
                     </form:FormElement>
@@ -227,25 +227,25 @@
                             />
                         </form:fields>
                     </form:FormElement>
-                    <form:FormElement label="{i18n>ESPricingFragment.Tax}" visible="{= ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'PVL'}">
+                    <form:FormElement label="{i18n>ESPricingFragment.Tax}" visible="{= ${ConditionType} !== 'Rental'}">
                         <form:fields>
                             <Input
                                 value="{ parts: ['Tax', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible="{= ${ConditionType} !== 'Rental'}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
-                        label="{i18n>ESPricingFragment.NetPriceWtax}" visible="{= ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'PVL'}"
+                        label="{i18n>ESPricingFragment.NetPriceWtax}" visible="{= ${ConditionType} !== 'Rental'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['NetPriceWithTax', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'PVL'}"
+                                visible="{= ${ConditionType} !== 'Rental'}"
                             />
                         </form:fields>
                     </form:FormElement>
