@@ -3477,20 +3477,9 @@ sap.ui.define([
 
 		setPVLPricingFormPendingChanges: function (form) {
 			const oDefaultModel = form.getModel();
-			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
-			
-            let packFactor =  oProductPrice.PACKFACTOR;
-            let uom = oProductPrice.UnitPerPack;
-			const isUnit = uom === "Unit";
 
 			const pvlPricingObj = oBoundContext.getObject();
-
-			const basePrice = pvlPricingObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPricingObj.ConfidentialPrice) : parseFloat(pvlPricingObj.PVL);
-			const correctPrice = basePrice;
-
-			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
-			pvlPricingObj.NetPriceWithoutTax = correctPrice;
 
 			oDefaultModel.resetChanges();
 
