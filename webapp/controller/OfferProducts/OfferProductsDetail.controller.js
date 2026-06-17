@@ -1715,8 +1715,10 @@ sap.ui.define([
 			const priceCondition = event.getParameter('data');
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
-			let classification = this.getModel("ui").getProperty("/Classification");
-			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+			if(this.sCountryCode === 'ES'){
+				let classification = this.getModel("ui").getProperty("/Classification");
+				if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+			}
 		},
 
 
@@ -1781,8 +1783,11 @@ sap.ui.define([
 			if(this.sCountryCode === 'ES' && context) this.updatePriceConditionForm(priceCondition?.ConditionType);
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
-			let classification = this.getModel("ui").getProperty("/Classification");
-			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+			if(this.sCountryCode === 'ES'){
+				let classification = this.getModel("ui").getProperty("/Classification");
+				if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+				this.calculatePVLNetPriceWithandWithoutTax(priceCondition, context);
+			}
 		},
 
 		setMainPriceCondition: function(priceCondition){
@@ -2977,6 +2982,20 @@ sap.ui.define([
                 }
             }            
             bindingContext.getModel().setProperty("MainPrice", mainPrice, bindingContext);
+        },
+
+		calculatePVLNetPriceWithandWithoutTax: function(pvlPriceConditionObj, bindingContext){
+            //re-calculating the PVL after PriceCondition Change
+			const basePrice = pvlPriceConditionObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPriceConditionObj.ConfidentialPrice) : parseFloat(pvlPriceConditionObj.PVL);
+			const correctPrice = basePrice;
+
+			let netPriceWithoutTax = correctPrice * (1 - pvlPriceConditionObj.RoyalDecreePercentage_1);
+			netPriceWithoutTax = this.formatter.roundToSixDecimalPlaces(netPriceWithoutTax);
+			let netPriceWithTax = netPriceWithoutTax * (1 + parseFloat(pvlPriceConditionObj.Tax));
+			netPriceWithTax = this.formatter.roundToSixDecimalPlaces(netPriceWithTax);
+             
+			bindingContext.getModel().setProperty("NetPriceWithoutTax", netPriceWithoutTax, bindingContext);
+			bindingContext.getModel().setProperty("NetPriceWithTax", netPriceWithTax, bindingContext);
         },
 
 		_onSubmitChangesRappelFormSuccess: function(res){
