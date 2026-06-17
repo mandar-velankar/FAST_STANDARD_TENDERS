@@ -1715,8 +1715,10 @@ sap.ui.define([
 			const priceCondition = event.getParameter('data');
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
-			let classification = this.getModel("ui").getProperty("/Classification");
-			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+			if(this.sCountryCode === 'ES'){
+				let classification = this.getModel("ui").getProperty("/Classification");
+				if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+			}
 		},
 
 
@@ -1781,8 +1783,11 @@ sap.ui.define([
 			if(this.sCountryCode === 'ES' && context) this.updatePriceConditionForm(priceCondition?.ConditionType);
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
-			let classification = this.getModel("ui").getProperty("/Classification");
-			if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+			if(this.sCountryCode === 'ES'){
+				let classification = this.getModel("ui").getProperty("/Classification");
+				if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+				this.calculatePVLNetPriceWithandWithoutTax(priceCondition, context);
+			}
 		},
 
 		setMainPriceCondition: function(priceCondition){
@@ -2956,7 +2961,13 @@ sap.ui.define([
                     mainPrice = 0;
                 }
 
-                if(mainPriceCondition.ConditionType === "Rental" || mainPriceCondition.ConditionType === "PVL")
+				if(mainPriceCondition.ConditionType === "PVL")
+                {
+					mainPrice = mainPriceCondition.NetPriceWithoutTax;     
+
+                }
+
+                if(mainPriceCondition.ConditionType === "Rental")
                 {
                     let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
 					let packFactor =  oProductPrice.PACKFACTOR;
@@ -2971,6 +2982,20 @@ sap.ui.define([
                 }
             }            
             bindingContext.getModel().setProperty("MainPrice", mainPrice, bindingContext);
+        },
+
+		calculatePVLNetPriceWithandWithoutTax: function(pvlPriceConditionObj, bindingContext){
+            //re-calculating the PVL after PriceCondition Change
+			const basePrice = pvlPriceConditionObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPriceConditionObj.ConfidentialPrice) : parseFloat(pvlPriceConditionObj.PVL);
+			const correctPrice = basePrice;
+
+			let netPriceWithoutTax = correctPrice * (1 - pvlPriceConditionObj.RoyalDecreePercentage_1);
+			netPriceWithoutTax = this.formatter.roundToSixDecimalPlaces(netPriceWithoutTax);
+			let netPriceWithTax = netPriceWithoutTax * (1 + parseFloat(pvlPriceConditionObj.Tax));
+			netPriceWithTax = this.formatter.roundToSixDecimalPlaces(netPriceWithTax);
+             
+			bindingContext.getModel().setProperty("NetPriceWithoutTax", netPriceWithoutTax, bindingContext);
+			bindingContext.getModel().setProperty("NetPriceWithTax", netPriceWithTax, bindingContext);
         },
 
 		_onSubmitChangesRappelFormSuccess: function(res){
@@ -3471,20 +3496,9 @@ sap.ui.define([
 
 		setPVLPricingFormPendingChanges: function (form) {
 			const oDefaultModel = form.getModel();
-			let oProductPrice = this.getModel("st").getProperty("/OfferProduct");
 			const oBoundContext = form.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext();
-			
-            let packFactor =  oProductPrice.PACKFACTOR;
-            let uom = oProductPrice.UnitPerPack;
-			const isUnit = uom === "Unit";
 
 			const pvlPricingObj = oBoundContext.getObject();
-
-			const basePrice = pvlPricingObj.ConfidentialDiscount !== 0 ? parseFloat(pvlPricingObj.ConfidentialPrice) : parseFloat(pvlPricingObj.PVL);
-			const correctPrice = basePrice;
-
-			pvlPricingObj.NetPriceWithTax = Number((correctPrice * (1 + Number(pvlPricingObj.Tax))).toFixed(2));
-			pvlPricingObj.NetPriceWithoutTax = correctPrice;
 
 			oDefaultModel.resetChanges();
 
