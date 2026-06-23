@@ -119,17 +119,24 @@
                                 enabled="false"
                                 visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
                             />
+                            <Button
+                                icon="sap-icon://message-information"
+                                type="Transparent"
+                                class="sapUiTinyMarginBegin"
+                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${PriceConditionCode} === 'YP11' &amp;&amp; (!${RoyalDecreePercentage_1} || Number(${RoyalDecreePercentage_1}) === 0) }"
+                                press=".onRoyalDecreeInfoPress"
+                            />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.royalDecreeIncl}"
-                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${RoyalDecreePercentage_1} > 0}"
+                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; (${PriceConditionCode} === 'YP11' || ${RoyalDecreePercentage_1} > 0)}"
                     >
                         <form:fields>
                             <CheckBox
                                 enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                 selected="{RoyalDecreeIncl}"
-                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${RoyalDecreePercentage_1} > 0}"
+                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; (${PriceConditionCode} === 'YP11' || ${RoyalDecreePercentage_1} > 0)}"
                                 select=".onPricingFormLiveChange($event, 'PrecioNeto')"
                             />
                             <!-- visible="{= ${RoyalDecree} === 'No' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
