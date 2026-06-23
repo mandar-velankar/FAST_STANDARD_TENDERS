@@ -3744,6 +3744,18 @@ sap.ui.define([
 				
 				context.getModel().setProperty("FreeGoodsOther", focBonus, context);
 			}
+		},
+
+		onRoyalDecreeInfoPress: function (event) {
+			if (!this._oRoyalDecreePopover) {
+				this._oRoyalDecreePopover = sap.ui.xmlfragment(
+					"com.bayer.tender.statenderapp.view.offer.fragments.RoyalDecreeInfoPopover",
+					this
+				);
+				this.getView().addDependent(this._oRoyalDecreePopover);
+			}
+
+			this._oRoyalDecreePopover.openBy(event.getSource());
 		}
 
     });
