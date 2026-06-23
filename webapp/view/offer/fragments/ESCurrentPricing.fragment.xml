@@ -121,13 +121,13 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.royalDecreeIncl}"
-                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${YD06} > 0}"
+                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; (${YP11} > 0 || ${YD06} > 0) }"
                     >
                         <form:fields>
                             <CheckBox
                                 enabled="false"
                                 selected="{RoyalDecreeIncl}"
-                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${YD06} > 0}"
+                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; (${YP11} > 0 || ${YD06} > 0) }"
                             />
                         </form:fields>
                     </form:FormElement>
