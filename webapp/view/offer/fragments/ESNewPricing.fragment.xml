@@ -123,7 +123,7 @@
                                 icon="sap-icon://message-information"
                                 type="Transparent"
                                 class="sapUiTinyMarginBegin"
-                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; ${IsYP11WithoutRD} &amp;&amp; (!${RoyalDecreePercentage_1} || Number(${RoyalDecreePercentage_1}) === 0) }"
+                                visible="{= ${IsYP11WithoutRD} &amp;&amp; (!${RoyalDecreePercentage_1} || Number(${RoyalDecreePercentage_1}) === 0) }"
                                 press=".onRoyalDecreeInfoPress"
                             />
                         </form:fields>
