@@ -69,6 +69,14 @@ sap.ui.define([
             this.OfferID = OfferID;
         },
 
+		getProductCode: function () {
+			return this.ProductCode;
+		},
+
+		setProductCode: function (ProductCode) {
+            this.ProductCode = ProductCode;
+        },
+
 		getTenderID: function(){
 			return this.tenderID;
 		},
