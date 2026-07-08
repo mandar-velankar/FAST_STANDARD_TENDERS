@@ -17,7 +17,8 @@ sap.ui.define([
 	"sap/m/Column",
 	"sap/ui/unified/FileUploaderParameter",
 	"sap/ui/core/BusyIndicator",
-	"sap/ui/core/Item"
+	"sap/ui/core/Item",
+	"../../service/StandardSingletonService",
 ], function (
 		BaseController, 
 		JSONModel, 
@@ -37,7 +38,8 @@ sap.ui.define([
 		Column,
 		FileUploaderParameter,
 	    BusyIndicator,
-		Item
+		Item,
+		StandardSingletonService
 	) {
 	"use strict";
 
@@ -291,6 +293,9 @@ sap.ui.define([
 				this.byId("idOfferProductsTable").removeSelections();
 				this.getOwnerComponent().getEventBus().publish("PriceConditionFormChannel", "UpdatePriceConditionForm");
 				this.getOwnerComponent().getEventBus().publish("OfferProductsDetailChannel", "UpdateOfferProductsDetailForm");
+				this.getModel('st').setProperty("/SelectedProductCode", selectedProductCode);
+				StandardSingletonService.setProductCode(selectedProductCode);
+
 				//this.byId("idOfferProductsTable").getBinding("items").refresh();
 			}
 			else{
