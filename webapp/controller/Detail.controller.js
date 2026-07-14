@@ -196,6 +196,8 @@ sap.ui.define([
 
 			// Set country immediately
 			this.getModel('st').setProperty("/SelectedCountry", this.sCountryCode);
+			this.getModel('st').setProperty("/SelectedOfferID", this.sOfferId);
+			this.getModel('st').setProperty("/SelectedProductCode", this.productId);
 
 			//Setup singleton data
 			this.setupSingletonData();
@@ -226,6 +228,9 @@ sap.ui.define([
 					// Set singleton data
 					StandardSingletonService.setInstituteID(selectedOffer?.QuotationInstituteID);
 					StandardSingletonService.setBU(selectedOfferProduct?.BU);
+					StandardSingletonService.setOfferID(this.sOfferId);
+					StandardSingletonService.setProductCode(this.productId);
+					this.getModel('st').setProperty("/SelectedBU", selectedOfferProduct?.BU);
 				}
 		
 				// Fetch country distributors (parallel with above)
