@@ -30,10 +30,7 @@
                         <Text text=">=" wrapping="false" class="sapUiSmallMarginTop"/>
                         <Input value="{st>Volume}" fieldWidth="80%" enabled="false"/>
                     </HBox>
-                    <Input value="{
-									parts: [ 'st>Discount', 'st>/SelectedCountry'],
-									type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'
-								}" enabled="false" fieldWidth="80%" />
+                    <Input value="{st>Discount}%" enabled="false" fieldWidth="80%" />
                     <Input value="{parts:['st>Tax', 'st>/SelectedCountry'], type:'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}" enabled="false" fieldWidth="80%"/>
                     <Input value="{path:'st>NetPriceWithoutTax', type:'sap.ui.model.type.Float', formatOptions: { maxFractionDigits: 2, minFractionDigits: 2, groupingEnabled: false, groupingSeparator: ',', decimalSeparator: '.'}}" enabled="false" fieldWidth="80%" type="Number"/>
                     <Input value="{path:'st>NetPriceWithTax', type:'sap.ui.model.type.Float', formatOptions: { maxFractionDigits: 2, minFractionDigits: 2, groupingEnabled: false, groupingSeparator: ',', decimalSeparator: '.'}}" enabled="false" fieldWidth="80%" type="Number"/>

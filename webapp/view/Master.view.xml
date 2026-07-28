@@ -99,27 +99,36 @@
 					</Select>
 
 					<Label
-						text="Institute"
+						text="Institute Type"
+						labelFor="idSelectInstituteType"
+					/>
+					<Select 
+						id="idSelectInstituteType"
+						selectedKey="{st>/SelectedInstituteType}"
+						change=".onChangeCountryInstituteType">
+						<core:Item key="{ChannelName}" text="{ChannelName}"/>
+					</Select>
+
+					<Label
+						text="Institute Name"
 						labelFor="idSelectInstitute"
 					/>
-					<ComboBox
+					<Input
 						id="idSelectInstitute"
-						selectedKey="{st>/SelectedInstituteIDFilter}"
-						showSecondaryValues= "true"
-						filterSecondaryValues="true"
-						change=".setFilter"
-					>
-						<core:ListItem
-							text="{InstituteName}"
-							key="{InstituteID}"
-							additionalText="{CustomerID}"
-						/>
-					</ComboBox>
+						width="12rem"
+						value="{st>/SelectedInstituteName}"
+						showValueHelp="true"
+						valueHelpRequest=".onInstituteValueHelpRequest"
+						change=".onInstituteInputChange"
+						editable="true"/>
 
 					<ToolbarSpacer/>
 					<Button text="{i18n>SalesReport}" visible="{= ${st>/SelectedCountry} === 'PL'}" press=".onOpenSalesReportScreen"/>
 					<SearchField id="idSearch" search=".setFilter" width="17.5rem"/>
-					<Button text ="{= ${st>/SelectedCountry} === 'NL'? 'New Price Request' :'New Tender'}" icon = "sap-icon://add" press=".onOpenCreateTenderDialog"/>
+					<Button
+						text="{path: 'st>/SelectedCountry', formatter: '.formatCreateTenderButtonText'}"
+						icon="sap-icon://add"
+						press=".onOpenCreateTenderDialog" />
 					<Button icon="sap-icon://sort" text="" press=".onOpenViewSettings"/>
 					<Button icon="sap-icon://download" text="Download CSV" press=".onDownloadZuelligExtractCSV" visible="{= ${accessControl>/standardtenderAccess/ZuelligExtract}}"/>
 					<Button icon="sap-icon://download" text="Extract Offers" press=".onDownloadExtractOffers" visible="{= ${st>/SelectedCountry} === 'NL'}"/>

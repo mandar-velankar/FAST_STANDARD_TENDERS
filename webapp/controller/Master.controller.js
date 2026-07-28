@@ -118,7 +118,7 @@ sap.ui.define([
 
 			this.stState = this.getOwnerComponent().getModel("st");
 			this.getOwnerComponent().getEventBus().subscribe("MasterTableUpdateChannel", "MasterTableUpdateEvent", this.handleUpdateMasterTable, this);
-			this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._bindInstituteItems, this);
+			//this.getOwnerComponent().getEventBus().subscribe("InstitutesFilterUpdateChannel", "InstitutesFilterUpdateEvent", this._bindInstituteItems, this);
 		},
 
 		onCountriesReceived: async function (oEvent) {
@@ -140,11 +140,10 @@ sap.ui.define([
 			// 		caseSensitive: false
 			// 	}));
 			// }
-
 			this._bindBrandItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
-			this._bindInstituteItems();
+			this._bindInstituteTypes();
 			this.onLanguageChange();
 			// this.setFilter(oEvent);
 			const userInfo = await this.stState.getService().getUserInfo(userID);
@@ -211,21 +210,32 @@ sap.ui.define([
 
 		_bindBrandItems: function (sCountryCode) {
 			const oSelectBrands = this.byId("idSlctBrand");
-			oSelectBrands?.bindItems({
-				path: "/CountryTenderBrands",
-				filters: [
-					new Filter("COUNTRYCODE", FilterOperator.EQ, sCountryCode)
-				],
-				sorter: new Sorter({
-					path: 'BRANDNAME',
-					descending: false
-				}),
-				template: new sap.ui.core.Item({
-					key: "{BRANDID}",
-					text: "{BRANDNAME}"
-				}),
-				templateShareable: true
-			});
+
+			if (!oSelectBrands) return;
+
+			let oBinding = oSelectBrands.getBinding("items");
+
+			// First time: create binding
+			if (!oBinding) {
+				oSelectBrands.bindItems({
+					path: "/CountryTenderBrands",
+					sorter: new sap.ui.model.Sorter("BRANDNAME", false),
+					template: new sap.ui.core.Item({
+						key: "{BRANDID}",
+						text: "{BRANDNAME}"
+					}),
+					templateShareable: true
+				});
+
+				oBinding = oSelectBrands.getBinding("items");
+			}
+
+			// Only update filter (FAST, no rebind)
+			const aFilters = [
+				new sap.ui.model.Filter("COUNTRYCODE", sap.ui.model.FilterOperator.EQ, sCountryCode)
+			];
+
+			oBinding.filter(aFilters);
 		},
 
 		_bindStatusses: function (sCountryCode) {
@@ -282,22 +292,23 @@ sap.ui.define([
 			});
 		},
 
-		_bindInstituteItems: function () {
-			const oSelectInstitute = this.byId("idSelectInstitute");
-			if (oSelectInstitute) {
-				oSelectInstitute.destroyItems();
-				oSelectInstitute.destroyAggregation();
+		_bindInstituteTypes: function () {
+			const oSelectInstituteType = this.byId("idSelectInstituteType");
+			if (oSelectInstituteType) {
+				oSelectInstituteType.destroyItems();
+				oSelectInstituteType.destroyAggregation();
 				// Force the loadItems event manually
-				this.onLoadInstitutes({ getSource: () => oSelectInstitute });
+				this.onLoadInstituteTypes({ getSource: () => oSelectInstituteType });
 			}
 		},
 
-		onLoadInstitutes: function (oEvent) {
-            const oComboBox = oEvent.getSource();
+		onLoadInstituteTypes: function (oEvent) {
+            const oSelect = oEvent.getSource();
             const oModel = this.getView().getModel(); // Get your OData V2 model
-            const sPath = "/PT_TMINST"; // The path to your entity set
+            const sPath = "/CountryInstituteTypeView"; // The path to your entity set
 			const controller = this;
-			const selectedInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter") || "All";
+			const selectedInstituteType = this.getModel('st').getProperty("/SelectedInstituteType") || "All";
+			this.getModel('st').setProperty("/SelectedInstituteIDFilter", "All");
 
             const aFilters = [
 				new Filter({
@@ -308,42 +319,249 @@ sap.ui.define([
 				})
 			];
 
-            // --- Get Sorters ---
-            const aSorters = [new Sorter("InstituteName", false)]; // Sort by Name ascending
             // --- Perform Manual OData Read ---
             oModel.read(sPath, {
-                sorters: aSorters,
                 filters: aFilters,
                 success: function (oData) {
 					
                     if (oData && oData.results) {
 						oData.results.unshift({
-							InstituteID: "All",
-							InstituteName: "All",
-							CustomerID: ""
+							ChannelName: "All",
+							ChannelCountry: controller.countryCode,
+							CountryCode: controller.countryCode
 						})
                         oData.results.forEach(function (oItemData) {
                             // Check if item already exists (important to avoid duplicates)
-                            var bExists = oComboBox.getItems().some(function(oExistingItem) {
-                                return oExistingItem.getKey() === oItemData.InstituteID;
+                            var bExists = oSelect.getItems().some(function(oExistingItem) {
+                                return oExistingItem.getKey() === oItemData.ChannelName;
                             });
 
                             if (!bExists) {
-                                oComboBox.addItem(new sap.ui.core.ListItem({
-                                    key: oItemData.InstituteID,
-                                    text: oItemData.InstituteName,
-									additionalText: oItemData.CustomerID
+                                oSelect.addItem(new sap.ui.core.ListItem({
+                                    key: oItemData.ChannelName,
+                                    text: oItemData.ChannelName
                                 }));
                             }
                         });
                     }
-					controller.getView().getModel('st').setProperty("/SelectedInstituteIDFilter", selectedInstituteID);
+					controller.getView().getModel('st').setProperty("/SelectedInstituteType", selectedInstituteType);
                 }.bind(this),
                 error: function (oError) {
                     console.error("Error loading more items:", oError);
                 }
             });
-        }, 
+        },
+		
+		onInstituteInputChange: function (oEvent) {
+			const sValue = oEvent.getParameter("value");
+			const oState = this.getModel("st");
+			// user cleared input
+			if (!sValue) {
+				oState.setProperty("/SelectedInstituteIDFilter", "All");
+				oState.setProperty("/SelectedInstituteName", "All");
+				this.setFilter();
+				return;
+			}
+		},
+
+		onChangeCountryInstituteType: function () {
+			const oStateModel = this.getModel("st");
+
+			// Reset selected institute when type changes
+			oStateModel.setProperty("/SelectedInstituteIDFilter", "All");
+			oStateModel.setProperty("/SelectedInstituteName", "");
+
+			// Clear input field
+			this.byId("idSelectInstitute").setValue("");
+
+			// Refresh master table
+			this.setFilter();
+
+			// If dialog already exists refresh its filters
+			if (this.byId("idSelectInstituteDialog")) {
+
+				const aFilters = [
+					new Filter("CountryCode", FilterOperator.EQ, this.countryCode)
+				];
+
+				const selectedInstituteType = oStateModel.getProperty("/SelectedInstituteType");
+
+				if (selectedInstituteType && selectedInstituteType !== "All") {
+
+					aFilters.push(
+						new Filter("InstituteType",FilterOperator.EQ, selectedInstituteType)
+					);
+				}
+
+				this.byId("idSelectInstituteDialog").getBinding("items")?.filter(aFilters);
+			}
+		},
+
+		onInstituteValueHelpRequest: function (oEvent) {
+			this._oInstituteInput = oEvent.getSource();
+			this.getInstituteDialog().then(this.onInstituteDialogLoaded.bind(this));
+		},
+
+
+		getInstituteDialog: function () {
+			const oView = this.getView();
+
+			if (!this.dialogInstitute) {
+				this.dialogInstitute = Fragment.load({
+					id: oView.getId(),
+					name: "com.bayer.tender.statenderapp.view.tender.fragments.SelectInstitute",
+					controller: this
+				}).then(function (oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			return this.dialogInstitute;
+		},
+
+
+		onInstituteDialogLoaded: function (oDialog) {
+			const oStateModel =	this.getView().getModel("st");
+
+			let aFilters = [
+				new Filter("CountryCode", FilterOperator.EQ, this.countryCode)
+			];
+
+			const selectedInstituteType = oStateModel.getProperty("/SelectedInstituteType");
+
+			if (selectedInstituteType && selectedInstituteType !== "All") {
+				aFilters.push(
+					new Filter("InstituteType", FilterOperator.EQ, selectedInstituteType)
+				);
+			}
+
+			oDialog.getBinding("items")?.filter(aFilters);
+			oDialog.open();
+		},
+
+
+		handleInstituteSearch: function (oEvent) {
+			const sValue = oEvent.getParameter("value");
+			const oStateModel = this.getView().getModel("st");
+
+			const aFilters = [
+				new Filter(
+					"CountryCode",
+					FilterOperator.EQ,
+					this.countryCode
+				)
+			];
+
+			const selectedInstituteType =
+				oStateModel.getProperty("/SelectedInstituteType");
+
+			if (
+				selectedInstituteType &&
+				selectedInstituteType !== "All"
+			) {
+				aFilters.push(
+					new Filter(
+						"InstituteType",
+						FilterOperator.EQ,
+						selectedInstituteType
+					)
+				);
+			}
+
+			// Search filters
+			if (sValue) {
+
+				let aSearchFilters = [];
+
+				// If value is numeric → search numeric fields only
+				if (!isNaN(Number(sValue))) {
+
+					aSearchFilters.push(
+						new Filter(
+							"CustomerID",
+							FilterOperator.EQ,
+							Number(sValue)
+						)
+					);
+
+					aSearchFilters.push(
+						new Filter(
+							"InstituteID",
+							FilterOperator.EQ,
+							Number(sValue)
+						)
+					);
+
+				} else {
+
+					// Text fields only
+					aSearchFilters.push(
+						new Filter({
+							path: "InstituteName",
+							operator: FilterOperator.Contains,
+							value1: sValue,
+							caseSensitive: false
+						})
+					);
+
+				}
+
+				// OR condition
+				aFilters.push(
+					new Filter({
+						filters: aSearchFilters,
+						and: false
+					})
+				);
+			}
+
+			oEvent.getSource().getBinding("items").filter(aFilters);
+		},
+
+		handleInstituteConfirm: function (oEvent) {
+			const oSelectedItem = oEvent.getParameter("selectedItem");
+			const oStateModel = this.getModel("st");
+
+			if (!oSelectedItem) {
+				oState.setProperty("/SelectedInstituteIDFilter", "All");
+        		oState.setProperty("/SelectedInstituteName", "");
+				this.setFilter();
+				return;
+			}
+
+			const oInstitute = oSelectedItem.getBindingContext().getObject();
+			oStateModel.setProperty("/SelectedInstituteIDFilter", oInstitute.InstituteID);
+			oStateModel.setProperty("/SelectedInstituteName", oInstitute.InstituteName);
+
+			this._oInstituteInput.setValue(oInstitute.InstituteName);
+
+			//refresh master table
+			this.setFilter();
+		},
+
+		getCountryDefaultSorters: function () {
+			switch (this.countryCode) {
+				case "PL":
+					return [
+						new Sorter({
+							path: 'BidDueDate', 
+							descending: true
+						})
+					];
+				default:
+					return [
+						new Sorter({
+							path: 'TenderID', 
+							descending: true
+						}),
+						new Sorter({
+							path: 'OfferID', 
+							descending: true
+						})
+					];
+			}
+		},
 
 		getCountryDefaultSorters: function () {
 			switch (this.countryCode) {
@@ -1039,17 +1257,30 @@ sap.ui.define([
 			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
 			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
-				const brandsInOffer = await this.stState.getService().getBrandsInOffer(sBrandId, sCountryCode)
-				const filteredBrandsInOffer = sCountryCode === 'TW' ? brandsInOffer.filter(offerID => !offerID.includes('HIST')) : brandsInOffer;
-				const filters = [];
-				for(let offerID in filteredBrandsInOffer){
-					filters.push(new Filter({
-						path: "OfferID",
-						operator: FilterOperator.EQ,
-						value1: brandsInOffer[offerID]
+				if (sCountryCode === 'TW') {
+					const filters = [
+						new Filter({
+							path: "OfferID",
+							operator: FilterOperator.NotContains,
+							value1: 'HIST'
+						}),
+						new Filter({
+							path: "OfferBrandIDs",
+							operator: FilterOperator.Contains,
+							value1: sBrandId,
+							caseSensitive: false
+						})
+					];
+
+					this.andFilters.push(new Filter(filters, true));
+				}else {
+					this.andFilters.push(new Filter({
+						path: "OfferBrandIDs",
+						operator: FilterOperator.Contains,
+						value1: sBrandId,
+						caseSensitive: false
 					}));
 				}
-				this.andFilters.push(new Filter(filters, false));
 			}
 
 			// Status 
@@ -1067,6 +1298,18 @@ sap.ui.define([
 				}));
 			}
 
+			const oSelectedInstituteType = this.byId("idSelectInstituteType");
+			// oSelectStatus.getBinding("items").filter([oFilterStatus]);
+			const instituteType = oSelectedInstituteType.getSelectedItem()?.getKey();
+			if (instituteType && instituteType.toLowerCase() !== 'all') {
+				this.andFilters.push(new Filter({
+					path: "InstituteType",
+					operator: FilterOperator.Contains,
+					value1: instituteType,
+					caseSensitive: false
+				}));
+			}
+
 
 			if (this.andFilters.length > 0) {
 				this._oList.getBinding('items').aApplicationFilters = [];
@@ -1078,9 +1321,9 @@ sap.ui.define([
 				}
 
 				// Institute 
-				const oSelectedInstitute = this.byId("idSelectInstitute");
-				const sInstituteID = oSelectedInstitute.getSelectedItem()?.getKey() || this.getModel('st').getProperty("/SelectedInstituteIDFilter");
-				if (sInstituteID && sInstituteID.toLowerCase() !== 'all') {
+				//const oSelectedInstitute = this.byId("idSelectInstitute");
+				const sInstituteID = this.getModel('st').getProperty("/SelectedInstituteIDFilter");
+				if (sInstituteID && String(sInstituteID).toLowerCase() !== "all") {
 					this.andFilters.push(new Filter({
 						path: "InstituteID",
 						operator: FilterOperator.EQ,
@@ -1161,8 +1404,30 @@ sap.ui.define([
 					return false;
 				}
 			}
-			return true
+			return true;
+		},
+		
+		formatCreateTenderButtonText: function(sCountry) {
+			const oBundle = this?.getView()?.getModel("i18n")?.getResourceBundle();
+
+			if (!oBundle) {
+				return "New Tender";
+			}
+
+			if (!sCountry) {
+				return oBundle.getText("NewTender");
+			}
+
+			switch (sCountry) {
+				case "NL":
+					return oBundle.getText("NLNewTender");
+				case "ES":
+					return oBundle.getText("ESNewTender");
+				default:
+					return oBundle.getText("NewTender");
+			}
 		}
+
 	});
 
 });

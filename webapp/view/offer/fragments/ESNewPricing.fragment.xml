@@ -72,7 +72,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['AdditionalDiscount', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'AdditionalDiscount' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
                                 visible="{= ${ConditionType} === 'PrecioNeto'}"
@@ -85,7 +90,12 @@
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['ESDiscount', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'ESDiscount' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'DescuentoComercial' }"
                                 liveChange=".onPricingFormLiveChange($event, 'DescuentoComercial')"
@@ -95,26 +105,39 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecree}"
-                        visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'Rental'}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
                     >
                         <form:fields>
                             <Input
-                                value="{ parts: ['RoyalDecreePercentage_1', 'CountryCode'], 
+                                value="{ parts: [
+                                    { path: 'RoyalDecreePercentage_1' },
+                                    { path: 'CountryCode' },
+                                    { value: '3' },
+                                    { value: '3' }
+                                ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'Rental'}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} !== 'Rental'}"
+                            />
+                            <Button
+                                icon="sap-icon://message-information"
+                                type="Transparent"
+                                class="sapUiTinyMarginBegin"
+                                visible="{= ${IsYP11WithoutRD} &amp;&amp; (!${RoyalDecreePercentage_1} || Number(${RoyalDecreePercentage_1}) === 0) }"
+                                press=".onRoyalDecreeInfoPress"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.royalDecreeIncl}"
-                        visible="false"
+                        visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; (${IsYP11WithoutRD} || ${RoyalDecreePercentage_1} > 0)}"
                     >
                         <form:fields>
                             <CheckBox
-                                enabled="false"
+                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                 selected="{RoyalDecreeIncl}"
-                                visible="false"
+                                visible="{= ${ConditionType} === 'PrecioNeto' &amp;&amp; (${IsYP11WithoutRD} || ${RoyalDecreePercentage_1} > 0)}"
+                                select=".onPricingFormLiveChange($event, 'PrecioNeto')"
                             />
                             <!-- visible="{= ${RoyalDecree} === 'No' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                  select=".onPricingFormLiveChange($event, 'PrecioNeto')" -->
@@ -122,13 +145,13 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeApplies}"
-                        visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}" 
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}" 
                     >
                         <form:fields>
                             <Select
                                 selectedKey="{= ${RoyalDecree} ? ${RoyalDecree} : 'No'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}"
                             >
                                 <items>
                                     <core:Item
@@ -145,7 +168,7 @@
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceBeforeRC}"
-                        visible="{= ${ConditionType} === 'PrecioNeto' || ${ConditionType} === 'PVL'}"
+                        visible="{= ${ConditionType} === 'PrecioNeto'}"
                     >
                         <form:fields>
                             <Input
@@ -154,46 +177,46 @@
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                                 liveChange=".onPricingFormLiveChange($event, 'PrecioNeto')"
-                                visible="{= ${ConditionType} === 'PrecioNeto' || ${ConditionType} === 'PVL'}"
+                                visible="{= ${ConditionType} === 'PrecioNeto'}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceBeforeRC}"
-                        visible="{= ${ConditionType} === 'DescuentoComercial'}"
+                        visible="{= ${ConditionType} === 'DescuentoComercial' || ${ConditionType} === 'PVL'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['NetPriceWithoutTax', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= ${ConditionType} === 'DescuentoComercial'}"
+                                visible="{= ${ConditionType} === 'DescuentoComercial' || ${ConditionType} === 'PVL'}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.RoyalDecreeValue}"
-                        visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['RoyalDecreeValue', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; ${ConditionType} !== 'Rental' &amp;&amp; ${ConditionType} !== 'DescuentoEspecial'}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; Number(${RoyalDecreeValue}) > 0 &amp;&amp; !['Rental','DescuentoEspecial'].includes(${ConditionType})}"
                             />
                         </form:fields>
                     </form:FormElement>
                     <form:FormElement
                         label="{i18n>ESPricingFragment.NetPriceAfterRC}"
-                        visible="{= !${RoyalDecreeIncl} &amp;&amp; (${ConditionType} === 'PrecioNeto' || ${ConditionType} === 'PVL')}"
+                        visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                     >
                         <form:fields>
                             <Input
                                 value="{ parts: ['NetPriceWithoutTaxAfterDeductionRD', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
                                 enabled="false"
-                                visible="{= !${RoyalDecreeIncl} &amp;&amp; (${ConditionType} === 'PrecioNeto' || ${ConditionType} === 'PVL')}"
+                                visible="{= ${RoyalDecree} === 'Yes' &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
                             />
                         </form:fields>
                     </form:FormElement>

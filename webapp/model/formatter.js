@@ -38,6 +38,20 @@ sap.ui.define([
 			return oPercentFormat.format(value);
 		},
 
+		formatPercentageWithFallback: function(value, countryCode, minDecimals, maxDecimals) {
+			if (value === null || value === undefined || value === '') {
+				return '100.000%';
+			}
+			var oPercentFormat = NumberFormat.getPercentInstance({
+				minFractionDigits: minDecimals ?? 3,
+				maxFractionDigits: maxDecimals ?? 3,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			});
+			return oPercentFormat.format(Number(value));
+		},
+
 		formatFloat: function(value){
 			if(!value) return;
 			return floatInstance.format(value);
@@ -313,6 +327,19 @@ sap.ui.define([
 				"NL": ";"
 			}
 			return data.split(separators[countryCode] ? separators[countryCode] : ",").length > 0;
+		},
+
+		floatNoUnit: function(value){
+			let oLocale = new sap.ui.core.Locale("en-US"); //force the same number format for all countries (also if browser language is german, . will be . as decimal)
+			var oNumberFormat = sap.ui.core.format.NumberFormat.getFloatInstance({
+				maxFractionDigits: 2,
+				minFractionDigits: 2,
+				groupingEnabled: true,
+				groupingSeparator: ",",
+				decimalSeparator: "."
+			},oLocale);
+			var oValue = oNumberFormat.format(parseFloat(value));
+			return oValue;
 		}
 	};
 });

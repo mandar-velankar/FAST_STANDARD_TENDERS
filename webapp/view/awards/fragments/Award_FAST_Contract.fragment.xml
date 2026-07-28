@@ -62,7 +62,7 @@
         <!-- RIGHT SIDE: Set All Product Outcome button -->
             <Button
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate} &amp;&amp; !${st>/fastCCMContractId}}"
+                    enabled="{= ${st>/AllAwardProductsHaveOutcome} &amp;&amp; !${st>/AllPriceConditionTypesRental} &amp;&amp; !!${st>/ContractStartDate} &amp;&amp; !!${st>/ContractEndDate} &amp;&amp; !${st>/fastCCMContractId}}"
                     press=".onCreateAllFASTContracts"
                     text="{i18n>CreateAllFASTContracts}"
                     class="sapUiTinyMarginEnd"
@@ -97,7 +97,7 @@
                 enabled="{= !${st>/AllAwardProductsHaveOutcome}}"
             >
                 <menu>
-                    <Menu>
+                    <Menu itemSelected="onMenuSetAllProductWonLostItemSelected">
                         <MenuItem text="Won" />
                         <MenuItem text="Lost" />
                     </Menu>

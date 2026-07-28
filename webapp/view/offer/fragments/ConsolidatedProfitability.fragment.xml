@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" 
+    xmlns:t="sap.ui.table" 
+    xmlns:form="sap.ui.layout.form" xmlns:u="sap.uxap"
+	xmlns:l="sap.ui.layout">
+
+    <Table 
+        id="idTableConsolidatedProductProfitability"
+        inset="false"
+        visible="{access>/tenderAccess/COGS}"
+    >
+        <columns>
+            <Column>
+                <Text text=""/>
+            </Column>
+            <Column>
+                <Text text="{i18n>OfferProductsDetailView.ConsolidatedProfitability.NPV_Gross_Margin}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>OfferProductsDetailView.ConsolidatedProfitability.NPV_Net_Sales}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>OfferProductsDetailView.ConsolidatedProfitability.NPV_COGS}"/>
+            </Column>
+            <Column>
+                <Text text="{i18n>OfferProductsDetailView.ConsolidatedProfitability.NPV_Profitability}"/>
+            </Column>
+        </columns>
+    </Table>
+    
+</core:FragmentDefinition>

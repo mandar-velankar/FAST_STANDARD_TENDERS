@@ -1,0 +1,19 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Popover
+        title="{i18n>ESPricingFragment.royalDecreeInfoTitle}"
+        placement="Auto">
+
+        <VBox class="sapUiSmallMargin">
+            <Text
+                text="{i18n>ESPricingFragment.royalDecreeInfoText}"
+                wrapping="true"
+                renderWhitespace="true"
+            />
+        </VBox>
+
+    </Popover>
+
+</core:FragmentDefinition>
