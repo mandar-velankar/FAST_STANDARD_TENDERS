@@ -413,6 +413,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/AwardedProductForm/editMode`, false);
 				this.cancelPendingChanges(["AwardedProductFormView"], "awardedProduct");
 			}
+			this.stState.getService().invalidateOfferProductCache(this.offerId, this.productId);
 			this.getOwnerComponent().getEventBus().publish("AwardedProductTableUpdateChannel", "AwardedProductTableUpdateEvent");
 			this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
 		},
@@ -1027,7 +1028,7 @@ sap.ui.define([
 
 				// needed to save product information in the ContractInformation table
 				this.getModel("st").setProperty("/SetDistributorAssignedProductCodes", brandProductMultiInputTokens);
-				this.getModel().createEntry('/AwardedOfferDistributors', {
+				this.getModel().createEntry('/v  ', {
 					properties: pendingChange,
 					groupId: "AwardedOfferDistributors"
 				});
