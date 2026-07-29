@@ -61,6 +61,22 @@ sap.ui.define([
             this.BU = BU;
         },
 
+		getOfferID: function () {
+			return this.OfferID;
+		},
+
+		setOfferID: function (OfferID) {
+            this.OfferID = OfferID;
+        },
+
+		getProductCode: function () {
+			return this.ProductCode;
+		},
+
+		setProductCode: function (ProductCode) {
+            this.ProductCode = ProductCode;
+        },
+
 		getTenderID: function(){
 			return this.tenderID;
 		},

@@ -138,6 +138,21 @@ sap.ui.define([
 					}
 				});
 			}).then(data => {
+				const {Classification, CountryCode} = this.getModel('st').getProperty('/SelectedTender');
+				if (!Classification || !CountryCode) this.getModel("ui").setProperty("/WordTemplateCountry", data);
+				if (CountryCode === 'PK') {
+					switch (Classification.toLowerCase().split(' ').join("").trim()) {
+						case "offerof%agediscount":
+							data = data.filter(el => el.name.toLowerCase().split(' ').join('').trim() !== 'ratequotelettertodistributor');
+							break;
+						case "tenderforfixedrate":
+							data = data.filter(el => el.name.toLowerCase().split(' ').join('').trim() !== 'discountlettertodistributor');
+							break;
+						default:
+							break;
+					}
+				}
+
 				this.getModel("ui").setProperty("/WordTemplateCountry", data);
 			});
 		},
