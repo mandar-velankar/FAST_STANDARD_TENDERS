@@ -42,19 +42,53 @@ sap.ui.define([
 			return oOffer;
 		},
 		getOfferProduct: async function (offerID, productCode) {
-			return new Promise((resolve, reject) => {
-					this.model.read("/OfferProductsDetailView", {
-						filters: [
-							new Filter("OfferID", "EQ", offerID),
-							new Filter("ProductCode", "EQ", productCode),
-							new Filter("Active", "EQ", 1),
-							new Filter("LotID", "EQ", 1),
-						],
-						success: function (res) {
-							resolve(res?.results[0])
-						}
-					});
-				})
+			if (!this._offerProductCache) {
+				this._offerProductCache = new Map();
+			}
+
+			const cacheKey = `${offerID}::${productCode}`;
+
+			// If a request for this exact offer/product is already in flight
+			// (or already resolved this session), reuse it instead of firing
+			// a new READ against the backend.
+			if (this._offerProductCache.has(cacheKey)) {
+				return this._offerProductCache.get(cacheKey);
+			}
+
+			const requestPromise = new Promise((resolve, reject) => {
+				this.model.read("/OfferProductsDetailView", {
+					filters: [
+						new Filter("OfferID", "EQ", offerID),
+						new Filter("ProductCode", "EQ", productCode),
+						new Filter("Active", "EQ", 1),
+						new Filter("LotID", "EQ", 1),
+					],
+					success: function (res) {
+						resolve(res?.results[0]);
+					},
+					error: function (err) {
+						// Don't leave a rejected promise cached — allow retry on next call
+						this._offerProductCache.delete(cacheKey);
+						reject(err);
+					}.bind(this)
+				});
+			});
+
+			this._offerProductCache.set(cacheKey, requestPromise);
+			return requestPromise;
+		},
+
+		/**
+		 * Call this whenever the offer product data is saved/changed, so the
+		 * next read reflects the update instead of serving stale cached data.
+		 */
+		invalidateOfferProductCache: function (offerID, productCode) {
+			if (!this._offerProductCache) return;
+			if (offerID && productCode) {
+				this._offerProductCache.delete(`${offerID}::${productCode}`);
+			} else {
+				this._offerProductCache.clear();
+			}
 		},
 		getOfferProducts: async function (offerID) {
 			return new Promise((resolve, reject) => {
