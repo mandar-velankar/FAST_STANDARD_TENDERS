@@ -344,20 +344,20 @@ sap.ui.define([
 				// This ensures that any DOM-dependent or aggregation-dependent changes
 				// (like adding dynamic links or tokens) happen after the SAPUI5 form has finished rendering.
 				
-				const formDelegate = {
-					onAfterRendering: () => {
-						// Call the custom method to add clickable links for contract numbers
-						// This method should handle creating Links or Tokens dynamically
-						// and attaching event handlers (e.g., navigation on press)
-						if (this.sCountryCode === 'ES') {
-							that.onAddContractLinks();
-						}
-						if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
-							this._bindDistributorsMultiInput();
-						}
-						form.removeEventDelegate(formDelegate);
+			const formDelegate = {
+				onAfterRendering: () => {
+					// Call the custom method to add clickable links for contract numbers
+					// This method should handle creating Links or Tokens dynamically
+					// and attaching event handlers (e.g., navigation on press)
+					if (this.sCountryCode === 'ES') {
+						that.onAddContractLinks();
 					}
+					if (StandardSingletonService.getIsMultiDistributorEnabledPerProduct()) {
+						this._bindDistributorsMultiInput();
+					}
+					form.removeEventDelegate(formDelegate);
 				}
+			}
 			form.addEventDelegate(formDelegate);
 			
 
@@ -614,6 +614,7 @@ sap.ui.define([
 				this.getModel("ui").setProperty(`/ProductForm/editMode`, false);
 				this.getModel("ui").setProperty(`/PricingForm/hasOfferProductDetailsSaved`, true);
 				this.cancelPendingChanges(["OfferProductsDetailView"], "offerProductDetailMsg");
+				this.stState.getService().invalidateOfferProductCache(this.sOfferId, this.productId);
 				this.updateEnablementModel(this.offerStatus?.STATUS, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
 				this.getOwnerComponent().getEventBus().publish("OfferProductsTableChannel", "updateOfferProductsTable");
 				this.getOwnerComponent().getEventBus().publish("MasterTableUpdateChannel", "MasterTableUpdateEvent");
