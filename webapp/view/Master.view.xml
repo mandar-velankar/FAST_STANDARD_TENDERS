@@ -69,6 +69,17 @@
 						<core:Item key="{BRANDID}" text="{BRANDNAME}"/>
 					</Select>
 					<Label
+						text="Product"
+						labelFor="idSlctProduct"
+					/>
+					<Select 
+						id="idSlctProduct" 
+						change=".setFilter"
+					>
+						<!-- items binding see controller -->
+						<core:Item key="{ProductPackID}" text="{ProductPackName}"/>
+					</Select>
+					<Label
 						text="Status"
 						labelFor="idSlctStatus"
 					/>
