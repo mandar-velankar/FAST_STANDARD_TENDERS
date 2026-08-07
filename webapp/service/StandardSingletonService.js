@@ -61,6 +61,22 @@ sap.ui.define([
             this.BU = BU;
         },
 
+		getOfferID: function () {
+			return this.OfferID;
+		},
+
+		setOfferID: function (OfferID) {
+            this.OfferID = OfferID;
+        },
+
+		getProductCode: function () {
+			return this.ProductCode;
+		},
+
+		setProductCode: function (ProductCode) {
+            this.ProductCode = ProductCode;
+        },
+
 		getTenderID: function(){
 			return this.tenderID;
 		},
@@ -280,6 +296,10 @@ sap.ui.define([
 						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
 					}
 					break;
+				case "PK": 
+					const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + "Classification";
+					originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem["OfferClassification"]); 
+						break;
 				default:
 					break;
 			}
