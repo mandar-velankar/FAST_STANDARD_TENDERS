@@ -296,6 +296,10 @@ sap.ui.define([
 						regionsMultiSelectField.getFields()[0]?.addToken(new Token({key: value, text:value}));
 					}
 					break;
+				case "PK": 
+					const pathTargetEntityID = originalInputField.getBindingContext().getPath() + "/" + "Classification";
+					originalInputField.getModel().setProperty(pathTargetEntityID, selectedItem["OfferClassification"]); 
+						break;
 				default:
 					break;
 			}

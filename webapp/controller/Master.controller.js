@@ -141,6 +141,7 @@ sap.ui.define([
 			// 	}));
 			// }
 			this._bindBrandItems(sCountryCode);
+			this._bindProductItems(sCountryCode);
 			this._bindStatusses(sCountryCode);
 			this._bindProductScopeItems(sCountryCode);
 			this._bindInstituteTypes();
@@ -234,6 +235,44 @@ sap.ui.define([
 			const aFilters = [
 				new sap.ui.model.Filter("COUNTRYCODE", sap.ui.model.FilterOperator.EQ, sCountryCode)
 			];
+
+			oBinding.filter(aFilters);
+		},
+
+		_bindProductItems: function (sCountryCode, sBrandId) {
+			const oSelectProducts = this.byId("idSlctProduct");
+
+			if (!oSelectProducts) return;
+
+			let oBinding = oSelectProducts.getBinding("items");
+
+			// First time: create binding
+			if (!oBinding) {
+				oSelectProducts.bindItems({
+					path: "/CountryProductFilterView",
+					sorter: new sap.ui.model.Sorter("ProductPackName", false),
+					template: new sap.ui.core.Item({
+						key: "{ProductPackID}",
+						text: "{ProductPackName}"
+					}),
+					templateShareable: true
+				});
+
+				oBinding = oSelectProducts.getBinding("items");
+			}
+
+			// Only update filter (FAST, no rebind)
+			const aFilters = [
+				new sap.ui.model.Filter("CountryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+			];
+
+			// If a brand is selected, only show its product packs (keep the "All Products" default row)
+			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
+				aFilters.push(new sap.ui.model.Filter([
+					new sap.ui.model.Filter("BrandID", sap.ui.model.FilterOperator.EQ, sBrandId),
+					new sap.ui.model.Filter("ProductPackID", sap.ui.model.FilterOperator.EQ, 'All_Products')
+				], false));
+			}
 
 			oBinding.filter(aFilters);
 		},
@@ -1245,17 +1284,24 @@ sap.ui.define([
 				StandardSingletonService.setCountryCode(sCountryCode);
 			}
 
-			const isCountrySelectChanged = oEvent?.getParameter("id").toLowerCase().includes("idslctcountry");
+			const oSelectBrands = this.byId("idSlctBrand");
+			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
+			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
+			const sSelectId = oEvent?.getParameter("id")?.toLowerCase();
+			const isCountrySelectChanged = sSelectId?.includes("idslctcountry");
 			if (isCountrySelectChanged) {
 				this._bindBrandItems(sCountryCode);
+				this._bindProductItems(sCountryCode, sBrandId);
+				this.byId("idSlctProduct")?.setSelectedKey("All_Products");
 				this._bindStatusses(sCountryCode);
 			}
 
 			// Brands
-			// const oFilterBrands = new Filter("COUNTRYCODE",FilterOperator.EQ, sCountryCode);
-			const oSelectBrands = this.byId("idSlctBrand");
-			// oSelectBrands.getBinding("items").filter([oFilterBrands]);
-			const sBrandId = oSelectBrands.getSelectedItem()?.getKey();
+			// Re-filter product dropdown when brand changes (CountryCode + BrandID)
+			if (sSelectId?.includes("idslctbrand")) {
+				this._bindProductItems(sCountryCode, sBrandId);
+				this.byId("idSlctProduct")?.setSelectedKey("All_Products");
+			}
 			if (sBrandId && !sBrandId.toLowerCase().includes('all_brands')) {
 				if (sCountryCode === 'TW') {
 					const filters = [
@@ -1281,6 +1327,18 @@ sap.ui.define([
 						caseSensitive: false
 					}));
 				}
+			}
+
+			// Products
+			const oSelectProducts = this.byId("idSlctProduct");
+			const sProductPackId = oSelectProducts.getSelectedItem()?.getKey();
+			if (sProductPackId && !sProductPackId.toLowerCase().includes('all_products')) {
+				this.andFilters.push(new Filter({
+					path: "OfferProductCodes",
+					operator: FilterOperator.Contains,
+					value1: sProductPackId,
+					caseSensitive: false
+				}));
 			}
 
 			// Status 
