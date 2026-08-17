@@ -1583,6 +1583,12 @@ sap.ui.define([
 				controller: this
 			}).then(function (form) {
 				vbox.addItem(form);
+				if (this.getModel("ui").getProperty("/Classification") === "Tender" && this.sCountryCode === "ES" && this.getModel("ui").getProperty("/PricingForm/hasOfferProductDetailsSaved") && this.getModel("em").getProperty("/OfferProductDetail/OfferPricingInfo/editMode")) {
+					this.getView().byId("IdpriceInfo").setEnabled(false);
+				}
+				else {
+					this.getView().byId("IdpriceInfo").setEnabled(true);
+				}
 				return form;
 			}.bind(this));
 		},
