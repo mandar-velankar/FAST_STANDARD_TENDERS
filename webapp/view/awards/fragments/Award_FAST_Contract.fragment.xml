@@ -28,7 +28,9 @@
                     width="10rem"
                     enabled="{= ${em>/AwardedProductDetail/AwardDetail/editMode} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender' &amp;&amp; !${st>/fastCCMContractId}}"
                     visible="{= ${st>/SelectedCountry} === 'ES'}"
-                    minDate="{st>/ContractMngtDateConstraints/minDate}"
+                    minDate="{= ${st>/SelectedTender/Classification} === 'Tender'
+                        ? null
+                        : ${st>/ContractMngtDateConstraints/minDate} }"
                     maxDate="{ui>/maxDate}"
                 />
             </HBox>
