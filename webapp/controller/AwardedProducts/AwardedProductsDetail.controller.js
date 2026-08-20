@@ -1028,7 +1028,7 @@ sap.ui.define([
 
 				// needed to save product information in the ContractInformation table
 				this.getModel("st").setProperty("/SetDistributorAssignedProductCodes", brandProductMultiInputTokens);
-				this.getModel().createEntry('/v  ', {
+				this.getModel().createEntry('/AwardedOfferDistributors', {
 					properties: pendingChange,
 					groupId: "AwardedOfferDistributors"
 				});
