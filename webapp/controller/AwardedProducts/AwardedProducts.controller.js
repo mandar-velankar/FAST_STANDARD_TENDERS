@@ -146,6 +146,8 @@ sap.ui.define([
 				this.getModel("st").setProperty("/AllAwardProductsHaveOutcome", allProductsHaveOutcome);
 				this.getModel("st").setProperty("/ContractStartDate", products[0]?.ContractStartDate);
 				this.getModel("st").setProperty("/ContractEndDate", products[0]?.ContractEndDate);
+				this._savedContractStartDate = products[0]?.ContractStartDate;
+				this._savedContractEndDate = products[0]?.ContractEndDate;
 			}
 		},
 
@@ -369,11 +371,25 @@ sap.ui.define([
 				return;
 			}
 
+			const startChanged = !this.isSameContractDate(startDate, this._savedContractStartDate);
+			const endChanged = !this.isSameContractDate(endDate, this._savedContractEndDate);
+
+			let successMessage;
+			if (startChanged && endChanged) {
+				successMessage = "Contract Start and end date updated successfully";
+			} else if (startChanged) {
+				successMessage = "Contract Start date updated successfully";
+			} else if (endChanged) {
+				successMessage = "Contract End date updated successfully";
+			} else {
+				return;
+			}
+
 			try {
 				this.getModel().callFunction("/updateFinalContractStartEndDate", {
 					method:"POST", 
 					urlParameters: {"OfferID": this.offerId, "ContractStartDate": formattedStartDate, "ContractEndDate": formattedEndDate},
-					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this),
+					success: this.onUpdateFinalContractStartEndDateSuccess.bind(this, successMessage),
 					error: this.onUpdateFinalContractStartEndDateFail.bind(this)
 				});
 			} catch (err) {
@@ -381,8 +397,19 @@ sap.ui.define([
 			}
 		},
 
-		onUpdateFinalContractStartEndDateSuccess: function(res){
-			MessageBox.success(res);
+		isSameContractDate: function (dateA, dateB) {
+			if (!dateA || !dateB) {
+				return !dateA && !dateB;
+			}
+			const a = new Date(dateA);
+			const b = new Date(dateB);
+			return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+		},
+
+		onUpdateFinalContractStartEndDateSuccess: function (successMessage){
+			this._savedContractStartDate = this.byId("contractStartDate").getDateValue();
+			this._savedContractEndDate = this.byId("contractEndDate").getDateValue();
+			MessageBox.success(successMessage);
 			this.handleRefreshAwardedProductTable();
 		},
 
