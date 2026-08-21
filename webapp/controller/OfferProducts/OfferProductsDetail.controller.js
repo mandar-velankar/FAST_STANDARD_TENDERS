@@ -162,7 +162,8 @@ sap.ui.define([
 					hasCurrentPricingReceived: false,
 					mainPriceConditionID: null,
 					instituteInBranch: true,
-					hasOfferProductDetailsSaved: false
+					hasOfferProductDetailsSaved: false,
+					isOverlappingContract: false//Snigdha 
 				},
 				RappelForm:{
 					hasRappelPriceCondition: false,
@@ -3648,6 +3649,10 @@ sap.ui.define([
 			if (product?.Custom_String_1) {
 				const contractInfo = product.Custom_String_1.split(":");
 				const contracts = contractInfo?.[0].split(",");
+				//snigdha
+				if (contracts && contracts.length > 0) {
+				this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", true);
+				}//snigdha
 				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
