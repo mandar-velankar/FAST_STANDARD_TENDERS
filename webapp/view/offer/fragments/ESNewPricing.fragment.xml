@@ -97,7 +97,7 @@
                                     { value: '3' }
                                 ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
-                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'DescuentoComercial' }"
+                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'DescuentoComercial' &amp;&amp; !${ui>/PricingForm/isOverlappingContract} }"
                                 liveChange=".onPricingFormLiveChange($event, 'DescuentoComercial')"
                                 visible="{= ${ConditionType} === 'DescuentoComercial' || ${ConditionType} === 'DescuentoEspecial'}"
                             />
@@ -175,7 +175,7 @@
                                 fieldGroupIds="priceInputPrecioNeto"
                                 value="{ parts: ['NetPriceWithoutTaxBeforeDeductionRD', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
-                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
+                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto' &amp;&amp; !${ui>/PricingForm/isOverlappingContract} }"
                                 liveChange=".onPricingFormLiveChange($event, 'PrecioNeto')"
                                 visible="{= ${ConditionType} === 'PrecioNeto'}"
                             />
