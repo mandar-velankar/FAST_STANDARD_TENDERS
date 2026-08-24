@@ -163,7 +163,9 @@ sap.ui.define([
 					mainPriceConditionID: null,
 					instituteInBranch: true,
 					hasOfferProductDetailsSaved: false,
-					isOverlappingContract: false
+					isOverlappingContract: false,
+					OverlappingContractMessage: false
+
 				},
 				RappelForm:{
 					hasRappelPriceCondition: false,
@@ -2376,6 +2378,7 @@ sap.ui.define([
 			});
 			let oModel = this.getModel();
 				oModel.read(path);
+				this.getModel("ui").setProperty("/PricingForm/OverlappingContractMessage", true);
 		},
 
 
@@ -3199,8 +3202,9 @@ sap.ui.define([
 			netPriceBeforeRC = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC);
 				
 			if(priceObj.RoyalDecreePercentage_1){
-				netPriceBeforeRC = netPriceBeforeRC * (1 - priceObj.RoyalDecreePercentage_1); 
-				royalDecreeValue = correctPrice * priceObj.RoyalDecreePercentage_1;
+				const netPriceAfterRD = this.formatter.roundToSixDecimalPlaces(netPriceBeforeRC * (1 - priceObj.RoyalDecreePercentage_1));
+				royalDecreeValue = netPriceBeforeRC - netPriceAfterRD;
+				netPriceBeforeRC = netPriceAfterRD;
 			}else{
 				netPriceBeforeRC = correctPrice * (1 - discount);
 			}
