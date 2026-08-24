@@ -163,7 +163,9 @@ sap.ui.define([
 					mainPriceConditionID: null,
 					instituteInBranch: true,
 					hasOfferProductDetailsSaved: false,
-					isOverlappingContract: false
+					isOverlappingContract: false,
+					OverlappingContractMessage: false
+
 				},
 				RappelForm:{
 					hasRappelPriceCondition: false,
@@ -2375,6 +2377,7 @@ sap.ui.define([
 			});
 			let oModel = this.getModel();
 				oModel.read(path);
+				this.getModel("ui").setProperty("/PricingForm/OverlappingContractMessage", true);
 		},
 
 

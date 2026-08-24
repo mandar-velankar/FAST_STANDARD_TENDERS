@@ -26,6 +26,7 @@
                 columnsM="1"
                 singleContainerFullSize="false"
             />
+            
         </form:layout>
         <form:formContainers>
             <form:FormContainer>
@@ -97,7 +98,7 @@
                                     { value: '3' }
                                 ], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomPercentageType'}"
-                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'DescuentoComercial' &amp;&amp; !${ui>/PricingForm/isOverlappingContract} }"
+                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'DescuentoComercial'}"
                                 liveChange=".onPricingFormLiveChange($event, 'DescuentoComercial')"
                                 visible="{= ${ConditionType} === 'DescuentoComercial' || ${ConditionType} === 'DescuentoEspecial'}"
                             />
