@@ -15,22 +15,13 @@
 					type="Emphasized"
 					press="onMessagePopoverPress($event, 'priceCondPrice')" 
 				/>
-                <HBox width="100%">
-                <Text wrapping="true"
-                
-                text="Price cannot be changed as there is Active Tender exists"
-                    visible="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ui>/PricingForm/OverlappingContractMessage} &amp;&amp; ${ui>/PricingForm/isOverlappingContract} }" 
-                    class="sapUiSmallMarginBegin"/>
-                    </HBox>
-                
 				<Button
 					icon="sap-icon://edit"
-                      id ="IdpriceInfo"
 					text="Edit"
 					press=".onPricingFormEditBtnPress"
 					visible="{= !${ui>/PricingForm/editMode} }"
+					enabled="{= ${ui>/PricingForm/hasOfferProductDetailsSaved} &amp;&amp; ${em>/OfferProductDetail/OfferPricingInfo/editMode}}"  
 				/>
-                
 				<Button
 					icon="sap-icon://save"
 					text="Save"

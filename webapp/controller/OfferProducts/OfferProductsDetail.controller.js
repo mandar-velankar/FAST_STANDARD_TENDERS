@@ -162,10 +162,7 @@ sap.ui.define([
 					hasCurrentPricingReceived: false,
 					mainPriceConditionID: null,
 					instituteInBranch: true,
-					hasOfferProductDetailsSaved: false,
-					isOverlappingContract: false,
-					OverlappingContractMessage: false
-
+					hasOfferProductDetailsSaved: false
 				},
 				RappelForm:{
 					hasRappelPriceCondition: false,
@@ -1586,12 +1583,6 @@ sap.ui.define([
 				controller: this
 			}).then(function (form) {
 				vbox.addItem(form);
-				if (this.getModel("ui").getProperty("/Classification") === "Tender" && this.sCountryCode === "ES" && this.getModel("ui").getProperty("/PricingForm/hasOfferProductDetailsSaved") && this.getModel("em").getProperty("/OfferProductDetail/OfferPricingInfo/editMode")) {
-					this.getView().byId("IdpriceInfo").setEnabled(false);
-				}
-				else {
-					this.getView().byId("IdpriceInfo").setEnabled(true);
-				}
 				return form;
 			}.bind(this));
 		},
@@ -2378,7 +2369,6 @@ sap.ui.define([
 			});
 			let oModel = this.getModel();
 				oModel.read(path);
-				this.getModel("ui").setProperty("/PricingForm/OverlappingContractMessage", true);
 		},
 
 
@@ -3648,13 +3638,11 @@ sap.ui.define([
 			// const elementFields = contractElement.getFields();
 
 			// if (Array.isArray(elementFields) && elementFields.length > 0) return
+			
 			contractElement.removeAllFields()
 			if (product?.Custom_String_1) {
 				const contractInfo = product.Custom_String_1.split(":");
 				const contracts = contractInfo?.[0].split(",");
-				if (contracts && contracts.length > 0) {
-				this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", true);
-				}
 				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
