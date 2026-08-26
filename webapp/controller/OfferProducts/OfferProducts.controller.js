@@ -828,6 +828,7 @@ sap.ui.define([
 					multiSelect: true,
 					contentWidth: '250px',
 					rememberSelections: false,
+					growing: false,
 					items: {
 						path: "ui>/OfferProductTable/countryBrands",
 						sorter: new Sorter("BRAND_NAME", false),
