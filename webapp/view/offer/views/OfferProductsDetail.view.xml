@@ -166,7 +166,6 @@
                         text="Set price by:" 
                         class="sapUiSmallMarginBegin sapUiTinyMarginTop sapUiTinyMarginEnd"
                     />
-                        
                     <Select
                         id = "idSelectedPriceContition"
                         items = "{/PriceConditionClassification}"
@@ -174,15 +173,11 @@
                         change="onPriceConditionChange"
                         enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; (!${ui>/PricingForm/isOverlappingContract} || (${ui>/PricingForm/isOverlappingContract} &amp;&amp; ${ui>/Classification} === 'Tender')) }"
                     >
-                    
-                    
                         <core:Item key="{ConditionType}" text="{
                             path: 'ConditionType',
                             formatter: '.formatter.replaceString'
                         }"/>
                     </Select>
-                    
-                   
                     <VBox id="idPriceConditionVbox" class="sapUiNoMargin">
                         <!-- PriceConditionFragments dynamically loaded from Controller:loadPriceConditionFragment  -->
                     </VBox>
