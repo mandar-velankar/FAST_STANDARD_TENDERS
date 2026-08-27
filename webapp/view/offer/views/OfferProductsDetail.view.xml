@@ -171,7 +171,7 @@
                         items = "{/PriceConditionClassification}"
                         selectedKey="{st>/SelectedPriceConditionType}"
                         change="onPriceConditionChange"
-                        enabled="{ui>/PricingForm/editMode}"
+                        enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; (!${ui>/PricingForm/isOverlappingContract} || (${ui>/PricingForm/isOverlappingContract} &amp;&amp; ${ui>/Classification} === 'Tender')) }"
                     >
                         <core:Item key="{ConditionType}" text="{
                             path: 'ConditionType',
