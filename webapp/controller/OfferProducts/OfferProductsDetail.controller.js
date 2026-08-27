@@ -244,9 +244,12 @@ sap.ui.define([
 				// Defer Spain-specific operations - run without awaiting
 				this._loadSpainSpecificData();
 			}
-			if (this.getModel("ui").getProperty("/PricingForm/isOverlappingContract") && selectedTender?.Classification === 'Tender'){
-					this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", false)
-				}
+			// if (this.getModel("ui").getProperty("/PricingForm/isOverlappingContract") && selectedTender?.Classification === 'Tender'){
+			// 		this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", false)
+			// 	}
+			// 	else if(this.getModel("ui").getProperty("/PricingForm/isOverlappingContract") && selectedTender?.Classification === 'Commercial Agreement'){
+			// 		this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", true)
+			// 	}
 
 			// Bind remaining views
 			this._bindDistributorsMultiInput();
