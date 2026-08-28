@@ -14,7 +14,8 @@
 					visible="{= ${messages>/priceCondPrice}.length > 0 &amp;&amp; ${ui>/PricingForm/editMode}}"
 					type="Emphasized"
 					press="onMessagePopoverPress($event, 'priceCondPrice')" 
-				/>
+                    		/>
+                    	
 				<Button
 					icon="sap-icon://edit"
 					text="Edit"
