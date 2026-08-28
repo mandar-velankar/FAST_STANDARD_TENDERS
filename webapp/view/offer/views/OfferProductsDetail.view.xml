@@ -182,7 +182,7 @@
                 <Text wrapping="true"
                 
                 text="Price cannot be changed as there is Active Tender exists"
-                    visible="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ui>/PricingForm/OverlappingContractMessage} &amp;&amp; ${ui>/PricingForm/isOverlappingContract} }" 
+                    visible="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ui>/PricingForm/OverlappingContractMessage} &amp;&amp; (${ui>/PricingForm/isOverlappingContract} &amp;&amp; ${st>/SelectedTender/Classification} !== 'Tender') }" 
                     class="sapUiSmallMarginBegin"/>
                     </HBox>	
                     <VBox id="idPriceConditionVbox" class="sapUiNoMargin">
