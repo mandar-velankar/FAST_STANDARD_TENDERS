@@ -271,7 +271,7 @@ sap.ui.define([
 						? this.stState.getContractMngtDateConstraints(this.sObjectId, this.sOfferId, this.sCountryCode)
 						: Promise.resolve(null)
 				]);
-		
+		this.getModel("st").setProperty("/SelectedOfferStatus", offerStatus?.STATUS);
 				// Get access control data (needed for updateVisibilityOfTabs)
 				const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 				const UserInfo = this.stState.getProperty('/UserInfo');
