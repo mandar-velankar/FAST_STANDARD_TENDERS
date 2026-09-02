@@ -63,6 +63,7 @@ sap.ui.define([
 		},
 
 		handleStatusChange: function(channel, event, data) {
+			this.getModel("st").setProperty("/SelectedOfferStatus",data.offerStatus);
 			const stTenderRoles = this.getModel("accessControl").getProperty('/standardtenderAccess');
 			const UserInfo = this.stState.getProperty('/UserInfo');
 			this.updateVisibilityOfTabs(this.iconTabBar, data.offerStatus, {OfferID: this.sOfferId, ProductCode: this.productId}, stTenderRoles, UserInfo, this.sCountryCode);
@@ -207,7 +208,7 @@ sap.ui.define([
 			}
 				
 			//Load metadata and remaining data
-			this.loadDetailPageData();
+		 	this.loadDetailPageData();
 
 		},
 
