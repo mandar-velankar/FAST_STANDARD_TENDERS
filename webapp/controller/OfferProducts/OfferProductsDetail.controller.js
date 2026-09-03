@@ -3651,8 +3651,10 @@ sap.ui.define([
 			contractElement.removeAllFields()
 			if (product?.Custom_String_1) {
 				const contractInfo = product.Custom_String_1.split(":");
+				const contractType = product.Custom_String_2.split(":");
 				const contracts = contractInfo?.[0].split(",");
-				if (contracts && contracts.length > 0) {
+				// if (contracts && contracts.length > 0) {
+				if (contracts && contracts.length > 0 && contractType[0] !== 'Commercial Agreement') {
 						this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", true);
 						}
 				const hbox = new HBox({
