@@ -175,7 +175,7 @@
                                 fieldGroupIds="priceInputPrecioNeto"
                                 value="{ parts: ['NetPriceWithoutTaxBeforeDeductionRD', 'Currency','Region', 'CountryCode'], 
                         			type: 'com.bayer.tender.statenderapp.model.datatypes.CustomCurrencyType'}"
-                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto'}"
+                                enabled="{= ${ui>/PricingForm/editMode} &amp;&amp; ${ConditionType} === 'PrecioNeto' &amp;&amp; (!${ui>/PricingForm/isOverlappingContract} || (${ui>/PricingForm/isOverlappingContract} &amp;&amp; ${st>/SelectedTender/Classification} === 'Tender')) }"
                                 liveChange=".onPricingFormLiveChange($event, 'PrecioNeto')"
                                 visible="{= ${ConditionType} === 'PrecioNeto'}"
                             />
