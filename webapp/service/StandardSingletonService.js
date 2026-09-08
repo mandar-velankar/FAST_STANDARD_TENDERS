@@ -451,9 +451,10 @@ sap.ui.define([
 										status === "Results Recorded" || 
 										status === "Delivery Ongoing" || 
 										status === "Outcome Accepted" || 
-										status === "Outcome Partially Accepted" || 
+										status === "Outcome Partially Accepted" ||
+										status === "Delivered" ||
 										status === "Outcome Rejected"? true : false;
-			const isDeliveryTruckingVisible = status === "Results Recorded" || status === "Delivery Ongoing" ? true : false;
+			const isDeliveryTruckingVisible = status === "Results Recorded" || status === "Delivery Ongoing" || status === "Delivered" ? true : false;
 
 			const isTenderOfferOverviewVisible = status === "Offer Created" || status === "Offer Approved" || status === "Offer Rejected" ? true : false;
 
