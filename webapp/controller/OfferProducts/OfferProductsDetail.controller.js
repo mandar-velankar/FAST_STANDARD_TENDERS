@@ -3651,12 +3651,12 @@ sap.ui.define([
 			contractElement.removeAllFields()
 			if (product?.Custom_String_1) {
 				const contractInfo = product.Custom_String_1.split(":");
-				const contractType = product.Custom_String_2.split(":");
+				const contractTypeFlag = product.Custom_Boolean_1;
 				const contracts = contractInfo?.[0].split(",");
 				// if (contracts && contracts.length > 0) {
-				if (contracts && contracts.length > 0 && contractType[0] !== 'Commercial Agreement') {
-						this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", true);
-						}
+				// if (contracts && contracts.length > 0 && contractType[0] !== 'Commercial Agreement') {
+						this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", contractTypeFlag);
+						// }
 				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
