@@ -924,8 +924,10 @@ sap.ui.define([
 				const pricingForm = this.byId("idPricingForm");
 
 				const context = this.sCountryCode === 'ES' ? pricingForm.getAggregation("formContainers")[1]?.getElementBinding()?.getBoundContext() || pricingForm.getAggregation("formContainers")[1]?.getAggregation("formElements")[0]?.getBindingContext() || pricingForm.getElementBinding()?.getBoundContext() : pricingForm.getElementBinding().getBoundContext();
+				if (!context) return;
 
 				const boundObject = context.getObject();
+				if (!boundObject) return;
 				const contextPath = context.getPath();
 				if(Number(boundObject.CurrentBasePrice) !== Number(boundObject.BasePrice)){
 					context.getModel().setProperty("BasePrice", boundObject.CurrentBasePrice, context);
@@ -2370,17 +2372,8 @@ sap.ui.define([
 				oModel.read(sPath);
 		},
 
-		updatePriceConditionForm: function (conditionType) {
-			let entityName = `/PriceCondition${conditionType}View`
-			const path = this.getModel().createKey(entityName, {
-				"OfferID": this.sOfferId,
-				"TenderID": this.sObjectId,
-				"ProductCode": this.productId,
-				"ConditionType": conditionType
-			});
-			let oModel = this.getModel();
-				oModel.read(path);
-				this.getModel("ui").setProperty("/PricingForm/OverlappingContractMessage", true);
+		updatePriceConditionForm: function () {
+			this.getModel("ui").setProperty("/PricingForm/OverlappingContractMessage", true);
 		},
 
 
@@ -3369,16 +3362,18 @@ sap.ui.define([
 			});
 		},
 
-		onGetSAPSalesOrderSimulationSuccess: function(res){
+		onGetSAPSalesOrderSimulationSuccess: async function(res){
 			MessageBox.success(res);
 			this.getModel("ui").setProperty("/PricingForm/hasCurrentPricingReceived", true);
 			this.onCloseGetCurrentPriceDialog();
-			// reload saved condition type
-			this.getSavedPriceConditionType().then((priceConditionType) => {
+			try {
+				const priceConditionType = await this.getSavedPriceConditionType();
 				this.getModel("st").setProperty("/SelectedPriceConditionType", priceConditionType);
-				this.loadPriceCondition();
+				await this.loadPriceCondition();
 				this.updatePriceConditionForm(priceConditionType);
-			});
+			} catch (error) {
+				MessageBox.error(error?.message || "Unable to reload pricing data.");
+			}
 			BusyIndicator.hide();
 		},
 
