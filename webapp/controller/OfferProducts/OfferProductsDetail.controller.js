@@ -246,6 +246,7 @@ sap.ui.define([
 			if (countryCode === 'ES') {
 				// Defer Spain-specific operations - run without awaiting
 				this._loadSpainSpecificData();
+				this.setBrandLevelRappelEnablement(offerProduct);
 			}
 			// if (this.getModel("ui").getProperty("/PricingForm/isOverlappingContract") && selectedTender?.Classification === 'Tender'){
 			// 		this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", false)
