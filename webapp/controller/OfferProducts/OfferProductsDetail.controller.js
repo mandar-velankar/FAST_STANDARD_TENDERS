@@ -244,6 +244,7 @@ sap.ui.define([
 			if (countryCode === 'ES') {
 				// Defer Spain-specific operations - run without awaiting
 				this._loadSpainSpecificData();
+				this.setBrandLevelRappelEnablement(offerProduct);
 			}
 
 			// Bind remaining views
