@@ -1723,11 +1723,13 @@ sap.ui.define([
 		 */
 		onPricingFormDataReceived: function(event){
 			const priceCondition = event.getParameter('data');
+			const conditionType = this.getModel('st').getProperty("/SelectedPriceConditionType");
 			this.setMainPriceCondition(priceCondition);
 			this.bindFOCMultiInputTokens(priceCondition);
 			if(this.sCountryCode === 'ES'){
 				let classification = this.getModel("ui").getProperty("/Classification");
 				if(classification === "Commercial Agreement") this.calculateRoyalDecreeAppliesAndMainConditionPrice(priceCondition);
+				this.rebasePrice(conditionType);
 			}
 		},
 
