@@ -247,12 +247,6 @@ sap.ui.define([
 				// Defer Spain-specific operations - run without awaiting
 				this._loadSpainSpecificData();
 			}
-			// if (this.getModel("ui").getProperty("/PricingForm/isOverlappingContract") && selectedTender?.Classification === 'Tender'){
-			// 		this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", false)
-			// 	}
-			// 	else if(this.getModel("ui").getProperty("/PricingForm/isOverlappingContract") && selectedTender?.Classification === 'Commercial Agreement'){
-			// 		this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", true)
-			// 	}
 
 			// Bind remaining views
 			this._bindDistributorsMultiInput();
@@ -3653,8 +3647,8 @@ sap.ui.define([
 				const contracts = contractInfo?.[0].split(",");
 				// if (contracts && contracts.length > 0) {
 				// if (contracts && contracts.length > 0 && contractType[0] !== 'Commercial Agreement') {
-						this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", contractTypeFlag);
-						// }
+				// this.getModel("ui").setProperty("/PricingForm/isOverlappingContract", contractTypeFlag);
+				// }
 				const hbox = new HBox({
 					items: [] // start with empty, we will add links dynamically
 				});
